@@ -1,0 +1,12 @@
+
+(xed:190834): Gtk-WARNING **: 11:17:30.943: Calling org.xfce.Session.Manager.Inhibit failed: GDBus.Error:org.freedesktop.DBus.Error.UnknownMethod: No such method “Inhibit”
+
+(xed:192137): Gtk-WARNING **: 11:42:17.591: Calling org.xfce.Session.Manager.Inhibit failed: GDBus.Error:org.freedesktop.DBus.Error.UnknownMethod: No such method “Inhibit”
+Spyder is already running. If you want to open a new 
+instance, please use the --new-instance option
+
+(xed:192137): Gtk-CRITICAL **: 15:40:21.738: gtk_action_group_get_action: assertion 'GTK_IS_ACTION_GROUP (action_group)' failed
+
+** (xed:192137): WARNING **: 16:08:55.634: Set document metadata failed: Error setting file metadata: No such file or directory
+
+** (xed:192137): WARNING **: 16:09:04.891: Set document metadata failed: Error setting file metadata: No such file or directory

@@ -1,0 +1,156 @@
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'converter.py', '-o', 'converter.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/converter.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'dynamictileprovider.py', '-o', 'dynamictileprovider.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/dynamictileprovider.py`
+  File updated.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'ferntileprovider.py', '-o', 'ferntileprovider.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/ferntileprovider.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'globalmosaictileprovider.py', '-o', 'globalmosaictileprovider.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/globalmosaictileprovider.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', '__init__.py', '-o', '__init__.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/__init__.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'magickconverter.py', '-o', 'magickconverter.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/magickconverter.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'mainwindow.py', '-o', 'mainwindow.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/mainwindow.py`
+  File updated.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'mandeltileprovider.py', '-o', 'mandeltileprovider.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/mandeltileprovider.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'mediaobject.py', '-o', 'mediaobject.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/mediaobject.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'osmtileprovider.py', '-o', 'osmtileprovider.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/osmtileprovider.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'pdfconverter.py', '-o', 'pdfconverter.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/pdfconverter.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'physicalobject.py', '-o', 'physicalobject.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/physicalobject.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'ppm.py', '-o', 'ppm.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/ppm.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'qzui.py', '-o', 'qzui.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/qzui.py`
+  File updated.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'scene.py', '-o', 'scene.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/scene.py`
+  File updated.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'statictileprovider.py', '-o', 'statictileprovider.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/statictileprovider.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'stringmediaobject.py', '-o', 'stringmediaobject.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/stringmediaobject.py`
+  File updated.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'svgmediaobject.py', '-o', 'svgmediaobject.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/svgmediaobject.py`
+  File updated.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'tilecache.py', '-o', 'tilecache.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/tilecache.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'tiledmediaobject.py', '-o', 'tiledmediaobject.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/tiledmediaobject.py`
+  File updated.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'tilemanager.py', '-o', 'tilemanager.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/tilemanager.py`
+  File updated.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'tileprovider.py', '-o', 'tileprovider.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/tileprovider.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'tile.py', '-o', 'tile.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/tile.py`
+  File updated.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'tiler.py', '-o', 'tiler.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/tiler.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'tilestore.py', '-o', 'tilestore.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/tilestore.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:44  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'webkitconverter.py', '-o', 'webkitconverter.py']
+
+Processing file: `/home/asd/Projects/pyzui/pyzui/webkitconverter.py`
+  File updated.
+

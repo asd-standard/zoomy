@@ -1,0 +1,6 @@
+**  pyqt4_to_pyqt5.log  Thursday 13. March 2025 11:36  **
+Args: ['/home/asd/anaconda3/envs/PyZui/bin/pyqt4topyqt5', 'main.py', '-o', 'mainqt5.py']
+
+Processing file: `/home/asd/Projects/pyzui/main.py`
+  File updated.
+
