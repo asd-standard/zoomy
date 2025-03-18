@@ -20,7 +20,7 @@
 
 from PyQt5 import QtCore, QtSvg
 
-from mediaobject import MediaObject, LoadError, RenderMode
+from .mediaobject import MediaObject, LoadError, RenderMode
 
 class SVGMediaObject(MediaObject):
     """StringMediaObject objects are used to represent SVG images that can be

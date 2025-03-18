@@ -18,14 +18,14 @@
 
 """Dynamic tile provider for the WMS Global Mosaic."""
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import tempfile
 import os
 
 from PIL import Image
 
-from dynamictileprovider import DynamicTileProvider
-import tilestore as TileStore
+from .dynamictileprovider import DynamicTileProvider
+from . import tilestore as TileStore
 
 class GlobalMosaicTileProvider(DynamicTileProvider):
     """GlobalMosaicTileProvider objects are used for downloading tiles from the
@@ -79,7 +79,7 @@ class GlobalMosaicTileProvider(DynamicTileProvider):
 
         params = self.base_params.copy()
         params['bbox'] = "%f,%f,%f,%f" % (x1, y1, x2, y2)
-        query_string = urllib.urlencode(params)
+        query_string = urllib.parse.urlencode(params)
         url = self.base_url + query_string
 
         fd, tmpfile = tempfile.mkstemp('.jpg')
@@ -87,7 +87,7 @@ class GlobalMosaicTileProvider(DynamicTileProvider):
 
         self._logger.info("downloading %s", url)
         try:
-            urllib.urlretrieve(url, tmpfile)
+            urllib.request.urlretrieve(url, tmpfile)
         except IOError:
             self._logger.exception("cannot reach server")
 

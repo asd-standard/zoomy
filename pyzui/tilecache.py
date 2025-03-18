@@ -18,7 +18,7 @@
 
 """Thread-safe Least Recently Used (LRU) cache for storing tiles."""
 
-from __future__ import with_statement
+
 
 from threading import RLock, Thread
 from collections import deque

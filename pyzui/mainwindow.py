@@ -24,13 +24,13 @@ import math
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import __init__ as PyZUI
-import scene as Scene
-import tilemanager as TileManager
-from qzui import QZUI
-from tiledmediaobject import TiledMediaObject
-from stringmediaobject import StringMediaObject
-from svgmediaobject import SVGMediaObject
+from . import __init__ as PyZUI
+from . import scene as Scene
+from . import tilemanager as TileManager
+from .qzui import QZUI
+from .tiledmediaobject import TiledMediaObject
+from .stringmediaobject import StringMediaObject
+from .svgmediaobject import SVGMediaObject
 
 class MainWindow(QtWidgets.QMainWindow):
     """MainWindow windows are used for displaying the PyZUI interface.
@@ -74,7 +74,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = QtWidgets.QMessageBox(self)
         dialog.setWindowTitle("PyZUI - Error")
         dialog.setText(text)
-        dialog.setDetailedText(details)
+        dialog.setDetailedText(str(details))
         dialog.setIcon(QtWidgets.QMessageBox.Warning)
         dialog.exec_()
 
@@ -117,8 +117,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__prev_dir = os.path.dirname(filename)
             try:
                 self.zui.scene = Scene.open(filename)
-            except Exception :
-                self.__show_error("Unable to open scene" )
+            except Exception as e :
+                self.__show_error("Unable to open scene", e)
 
 
     def __action_open_scene_home(self):
@@ -127,8 +127,7 @@ class MainWindow(QtWidgets.QMainWindow):
         __action_open_scene_home() -> None
         """
         try:
-            self.zui.scene = Scene.open(
-                os.path.join("data", "home.pzs"))
+            self.zui.scene = Scene.load_scene(os.path.join("data", "home.pzs")) #"/home/asd/Projects/pyzui/data/home.pzs"
         except Exception as e:
             self.__show_error("Unable to open the Home scene", str(e))
 
@@ -147,8 +146,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__prev_dir = os.path.dirname(filename)
             try:
                 self.zui.scene.save(filename)
-            except Exception :
-                self.__show_error("Unable to save scene" )
+            except Exception as e:
+                self.__show_error("Unable to save scene", e)
 
 
     def __action_save_screenshot(self):
@@ -167,8 +166,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__prev_dir = os.path.dirname(filename)
             try:
                 QtGui.QPixmap.grabWidget(self.zui).save(filename)
-            except Exception :
-                self.__show_error("Unable to save screenshot" )
+            except Exception as e:
+                self.__show_error("Unable to save screenshot", e)
 
 
     def __open_media(self, media_id, add=True):
@@ -179,24 +178,25 @@ class MainWindow(QtWidgets.QMainWindow):
 
         __open_media(string[, bool]) -> None
         """
-        try:
-            if media_id.startswith('string:'):
-                mediaobject = StringMediaObject(media_id, self.zui.scene)
-            elif media_id.lower().endswith('.svg'):
-                mediaobject = SVGMediaObject(media_id, self.zui.scene)
-            else:
-                mediaobject = TiledMediaObject(media_id, self.zui.scene, True)
-        except Exception :
-            self.__show_error("Unable to open media" )
+        #try:
+        if media_id.startswith('string:'.encode()):
+            mediaobject = StringMediaObject(media_id, self.zui.scene)
+        elif media_id.lower().endswith('.svg'):
+            mediaobject = SVGMediaObject(media_id, self.zui.scene)
         else:
-            if add:
-                w = self.zui.width()
-                h = self.zui.height()
-                mediaobject.fit((w/4, h/4, w*3/4, h*3/4))
-                self.zui.scene.add(mediaobject)
-            else:
-                return mediaobject
-
+            mediaobject = TiledMediaObject(media_id, self.zui.scene, True)
+        #except Exception as e:
+        #    self.__show_error("Unable to open media", e)
+        
+        #else:
+        if add:
+            w = self.zui.width()
+            h = self.zui.height()
+            mediaobject.fit((w/4, h/4, w*3/4, h*3/4))
+            self.zui.scene.add(mediaobject)
+        else:
+            return mediaobject
+        
 
     def __action_open_media_local(self):
         """Open media from the location chosen by the user in a file

@@ -23,8 +23,8 @@ import os
 
 from PyQt5 import QtCore, QtGui
 
-from tileprovider import TileProvider
-import tilestore as TileStore
+from .tileprovider import TileProvider
+from . import tilestore as TileStore
 
 class DynamicTileProvider(TileProvider):
     """DynamicTileProvider objects are used for either generating tiles or

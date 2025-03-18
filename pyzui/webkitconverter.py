@@ -27,7 +27,7 @@ import time
 
 from PyQt5 import QtCore, QtGui, QtSvg, QtWebEngineWidgets, QtWidgets
 
-from converter import Converter
+from .converter import Converter
 
 class WebKitConverter(Converter):
     """WebKitConverter objects are used for rendering webpages.

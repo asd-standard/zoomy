@@ -18,7 +18,7 @@
 
 """Module for reading PPM images."""
 
-from tiler import Tiler
+from .tiler import Tiler
 
 def read_ppm_header(f):
     """Read the PPM header in the given file object `f` and return a tuple
@@ -44,8 +44,8 @@ def read_ppm_header(f):
         raise IOError("can only load binary PPM (P6 format)")
 
     try:
-        width = long(header[1])
-        height = long(header[2])
+        width = int(header[1])
+        height = int(header[2])
         maxval = int(header[3])
     except ValueError:
         raise IOError("invalid PPM header")

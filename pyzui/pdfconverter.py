@@ -18,16 +18,16 @@
 
 """PDF rasterizer based upon either Xpdf or Poppler."""
 
-from __future__ import with_statement
+
 
 import subprocess
 import tempfile
 import os
 import shutil
 
-from converter import Converter
-from ppm import read_ppm_header
-import tilestore as TileStore
+from .converter import Converter
+from .ppm import read_ppm_header
+from . import tilestore as TileStore
 
 class PDFConverter(Converter):
     """PDFConverter objects are used for rasterizing PDFs.

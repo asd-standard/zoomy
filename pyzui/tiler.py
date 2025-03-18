@@ -18,7 +18,7 @@
 
 """Threaded image tiler (abstract base class)."""
 
-from __future__ import with_statement
+
 
 from threading import Thread
 import os
@@ -26,8 +26,8 @@ import math
 import logging
 import shutil
 
-import tilestore as TileStore
-import tile as Tile
+from . import tilestore as TileStore
+from . import tile as Tile
 
 class Tiler(Thread):
     """Tiler objects are used for tiling images.

@@ -18,13 +18,13 @@
 
 """Threaded class for loading tiles into memory (abstract base class)."""
 
-from __future__ import with_statement
+
 
 from threading import Thread, Condition
 from collections import deque
 import logging
 
-from tile import Tile
+from .tile import Tile
 
 class TileProvider(Thread):
     """TileProvider objects are used for loading tiles into TileCache objects.

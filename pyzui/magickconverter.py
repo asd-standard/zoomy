@@ -18,14 +18,14 @@
 
 """Image converter based upon ImageMagick."""
 
-from __future__ import with_statement
+
 
 import subprocess
 import os
 import sys
 
-from converter import Converter
-import tilestore as TileStore
+from .converter import Converter
+from . import tilestore as TileStore
 
 class MagickConverter(Converter):
     """MagickConverter objects are used for converting media with ImageMagick.

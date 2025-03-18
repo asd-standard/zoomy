@@ -22,7 +22,7 @@ import random
 
 from PIL import Image
 
-from dynamictileprovider import DynamicTileProvider
+from .dynamictileprovider import DynamicTileProvider
 
 class FernTileProvider(DynamicTileProvider):
     """FernTileProvider objects are used for generating tiles of Barnsley's
@@ -138,7 +138,7 @@ class FernTileProvider(DynamicTileProvider):
 
         x = 0.0
         y = 0.0
-        for i in xrange(self.max_iterations):
+        for i in range(self.max_iterations):
             if x1 <= x <= x2 and y1 <= y <= y2:
                 self.__draw_point(
                     tile, x-x1, y-y1, tilesize_units)

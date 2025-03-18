@@ -20,7 +20,7 @@
 
 from PyQt5 import QtCore, QtGui
 
-from mediaobject import MediaObject, LoadError, RenderMode
+from .mediaobject import MediaObject, LoadError, RenderMode
 
 class StringMediaObject(MediaObject):
     """StringMediaObject objects are used to represent strings that can be
@@ -36,11 +36,11 @@ class StringMediaObject(MediaObject):
         MediaObject.__init__(self, media_id, scene)
 
         hexcol = self._media_id[len('string:'):len('string:rrggbb')]
-        self.__color = QtGui.QColor('#' + hexcol)
+        self.__color = QtGui.QColor('#' + hexcol.decode())
         if not self.__color.isValid():
             raise LoadError("the supplied colour is invalid")
 
-        self.__str = self._media_id[len('string:rrggbb:'):].decode('utf-8')
+        self.__str = self._media_id[len('string:rrggbb:'):] # removed .decode('utf-8')
 
 
     transparent = True
@@ -58,7 +58,8 @@ class StringMediaObject(MediaObject):
 
             painter.setPen(self.__color)
             painter.setFont(self.__font)
-            painter.drawText(x, y, w, h, QtCore.Qt.AlignCenter, self.__str)
+            rect = QtCore.QRect(int(x), int(y), int(w), int(h))
+            painter.drawText(rect, QtCore.Qt.AlignCenter, self.__str.decode('utf-8'))
 
 
     @property
@@ -84,7 +85,7 @@ class StringMediaObject(MediaObject):
 
         if font:
             fontmetrics = QtGui.QFontMetrics(font)
-            w = fontmetrics.width(self.__str)
+            w = fontmetrics.width(self.__str.decode('utf-8'))
             h = fontmetrics.height()
             return (w,h)
         else:

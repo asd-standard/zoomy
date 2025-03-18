@@ -20,8 +20,8 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import scene as Scene
-import tilemanager as TileManager
+from . import scene as Scene
+from . import tilemanager as TileManager
 
 class QZUI(QtWidgets.QWidget):
     """QZUI widgets are used for rendering the ZUI.

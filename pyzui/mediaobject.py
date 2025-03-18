@@ -20,7 +20,7 @@
 
 import math
 
-from physicalobject import PhysicalObject
+from .physicalobject import PhysicalObject
 
 class MediaObject(PhysicalObject):
     """MediaObject objects are used to represent media that can be rendered in
@@ -131,7 +131,7 @@ class MediaObject(PhysicalObject):
 
         fit(tuple<float,float,float,float>) -> None
         """
-        box_x, box_y, box_x2, box_y2 = map(float, bbox)
+        box_x, box_y, box_x2, box_y2 = list(map(float, bbox))
         box_w = box_x2 - box_x
         box_h = box_y2 - box_y
 

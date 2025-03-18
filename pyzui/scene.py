@@ -18,26 +18,27 @@
 
 """A collection of media objects."""
 
-from __future__ import with_statement
+
 
 ## we need to import __builtin__ to be able to call __builtin__.open since this
 ## module defines its own open function
 #import __builtin__
 ##removed all __builtin__
 
-import logging
+#commented out on 20250314 
+#import logging
 from threading import RLock
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import math
 
 from PyQt5 import QtCore
 
-from physicalobject import PhysicalObject
-import tilemanager as TileManager
-import mediaobject as MediaObject
-from tiledmediaobject import TiledMediaObject
-from stringmediaobject import StringMediaObject
-from svgmediaobject import SVGMediaObject
+from .physicalobject import PhysicalObject
+from . import tilemanager as TileManager
+from . import mediaobject as MediaObject
+from .tiledmediaobject import TiledMediaObject
+from .stringmediaobject import StringMediaObject
+from .svgmediaobject import SVGMediaObject
 
 class Scene(PhysicalObject):
     """Scene objects are used to hold a collection of MediaObjects.
@@ -53,8 +54,9 @@ class Scene(PhysicalObject):
         self.__viewport_size = self.standard_viewport_size
 
         self.selection = None
-
-        self.__logger = logging.getLogger("Scene")
+        
+        #commented out on 20250314 
+        #self.__logger = logging.getLogger("Scene")
 
 
     ## an arbitrary size that is common to all scenes upon creation
@@ -86,7 +88,7 @@ class Scene(PhysicalObject):
             for mediaobject in self.__objects:
                 f.write("%s\t%s\t%s\t%s\t%s\n" % \
                     (type(mediaobject).__name__,
-                    urllib.quote(mediaobject.media_id) \
+                    urllib.parse.quote(mediaobject.media_id) \
                         .replace('%3A', ':'),
                     mediaobject.zoomlevel,
                     mediaobject.pos[0],
@@ -139,7 +141,16 @@ class Scene(PhysicalObject):
         __sort_objects() -> None
         """
         with self.__objects_lock:
-            self.__objects.sort(reverse=True)
+            
+            objects_areas = []
+            objects_positions = []
+            #self.__objects.sort(reverse=True)
+            for i in self.__objects :
+                area = i._x**2+i._y**2
+                objects_areas.append(area)
+                
+            print(objects_areas)
+            
 
 
     def get(self, pos):
@@ -297,7 +308,7 @@ def new():
     return Scene()
 
 
-def open(filename):
+def load_scene(filename):
     """Load the scene stored in the file given by `filename`.
 
     open(string) -> Scene
@@ -307,8 +318,10 @@ def open(filename):
     """
 
     scene = Scene()
-
-    f = open(filename, 'U')
+    
+    print(filename)
+    
+    f = open(filename) #removed , 'U' as second argument
 
     zoomlevel, ox, oy = f.readline().split()
     scene.zoomlevel = float(zoomlevel)
@@ -316,7 +329,7 @@ def open(filename):
 
     for line in f:
         class_name, media_id, zoomlevel, x, y = line.split()
-        media_id = urllib.unquote(media_id)
+        media_id = urllib.parse.unquote(media_id)
 
         if class_name == 'TiledMediaObject' or \
            class_name == 'StringMediaObject' or \

@@ -29,13 +29,13 @@ import logging
 from PIL import Image
 from PyQt5 import QtCore
 
-import tilestore as TileStore
-from tilecache import TileCache
-from statictileprovider import StaticTileProvider
-from osmtileprovider import OSMTileProvider
-from globalmosaictileprovider import GlobalMosaicTileProvider
-from mandeltileprovider import MandelTileProvider
-from ferntileprovider import FernTileProvider
+from . import tilestore as TileStore
+from .tilecache import TileCache
+from .statictileprovider import StaticTileProvider
+from .osmtileprovider import OSMTileProvider
+from .globalmosaictileprovider import GlobalMosaicTileProvider
+from .mandeltileprovider import MandelTileProvider
+from .ferntileprovider import FernTileProvider
 
 
 
@@ -61,7 +61,7 @@ def init(total_cache_size=192):
         'dynamic:mandel': MandelTileProvider(__tilecache),
         'dynamic:fern':   FernTileProvider(__tilecache),
     }
-    for tp in __tp_dynamic.values():
+    for tp in list(__tp_dynamic.values()):
         tp.start()
 
     __logger = logging.getLogger("TileManager")
@@ -235,7 +235,7 @@ def purge(media_id=None):
     `MediaObject`s for the media should exist).
     """
     __tp_static.purge(media_id)
-    for tp in __tp_dynamic.itervalues():
+    for tp in list(__tp_dynamic.values()):
         tp.purge(media_id)
 
 

@@ -26,12 +26,12 @@ import logging
 from PyQt5 import QtCore, QtGui
 from PIL import ImageQt
 
-from mediaobject import MediaObject, LoadError, RenderMode
-import tilemanager as TileManager
-from ppm import PPMTiler
-from webkitconverter import  WebKitConverter
-from pdfconverter import PDFConverter
-from magickconverter import MagickConverter
+from .mediaobject import MediaObject, LoadError, RenderMode
+from . import tilemanager as TileManager
+from .ppm import PPMTiler
+from .webkitconverter import  WebKitConverter
+from .pdfconverter import PDFConverter
+from .magickconverter import MagickConverter
 
 class TiledMediaObject(MediaObject):
     """TiledMediaObject objects are used to represent tiled media that can be

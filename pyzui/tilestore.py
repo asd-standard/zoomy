@@ -42,7 +42,8 @@ def get_media_path(media_id):
 
     get_media_path(string) -> string
     """
-    media_hash = hashlib.sha1(media_id).hexdigest()
+    #media_hash = hashlib.sha1(media_id).hexdigest() #REPLACED BY:
+    media_hash = hashlib.sha1(media_id.encode('utf-8')).hexdigest()
     media_dir = os.path.join(tile_dir, media_hash)
     return media_dir
 
@@ -108,7 +109,7 @@ def load_metadata(media_id):
             if   val_type == 'int':   val = int(val)
             elif val_type == 'bool':  val = bool(val)
             elif val_type == 'float': val = float(val)
-            elif val_type == 'long':  val = long(val)
+            elif val_type == 'long':  val = int(val)
         except Exception:
             pass
         else:
@@ -137,7 +138,7 @@ def write_metadata(media_id, **kwargs):
     """
     path = get_media_path(media_id)
     f = open(os.path.join(path, "metadata"), 'w')
-    for key,val in kwargs.iteritems():
+    for key,val in list(kwargs.items()):
         f.write("%s\t%s\t%s\n"
             % (key, str(val), type(val).__name__))
     f.close()

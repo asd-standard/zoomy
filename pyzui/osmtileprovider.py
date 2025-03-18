@@ -18,9 +18,9 @@
 
 """Dynamic tile provider for OpenStreetMap."""
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
-from dynamictileprovider import DynamicTileProvider
+from .dynamictileprovider import DynamicTileProvider
 
 class OSMTileProvider(DynamicTileProvider):
     """OSMTileProvider objects are used for downloading tiles from
@@ -49,6 +49,6 @@ class OSMTileProvider(DynamicTileProvider):
 
         self._logger.info("downloading %s", url)
         try:
-            urllib.urlretrieve(url, outfile)
+            urllib.request.urlretrieve(url, outfile)
         except IOError:
             self._logger.exception("cannot reach server")

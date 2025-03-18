@@ -22,8 +22,8 @@ import tempfile
 import subprocess
 import os
 
-from dynamictileprovider import DynamicTileProvider
-from magickconverter import MagickConverter
+from .dynamictileprovider import DynamicTileProvider
+from .magickconverter import MagickConverter
 
 class MandelTileProvider(DynamicTileProvider):
     """MandelTileProvider objects are used for generating tiles of the

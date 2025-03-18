@@ -20,15 +20,15 @@
 
 import math
 
-class PhysicalObject(object):
-    """PhysicalObject objects are used to represent anything that has a
+class PhysicalObject(object): #removed object from class argument
+    """Physicalobject pobjects are used to represent anything that has a
     3-dimensional position and velocity, where the z-dimension represents a
     zoomlevel.
 
-    Constructor: PhysicalObject()
+    Constructor: Physicalpobject()
     """
     def __init__(self):
-        """Create a new PhysicalObject at the origin with zero velocity."""
+        """Create a new Physicalpobject at the origin with zero velocity."""
         self._x = 0.0
         self._y = 0.0
         self._z = 0.0
@@ -80,7 +80,7 @@ class PhysicalObject(object):
 
 
     def move(self, dx, dy):
-        """Move the object by (`dx`,`dy`).
+        """Move the pobject by (`dx`,`dy`).
 
         move(float, float) -> None
         """
@@ -113,13 +113,13 @@ class PhysicalObject(object):
 
     def aim(self, v, s, t=None):
         """Calculate the initial velocity such that at time `t` the relative
-        displacement of the object will be `s`, and increase the velocity
+        displacement of the pobject will be `s`, and increase the velocity
         represented by `v` by this amount.
 
         If `t` is omitted then it will be taken that `s` is the limit of the
         displacement as `t` approaches infinity
         i.e. the initial velocity will be calculated such that the total
-        displacement will be `s` once the object has stopped moving.
+        displacement will be `s` once the pobject has stopped moving.
 
         velocity(string, float[, float]) -> None
 
@@ -161,31 +161,31 @@ class PhysicalObject(object):
 
     @property
     def moving(self):
-        """Boolean value indicating whether the object has a non-zero
+        """Boolean value indicating whether the pobject has a non-zero
         velocity."""
         return not (self.vx == self.vy == self.vz == 0)
 
 
     def __get_zoomlevel(self):
-        """The zoomlevel of the object."""
+        """The zoomlevel of the pobject."""
         return self._z
     def __set_zoomlevel(self, zoomlevel):
         self._z = zoomlevel
     zoomlevel = property(__get_zoomlevel, __set_zoomlevel)
 
     def __get_centre(self):
-        """The on-screen coordinates of the centre of the object (the
+        """The on-screen coordinates of the centre of the pobject (the
         point that will maintain its position on the screen as the
-        object is being zoomed).
+        pobject is being zoomed).
         """
-        ## we need to convert object-coordinate C to
+        ## we need to convert pobject-coordinate C to
         ## screen-coordinate P:
         ## P = pos + C * 2**zoomlevel
         return (self._x + self._centre[0] * 2**self._z,
                 self._y + self._centre[1] * 2**self._z)
     def __set_centre(self, centre):
         ## we need to convert screen-coordinate P to
-        ## object-coordinate C:
+        ## pobject-coordinate C:
         ## P = pos + C * 2**zoomlevel
         ##   => C = (P - pos) * 2**-zoomlevel
         self._centre = ((centre[0] - self._x) * 2**-self._z,
