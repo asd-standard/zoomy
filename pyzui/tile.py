@@ -18,21 +18,26 @@
 
 """Class for representing image tiles."""
 
-from PIL import Image
-from PIL import ImageQt
+
+from PIL import Image, ImageQt
 from PyQt5 import QtCore, QtGui
 
-class Tile(object):
+#REMOVED object
+
+class Tile():
     """Tile objects allow storage and manipulation of image tiles.
 
     Constructor: Tile(Image or QImage)
     """
     def __init__(self, image):
+    
         """Create a new tile with the given image."""
         if image.__class__ is ImageQt or type(image) is QtGui.QImage:
             self.__image = image
+            
         else:
-            self.__image = ImageQt(image)
+            self.__image = ImageQt.ImageQt(image)
+            
 
 
     def crop(self, bbox):
@@ -44,7 +49,8 @@ class Tile(object):
         x, y, x2, y2 = bbox
         w = x2 - x
         h = y2 - y
-        return Tile(self.__image.copy(x, y, w, h))
+        
+        return Tile(self.__image.copy(int(x), int(y), int(w), int(h)))
 
 
     def resize(self, width, height):
@@ -52,7 +58,7 @@ class Tile(object):
 
         resize(int, int) -> Tile
         """
-        return Tile(self.__image.scaled(width, height,
+        return Tile(self.__image.scaled(int(width), int(height),
             QtCore.Qt.IgnoreAspectRatio,
             QtCore.Qt.SmoothTransformation))
 
@@ -94,8 +100,26 @@ def fromstring(string, width, height):
 
     fromstring(string, int, int) -> Tile
     """
-    return Tile(Image.fromstring('RGB', (width, height), string))
+    #print('STRING UNENCODED \n \n \n', string)
+    #print('STRING ENCODED \n ', len(string.encode('latin-1')))   
+    #for i in range(len(string)) :
+    #
+      
+    return Tile(Image.frombytes('RGB', (width, height), string.encode('latin-1')))
 
+    '''    
+    string = string[1:]    
+    array = []
+    j=0    
+    for i in range(height) :
+        if i==0 :
+            pass
+        array.append(string[j:j+width])
+        j += width
+    
+    print('ARRAY \n', array)
+    return Tile(Image.fromarray(array))
+    '''
 
 def merged(t1, t2, t3, t4):
     """Merge the given tiles into a single tile.

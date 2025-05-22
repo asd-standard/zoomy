@@ -31,7 +31,7 @@ class SVGMediaObject(MediaObject):
     def __init__(self, media_id, scene):
         MediaObject.__init__(self, media_id, scene)
 
-        self.__renderer = QtSvg.QSvgRenderer()
+        self.__renderer = QtSvg.QSvgRendmagickerer()
         if not self.__renderer.load(self._media_id):
             raise LoadError("unable to parse SVG file")
 

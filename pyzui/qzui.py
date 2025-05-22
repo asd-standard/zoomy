@@ -19,24 +19,27 @@
 """QWidget for displaying the ZUI."""
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from threading import Thread
 
 from . import scene as Scene
 from . import tilemanager as TileManager
 
-class QZUI(QtWidgets.QWidget):
+class QZUI(QtWidgets.QWidget, Thread):
     """QZUI widgets are used for rendering the ZUI.
 
     Constructor: QZUI([QWidget])
     """
     error = QtCore.pyqtSignal()
 
-    def __init__(self, parent=None, framerate=10):
+    def __init__(self, parent=None, framerate=int):
         """Create a new QZUI QWidget with the given `parent` widget."""
         QtWidgets.QWidget.__init__(self, parent)
 
+        Thread.__init__(self)
         self.__scene = Scene.new()
-
-        self.__mousedown = False
+        
+        self.__mouse_right_down = False
+        self.__mouse_left_down = False
         self.__mousepos = None
         self.__shift_held = False
         self.__alt_held = False
@@ -87,19 +90,20 @@ class QZUI(QtWidgets.QWidget):
         try:
             ## paint background
             painter.fillRect(
-                0, 0, self.width(), self.height(), QtCore.Qt.black)
+                    0, 0, self.width(), self.height(), QtCore.Qt.black)
 
             ## render scene
-            errors = self.scene.render(painter, self.__draft)
-
+            self.scene.render(painter, self.__draft) #errors = 
+            
             ## show errors
-            for mediaobject, e in errors:
-                self.error.emit("Error loading %s" % mediaobject, str(e))
+            #for mediaobject in errors:
+                
+            #    self.error.emit("Error loading %s" + str(mediaobject))
 
         finally:
             painter.end()
 
-        if self.__mousedown:
+        if self.__mouse_left_down:
             self.__active_object.vx = self.__active_object.vy = 0.0
 
 
@@ -128,7 +132,7 @@ class QZUI(QtWidgets.QWidget):
 
 
     def wheelEvent(self, event):
-        num_degrees = float(event.angleDelta().y()) / 8
+        num_degrees = event.angleDelta().y() / 8
         num_steps = num_degrees / 15
         self.__zoom(num_steps)
         self.__mousepos = (event.x(), event.y())
@@ -136,15 +140,21 @@ class QZUI(QtWidgets.QWidget):
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
-            self.__mousedown = True
+            self.__mouse_left_down = True
+            self.__mousepos = (event.x(), event.y())
+            if not self.__shift_held:
+                ## shift-click won't change the selection
+                self.scene.selection = self.scene.get(self.__mousepos)
+        
+        if event.button() == QtCore.Qt.RightButton:
+            self.__mouse_right_down = True
             self.__mousepos = (event.x(), event.y())
             if not self.__shift_held:
                 ## shift-click won't change the selection
                 self.scene.selection = self.scene.get(self.__mousepos)
 
-
     def mouseMoveEvent(self, event):
-        if (event.buttons()&QtCore.Qt.LeftButton) and self.__mousedown:
+        if (event.buttons()&QtCore.Qt.LeftButton) and self.__mouse_left_down:
             mx = event.x() - self.__mousepos[0]
             my = event.y() - self.__mousepos[1]
 
@@ -156,8 +166,8 @@ class QZUI(QtWidgets.QWidget):
 
 
     def mouseReleaseEvent(self, event):
-        if event.button() == QtCore.Qt.LeftButton and self.__mousedown:
-            self.__mousedown = False
+        if event.button() == QtCore.Qt.LeftButton and self.__mouse_left_down:
+            self.__mouse_left_down = False
 
 
     def keyPressEvent(self, event):
@@ -220,6 +230,7 @@ class QZUI(QtWidgets.QWidget):
     def __get_framerate(self):
         """Rendering framerate."""
         return self.__framerate
+
     def __set_framerate(self, framerate):
         self.__framerate = framerate
         if self.__framerate:
@@ -231,7 +242,9 @@ class QZUI(QtWidgets.QWidget):
     def __get_scene(self):
         """Scene currently being viewed."""
         return self.__scene
+
     def __set_scene(self, scene):
+
         self.__scene = Scene.new() ## erase scene
         TileManager.purge()
         self.__scene = scene
@@ -241,4 +254,10 @@ class QZUI(QtWidgets.QWidget):
         self.__scene.centre = (self.width()/2, self.height()/2)
         self.__scene.zoom(-5.0)
         self.__scene.aim('z', 5.0)
+
     scene = property(__get_scene, __set_scene)
+
+
+
+
+

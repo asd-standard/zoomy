@@ -26,10 +26,11 @@
 ##removed all __builtin__
 
 #commented out on 20250314 
-#import logging
+import logging
 from threading import RLock
 import urllib.request, urllib.parse, urllib.error
 import math
+
 
 from PyQt5 import QtCore
 
@@ -44,8 +45,11 @@ class Scene(PhysicalObject):
     """Scene objects are used to hold a collection of MediaObjects.
 
     Constructor: Scene()
+
     """
+    standard_viewport_size = (256,256)
     def __init__(self):
+
         """Create a new scene."""
         PhysicalObject.__init__(self)
 
@@ -56,11 +60,11 @@ class Scene(PhysicalObject):
         self.selection = None
         
         #commented out on 20250314 
-        #self.__logger = logging.getLogger("Scene")
+        self.__logger = logging.getLogger("Scene")
 
 
     ## an arbitrary size that is common to all scenes upon creation
-    standard_viewport_size = (256,256)
+    #standard_viewport_size = (256,256)
 
     def save(self, filename):
         """Save the scene to the location given by `filename`.
@@ -70,7 +74,7 @@ class Scene(PhysicalObject):
 
         save(string) -> None
         """
-
+        
         actual_viewport_size = self.viewport_size
         ## set the viewport to a standard size before saving, so that
         ## when it is loaded the scene can be scaled to fit whatever
@@ -100,6 +104,7 @@ class Scene(PhysicalObject):
 
 
     def add(self, mediaobject):
+        
         """Add `mediaobject` to this scene.
 
         This has no effect if `mediaobject` is already in the scene.
@@ -108,7 +113,9 @@ class Scene(PhysicalObject):
         """
         with self.__objects_lock:
             if mediaobject not in self.__objects:
+                #print('happened')
                 self.__objects.append(mediaobject)
+                #print(self.__objects)
 
 
     def remove(self, mediaobject):
@@ -137,19 +144,14 @@ class Scene(PhysicalObject):
 
     def __sort_objects(self):
         """Sort self.__objects from largest to smallest area.
+            20250319 sorting based on zoomlevel ._z attribute of class mediaobject
 
         __sort_objects() -> None
         """
         with self.__objects_lock:
             
-            objects_areas = []
-            objects_positions = []
-            #self.__objects.sort(reverse=True)
-            for i in self.__objects :
-                area = i._x**2+i._y**2
-                objects_areas.append(area)
-                
-            print(objects_areas)
+            self.__objects.sort(key=lambda mediaobject: mediaobject._z)
+            #print(self.__objects)
             
 
 
@@ -193,7 +195,7 @@ class Scene(PhysicalObject):
 
         with self.__objects_lock:
             self.__sort_objects()
-
+            #print(self.__objects)
             hidden = False
             hidden_objects = set()
             for mediaobject in reversed(self.__objects):
@@ -211,24 +213,28 @@ class Scene(PhysicalObject):
                         ## as hidden
                         hidden = True
 
-            num_objects = len(self.__objects)
             for mediaobject in self.__objects:
+                #print(vars(mediaobject))
                 if mediaobject in hidden_objects:
                     mode = MediaObject.RenderMode.Invisible
                 elif draft:
                     mode = MediaObject.RenderMode.Draft
                 else:
                     mode = MediaObject.RenderMode.HighQuality
-
-                try:
-                    mediaobject.render(painter, mode)
-                except MediaObject.LoadError :
-                    errors.append((mediaobject ))
-
-            for mediaobject, e in errors:
+                
+                #try:   
+                mediaobject.render(painter, mode)
+                #except MediaObject.LoadError :
+                    #print('IM HERE')
+                    #print(vars(mediaobject))
+                #    errors.append((mediaobject ))
+                    
+            #for mediaobject in errors:
                 ## remove mediaobjects that have raised errors
-                self.remove(mediaobject)
-
+            #    print('## remove mediaobjects that have raised MediaObject.LoadError')
+                ##print(vars(mediaobject))
+            #    self.remove(mediaobject)
+            
             ## draw border around selected object
             if self.selection:
                 x1, y1 = self.selection.topleft

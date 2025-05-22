@@ -1,7 +1,0 @@
-
-#method
-__sort_objects(self): 
-#on scene.py the line
---> 146     self.__objects.sort(reverse=True)
-#gives
-TypeError: '<' not supported between instances of 'StringMediaObject' and 'StringMediaObject'

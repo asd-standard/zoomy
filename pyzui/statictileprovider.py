@@ -36,12 +36,13 @@ class StaticTileProvider(TileProvider):
 
 
     def _load(self, tile_id):
+        #print('statictileprovider-39', tile_id)
         media_id, tilelevel, row, col = tile_id
-
+        
         maxtilelevel = TileStore.get_metadata(media_id, 'maxtilelevel')
         if tilelevel > maxtilelevel:
             return None
-
+        
         filename = TileStore.get_tile_path(tile_id)
         try:
             tile = Image.open(filename)

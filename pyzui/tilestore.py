@@ -66,9 +66,10 @@ def get_tile_path(tile_id, mkdirp=False, prefix=None, filext=None):
     Precondition: if `filext` is None, then the metadata file for the media
     that this tile belongs to exists and contains an entry for filext
     """
-
+    #print('tilestore-70',tile_id)
+    
     media_id, tilelevel, row, col = tile_id
-
+    
     if not prefix:
         prefix = get_media_path(media_id)
 
@@ -83,7 +84,7 @@ def get_tile_path(tile_id, mkdirp=False, prefix=None, filext=None):
 
     filename = os.path.join(
         filename, "%02d_%06d_%06d.%s" % (tilelevel, row, col, filext))
-
+    
     return filename
 
 
@@ -96,7 +97,7 @@ def load_metadata(media_id):
     path = get_media_path(media_id)
 
     try:
-        f = open(os.path.join(path, "metadata"), 'U')
+        f = open(os.path.join(path, "metadata"))
     except IOError:
         return False
 
@@ -114,7 +115,7 @@ def load_metadata(media_id):
             pass
         else:
             __metadata[media_id][key] = val
-
+            
     f.close()
 
     return True
@@ -150,6 +151,28 @@ def tiled(media_id):
 
     tiled(string) -> bool
     """
+    #print('pyzui.tilestore-154',media_id)
     path = get_media_path(media_id)
+    #print(path)
+    ##We have to understand what this return function does
+    #print(os.path.join(path, "metadata"))
     return os.path.exists(os.path.join(path, "metadata")) and \
            os.path.exists(get_tile_path((media_id, 0, 0, 0)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

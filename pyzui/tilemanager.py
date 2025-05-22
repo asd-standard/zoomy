@@ -39,7 +39,7 @@ from .ferntileprovider import FernTileProvider
 
 
 
-
+#192
 def init(total_cache_size=192):
     """Initialise the TileManager. This **must** be called before any other
     functions are called.
@@ -54,7 +54,7 @@ def init(total_cache_size=192):
 
     __tp_static = StaticTileProvider(__tilecache)
     __tp_static.start()
-
+    
     __tp_dynamic = {
         'dynamic:osm':    OSMTileProvider(__tilecache),
         'dynamic:gm':     GlobalMosaicTileProvider(__tilecache),
@@ -72,7 +72,7 @@ def load_tile(tile_id):
 
     load_tile(tuple<string,int,int,int>) -> None
     """
-
+    
     media_id = tile_id[0]
 
     if media_id in __tp_dynamic:

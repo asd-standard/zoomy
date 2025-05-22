@@ -76,6 +76,7 @@ class MandelTileProvider(DynamicTileProvider):
             self._logger.error("conversion failed with return code %d",
                 returncode)
         else:
+
             converter = MagickConverter(tmpfile, outfile)
             converter.start()
             converter.join() ## block until conversion finished

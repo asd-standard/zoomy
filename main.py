@@ -26,12 +26,17 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import pyzui.tilemanager as TileManager
 from pyzui.mainwindow import MainWindow
 
+
+
 def main():
+    
     if os.path.dirname(__file__):
         ## set the working directory to the directory containing this script
         os.chdir(os.path.dirname(__file__))
-
+    #logging.getLogger('requests').setLevel(logging.DEBUG)
     logging.basicConfig(level=logging.DEBUG)
+    
+    
     TileManager.init()
 
     app = QtWidgets.QApplication(sys.argv)

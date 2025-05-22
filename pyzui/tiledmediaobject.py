@@ -42,7 +42,7 @@ class TiledMediaObject(MediaObject):
 
     Constructor: TiledMediaObject(string, Scene[, bool])
     """
-    def __init__(self, media_id, scene, autofit=False):
+    def __init__(self, media_id, scene, autofit=True):
         MediaObject.__init__(self, media_id, scene)
 
         self.__autofit = autofit
@@ -65,13 +65,18 @@ class TiledMediaObject(MediaObject):
         self.__tileblock_id = None
         self.__tileblock_final = False
         self.__tileblock_age = 0
-
-        if TileManager.tiled(self._media_id):
+        
+        #print('tiledmediaobject-70-TileManager.tiled(self._media_id):',TileManager.tiled(self._media_id))
+        
+        if TileManager.tiled(self._media_id):          
             TileManager.load_tile((self._media_id, 0, 0, 0))
+            
         else:
+            #print('tiledmediaobject-75-need-to-tile', self._media_id)
             self.__logger.info("need to tile media")
             fd, self.__tmpfile = tempfile.mkstemp('.ppm')
             os.close(fd)
+            
             if self._media_id.startswith('http://') or \
                self._media_id.lower().endswith('.html') or \
                self._media_id.lower().endswith('.htm'):
@@ -89,12 +94,13 @@ class TiledMediaObject(MediaObject):
                 self.__logger.info(
                     "assuming media is a local PPM file")
                 self.__ppmfile = self._media_id
+                
             else:
                 self.__converter = MagickConverter(
                     self._media_id, self.__tmpfile)
                 self.__ppmfile = self.__tmpfile
                 self.__converter.start()
-
+            
 
     transparent = False
 
@@ -163,8 +169,10 @@ class TiledMediaObject(MediaObject):
         Precondition: mode is equal to either RenderMode.Draft or
         RenderMode.HighQuality
         """
+        
         self.__logger.debug("rendering tileblock")
-
+        
+        
         tilelevel, row_min, col_min, row_max, col_max = tileblock_id
 
         brtile = TileManager.get_tile_robust(
@@ -219,6 +227,7 @@ class TiledMediaObject(MediaObject):
         Precondition: mode is equal to one of the constants defined in
         RenderMode
         """
+        
         if min(self.onscreen_size) <= 1 or mode == RenderMode.Invisible:
             ## don't bother rendering if the image is too
             ## small to be seen, or invisible mode is set
@@ -249,6 +258,7 @@ class TiledMediaObject(MediaObject):
             return
 
         tileblock_id = (tilelevel, row_min, col_min, row_max, col_max)
+
         if (self.__tileblock_id != tileblock_id) or \
            (not self.__tileblock_final and \
             (mode == RenderMode.HighQuality or \
@@ -272,7 +282,8 @@ class TiledMediaObject(MediaObject):
         o = self.topleft
         x = o[0] + int(tilescale * self.__tilesize*col_min)
         y = o[1] + int(tilescale * self.__tilesize*row_min)
-        painter.drawImage(x, y, image_scaled)
+        
+        painter.drawImage(int(x), int(y), image_scaled)
 
 
     def __render_placeholder(self, painter):
@@ -285,7 +296,7 @@ class TiledMediaObject(MediaObject):
         w,h = self.onscreen_size
 
         try:
-            painter.fillRect(x, y, w, h, QtCore.Qt.darkGray)
+            painter.fillRect(x, y, w, h, QtCore.Qt.darkGray) #darkGray
         except TypeError:
             ## rectangle dimensions could not be converted to ints
             pass
@@ -311,6 +322,7 @@ class TiledMediaObject(MediaObject):
 
         __try_load() -> None
         """
+        
         try:
             TileManager.get_tile(
                 (self._media_id, 0, 0, 0))
@@ -328,7 +340,7 @@ class TiledMediaObject(MediaObject):
                 ## destory tiler to close tmpfile (reqd to unlink on Windows)
                 self.__tiler = None
 
-            if self.__tmpfile:
+            if os.name == 'nt' : #self.__tmpfile
                 try:
                     os.unlink(self.__tmpfile)
                 except:
@@ -362,6 +374,7 @@ class TiledMediaObject(MediaObject):
 
         __run_tiler() -> None
         """
+        
         if not os.path.exists(self.__ppmfile):
             ## there was a problem converting, or the input file
             ## never actually existed
@@ -377,22 +390,28 @@ class TiledMediaObject(MediaObject):
             filext = 'png'
 
         try:
-            self.__tiler = PPMTiler(
-                self.__ppmfile, self._media_id, filext)
+            
+            self.__tiler = PPMTiler(self.__ppmfile, self._media_id, filext)
             self.__tiler.start()
+            
         except IOError :
             raise LoadError("there was an error creating the tiler: %s")
 
 
     def render(self, painter, mode):
+                
         if self.__loaded:
             self.__render_media(painter, mode)
 
         elif self.__tiler and self.__tiler.error:
-            raise LoadError("an error ocurred during "
+            
+            self.__logger.exception("an error ocurred during "
                 "the tiling process: %s" % self.__tiler.error)
-
-        elif TileManager.tiled(self._media_id):
+            #raise LoadError("an error ocurred during "
+            #    "the tiling process: %s" % self.__tiler.error)
+        
+        if TileManager.tiled(self._media_id): #replaced elif with if
+            
             self.__try_load()
             if self.__loaded:
                 self.__render_media(painter, mode)

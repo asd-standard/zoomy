@@ -34,13 +34,13 @@ class StringMediaObject(MediaObject):
     """
     def __init__(self, media_id, scene):
         MediaObject.__init__(self, media_id, scene)
-
         hexcol = self._media_id[len('string:'):len('string:rrggbb')]
-        self.__color = QtGui.QColor('#' + hexcol.decode())
+        self.__color = QtGui.QColor('#' + hexcol)
         if not self.__color.isValid():
             raise LoadError("the supplied colour is invalid")
-
+        
         self.__str = self._media_id[len('string:rrggbb:'):] # removed .decode('utf-8')
+        self.line = []
 
 
     transparent = True
@@ -49,17 +49,59 @@ class StringMediaObject(MediaObject):
     base_pointsize = 24.0
 
     def render(self, painter, mode):
+        
         if min(self.onscreen_size) > 1 and mode != RenderMode.Invisible:
             ## don't bother rendering if the string is too
             ## small to be seen, or invisible mode is set
 
             x,y = self.topleft
-            w,h = self.onscreen_size
-
+            w,h = self.onscreen_size 
+            
             painter.setPen(self.__color)
             painter.setFont(self.__font)
-            rect = QtCore.QRect(int(x), int(y), int(w), int(h))
-            painter.drawText(rect, QtCore.Qt.AlignCenter, self.__str.decode('utf-8'))
+                     
+            string_list = list(self.__str)  
+            
+            self.line = []
+            self.line.append([])
+
+            font = self.__font            
+            if font:
+                fontmetrics = QtGui.QFontMetrics(font)
+            hl = fontmetrics.height()
+            j=0
+                     
+            for i in string_list :                
+                if i == '\n' :                    
+                    self.line.append([])
+                    j += 1
+                else :
+                    self.line[j] += str(i)
+
+            if len(self.line) > 1 :
+                yr = y                
+                rectlist = []
+                            
+                for i in range(len(self.line)) :
+                    rectlist.append(QtCore.QRectF(int(x), int(yr), int(w), int(hl)))
+                    yr += hl    
+       
+                    #print(self.line[i]) #, type(self.line[i])
+                    if i < (len(self.line)-1) :                
+                        string = ''.join(self.line[i][:])
+                    else :
+                        string = ''.join(self.line[i][:])
+    
+                    rect = rectlist[i]
+                    painter.drawText(rect, string ) 
+ 
+            else :
+                rect = QtCore.QRectF(int(x), int(y), int(w), int(hl))
+                string = ''.join(self.line[0])                
+                painter.drawText(rect, string ) #, QtCore.Qt.AlignCenter
+
+           
+            
 
 
     @property
@@ -85,8 +127,16 @@ class StringMediaObject(MediaObject):
 
         if font:
             fontmetrics = QtGui.QFontMetrics(font)
-            w = fontmetrics.width(self.__str.decode('utf-8'))
-            h = fontmetrics.height()
+
+            if len(self.line) > 1 :
+                w = fontmetrics.width(''.join(sorted(self.line, key=len, reverse=True)[0][:])+' ')         
+                h = fontmetrics.height()*len(self.line)
+            else :
+                w = fontmetrics.width(self.__str+' ')
+                h = fontmetrics.height()                
             return (w,h)
+
         else:
             return (0,0)
+
+

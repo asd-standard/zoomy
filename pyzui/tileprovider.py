@@ -32,6 +32,7 @@ class TileProvider(Thread):
     Constructor: TileProvider(TileCache)
     """
     def __init__(self, tilecache):
+        
         """Create a new TileProvider for loading tiles into the given
         `tilecache`."""
 
@@ -42,7 +43,7 @@ class TileProvider(Thread):
 
         self.__tasks = deque()
         self.__tasks_available = Condition()
-
+    
         self._logger = logging.getLogger(str(self))
 
 

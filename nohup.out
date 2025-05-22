@@ -1,12 +1,20 @@
 
-(xed:190834): Gtk-WARNING **: 11:17:30.943: Calling org.xfce.Session.Manager.Inhibit failed: GDBus.Error:org.freedesktop.DBus.Error.UnknownMethod: No such method “Inhibit”
+(xed:248394): Gtk-WARNING **: 17:05:47.461: Calling org.xfce.Session.Manager.Inhibit failed: GDBus.Error:org.freedesktop.DBus.Error.UnknownMethod: No such method “Inhibit”
 
-(xed:192137): Gtk-WARNING **: 11:42:17.591: Calling org.xfce.Session.Manager.Inhibit failed: GDBus.Error:org.freedesktop.DBus.Error.UnknownMethod: No such method “Inhibit”
-Spyder is already running. If you want to open a new 
-instance, please use the --new-instance option
+(xed:30777): Gtk-WARNING **: 17:24:09.577: Calling org.xfce.Session.Manager.Inhibit failed: GDBus.Error:org.freedesktop.DBus.Error.UnknownMethod: No such method “Inhibit”
 
-(xed:192137): Gtk-CRITICAL **: 15:40:21.738: gtk_action_group_get_action: assertion 'GTK_IS_ACTION_GROUP (action_group)' failed
+(xed:30777): Gtk-CRITICAL **: 14:46:17.272: gtk_widget_get_mapped: assertion 'GTK_IS_WIDGET (widget)' failed
 
-** (xed:192137): WARNING **: 16:08:55.634: Set document metadata failed: Error setting file metadata: No such file or directory
+(xed:30777): Gdk-CRITICAL **: 14:46:17.273: gdk_window_is_visible: assertion 'GDK_IS_WINDOW (window)' failed
 
-** (xed:192137): WARNING **: 16:09:04.891: Set document metadata failed: Error setting file metadata: No such file or directory
+(xed:30777): Gdk-CRITICAL **: 14:46:17.273: gdk_window_show_internal: assertion 'GDK_IS_WINDOW (window)' failed
+
+(xed:30777): Gtk-CRITICAL **: 14:46:17.273: gtk_widget_set_opacity: assertion 'GTK_IS_WIDGET (widget)' failed
+
+(xed:30777): Gtk-CRITICAL **: 14:46:17.273: gtk_widget_queue_draw: assertion 'GTK_IS_WIDGET (widget)' failed
+
+(xed:30777): Gtk-CRITICAL **: 15:05:05.589: gtk_window_set_transient_for: assertion 'GTK_IS_WINDOW (window)' failed
+
+(xed:30777): Gtk-CRITICAL **: 15:20:13.721: gtk_window_set_transient_for: assertion 'GTK_IS_WINDOW (window)' failed
+
+(xed:30777): Gtk-CRITICAL **: 15:21:52.870: gtk_window_set_transient_for: assertion 'GTK_IS_WINDOW (window)' failed

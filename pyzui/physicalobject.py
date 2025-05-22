@@ -191,3 +191,8 @@ class PhysicalObject(object): #removed object from class argument
         self._centre = ((centre[0] - self._x) * 2**-self._z,
                         (centre[1] - self._y) * 2**-self._z)
     centre = property(__get_centre, __set_centre)
+
+
+
+
+

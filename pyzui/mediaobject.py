@@ -131,12 +131,15 @@ class MediaObject(PhysicalObject):
 
         fit(tuple<float,float,float,float>) -> None
         """
+        
         box_x, box_y, box_x2, box_y2 = list(map(float, bbox))
         box_w = box_x2 - box_x
+        #print('box_x, box_x2',box_x, box_x2)
         box_h = box_y2 - box_y
+        #print('box_y',box_y)
 
         w, h = self.onscreen_size
-
+        #print('MEDIA',w,h)
         if w/h > box_w/box_h:
             ## need to fit width
             scale = box_w / w
@@ -152,8 +155,10 @@ class MediaObject(PhysicalObject):
 
         self._x = (target_x - self._scene.origin[0]) \
             * (2 ** -self._scene.zoomlevel)
+        #print('self._x',self._x)
         self._y = (target_y - self._scene.origin[1]) \
             * (2 ** -self._scene.zoomlevel)
+        #print('self._y',self._y)
 
 
     def __cmp__(self, other):
@@ -246,6 +251,7 @@ class MediaObject(PhysicalObject):
 
 
 class LoadError(Exception):
+    
     """Exception for if there is an error loading the media."""
     pass
 
@@ -255,3 +261,9 @@ class RenderMode:
     Invisible = 0
     Draft = 1
     HighQuality = 2
+
+
+
+
+
+

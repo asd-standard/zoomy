@@ -22,7 +22,7 @@
 
 import subprocess
 import os
-import sys
+#import sys
 
 from .converter import Converter
 from . import tilestore as TileStore
@@ -35,6 +35,7 @@ class MagickConverter(Converter):
     Constructor: MagickConverter(string, string)
     """
     def __init__(self, infile, outfile):
+        
         Converter.__init__(self, infile, outfile)
 
         ## since PPMTiler only supports 8-bit images
@@ -42,7 +43,7 @@ class MagickConverter(Converter):
 
 
     def run(self):
-        if sys.platform == 'win32':
+        if os.name == 'nt':
             convert_exe = 'imconvert'
         else:
             convert_exe = 'convert'
@@ -57,15 +58,19 @@ class MagickConverter(Converter):
             stdout = process.communicate()[0]
 
         if process.returncode != 0:
+            #print('InFILE', self._infile)
+            #print('OutFILE', self._outfile)
+            #print('IM HERE!!! FOR REAL!!!')
             self.error = "conversion failed with return code " \
                 "%d:\n%s" % (process.returncode, stdout)
             self._logger.error(self.error)
+                        
             try:
                 os.unlink(self._outfile)
             except:
                 self.__logger.exception("unable to unlink temporary file "
                     "'%s'" % self._outfile)
-
+            
         self._progress = 1.0
 
 
@@ -76,3 +81,8 @@ class MagickConverter(Converter):
     def __repr__(self):
         return "MagickConverter(%s, %s)" % \
             (repr(self._infile), repr(self._outfile))
+
+
+
+
+

@@ -68,3 +68,10 @@ class Converter(Thread):
 
     def __repr__(self):
         return "Converter(%s, %s)" % (repr(self._infile), repr(self._outfile))
+    
+    
+    
+    
+    
+    
+    

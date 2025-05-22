@@ -19,10 +19,16 @@
 """PyZUI QMainWindow."""
 
 import logging
-import os
 import math
+import os
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import (
+    QApplication, QDialog, QTextEdit, QVBoxLayout, QPushButton, QDialogButtonBox, QInputDialog, QLineEdit, QWidget, QLabel
+)
+
+from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtGui import QFont, QColor, QPainter
 
 from . import __init__ as PyZUI
 from . import scene as Scene
@@ -32,12 +38,13 @@ from .tiledmediaobject import TiledMediaObject
 from .stringmediaobject import StringMediaObject
 from .svgmediaobject import SVGMediaObject
 
+
 class MainWindow(QtWidgets.QMainWindow):
     """MainWindow windows are used for displaying the PyZUI interface.
 
     Constructor: MainWindow()
     """
-    def __init__(self, framerate=10):
+    def __init__(self, framerate=40):
         """Create a new MainWindow."""
         QtWidgets.QMainWindow.__init__(self)
 
@@ -48,22 +55,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("PyZUI")
 
         self.zui = QZUI(self, framerate)
+        self.zui.start()        
         self.setCentralWidget(self.zui)
 
         self.__create_actions()
         self.__create_menus()
 
         self.zui.error.connect(self.__show_error)
+        
 
         self.__action_open_scene_home()
 
 
     def sizeHint(self):
-        return QtCore.QSize(800,600)
-
+        return QtCore.QSize(1280,720)
 
     def minimumSizeHint(self):
-        return QtCore.QSize(320,240)
+        return QtCore.QSize(160,120)
 
 
     def __show_error(self, text, details):
@@ -111,14 +119,14 @@ class MainWindow(QtWidgets.QMainWindow):
         __action_open_scene() -> None
         """
         filename = str(QtWidgets.QFileDialog.getOpenFileName(
-            self, "Open scene", self.__prev_dir, "PyZUI Scenes (*.pzs)"))[0]
+            self, "Open scene", self.__prev_dir, "PyZUI Scenes (*.pzs)")[0])
 
         if filename:
             self.__prev_dir = os.path.dirname(filename)
             try:
-                self.zui.scene = Scene.open(filename)
+                self.zui.scene = Scene.load_scene(filename)
             except Exception as e :
-                self.__show_error("Unable to open scene", e)
+                self.__show_error("Unable to open scene ERROR in mainwindow.__action_open_scene \n", e)
 
 
     def __action_open_scene_home(self):
@@ -129,7 +137,7 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.zui.scene = Scene.load_scene(os.path.join("data", "home.pzs")) #"/home/asd/Projects/pyzui/data/home.pzs"
         except Exception as e:
-            self.__show_error("Unable to open the Home scene", str(e))
+            self.__show_error('Unable to open the Home scene, ERROR in mainwindow.__action_open_scene_home \n', str(e))
 
 
     def __action_save_scene(self):
@@ -138,16 +146,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
         __action_save_scene() -> None
         """
+        
         filename = str(QtWidgets.QFileDialog.getSaveFileName(
             self, "Save scene", os.path.join(self.__prev_dir, "scene.pzs"),
-            "PyZUI Scenes (*.pzs)"))[0]
-
+            "PyZUI Scenes (*.pzs)")[0])
+        
         if filename:
             self.__prev_dir = os.path.dirname(filename)
             try:
                 self.zui.scene.save(filename)
             except Exception as e:
-                self.__show_error("Unable to save scene", e)
+                self.__show_error("Unable to save scene ERROR in mainwindow.__action_save_scene \n", e)
 
 
     def __action_save_screenshot(self):
@@ -167,7 +176,7 @@ class MainWindow(QtWidgets.QMainWindow):
             try:
                 QtGui.QPixmap.grabWidget(self.zui).save(filename)
             except Exception as e:
-                self.__show_error("Unable to save screenshot", e)
+                self.__show_error("Unable to save screenshot ERROR in mainwindow.__action_save_screenshot", e)
 
 
     def __open_media(self, media_id, add=True):
@@ -178,22 +187,28 @@ class MainWindow(QtWidgets.QMainWindow):
 
         __open_media(string[, bool]) -> None
         """
-        #try:
-        if media_id.startswith('string:'.encode()):
-            mediaobject = StringMediaObject(media_id, self.zui.scene)
-        elif media_id.lower().endswith('.svg'):
-            mediaobject = SVGMediaObject(media_id, self.zui.scene)
-        else:
-            mediaobject = TiledMediaObject(media_id, self.zui.scene, True)
-        #except Exception as e:
-        #    self.__show_error("Unable to open media", e)
+        try:
+            if media_id.startswith('string:'):
+                mediaobject = StringMediaObject(media_id, self.zui.scene)
+            elif media_id.lower().endswith('.svg'):
+                mediaobject = SVGMediaObject(media_id, self.zui.scene)
+            else:
+                mediaobject = TiledMediaObject(media_id, self.zui.scene, True)
+                #print(vars(mediaobject))
+        except Exception as e:
+        
+            self.__show_error("Unable to open media ERROR in mainwindow.__open_media \n", e)
         
         #else:
         if add:
+        
             w = self.zui.width()
+            #print(w)
             h = self.zui.height()
+            #print(h)
             mediaobject.fit((w/4, h/4, w*3/4, h*3/4))
             self.zui.scene.add(mediaobject)
+            
         else:
             return mediaobject
         
@@ -204,26 +219,59 @@ class MainWindow(QtWidgets.QMainWindow):
 
         __action_open_media_local() -> None
         """
-        filename = str(QtWidgets.QFileDialog.getOpenFileName(
-            self, "Open local media", self.__prev_dir))[0]
-
+        filename = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Open local media", self.__prev_dir)
+        #print(filename[0])
         if filename:
-            self.__prev_dir = os.path.dirname(filename)
-            self.__open_media(filename)
+            #print('mainwindow-216-filename', filename)
+            self.__prev_dir = os.path.dirname(filename[0])
+            self.__open_media(filename[0])
 
 
-    def __action_open_media_uri(self):
-        """Open media by the URI entered by the user in an input dialog.
+    def __action_open_media_string(self):
+        """Render string given by the user in an input dialog.
 
-        __action_open_media_uri() -> None
+        __action_open_media_string() -> None
         """
-        uri, ok = QtWidgets.QInputDialog.getText(
-            self, "Open media by URI", "URI:")
-        uri = uri.encode('utf-8')
+        
+        dialog = QDialog()
+        dialog.setWindowTitle("String input:")
+        dialog.resize(600, 600)
+        # Create text edit widget
+        text_edit = QTextEdit(dialog)
+        font = QFont()
+        font.setPointSize(16)  # Set desired font size
+        text_edit.setFont(font)
 
+        # Align text to top-left (horizontal only by default)
+        text_edit.setAlignment(Qt.AlignLeft)
+        
+        # Create a text input field for custom color entry
+        custom_color_input = QLineEdit(dialog) #dialog
+        custom_color_input.setPlaceholderText("Enter custom color (e.g., #ff5733)")    
+        
+        # Create OK/Cancel buttons
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, dialog)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+
+        # Layout setup
+        layout = QVBoxLayout(dialog)
+        layout.addWidget(text_edit)
+        layout.addWidget(custom_color_input)
+        layout.addWidget(buttons)
+
+        # Run dialog and get result
+        if dialog.exec_() == QDialog.Accepted:
+            color_code = custom_color_input.text()           
+            uri = 'string:'+str(color_code)+str(':') + str(text_edit.toPlainText())
+            ok = True
+        else :
+            ok = False
+        
         if ok and uri:
             self.__open_media(uri)
-
+        
 
     def __action_open_media_dir(self):
         """Open media from the directory chosen by the user in a file
@@ -297,13 +345,55 @@ class MainWindow(QtWidgets.QMainWindow):
             PyZUI.__copyright_notice__)
 
 
-    def __action_about_qt(self):
+    def __action_about_qt(self) :
         """Display the Qt about dialog.
 
         __action_about_qt() -> None
         """
         QtWidgets.QMessageBox.aboutQt(self)
 
+    def __action_save_and_quit(self) :
+        """Calls the __action_save_scene and then quit.
+            
+        """
+        self.__action_save_scene()
+        QtWidgets.QApplication.closeAllWindows()
+    
+    def __action_confirm_quit(self) :
+        """Ask user if it really wants to quit.
+                    
+        """
+        # Create the dialog window
+        dialog = QDialog()
+        dialog.setWindowTitle("Confirm Quit")
+        
+        save_clicked = False
+        # Add label to the layout
+        label = QLabel("Are you sure you want to quit?")
+        
+        buttons = QDialogButtonBox(QDialogButtonBox.Yes | QDialogButtonBox.No,  dialog)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        
+        save_button = QPushButton('Save and Quit', dialog)
+        save_button.setIcon(QtGui.QIcon.fromTheme("document-save"))
+        
+        save_button.clicked.connect(self.__action_save_and_quit)
+        
+
+        buttons.addButton(save_button, QDialogButtonBox.ActionRole)
+
+        layout = QVBoxLayout(dialog)
+        layout.addWidget(label)
+        layout.addWidget(buttons)
+        response = dialog.exec_()
+
+        if response  == QDialog.Accepted :
+            QtWidgets.QApplication.closeAllWindows() 
+        elif response == QDialog.Rejected :
+            dialog.close()
+        
+        
 
     def __create_actions(self):
         """Create the QActions required for the interface.
@@ -324,28 +414,23 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__action_save_screenshot, "Ctrl+H")
         self.__create_action('open_media_local', "Open &Local Media",
             self.__action_open_media_local, "Ctrl+L")
-        self.__create_action('open_media_uri', "Open Media by &URI",
-            self.__action_open_media_uri, "Ctrl+U")
+        self.__create_action('open_media_string', "Open Media by &String",
+            self.__action_open_media_string, "Ctrl+U")
         self.__create_action('open_media_dir', "Open Media &Directory",
             self.__action_open_media_dir, "Ctrl+D")
         self.__create_action('quit', "&Quit",
-            QtWidgets.QApplication.closeAllWindows, "Ctrl+Q")
+            self.__action_confirm_quit, "Ctrl+Q")
+            
 
         self.__action['group_set_fps'] = QtWidgets.QActionGroup(self)
-        for i in range(5, 31, 5):
+        for i in range(20, 61, 10):
             key = "set_fps_%d" % i
             self.__create_action(key, "%d FPS" % i, checkable=True)
             self.__action[key].fps = i
             self.__action['group_set_fps'].addAction(self.__action[key])
         
-        #self.__action['group_set_fps'].triggered[QAction].connect(self.__action_set_fps)
-        #REPLACED WITH BELOW
-        self.__action['group_set_fps'].triggered[QtWidgets.QAction].connect(self.__action_set_fps) 
-        #REPLACED WITH BELOW
-        #self.connect(self.__action['group_set_fps'],
-        #    QtCore.SIGNAL("triggered(QAction*)"), self.__action_set_fps)
-        # END REPLACEMENT
         
+        self.__action['group_set_fps'].triggered[QtWidgets.QAction].connect(self.__action_set_fps)
         self.__action['set_fps_%d' % self.zui.framerate].setChecked(True)
 
         self.__create_action('fullscreen', "&Fullscreen",
@@ -369,7 +454,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__menu['file'].addAction(self.__action['save_scene'])
         self.__menu['file'].addAction(self.__action['save_screenshot'])
         self.__menu['file'].addAction(self.__action['open_media_local'])
-        self.__menu['file'].addAction(self.__action['open_media_uri'])
+        self.__menu['file'].addAction(self.__action['open_media_string'])
         self.__menu['file'].addAction(self.__action['open_media_dir'])
         self.__menu['file'].addAction(self.__action['quit'])
 
