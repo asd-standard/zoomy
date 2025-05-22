@@ -31,7 +31,7 @@ class QZUI(QtWidgets.QWidget, Thread):
     """
     error = QtCore.pyqtSignal()
 
-    def __init__(self, parent=None, framerate=int):
+    def __init__(self, parent=None, framerate=int, zoom_sensitivity=int):
         """Create a new QZUI QWidget with the given `parent` widget."""
         QtWidgets.QWidget.__init__(self, parent)
 
@@ -48,6 +48,7 @@ class QZUI(QtWidgets.QWidget, Thread):
 
         self.__timer = QtCore.QBasicTimer()
 
+        self.zoom_sensitivity = zoom_sensitivity
         self.framerate = framerate
         self.reduced_framerate = 2
 
@@ -132,8 +133,8 @@ class QZUI(QtWidgets.QWidget, Thread):
 
 
     def wheelEvent(self, event):
-        num_degrees = event.angleDelta().y() / 8
-        num_steps = num_degrees / 15
+        num_degrees = event.angleDelta().y() #/ 8
+        num_steps = num_degrees / self.zoom_sensitivity #15
         self.__zoom(num_steps)
         self.__mousepos = (event.x(), event.y())
 

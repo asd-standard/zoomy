@@ -18,3 +18,5 @@
 (xed:30777): Gtk-CRITICAL **: 15:20:13.721: gtk_window_set_transient_for: assertion 'GTK_IS_WINDOW (window)' failed
 
 (xed:30777): Gtk-CRITICAL **: 15:21:52.870: gtk_window_set_transient_for: assertion 'GTK_IS_WINDOW (window)' failed
+
+(xed:30777): Gtk-CRITICAL **: 16:08:23.434: gtk_window_set_transient_for: assertion 'GTK_IS_WINDOW (window)' failed

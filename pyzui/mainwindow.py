@@ -44,17 +44,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
     Constructor: MainWindow()
     """
-    def __init__(self, framerate=40):
+    def __init__(self, framerate=40, zoom_sensitivity=100):
         """Create a new MainWindow."""
         QtWidgets.QMainWindow.__init__(self)
 
         self.__logger = logging.getLogger("MainWindow")
 
         self.__prev_dir = ''
-
+        
         self.setWindowTitle("PyZUI")
 
-        self.zui = QZUI(self, framerate)
+        self.zui = QZUI(self, framerate, zoom_sensitivity)
         self.zui.start()        
         self.setCentralWidget(self.zui)
 
@@ -62,7 +62,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__create_menus()
 
         self.zui.error.connect(self.__show_error)
-        
 
         self.__action_open_scene_home()
 
@@ -392,7 +391,26 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QApplication.closeAllWindows() 
         elif response == QDialog.Rejected :
             dialog.close()
-        
+
+    def __action_set_zoom_sensitivity(self) :
+
+        dialog = QInputDialog()
+        dialog.setWindowTitle("Set zoom sensitivity")
+        dialog.setLabelText("sentitivity goes from 0 to 100")
+        dialog.resize(300, 80)  # Set the size here
+
+        ok_pressed = dialog.exec_()
+        text_input = dialog.textValue()
+           
+        if ok_pressed and text_input :
+            if int(text_input) < 0 or int(text_input) > 100 :
+                self.__show_error("Sensitivity input must range from 0 to 100")
+            elif int(text_input) == 0 :
+                self.zui.zoom_sensitivity = 1000
+            else :
+                self.zui.zoom_sensitivity = (1000 / int(text_input)) 
+            
+         
         
 
     def __create_actions(self):
@@ -420,7 +438,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__action_open_media_dir, "Ctrl+D")
         self.__create_action('quit', "&Quit",
             self.__action_confirm_quit, "Ctrl+Q")
-            
+        self.__create_action('set_zoom_sensitivity', "adjust &sensitivity",
+            self.__action_set_zoom_sensitivity)
 
         self.__action['group_set_fps'] = QtWidgets.QActionGroup(self)
         for i in range(20, 61, 10):
@@ -460,8 +479,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.__menu['view'] = self.menuBar().addMenu("&View")
         self.__menu['set_fps'] = self.__menu['view'].addMenu("Set &Framerate")
-        self.__menu['set_fps'].addActions(
-            self.__action['group_set_fps'].actions())
+        self.__menu['set_fps'].addActions(self.__action['group_set_fps'].actions())
+        self.__menu['view'].addAction(self.__action['set_zoom_sensitivity'])
         self.__menu['view'].addAction(self.__action['fullscreen'])
 
         self.__menu['help'] = self.menuBar().addMenu("&Help")
