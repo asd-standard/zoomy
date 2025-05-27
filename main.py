@@ -41,7 +41,7 @@ def main():
 
     app = QtWidgets.QApplication(sys.argv)
     app.setWindowIcon(QtGui.QIcon(os.path.join("data", "icon.png")))
-
+    
     window = MainWindow()
     window.show()
 

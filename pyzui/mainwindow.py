@@ -24,7 +24,7 @@ import os
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (
-    QApplication, QDialog, QTextEdit, QVBoxLayout, QPushButton, QDialogButtonBox, QInputDialog, QLineEdit, QWidget, QLabel
+    QApplication, QDialog, QTextEdit, QVBoxLayout, QPushButton, QDialogButtonBox, QInputDialog, QLineEdit, QWidget, QLabel, QHBoxLayout, QSizePolicy
 )
 
 from PyQt5.QtCore import Qt, QPoint
@@ -38,6 +38,7 @@ from .tiledmediaobject import TiledMediaObject
 from .stringmediaobject import StringMediaObject
 from .svgmediaobject import SVGMediaObject
 
+from .dialogwindows import DialogWindows
 
 class MainWindow(QtWidgets.QMainWindow):
     """MainWindow windows are used for displaying the PyZUI interface.
@@ -46,6 +47,7 @@ class MainWindow(QtWidgets.QMainWindow):
     """
     def __init__(self, framerate=40, zoom_sensitivity=100):
         """Create a new MainWindow."""
+        
         QtWidgets.QMainWindow.__init__(self)
 
         self.__logger = logging.getLogger("MainWindow")
@@ -64,6 +66,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.zui.error.connect(self.__show_error)
 
         self.__action_open_scene_home()
+
 
 
     def sizeHint(self):
@@ -199,8 +202,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__show_error("Unable to open media ERROR in mainwindow.__open_media \n", e)
         
         #else:
-        if add:
-        
+        if add: 
             w = self.zui.width()
             #print(w)
             h = self.zui.height()
@@ -232,42 +234,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         __action_open_media_string() -> None
         """
-        
-        dialog = QDialog()
-        dialog.setWindowTitle("String input:")
-        dialog.resize(600, 600)
-        # Create text edit widget
-        text_edit = QTextEdit(dialog)
-        font = QFont()
-        font.setPointSize(16)  # Set desired font size
-        text_edit.setFont(font)
-
-        # Align text to top-left (horizontal only by default)
-        text_edit.setAlignment(Qt.AlignLeft)
-        
-        # Create a text input field for custom color entry
-        custom_color_input = QLineEdit(dialog) #dialog
-        custom_color_input.setPlaceholderText("Enter custom color (e.g., #ff5733)")    
-        
-        # Create OK/Cancel buttons
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, dialog)
-        buttons.accepted.connect(dialog.accept)
-        buttons.rejected.connect(dialog.reject)
-
-        # Layout setup
-        layout = QVBoxLayout(dialog)
-        layout.addWidget(text_edit)
-        layout.addWidget(custom_color_input)
-        layout.addWidget(buttons)
-
-        # Run dialog and get result
-        if dialog.exec_() == QDialog.Accepted:
-            color_code = custom_color_input.text()           
-            uri = 'string:'+str(color_code)+str(':') + str(text_edit.toPlainText())
-            ok = True
-        else :
-            ok = False
-        
+        dialog = DialogWindows._open_string_input_dialog()
+        ok, uri = dialog._run_dialog()
         if ok and uri:
             self.__open_media(uri)
         
@@ -393,14 +361,8 @@ class MainWindow(QtWidgets.QMainWindow):
             dialog.close()
 
     def __action_set_zoom_sensitivity(self) :
-
-        dialog = QInputDialog()
-        dialog.setWindowTitle("Set zoom sensitivity")
-        dialog.setLabelText("sentitivity goes from 0 to 100")
-        dialog.resize(300, 80)  # Set the size here
-
-        ok_pressed = dialog.exec_()
-        text_input = dialog.textValue()
+        
+        ok_pressed, text_input = DialogWindows._open_zoom_sensitivity_input_dialog()
            
         if ok_pressed and text_input :
             if int(text_input) < 0 or int(text_input) > 100 :
@@ -410,8 +372,6 @@ class MainWindow(QtWidgets.QMainWindow):
             else :
                 self.zui.zoom_sensitivity = (1000 / int(text_input)) 
             
-         
-        
 
     def __create_actions(self):
         """Create the QActions required for the interface.
