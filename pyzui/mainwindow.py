@@ -204,12 +204,12 @@ class MainWindow(QtWidgets.QMainWindow):
         #else:
         if add: 
             w = self.zui.width()
-            #print(w)
             h = self.zui.height()
-            #print(h)
-            mediaobject.fit((w/4, h/4, w*3/4, h*3/4))
-            self.zui.scene.add(mediaobject)
-            
+            try :
+                mediaobject.fit((w/4, h/4, w*3/4, h*3/4))
+                self.zui.scene.add(mediaobject)
+            except Exception as e:
+                self.__show_error("Error in opening media in __open_media \n", e)
         else:
             return mediaobject
         
@@ -361,12 +361,23 @@ class MainWindow(QtWidgets.QMainWindow):
             dialog.close()
 
     def __action_set_zoom_sensitivity(self) :
+<<<<<<< HEAD
         
         ok_pressed, text_input = DialogWindows._open_zoom_sensitivity_input_dialog()
+=======
+
+        dialog = QInputDialog()
+        dialog.setWindowTitle("Set zoom sensitivity")
+        dialog.setLabelText("sentitivity goes from 0 to 100, current: "+str(self.zui.zoom_sensitivity/10))
+        dialog.resize(300, 80)  # Set the size here
+
+        ok_pressed = dialog.exec_()
+        text_input = dialog.textValue()
+>>>>>>> 745aa476ad3a29bfe12482609e48365029a278c6
            
         if ok_pressed and text_input :
             if int(text_input) < 0 or int(text_input) > 100 :
-                self.__show_error("Sensitivity input must range from 0 to 100")
+                self.__show_error("Sensitivity input must range from 0 to 100, current")
             elif int(text_input) == 0 :
                 self.zui.zoom_sensitivity = 1000
             else :
