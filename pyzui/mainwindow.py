@@ -359,21 +359,20 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QApplication.closeAllWindows() 
         elif response == QDialog.Rejected :
             dialog.close()
-
+    
     def __action_set_zoom_sensitivity(self) :
-<<<<<<< HEAD
-        
-        ok_pressed, text_input = DialogWindows._open_zoom_sensitivity_input_dialog()
-=======
 
+        ok_pressed, text_input = DialogWindows._open_zoom_sensitivity_input_dialog(self.zui.zoom_sensitivity)
+
+        '''
         dialog = QInputDialog()
         dialog.setWindowTitle("Set zoom sensitivity")
-        dialog.setLabelText("sentitivity goes from 0 to 100, current: "+str(self.zui.zoom_sensitivity/10))
+        
         dialog.resize(300, 80)  # Set the size here
 
         ok_pressed = dialog.exec_()
         text_input = dialog.textValue()
->>>>>>> 745aa476ad3a29bfe12482609e48365029a278c6
+        '''
            
         if ok_pressed and text_input :
             if int(text_input) < 0 or int(text_input) > 100 :

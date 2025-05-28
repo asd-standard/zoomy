@@ -37,11 +37,12 @@ class DialogWindows():
 
     """
     
-    def _open_zoom_sensitivity_input_dialog():
+    def _open_zoom_sensitivity_input_dialog(current_sensitivity):
         
         dialog = QInputDialog()
         dialog.setWindowTitle("Set zoom sensitivity")
-        dialog.setLabelText("sentitivity goes from 0 to 100")
+        dialog.setLabelText("sentitivity goes from 0 to 100, current: "+str((current_sensitivity**-1)*1000))
+        #dialog.setLabelText("sentitivity goes from 0 to 100")
         dialog.resize(300, 80)  # Set the size here
 
         ok_pressed = dialog.exec_()
