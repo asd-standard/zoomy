@@ -134,7 +134,7 @@ class QZUI(QtWidgets.QWidget, Thread):
 
     def wheelEvent(self, event):
         num_degrees = event.angleDelta().y() #/ 8
-        num_steps = num_degrees / self.zoom_sensitivity #15
+        num_steps = round(num_degrees / self.zoom_sensitivity , 3) #15
         self.__zoom(num_steps)
         self.__mousepos = (event.x(), event.y())
 

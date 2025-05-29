@@ -34,7 +34,7 @@ def main():
         ## set the working directory to the directory containing this script
         os.chdir(os.path.dirname(__file__))
     #logging.getLogger('requests').setLevel(logging.DEBUG)
-    logging.basicConfig(level=logging.DEBUG)
+    #logging.basicConfig(level=logging.DEBUG)
     
     
     TileManager.init()
@@ -47,3 +47,6 @@ def main():
 
     sys.exit(app.exec_())
 if __name__ == '__main__': main()
+
+
+

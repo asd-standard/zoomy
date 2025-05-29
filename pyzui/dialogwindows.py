@@ -41,7 +41,7 @@ class DialogWindows():
         
         dialog = QInputDialog()
         dialog.setWindowTitle("Set zoom sensitivity")
-        dialog.setLabelText("sentitivity goes from 0 to 100, current: "+str((current_sensitivity**-1)*1000))
+        dialog.setLabelText("sentitivity goes from 0 to 100, current: "+str(int(1000/current_sensitivity)))
         #dialog.setLabelText("sentitivity goes from 0 to 100")
         dialog.resize(300, 80)  # Set the size here
 
@@ -68,7 +68,7 @@ also gives a selection column of the last 20 used colors.
             
             self.string_color = ''
             self.passed_color = ''
-            self.color_codes = deque(maxlen=20)
+            self.color_codes = deque(maxlen=24)
 
             if os.path.isfile(self.color_dir+'/color_list.txt'):
                     with open(self.color_dir+'/color_list.txt', 'r') as f :
@@ -149,7 +149,7 @@ also gives a selection column of the last 20 used colors.
 
             dialog = QDialog()
             dialog.setWindowTitle("String input:")
-            dialog.resize(800, 600)
+            dialog.resize(900, 600)
 
             # Create text edit widget
             self.text_edit = QTextEdit(dialog) #Input string it's going to be typed in here 
@@ -178,7 +178,7 @@ also gives a selection column of the last 20 used colors.
 
             for code in self.color_codes:
                 btn = self._color_button(code)
-                btn.setFixedWidth(150)
+                btn.setFixedWidth(120)
                 color_layout.addWidget(btn)
             
             color_layout.addStretch()

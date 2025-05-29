@@ -18,13 +18,14 @@
 
 """Strings to be displayed in the ZUI."""
 
+#from threading import Thread
 from PyQt5 import QtCore, QtGui
 
 from .mediaobject import MediaObject, LoadError, RenderMode
 
-class StringMediaObject(MediaObject):
+class StringMediaObject(MediaObject): #Thread
     """StringMediaObject objects are used to represent strings that can be
-    rendered in the ZUI.
+    rendered in the ZUI.QT_LOGGING_RULES="qt.qpa.*=true"
 
     `media_id` should be of the form 'string:rrggbb:foobar', where 'rrggbb' is
     a string of three two-digit hexadecimal numbers representing the colour of
@@ -33,6 +34,8 @@ class StringMediaObject(MediaObject):
     Constructor: StringMediaObject(string, Scene)
     """
     def __init__(self, media_id, scene):
+        
+        #Thread.__init__(self)
         MediaObject.__init__(self, media_id, scene)
         hexcol = self._media_id[len('string:'):len('string:rrggbb')]
         self.__color = QtGui.QColor('#' + hexcol)

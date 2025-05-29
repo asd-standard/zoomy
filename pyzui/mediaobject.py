@@ -31,7 +31,11 @@ class MediaObject(PhysicalObject):
     def __init__(self, media_id, scene):
         """Create a new MediaObject from the media identified by `media_id`,
         and the parent Scene referenced by `scene`."""
+        #initialize mediobject centre, position and velocity        
         PhysicalObject.__init__(self)
+        #self.PhysicalObject = PhysicalObject()        
+        #self.PhysicalObject.start()        
+        
 
         self._media_id = media_id
         self._scene = scene

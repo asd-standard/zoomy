@@ -40,7 +40,7 @@ from .ferntileprovider import FernTileProvider
 
 
 #192
-def init(total_cache_size=192):
+def init(total_cache_size=1024):
     """Initialise the TileManager. This **must** be called before any other
     functions are called.
     

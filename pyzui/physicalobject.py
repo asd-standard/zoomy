@@ -18,9 +18,10 @@
 
 """An object that obeys the laws of physics."""
 
+#from threading import Thread
 import math
 
-class PhysicalObject(object): #removed object from class argument
+class PhysicalObject(): #removed object from class argument and Thread
     """Physicalobject pobjects are used to represent anything that has a
     3-dimensional position and velocity, where the z-dimension represents a
     zoomlevel.
@@ -29,6 +30,9 @@ class PhysicalObject(object): #removed object from class argument
     """
     def __init__(self):
         """Create a new Physicalpobject at the origin with zero velocity."""
+              
+        #Thread.__init__(self)
+
         self._x = 0.0
         self._y = 0.0
         self._z = 0.0

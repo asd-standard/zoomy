@@ -66,7 +66,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.zui.error.connect(self.__show_error)
 
         self.__action_open_scene_home()
-
+        
+        #self.StringMediaObject = StringMediaObject.start(self)
 
 
     def sizeHint(self):
@@ -235,7 +236,10 @@ class MainWindow(QtWidgets.QMainWindow):
         __action_open_media_string() -> None
         """
         dialog = DialogWindows._open_string_input_dialog()
-        ok, uri = dialog._run_dialog()
+        try :
+            ok, uri = dialog._run_dialog() 
+        except Exception as e :
+            self.__show_error('Error loading Media String: \n', e)         
         if ok and uri:
             self.__open_media(uri)
         
@@ -380,7 +384,7 @@ class MainWindow(QtWidgets.QMainWindow):
             elif int(text_input) == 0 :
                 self.zui.zoom_sensitivity = 1000
             else :
-                self.zui.zoom_sensitivity = (1000 / int(text_input)) 
+                self.zui.zoom_sensitivity = int(1000 / int(text_input)) 
             
 
     def __create_actions(self):

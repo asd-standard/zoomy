@@ -51,7 +51,11 @@ class Scene(PhysicalObject):
     def __init__(self):
 
         """Create a new scene."""
-        PhysicalObject.__init__(self)
+        #initialize mediobject centre, position and velocity
+        PhysicalObject.__init__(self)        
+        #self.PhysicalObject = PhysicalObject()
+        #self.PhysicalObject.start()
+        
 
         self.__objects = []
         self.__objects_lock = RLock()
@@ -61,7 +65,7 @@ class Scene(PhysicalObject):
         
         #commented out on 20250314 
         self.__logger = logging.getLogger("Scene")
-
+         
 
     ## an arbitrary size that is common to all scenes upon creation
     #standard_viewport_size = (256,256)
@@ -258,6 +262,7 @@ class Scene(PhysicalObject):
 
         step(float) -> None
         """
+        
         with self.__objects_lock:
             for mediaobject in self.__objects:
                 mediaobject.step(t)
@@ -325,7 +330,7 @@ def load_scene(filename):
 
     scene = Scene()
     
-    print(filename)
+    #print(filename)
     
     f = open(filename) #removed , 'U' as second argument
 
