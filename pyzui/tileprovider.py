@@ -96,6 +96,7 @@ class TileProvider(Thread):
                 if tile:
                     self._logger.debug("loaded %s", str(tile_id))
                     self.__tilecache[tile_id] = Tile(tile)
+                    
                     del tile
                 else:
                     self._logger.debug("unavailable %s", str(tile_id))
@@ -127,3 +128,5 @@ class TileProvider(Thread):
 
     def __repr__(self):
         return "%s()" % type(self).__name__
+
+

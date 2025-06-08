@@ -26,6 +26,7 @@
 ##removed all __builtin__
 
 #commented out on 20250314 
+
 import logging
 from threading import RLock
 import urllib.request, urllib.parse, urllib.error
@@ -226,21 +227,21 @@ class Scene(PhysicalObject):
                 else:
                     mode = MediaObject.RenderMode.HighQuality
                 
-                #try:   
-                mediaobject.render(painter, mode)
-                #except MediaObject.LoadError :
-                    #print('IM HERE')
-                    #print(vars(mediaobject))
-                #    errors.append((mediaobject ))
+                try:   
+                    mediaobject.render(painter, mode)
+                except MediaObject.LoadError :
+                    print('ERROR IN scene.render() \n')
+                    print(vars(mediaobject))
+                    errors.append((mediaobject ))
                     
-            #for mediaobject in errors:
+            for mediaobject in errors:
                 ## remove mediaobjects that have raised errors
-            #    print('## remove mediaobjects that have raised MediaObject.LoadError')
+                print('## remove mediaobjects that have raised MediaObject.LoadError')
                 ##print(vars(mediaobject))
-            #    self.remove(mediaobject)
+                self.remove(mediaobject)
             
             ## draw border around selected object
-            if self.selection:
+            if self.selection :
                 x1, y1 = self.selection.topleft
                 x2, y2 = self.selection.bottomright
 
@@ -276,7 +277,7 @@ class Scene(PhysicalObject):
         if not (self.vx == self.vy == self.vz == 0):
             return True
         else:
-            with self.__objects_lock:
+            with self.__objects_lock :
                 for mediaobject in self.__objects:
                     if mediaobject.moving:
                         return True
@@ -351,6 +352,7 @@ def load_scene(filename):
             elif class_name ==   'StringMediaObject':
                 mediaobject = StringMediaObject(
                     media_id, scene)
+                
             elif class_name ==   'SVGMediaObject':
                 mediaobject = SVGMediaObject(
                     media_id, scene)

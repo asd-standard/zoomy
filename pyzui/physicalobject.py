@@ -47,7 +47,7 @@ class PhysicalObject(): #removed object from class argument and Thread
     ## the velocity is damped at each frame such that each second it is
     ## reduced by a factor of damping_factor:
     ##   v = u * damping_factor**-t
-    damping_factor = 256
+    damping_factor = 512 #256
 
     def __damp(self, velocity, t):
         """Damp the given velocity.
@@ -55,7 +55,7 @@ class PhysicalObject(): #removed object from class argument and Thread
         __damp(float, float) -> float
         """
         velocity *= self.damping_factor ** -t
-        if abs(velocity) < 0.05:
+        if abs(velocity) < 0.1:
             velocity = 0.0
         return velocity
 

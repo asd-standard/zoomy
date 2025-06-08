@@ -4,3 +4,13 @@
 (xed:239335): Gtk-WARNING **: 17:21:26.550: Calling org.xfce.Session.Manager.Inhibit failed: GDBus.Error:org.freedesktop.DBus.Error.UnknownMethod: No such method “Inhibit”
 
 (xed:179473): Gtk-WARNING **: 12:24:43.249: Calling org.xfce.Session.Manager.Inhibit failed: GDBus.Error:org.freedesktop.DBus.Error.UnknownMethod: No such method “Inhibit”
+
+(xed:8628): GLib-GIO-CRITICAL **: 10:05:38.473: g_file_equal: assertion 'G_IS_FILE (file1)' failed
+
+(xed:8628): GLib-GIO-CRITICAL **: 10:05:38.473: g_file_equal: assertion 'G_IS_FILE (file1)' failed
+
+(xed:8628): GLib-GIO-CRITICAL **: 10:05:38.473: g_file_equal: assertion 'G_IS_FILE (file1)' failed
+
+(xed:8628): GLib-GIO-CRITICAL **: 10:05:38.473: g_file_equal: assertion 'G_IS_FILE (file1)' failed
+
+(xed:8628): GLib-GIO-CRITICAL **: 10:05:38.473: g_file_equal: assertion 'G_IS_FILE (file1)' failed

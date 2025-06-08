@@ -23,6 +23,7 @@ import os
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from pyzui.qzui import QZUI
 import pyzui.tilemanager as TileManager
 from pyzui.mainwindow import MainWindow
 
@@ -46,6 +47,7 @@ def main():
     window.show()
 
     sys.exit(app.exec_())
+
 if __name__ == '__main__': main()
 
 

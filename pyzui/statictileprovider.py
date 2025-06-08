@@ -48,5 +48,11 @@ class StaticTileProvider(TileProvider):
             tile = Image.open(filename)
             tile.load()
             return tile
+
+
+
+
+
+
         except IOError:
             return None

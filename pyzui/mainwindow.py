@@ -23,6 +23,7 @@ import math
 import os
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QTextEdit, QVBoxLayout, QPushButton, QDialogButtonBox, QInputDialog, QLineEdit, QWidget, QLabel, QHBoxLayout, QSizePolicy
 )
@@ -45,7 +46,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     Constructor: MainWindow()
     """
-    def __init__(self, framerate=40, zoom_sensitivity=100):
+    def __init__(self, framerate=10, zoom_sensitivity=50):
         """Create a new MainWindow."""
         
         QtWidgets.QMainWindow.__init__(self)
@@ -239,7 +240,9 @@ class MainWindow(QtWidgets.QMainWindow):
         try :
             ok, uri = dialog._run_dialog() 
         except Exception as e :
-            self.__show_error('Error loading Media String: \n', e)         
+            self.__show_error('Error loading Media String: \n', e)   
+            ok = False
+            uri = False      
         if ok and uri:
             self.__open_media(uri)
         
@@ -416,7 +419,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__action_set_zoom_sensitivity)
 
         self.__action['group_set_fps'] = QtWidgets.QActionGroup(self)
-        for i in range(20, 61, 10):
+        for i in range(10, 41, 10):
             key = "set_fps_%d" % i
             self.__create_action(key, "%d FPS" % i, checkable=True)
             self.__action[key].fps = i

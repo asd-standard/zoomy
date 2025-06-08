@@ -50,7 +50,7 @@ class QZUI(QtWidgets.QWidget, Thread):
 
         self.zoom_sensitivity = zoom_sensitivity
         self.framerate = framerate
-        self.reduced_framerate = 2
+        self.reduced_framerate = 5
 
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.setMouseTracking(True)
@@ -110,13 +110,13 @@ class QZUI(QtWidgets.QWidget, Thread):
 
     def timerEvent(self, event):
         if event.timerId() == self.__timer.timerId():
-            if self.scene.moving:
+            if self.scene.moving :
                 self.__dropped_frames = 0
                 self.__draft = True
                 self.update()
             else:
-                ## nothing much has changed since the last
-                ## paintEvent so reduce the framerate
+                ## Scene or MediaObjects are moving so drop Frames 
+                
                 if self.__dropped_frames >= \
                    self.framerate/self.reduced_framerate:
                     self.__dropped_frames = 0

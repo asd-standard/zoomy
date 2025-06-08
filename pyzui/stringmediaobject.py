@@ -23,9 +23,9 @@ from PyQt5 import QtCore, QtGui
 
 from .mediaobject import MediaObject, LoadError, RenderMode
 
-class StringMediaObject(MediaObject): #Thread
+class StringMediaObject(MediaObject): #, Thread
     """StringMediaObject objects are used to represent strings that can be
-    rendered in the ZUI.QT_LOGGING_RULES="qt.qpa.*=true"
+    rendered in the zui"
 
     `media_id` should be of the form 'string:rrggbb:foobar', where 'rrggbb' is
     a string of three two-digit hexadecimal numbers representing the colour of
@@ -42,8 +42,8 @@ class StringMediaObject(MediaObject): #Thread
         if not self.__color.isValid():
             raise LoadError("the supplied colour is invalid")
         
-        self.__str = self._media_id[len('string:rrggbb:'):] # removed .decode('utf-8')
-        self.line = []
+        self.__str = self._media_id[len('string:rrggbb:'):] 
+        self.lines = []
 
 
     transparent = True
@@ -52,8 +52,11 @@ class StringMediaObject(MediaObject): #Thread
     base_pointsize = 24.0
 
     def render(self, painter, mode):
-        
-        if min(self.onscreen_size) > 1 and mode != RenderMode.Invisible:
+        '''Given QtPainter and Rendering mode renders the string calculating the 
+           rendering rectangle and using QtPainter.DrawText
+        '''
+        # TODO first 2 condition are arbitrary to user screen and have to make them universally working
+        if min(self.onscreen_size) > 7 and max(self.onscreen_size) < 1800 and mode != RenderMode.Invisible:
             ## don't bother rendering if the string is too
             ## small to be seen, or invisible mode is set
 
@@ -62,45 +65,52 @@ class StringMediaObject(MediaObject): #Thread
             
             painter.setPen(self.__color)
             painter.setFont(self.__font)
-                     
+            
+            # Broke the string in a characters list   
             string_list = list(self.__str)  
             
-            self.line = []
-            self.line.append([])
+            self.lines = []
+            self.lines.append([])
 
-            font = self.__font            
+            font = self.__font   
+         
             if font:
                 fontmetrics = QtGui.QFontMetrics(font)
             hl = fontmetrics.height()
             j=0
                      
-            for i in string_list :                
+            for i in string_list :  
+                # If a \n char is encountered a new sublist is appended to self.lines              
                 if i == '\n' :                    
-                    self.line.append([])
+                    self.lines.append([])
                     j += 1
                 else :
-                    self.line[j] += str(i)
+                # Otherwise the char is appended to the currend self.lines sublist
+                    self.lines[j] += str(i)
 
-            if len(self.line) > 1 :
+            if len(self.lines) > 1 :
                 yr = y                
                 rectlist = []
                             
-                for i in range(len(self.line)) :
+                for i in range(len(self.lines)) :
+                    '''for every line in self.lines a QRectF is created below the previous one 
+                       for the line to be painted on by QtPainter.drawText method'''
+ 
                     rectlist.append(QtCore.QRectF(int(x), int(yr), int(w), int(hl)))
                     yr += hl    
        
-                    #print(self.line[i]) #, type(self.line[i])
-                    if i < (len(self.line)-1) :                
-                        string = ''.join(self.line[i][:])
+                    #print(self.lines[i]) #, type(self.lines[i])
+                    if i < (len(self.lines)-1) :                
+                        string = ''.join(self.lines[i][:])
                     else :
-                        string = ''.join(self.line[i][:])
+                        string = ''.join(self.lines[i][:])
     
                     rect = rectlist[i]
                     painter.drawText(rect, string ) 
  
             else :
                 rect = QtCore.QRectF(int(x), int(y), int(w), int(hl))
-                string = ''.join(self.line[0])                
+                string = ''.join(self.lines[0])                
                 painter.drawText(rect, string ) #, QtCore.Qt.AlignCenter
 
            
@@ -126,16 +136,22 @@ class StringMediaObject(MediaObject): #Thread
 
     @property
     def onscreen_size(self):
+        '''Returns with and height of the MediaObject passed to the StringMediaObject Class
+        '''
         font = self.__font
 
         if font:
             fontmetrics = QtGui.QFontMetrics(font)
-
-            if len(self.line) > 1 :
-                w = fontmetrics.width(''.join(sorted(self.line, key=len, reverse=True)[0][:])+' ')         
-                h = fontmetrics.height()*len(self.line)
+            
+            if len(self.lines) > 1 :
+                # Returns the width of the longest line in the paragraph stack.
+                w = fontmetrics.width(''.join(sorted(self.lines, key=len, reverse=True)[0][:])+' ')         
+                # Returns the font height times the number of lines in the paragraph stack                
+                h = fontmetrics.height()*len(self.lines)
             else :
+                # Is the sting is not a paragraph just gives the lenght of the string 
                 w = fontmetrics.width(self.__str+' ')
+                # and the height of the font
                 h = fontmetrics.height()                
             return (w,h)
 

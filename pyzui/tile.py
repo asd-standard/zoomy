@@ -22,7 +22,7 @@
 from PIL import Image, ImageQt
 from PyQt5 import QtCore, QtGui
 
-#REMOVED object
+#REMOVED object 
 
 class Tile():
     """Tile objects allow storage and manipulation of image tiles.
@@ -30,7 +30,7 @@ class Tile():
     Constructor: Tile(Image or QImage)
     """
     def __init__(self, image):
-    
+        
         """Create a new tile with the given image."""
         if image.__class__ is ImageQt or type(image) is QtGui.QImage:
             self.__image = image
