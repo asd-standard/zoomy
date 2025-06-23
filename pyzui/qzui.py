@@ -25,8 +25,8 @@ from . import scene as Scene
 from . import tilemanager as TileManager
 
 class QZUI(QtWidgets.QWidget, Thread):
-    """QZUI widgets are used for rendering the ZUI.
-
+    """QZUI widgets that are used for rendering the ZUI.
+        This class defines all the methods to retieve events, Mouse, Keyboard, ecc
     Constructor: QZUI([QWidget])
     """
     error = QtCore.pyqtSignal()
@@ -50,7 +50,7 @@ class QZUI(QtWidgets.QWidget, Thread):
 
         self.zoom_sensitivity = zoom_sensitivity
         self.framerate = framerate
-        self.reduced_framerate = 5
+        self.reduced_framerate = 3
 
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.setMouseTracking(True)
@@ -83,6 +83,11 @@ class QZUI(QtWidgets.QWidget, Thread):
 
 
     def paintEvent(self, event):
+        '''
+            method that allows you to perform custom painting on a widget. 
+            It is part of the event handling system, and you typically override it in a subclass of a QWidget 
+            (or any subclass like QLabel, QFrame, etc.) to draw graphics using the QPainter class.
+        '''
         if self.framerate:
             self.scene.step(1.0 / self.framerate)
 
@@ -152,7 +157,7 @@ class QZUI(QtWidgets.QWidget, Thread):
             self.__mousepos = (event.x(), event.y())
             if not self.__shift_held:
                 ## shift-click won't change the selection
-                self.scene.selection = self.scene.get(self.__mousepos)
+                self.scene.right_selection = self.scene.get(self.__mousepos)
 
     def mouseMoveEvent(self, event):
         if (event.buttons()&QtCore.Qt.LeftButton) and self.__mouse_left_down:

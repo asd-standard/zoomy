@@ -35,7 +35,6 @@ class StringMediaObject(MediaObject): #, Thread
     """
     def __init__(self, media_id, scene):
         
-        #Thread.__init__(self)
         MediaObject.__init__(self, media_id, scene)
         hexcol = self._media_id[len('string:'):len('string:rrggbb')]
         self.__color = QtGui.QColor('#' + hexcol)
@@ -44,6 +43,34 @@ class StringMediaObject(MediaObject): #, Thread
         
         self.__str = self._media_id[len('string:rrggbb:'):] 
         self.lines = []
+        self.lines.append([])
+        
+        # in order for a multi line string to be rendered of the exact size self.lines have to be 
+        # set to the right value before self.onscreen_size method gets called
+        '''
+        cdef char* c_str = self.__str
+        j=0
+        i=0
+        while c_str[i] != 0:
+            if c_str[i] == 10:  # ASCII value of '\n'
+                self.lines.append([])
+                j += 1
+            else:
+                self.lines[j].append(c_str[i].decode('ascii'))  # convert char to Python str
+            i += 1
+            #gives error, expected bytes, str found
+        '''
+        j=0
+        for i in list(self.__str) :  
+                # If a \n char is encountered a new sublist is appended to self.lines              
+                if i == '\n' :                    
+                    self.lines.append([])
+                    j += 1
+                else :
+                # Otherwise the char is appended to the currend self.lines sublist
+                    self.lines[j] += str(i)
+        
+        
 
 
     transparent = True
@@ -60,44 +87,32 @@ class StringMediaObject(MediaObject): #, Thread
             ## don't bother rendering if the string is too
             ## small to be seen, or invisible mode is set
 
-            x,y = self.topleft
-            w,h = self.onscreen_size 
             
             painter.setPen(self.__color)
             painter.setFont(self.__font)
             
-            # Broke the string in a characters list   
-            string_list = list(self.__str)  
+            # Broke the string in a characters list     
             
-            self.lines = []
-            self.lines.append([])
-
+            x,y = self.topleft
+            w,h = self.onscreen_size 
             font = self.__font   
          
             if font:
                 fontmetrics = QtGui.QFontMetrics(font)
             hl = fontmetrics.height()
-            j=0
                      
-            for i in string_list :  
-                # If a \n char is encountered a new sublist is appended to self.lines              
-                if i == '\n' :                    
-                    self.lines.append([])
-                    j += 1
-                else :
-                # Otherwise the char is appended to the currend self.lines sublist
-                    self.lines[j] += str(i)
-
+            
             if len(self.lines) > 1 :
                 yr = y                
                 rectlist = []
                             
                 for i in range(len(self.lines)) :
                     '''for every line in self.lines a QRectF is created below the previous one 
-                       for the line to be painted on by QtPainter.drawText method'''
- 
+                    for the line to be painted on by QtPainter.drawText method
+                    '''
+            
                     rectlist.append(QtCore.QRectF(int(x), int(yr), int(w), int(hl)))
-                    yr += hl    
+                    yr += hl  
        
                     #print(self.lines[i]) #, type(self.lines[i])
                     if i < (len(self.lines)-1) :                
@@ -106,7 +121,7 @@ class StringMediaObject(MediaObject): #, Thread
                         string = ''.join(self.lines[i][:])
     
                     rect = rectlist[i]
-                    painter.drawText(rect, string ) 
+                    painter.drawText(rect, string) 
  
             else :
                 rect = QtCore.QRectF(int(x), int(y), int(w), int(hl))
@@ -145,12 +160,13 @@ class StringMediaObject(MediaObject): #, Thread
             
             if len(self.lines) > 1 :
                 # Returns the width of the longest line in the paragraph stack.
-                w = fontmetrics.width(''.join(sorted(self.lines, key=len, reverse=True)[0][:])+' ')         
+                w = fontmetrics.width(''.join(sorted(self.lines, key=len, reverse=True)[0][:])+'--------')         
                 # Returns the font height times the number of lines in the paragraph stack                
                 h = fontmetrics.height()*len(self.lines)
+                
             else :
                 # Is the sting is not a paragraph just gives the lenght of the string 
-                w = fontmetrics.width(self.__str+' ')
+                w = fontmetrics.width(self.__str+'--')
                 # and the height of the font
                 h = fontmetrics.height()                
             return (w,h)

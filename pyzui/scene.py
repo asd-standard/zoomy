@@ -19,14 +19,6 @@
 """A collection of media objects."""
 
 
-
-## we need to import __builtin__ to be able to call __builtin__.open since this
-## module defines its own open function
-#import __builtin__
-##removed all __builtin__
-
-#commented out on 20250314 
-
 import logging
 from threading import RLock
 import urllib.request, urllib.parse, urllib.error
@@ -44,10 +36,11 @@ from .svgmediaobject import SVGMediaObject
 
 class Scene(PhysicalObject):
     """Scene objects are used to hold a collection of MediaObjects.
-
+        This class manages all the objects that can be rendered in the interface.
     Constructor: Scene()
 
     """
+    ## an arbitrary size that is common to all scenes upon creation
     standard_viewport_size = (256,256)
     def __init__(self):
 
@@ -63,6 +56,7 @@ class Scene(PhysicalObject):
         self.__viewport_size = self.standard_viewport_size
 
         self.selection = None
+        self.right_selection = None
         
         #commented out on 20250314 
         self.__logger = logging.getLogger("Scene")
@@ -118,10 +112,8 @@ class Scene(PhysicalObject):
         """
         with self.__objects_lock:
             if mediaobject not in self.__objects:
-                #print('happened')
-                self.__objects.append(mediaobject)
-                #print(self.__objects)
 
+                self.__objects.append(mediaobject)
 
     def remove(self, mediaobject):
         """Remove `mediaobject` from scene.
@@ -232,7 +224,7 @@ class Scene(PhysicalObject):
                 except MediaObject.LoadError :
                     print('ERROR IN scene.render() \n')
                     print(vars(mediaobject))
-                    errors.append((mediaobject ))
+                    errors.append((mediaobject))
                     
             for mediaobject in errors:
                 ## remove mediaobjects that have raised errors
@@ -241,6 +233,7 @@ class Scene(PhysicalObject):
                 self.remove(mediaobject)
             
             ## draw border around selected object
+            ## self.selection
             if self.selection :
                 x1, y1 = self.selection.topleft
                 x2, y2 = self.selection.bottomright
@@ -253,6 +246,9 @@ class Scene(PhysicalObject):
 
                 painter.setPen(QtCore.Qt.green)
                 painter.drawRect(x1, y1, x2-x1, y2-y1)
+
+            if self.right_selection :
+                print('RIGHT SELECTED \n')
 
         return errors
 
@@ -288,6 +284,7 @@ class Scene(PhysicalObject):
     def __get_origin(self):
         """Location of the scene's origin."""
         return (self._x, self._y)
+
     def __set_origin(self, origin):
         self._x, self._y = origin
     origin = property(__get_origin, __set_origin)
@@ -295,6 +292,7 @@ class Scene(PhysicalObject):
     def __get_viewport_size(self):
         """Dimensions of the viewport."""
         return self.__viewport_size
+
     def __set_viewport_size(self, viewport_size):
         ## centre the scene in the new viewport
         old_viewport_size = self.__viewport_size
@@ -309,6 +307,7 @@ class Scene(PhysicalObject):
         self.zoom(math.log(scale, 2))
 
         self.__viewport_size = viewport_size
+        
     viewport_size = property(__get_viewport_size, __set_viewport_size)
 
 

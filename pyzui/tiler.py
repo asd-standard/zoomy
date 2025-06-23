@@ -85,6 +85,7 @@ class Tiler(Thread):
         self.__logger = logging.getLogger(str(self))
 
         self.error = None
+
         
 
     
@@ -121,7 +122,9 @@ class Tiler(Thread):
         row i.e. the first call must have row=0, then the next call must have
         row=1, etc.
         """
+        print('Tiler 125, Row', row)
         if row >= self.__numtiles_down_total:
+            print('tiler127 requested row does not exist')
             ## requested row does not exist
             return None
 
@@ -153,7 +156,6 @@ class Tiler(Thread):
                 if i == self.__numtiles_across_total-1:
                     ## last tile in row 
                     tiles[i] += (scanchunk[p:]).decode('latin-1') 
-                              
                 else:
                     tiles[i] += (scanchunk[p : p + self._bytes_per_pixel*self.__tilesize]).decode('latin-1')
                     #print(tiles[i],'\n')
@@ -161,7 +163,6 @@ class Tiler(Thread):
 
 
         for i in range(self.__numtiles_across_total):
-            #print('TILESSS',type(tiles[i]))
             if i == self.__numtiles_across_total-1:
                 ## last tile in row
                 tiles[i] = Tile.fromstring(tiles[i],
@@ -213,26 +214,35 @@ class Tiler(Thread):
 
         __tiles(int, int) -> list<Tile>
         """
+        #print('HERE--HERE Tiler227 \n')
         if tilelevel == self.__maxtilelevel:
-            try : tiles = self.__load_row_from_file(row)
+            try : 
             
+                tiles = self.__load_row_from_file(row)
+                
             except Exception as e :
+                print('HERE--HERE Tiler222 \n')
                 self.error = str(e)
                 outpath = TileStore.get_media_path(self.__media_id)
                 shutil.rmtree(outpath, ignore_errors=True)
                 traceback.print_stack()    
+            
         else:
             ## load the requested row by merging sub-tiles from
             ## tilelevel (tilelevel+1)
+            
             try :
                 row_a = self.__tiles(tilelevel+1, row*2)
                 row_b = self.__tiles(tilelevel+1, row*2+1)
                 tiles = self.__mergerows(row_a, row_b)
+                
             except Exception as e :
+                print('HERE--HERE Tiler236 \n')
                 self.error = str(e)
                 outpath = TileStore.get_media_path(self.__media_id)
                 shutil.rmtree(outpath, ignore_errors=True)
                 traceback.print_stack()
+            
         if not tiles:
             ## requested row does not exist
             return None
@@ -279,7 +289,7 @@ class Tiler(Thread):
             ## i.e. if maxtilelevel-1 also fulfills the req'ment
             if self.__tilesize * (2**(maxtilelevel-1)) >= maxdim:
                 maxtilelevel -= 1
-
+            
             return maxtilelevel
 
 
@@ -332,21 +342,19 @@ class Tiler(Thread):
         ## respectively
         self.__right_tiles_width =   (self._width  - 1) % self.__tilesize + 1
         self.__bottom_tiles_height = (self._height - 1) % self.__tilesize + 1
-        #print(self.__bottom_tiles_height, self.__right_tiles_width)
+        #print(self.__bottom_tiles_height, self.__right_tiles_width) 
 
         try:
             with TileStore.disk_lock:
-          
-                ## recursively tile the image
+              
+                    ## recursively tile the image
                 self.__tiles()
-           
-        except :
-            pass
-            '''            
+          
+        except Exception as e:       
             self.error = str(e)
             outpath = TileStore.get_media_path(self.__media_id)
             shutil.rmtree(outpath, ignore_errors=True)
-            '''    
+               
         else:
             
             TileStore.write_metadata(self.__media_id,
@@ -377,9 +385,6 @@ class Tiler(Thread):
 
     def __repr__(self):
         return "Tiler(%s)" % repr(self._infile)
-
-
-
 
 
 

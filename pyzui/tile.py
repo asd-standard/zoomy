@@ -18,9 +18,9 @@
 
 """Class for representing image tiles."""
 
-
-from PIL import Image, ImageQt
+from PIL import Image, ImageQt 
 from PyQt5 import QtCore, QtGui
+import traceback
 
 #REMOVED object 
 
@@ -36,7 +36,12 @@ class Tile():
             self.__image = image
             
         else:
-            self.__image = ImageQt.ImageQt(image)
+            try :
+                self.__image = ImageQt.ImageQt(image)
+            except Exception as e :
+                print('ERROR on tile __init__ \n', e)
+                traceback.print_stack()
+
             
 
 

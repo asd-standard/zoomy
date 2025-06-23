@@ -43,7 +43,7 @@ from .dialogwindows import DialogWindows
 
 class MainWindow(QtWidgets.QMainWindow):
     """MainWindow windows are used for displaying the PyZUI interface.
-
+        This class defines all'the interface affordances, menus, widgets, frames ecc.
     Constructor: MainWindow()
     """
     def __init__(self, framerate=10, zoom_sensitivity=50):
@@ -67,8 +67,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.zui.error.connect(self.__show_error)
 
         self.__action_open_scene_home()
-        
-        #self.StringMediaObject = StringMediaObject.start(self)
 
 
     def sizeHint(self):
@@ -169,16 +167,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
         __action_save_screenshot() -> None
         """
-        filename = str(QtWidgets.QFileDialog.getSaveFileName(
+        filename = (QtWidgets.QFileDialog.getSaveFileName(
             self, "Save screenshot",
             os.path.join(self.__prev_dir, "screenshot.png"),
             "Images (*.bmp *.jpg *.jpeg *.png *.ppm *.tif *.tiff "
-            "*.xbm *.xpm)"))[0]
+            "*.xbm *.xpm)"))
 
-        if filename:
-            self.__prev_dir = os.path.dirname(filename)
+        if filename :
+            print(filename)
+            self.__prev_dir = os.path.dirname(filename[0])
             try:
-                QtGui.QPixmap.grabWidget(self.zui).save(filename)
+                pixmap = self.zui.grab()
+                pixmap.save(filename[0])
             except Exception as e:
                 self.__show_error("Unable to save screenshot ERROR in mainwindow.__action_save_screenshot", e)
 
@@ -203,8 +203,8 @@ class MainWindow(QtWidgets.QMainWindow):
         
             self.__show_error("Unable to open media ERROR in mainwindow.__open_media \n", e)
         
-        #else:
-        if add: 
+        if add:
+             
             w = self.zui.width()
             h = self.zui.height()
             try :
@@ -212,6 +212,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.zui.scene.add(mediaobject)
             except Exception as e:
                 self.__show_error("Error in opening media in __open_media \n", e)
+        #This return actually never engages as add is set to True in the method input arguments
         else:
             return mediaobject
         
@@ -296,7 +297,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         __action_set_fps(QAction) -> None
         """
-        self.zui.framerate = act.fps
+        self.zui.framerate = int(act.fps/2)
 
 
     def __action_fullscreen(self):
