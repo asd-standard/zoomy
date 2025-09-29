@@ -1,7 +1,9 @@
 PyZUI INSTALLATION INSTRUCTIONS
 ===============================
 
-This PyZUI fork was developed with debian 13 "trixie" as d.e and a miniconda for dependencies management. It has also been tested on AArch64 and Win11, always with a miniconda enviroment managing all dependencies.
+This PyZUI fork was developed with debian 13 "trixie" as d.e and a miniconda for 
+dependencies management. It has also been tested on AArch64 and Win11, always with a 
+miniconda enviroment managing all dependencies.
 
 original project can be found at:
 https://github.com/davidar/pyzui
