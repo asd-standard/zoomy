@@ -11,14 +11,22 @@ https://github.com/davidar/pyzui
 DEPENDENCIES
 ============
 
-All dependencies have been installed in a miniconda enviroment, the following
-ones trough the default Anaconda channel:
-
-Basic usage: conda install "package"="version number"
-
 PyZui has been developed with the following python version
 
 - python=3.12.9
+
+All dependencies have been installed in a miniconda enviroment, for all 3 platforms tested
+the procedure has always been to install miniconda, create an enviroment:
+
+  conda create -n "enviroment name" python=python=3.12.9
+  
+And activate such enviroment
+
+  conda activate "enviroment name"
+
+with all the core dependencies installed trough the default Anaconda channel:
+
+  conda install "package"="version number"
 
 PyZUI depends on the following Python packages:
 
@@ -33,57 +41,44 @@ PyZUI depends on the following Python packages:
 - pillow=9.4.0
 
 The following non-Python packages are also required by certain features of the
-application, thhose are installed trough the Conda-Forge Anaconda channel. Especially if
+application, those are installed trough the Conda-Forge Anaconda channel. Especially if
 you run linux those packages may already be present on your system and may work, it's 
 nevertheless highly reccomended to install them in the conda enviroment:
 
-Basic usage: conda install -c conda-forge "package"="version number"
+  conda install -c conda-forge "package"="version number"
 
 - imagemagick=7.1.1_5 
   (highly recommended, but strictly optional if you do not intend
   using images of any format other than PPM; the absence of ImageMagick may
   also break other parts of the application as well);
+
 - poppler=24.09.0
   pdftoppm from Poppler or Xpdf (optional if you do not intend viewing PDFs);
 
+After completion of this dependencies set up you can install  
+
 UBUNTU/DEBIAN SPECIFIC INSTRUCTIONS
 ===================================
-PyQt4, PIL and ImageMagick can be installed in Debian-based distributions by:
-  apt-get install python-qt4 python-imaging imagemagick
 
-pdftoppm can be installed by either:
-  apt-get install poppler-utils
-or:
-  apt-get install xpdf-reader
-
-jrMandel can be downloaded from <http://freshmeat.net/projects/jrmandel/>,
-and installed with the standard:
-  ./configure && make && make install
+PyZUI can be run by executing the script 'main.py'. It is not necessary to run
+this from the command-line (unless you want to view the logging), and it can be
+run from any directory (the script will set the set the working directory
+appropriately by itself).
 
 WINDOWS SPECIFIC INSTRUCTIONS
 =============================
-PyQt4, PIL and ImageMagick can be installed in Windows by downloading and
-running the installers available from their respective websites:
-- http://riverbankcomputing.co.uk/software/pyqt/download
-- http://pythonware.com/products/pil/
-- http://imagemagick.org/script/binary-releases.php#windows
 
-Due to a conflict between the the 'convert.exe' provided by ImageMagick and
-that provided by Windows NT/2000/XP (see
-<http://savage.net.au/ImageMagick/html/install-convert.html>), you will need to
-rename the 'convert.exe' provided by ImageMagick (in
-C:\Program Files\ImageMagick-XXXXXXXXX\) to 'imconvert.exe'.
+- You have to install Windows subsystem for linux, (wsl), the default linux distribution   
+  should work, nevertheless if you want to be 100% sure th PyZui have been tested with 
+  ubuntu 24.04.
 
-pdftoppm can be installed by downloading the Win32 binary zip archive from
-<http://foolabs.com/xpdf/download.html>, extracting it, and copying
-'pdftoppm.exe' to somewhere in your PATH (such as C:\WINDOWS\system32\).
-
-I haven't tried using jrMandel on Windows as it would need to be compiled from
-source with something like MSVC, and I'm not even sure it is supported on
-Windows.
+- Once you have wsl installed you need to install miniconda on it, then you can create an
+  enviroment and install all the dependencies as explained in the DEPENDENCIES 
+  section.  
 
 RUNNING PyZUI
 =============
+
 PyZUI can be run by executing the script 'main.py'. It is not necessary to run
 this from the command-line (unless you want to view the logging), and it can be
 run from any directory (the script will set the set the working directory
