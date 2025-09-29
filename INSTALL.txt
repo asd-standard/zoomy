@@ -1,24 +1,48 @@
 PyZUI INSTALLATION INSTRUCTIONS
 ===============================
-PyZUI was developed under Ubuntu 8.10 Intrepid Ibex. It has also been tested on
-Ubuntu 9.04 Jaunty Jackalope, Ubuntu 9.10 Karmic Koala, and Windows XP.
+
+This PyZUI fork was developed with debian 13 "trixie" as d.e and a miniconda for dependencies management. It has also been tested on AArch64 and Win11, always with a miniconda enviroment managing all dependencies.
+
+original project can be found at:
+https://github.com/davidar/pyzui
 
 DEPENDENCIES
 ============
+
+All dependencies have been installed in a miniconda enviroment, the following
+ones trough the default Anaconda channel:
+
+Basic usage: conda install "package"="version number"
+
+PyZui has been developed with the following python version
+
+- python=3.12.9
+
 PyZUI depends on the following Python packages:
-- PyQt4
-- Python Imaging Library (PIL)
+
+- qt-main=5.15.2
+- qt-webengine=5.15.9
+- qtawesome=1.4.0
+- qtpy=2.4.1
+- pyqt=5.15.10
+- pyqt5-sip=12.13.0
+- pyqtwebengine=5.15.10
+
+- pillow=9.4.0
 
 The following non-Python packages are also required by certain features of the
-application:
-- ImageMagick (highly recommended, but strictly optional if you do not intend
+application, thhose are installed trough the Conda-Forge Anaconda channel. Especially if
+you run linux those packages may already be present on your system and may work, it's 
+nevertheless highly reccomended to install them in the conda enviroment:
+
+Basic usage: conda install -c conda-forge "package"="version number"
+
+- imagemagick=7.1.1_5 
+  (highly recommended, but strictly optional if you do not intend
   using images of any format other than PPM; the absence of ImageMagick may
-  also break other parts of the application as well)
-- pdftoppm from Poppler or Xpdf (optional if you do not intend viewing PDFs);
-  Note that PyZUI has been developed using the pdftoppm binary provided by
-  Poppler
-- jrMandel (optional if you do not intend viewing the Mandelbrot set dynamic
-  media)
+  also break other parts of the application as well);
+- poppler=24.09.0
+  pdftoppm from Poppler or Xpdf (optional if you do not intend viewing PDFs);
 
 UBUNTU/DEBIAN SPECIFIC INSTRUCTIONS
 ===================================
@@ -65,3 +89,5 @@ appropriately by itself).
 
 In Windows just double-click on 'main.py'. If you don't want the logging window
 to be shown, rename it to 'main.pyw' first.
+
+
