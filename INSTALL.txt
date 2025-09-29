@@ -57,10 +57,10 @@ nevertheless highly reccomended to install them in the conda enviroment:
 
 After completion of this dependencies set up you can install  
 
-UBUNTU/DEBIAN SPECIFIC INSTRUCTIONS
+UBUNTU/DEBIAN, AArch64, SPECIFIC INSTRUCTIONS
 ===================================
 
-- Follow the instructions in the DEPENDENCIES section
+- Install miniconda and follow the instructions in the DEPENDENCIES section
 
 - RUNNING PyZUI
   ============
@@ -69,10 +69,9 @@ UBUNTU/DEBIAN SPECIFIC INSTRUCTIONS
 
   python main.py
  
-- It is not necessary to run
-  this from the command-line (unless you want to view the logging), and it can be
-  run from any directory (the script will set the set the working directory
-  appropriately by itself).
+- It is not necessary to run this from the command-line (unless you want to view the    
+  logging), and it can be run from any directory (the script will set the set the working 
+  directory appropriately by itself).
 
 WINDOWS SPECIFIC INSTRUCTIONS
 =============================
