@@ -44,6 +44,8 @@ from .dialogwindows import DialogWindows
 class MainWindow(QtWidgets.QMainWindow):
     """MainWindow windows are used for displaying the PyZUI interface.
         This class defines all'the interface affordances, menus, widgets, frames ecc.
+        Framerate and zoom_sensitivity variables have to be declared the same value as
+        in qzui class
     Constructor: MainWindow()
     """
     def __init__(self, framerate=10, zoom_sensitivity=50):

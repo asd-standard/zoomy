@@ -31,7 +31,7 @@ class QZUI(QtWidgets.QWidget, Thread):
     """
     error = QtCore.pyqtSignal()
 
-    def __init__(self, parent=None, framerate=int, zoom_sensitivity=int):
+    def __init__(self, parent=None, framerate=10, zoom_sensitivity=50):
         """Create a new QZUI QWidget with the given `parent` widget."""
         QtWidgets.QWidget.__init__(self, parent)
 
@@ -238,7 +238,7 @@ class QZUI(QtWidgets.QWidget, Thread):
         return self.__framerate
 
     def __set_framerate(self, framerate):
-        self.__framerate = framerate
+        self.__framerate = framerate        
         if self.__framerate:
             self.__timer.start(int(1000/self.__framerate), self)
         elif self.__timer.isActive():

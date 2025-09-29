@@ -24,9 +24,8 @@ USAGE
 e.g.:
   for file in images/*; do ./benchmark.py $file; done
 """
-
-import sys
 import os
+import sys
 import tempfile
 import time
 import shutil
@@ -34,7 +33,7 @@ import shutil
 sys.path.append(os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..')))
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 import pyzui.tilemanager as TileManager
 import pyzui.tilestore as TileStore
@@ -58,31 +57,31 @@ def mem(size='rss'):
 
 
 def benchmark(filename, ppmfile):
-    print "Benchmarking %s ..." % os.path.basename(filename)
+    print ("Benchmarking %s ..." % os.path.basename(filename))
 
     base_mem = mem()
 
     ## conversion
     c = MagickConverter(filename, ppmfile)
     start_time = time.time()
-    print "Converting to PPM...",
+    print ("Converting to PPM...")
     sys.stdout.flush()
     c.run()
     end_time = time.time()
-    print "Done: took %.2fs" % (end_time - start_time)
+    print ("Done: took %.2fs" % (end_time - start_time))
     del c
 
     ## metadata
     f = open(ppmfile, 'rb')
     w,h = read_ppm_header(f)
     f.close()
-    print "Dimensions: %dx%d, %.2f megapixels" % (w, h, w * h * 1e-6)
+    print ("Dimensions: %dx%d, %.2f megapixels" % (w, h, w * h * 1e-6))
     del f, w, h
 
     ## tiling
     t = PPMTiler(ppmfile)
     start_time = time.time()
-    print "Tiling...",
+    print ("Tiling...")
     sys.stdout.flush()
     t.run()
     end_time = time.time()
@@ -96,16 +95,15 @@ def benchmark(filename, ppmfile):
     ## while the tiler is running and maintain a max value
     end_mem = mem()
 
-    print "Done: took %.2fs consuming %.2fMB RAM" % \
-        ((end_time - start_time), (end_mem - base_mem) * 1e-3)
+    print ("Done: took %.2fs consuming %.2fMB RAM" % ((end_time - start_time), (end_mem - base_mem) * 1e-3))
     del t
 
     ## zooming
     viewport_w = 800
     viewport_h = 600
-    print "Viewport: %dx%d" % (viewport_w, viewport_h)
+    print ("Viewport: %dx%d" % (viewport_w, viewport_h))
     zoom_amount = 5.0
-    print "Zoom amount: %.1f" % zoom_amount
+    print ("Zoom amount: %.1f" % zoom_amount)
 
     qzui = QZUI()
     qzui.framerate = None
@@ -119,37 +117,33 @@ def benchmark(filename, ppmfile):
     obj.fit((0, 0, viewport_w, viewport_h))
 
     start_time = time.time()
-    print "Zooming (cold)...",
+    print ("Zooming (cold)...")
     sys.stdout.flush()
     num_frames = 100
-    for i in xrange(num_frames):
+    for i in range(num_frames):
         qzui.repaint()
         scene.centre = (viewport_w/2, viewport_h/2)
         scene.zoom(zoom_amount/num_frames)
     end_time = time.time()
-    print "Done: %d frames took %.2fs, mean framerate %.2f FPS" % \
-        (num_frames, (end_time - start_time),
-        num_frames / (end_time - start_time))
+    print ("Done: %d frames took %.2fs, mean framerate %.2f FPS" % (num_frames, (end_time - start_time), num_frames / (end_time - start_time)))
 
     scene.zoom(-zoom_amount)
     start_time = time.time()
-    print "Zooming (warm)...",
+    print ("Zooming (warm)...")
     sys.stdout.flush()
     num_frames = 100
-    for i in xrange(num_frames):
+    for i in range(num_frames):
         qzui.repaint()
         scene.centre = (viewport_w/2, viewport_h/2)
         scene.zoom(zoom_amount/num_frames)
     end_time = time.time()
-    print "Done: %d frames took %.2fs, mean framerate %.2f FPS" % \
-        (num_frames, (end_time - start_time),
-        num_frames / (end_time - start_time))
+    print ("Done: %d frames took %.2fs, mean framerate %.2f FPS" % (num_frames, (end_time - start_time), num_frames / (end_time - start_time)))
 
 
 def main():
     TileManager.init()
     TileStore.tile_dir = tempfile.mkdtemp()
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
 
     filename = os.path.abspath(sys.argv[1])
     ppmfile = tempfile.mkstemp('.ppm')[1]
@@ -162,3 +156,6 @@ def main():
         shutil.rmtree(TileStore.tile_dir, ignore_errors=True)
         os.unlink(ppmfile)
 if __name__ == '__main__': main()
+
+
+

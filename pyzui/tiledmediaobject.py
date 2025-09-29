@@ -28,7 +28,9 @@ from PIL import ImageQt
 
 from .mediaobject import MediaObject, LoadError, RenderMode
 from . import tilemanager as TileManager
+# Sbdivide a ppm image into tiles that fit the mediaobject frame 
 from .ppm import PPMTiler
+# The classes that convert various format to ppm images
 from .webkitconverter import  WebKitConverter
 from .pdfconverter import PDFConverter
 from .magickconverter import MagickConverter
