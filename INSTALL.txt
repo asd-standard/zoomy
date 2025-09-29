@@ -60,10 +60,19 @@ After completion of this dependencies set up you can install
 UBUNTU/DEBIAN SPECIFIC INSTRUCTIONS
 ===================================
 
-PyZUI can be run by executing the script 'main.py'. It is not necessary to run
-this from the command-line (unless you want to view the logging), and it can be
-run from any directory (the script will set the set the working directory
-appropriately by itself).
+- Follow the instructions in the DEPENDENCIES section
+
+- RUNNING PyZUI
+  ============
+
+- PyZUI can be run by executing the script 'main.py': 
+
+  python main.py
+ 
+- It is not necessary to run
+  this from the command-line (unless you want to view the logging), and it can be
+  run from any directory (the script will set the set the working directory
+  appropriately by itself).
 
 WINDOWS SPECIFIC INSTRUCTIONS
 =============================
@@ -76,15 +85,16 @@ WINDOWS SPECIFIC INSTRUCTIONS
   enviroment and install all the dependencies as explained in the DEPENDENCIES 
   section.  
 
-RUNNING PyZUI
-=============
+- RUNNING PyZUI
+  =============
 
-PyZUI can be run by executing the script 'main.py'. It is not necessary to run
-this from the command-line (unless you want to view the logging), and it can be
-run from any directory (the script will set the set the working directory
-appropriately by itself).
+- You can then run PyZui by launching your wsl enviroment, navigate to the root of the 
+  pyzui project and run:
 
-In Windows just double-click on 'main.py'. If you don't want the logging window
-to be shown, rename it to 'main.pyw' first.
+  python main.py 
+
+
+
+
 
 
