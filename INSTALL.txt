@@ -18,7 +18,7 @@ PyZui has been developed with the following python version
 All dependencies have been installed in a miniconda enviroment, for all 3 platforms tested
 the procedure has always been to install miniconda, create an enviroment:
 
-  conda create -n "enviroment name" python=python=3.12.9
+  conda create -n "enviroment name" python=3.12.9
   
 And activate such enviroment
 
@@ -30,12 +30,7 @@ with all the core dependencies installed trough the default Anaconda channel:
 
 PyZUI depends on the following Python packages:
 
-- qt-main=5.15.2
-- qt-webengine=5.15.9
-- qtawesome=1.4.0
-- qtpy=2.4.1
-- pyqt=5.15.10
-- pyqt5-sip=12.13.0
+- pyqt=5.15.10 
 - pyqtwebengine=5.15.10
 
 - pillow=9.4.0
@@ -65,12 +60,16 @@ UBUNTU/DEBIAN, AArch64, SPECIFIC INSTRUCTIONS
 - RUNNING PyZUI
   ============
 
-- PyZUI can be run by executing the script 'main.py': 
+- PyZUI can be run by activating the enviroment as explained in the DEPENDENCIES section:
+
+  conda activate "enviroment name"
+
+- Then executing 'main.py' with python interpreter:
 
   python main.py
  
 - It is not necessary to run this from the command-line (unless you want to view the    
-  logging), and it can be run from any directory (the script will set the set the working 
+  logging), and it can be run from any directory (the script will set the working
   directory appropriately by itself).
 
 WINDOWS SPECIFIC INSTRUCTIONS
