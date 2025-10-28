@@ -21,12 +21,12 @@ PyZUI is a Zooming User Interface for Python.
 <http://da.vidr.cc/projects/pyzui/>
 """
 
-__author__ = "David Roberts"
+__author__ = "David Roberts, Andrea Silvestri"
 __copyright__ = "Copyright (C) 2009  David Roberts <d@vidr.cc>"
 __copyright_notice__ = """
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
+as published by the Free Software Foundation; either version 3
 of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,

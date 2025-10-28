@@ -30,7 +30,11 @@ from pyzui.mainwindow import MainWindow
 
 
 def main():
-    
+    """
+        Starts the PyZui application, 
+    """
+
+
     if os.path.dirname(__file__):
         ## set the working directory to the directory containing this script
         os.chdir(os.path.dirname(__file__))
