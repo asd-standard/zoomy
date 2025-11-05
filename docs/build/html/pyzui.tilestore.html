@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pyzui.tilestore module &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=086c1757"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pyzui.tilestore">
+<span id="pyzui-tilestore-module"></span><h1>pyzui.tilestore module<a class="headerlink" href="#module-pyzui.tilestore" title="Link to this heading">¶</a></h1>
+<p>Module for managing the disk-based tile storage facility.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyzui.tilestore.get_media_path">
+<span class="sig-prename descclassname"><span class="pre">pyzui.tilestore.</span></span><span class="sig-name descname"><span class="pre">get_media_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">media_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilestore.html#get_media_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilestore.get_media_path" title="Link to this definition">¶</a></dt>
+<dd><p>Return the path to the directory containing the tiles for the media
+identified by <cite>media_id</cite>.</p>
+<p>get_media_path(string) -&gt; string</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyzui.tilestore.get_tile_path">
+<span class="sig-prename descclassname"><span class="pre">pyzui.tilestore.</span></span><span class="sig-name descname"><span class="pre">get_tile_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mkdirp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilestore.html#get_tile_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilestore.get_tile_path" title="Link to this definition">¶</a></dt>
+<dd><p>Return the path to the tile identified by <cite>tile_id</cite>.</p>
+<p>If <cite>mkdirp</cite> is True, then any non-existent parent directories of the tile
+will be created.</p>
+<p>If <cite>prefix</cite> is omitted, it will be set to the value returned by
+<cite>get_media_path</cite>.</p>
+<p>If <cite>filext</cite> is omitted, it will be set to the value returned by
+<cite>get_metadata</cite>.</p>
+<p>get_tile_path(tuple&lt;string,int,int,int&gt;[, bool[, string[, string]]])
+-&gt; string</p>
+<p>Precondition: if <cite>filext</cite> is None, then the metadata file for the media
+that this tile belongs to exists and contains an entry for filext</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyzui.tilestore.load_metadata">
+<span class="sig-prename descclassname"><span class="pre">pyzui.tilestore.</span></span><span class="sig-name descname"><span class="pre">load_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">media_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilestore.html#load_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilestore.load_metadata" title="Link to this definition">¶</a></dt>
+<dd><p>Load metadata from disk for the given <cite>media_id</cite>, and return a bool
+indicating whether the load was successful.</p>
+<p>load_metadata(string) -&gt; bool</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyzui.tilestore.get_metadata">
+<span class="sig-prename descclassname"><span class="pre">pyzui.tilestore.</span></span><span class="sig-name descname"><span class="pre">get_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">media_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilestore.html#get_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilestore.get_metadata" title="Link to this definition">¶</a></dt>
+<dd><p>Return the value associated with the given metadata key, None if there
+is no such value.</p>
+<p>get_metadata(string, string) -&gt; object or None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyzui.tilestore.write_metadata">
+<span class="sig-prename descclassname"><span class="pre">pyzui.tilestore.</span></span><span class="sig-name descname"><span class="pre">write_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">media_id</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilestore.html#write_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilestore.write_metadata" title="Link to this definition">¶</a></dt>
+<dd><p>Write the metadata given in <cite>kwargs</cite> for the given <cite>media_id</cite>.</p>
+<p>write_metadata(string, metadata_key=metadata_val, …) -&gt; None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyzui.tilestore.tiled">
+<span class="sig-prename descclassname"><span class="pre">pyzui.tilestore.</span></span><span class="sig-name descname"><span class="pre">tiled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">media_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilestore.html#tiled"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilestore.tiled" title="Link to this definition">¶</a></dt>
+<dd><p>Return True iff the media identified by <cite>media_id</cite> has been tiled
+i.e. iff both a metadata file and the (0,0,0) tile exist.</p>
+<p>tiled(string) -&gt; bool</p>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/pyzui.tilestore.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

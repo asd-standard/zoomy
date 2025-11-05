@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pyzui.pdfconverter module &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=086c1757"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pyzui.pdfconverter">
+<span id="pyzui-pdfconverter-module"></span><h1>pyzui.pdfconverter module<a class="headerlink" href="#module-pyzui.pdfconverter" title="Link to this heading">¶</a></h1>
+<p>PDF rasterizer based upon either Xpdf or Poppler.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyzui.pdfconverter.PDFConverter">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.pdfconverter.</span></span><span class="sig-name descname"><span class="pre">PDFConverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/pdfconverter.html#PDFConverter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.pdfconverter.PDFConverter" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pyzui.converter.html#pyzui.converter.Converter" title="pyzui.converter.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>PDFConverter objects are used for rasterizing PDFs.</p>
+<p>The output format will always be PPM irrespective of the file extension of
+the output file. If another output format is required then PDFConverter
+should be used in conjunction with MagickConverter.</p>
+<p>Constructor: PDFConverter(string, string)</p>
+<p>Create a new Converter for converting media at the location given by
+<cite>infile</cite> to the location given by <cite>outfile</cite>.</p>
+<p>Where appropriate, the output format will be determined from the file
+extension of <cite>outfile</cite>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.pdfconverter.PDFConverter.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/pdfconverter.html#PDFConverter.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.pdfconverter.PDFConverter.run" title="Link to this definition">¶</a></dt>
+<dd><p>Run the conversion. If any errors are encountered then <cite>self.error</cite>
+will be set to a string describing the error.</p>
+<p>run() -&gt; None</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/pyzui.pdfconverter.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

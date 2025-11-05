@@ -1,0 +1,4 @@
+.. PyZui project structure file,
+
+Project structure
+=================

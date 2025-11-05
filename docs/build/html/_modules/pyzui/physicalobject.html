@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyzui.physicalobject &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=12dfc556" />
+    <script src="../../_static/documentation_options.js?v=086c1757"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pyzui.physicalobject</h1><div class="highlight"><pre>
+<span></span><span class="c1">## PyZUI 0.1 - Python Zooming User Interface</span>
+<span class="c1">## Copyright (C) 2009  David Roberts &lt;d@vidr.cc&gt;</span>
+<span class="c1">##</span>
+<span class="c1">## This program is free software; you can redistribute it and/or</span>
+<span class="c1">## modify it under the terms of the GNU General Public License</span>
+<span class="c1">## as published by the Free Software Foundation; either version 2</span>
+<span class="c1">## of the License, or (at your option) any later version.</span>
+<span class="c1">##</span>
+<span class="c1">## This program is distributed in the hope that it will be useful,</span>
+<span class="c1">## but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1">## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1">## GNU General Public License for more details.</span>
+<span class="c1">##</span>
+<span class="c1">## You should have received a copy of the GNU General Public License</span>
+<span class="c1">## along with this program; if not, write to the Free Software</span>
+<span class="c1">## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA</span>
+<span class="c1">## 02110-1301, USA.</span>
+
+<span class="sd">&quot;&quot;&quot;An object that obeys the laws of physics.&quot;&quot;&quot;</span>
+
+<span class="c1">#from threading import Thread</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+
+<div class="viewcode-block" id="PhysicalObject">
+<a class="viewcode-back" href="../../pyzui.physicalobject.html#pyzui.physicalobject.PhysicalObject">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PhysicalObject</span><span class="p">():</span> <span class="c1">#removed object from class argument and Thread</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Physicalobject pobjects are used to represent anything that has a</span>
+<span class="sd">    3-dimensional position and velocity, where the z-dimension represents a</span>
+<span class="sd">    zoomlevel.</span>
+
+<span class="sd">    Constructor: Physicalpobject()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new Physicalpobject at the origin with zero velocity.&quot;&quot;&quot;</span>
+              
+        <span class="c1">#Thread.__init__(self)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vx</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vy</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vz</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+
+    <span class="c1">## the velocity is damped at each frame such that each second it is</span>
+    <span class="c1">## reduced by a factor of damping_factor:</span>
+    <span class="c1">##   v = u * damping_factor**-t</span>
+    <span class="n">damping_factor</span> <span class="o">=</span> <span class="mi">512</span> <span class="c1">#256</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__damp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Damp the given velocity.</span>
+
+<span class="sd">        __damp(float, float) -&gt; float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">velocity</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">damping_factor</span> <span class="o">**</span> <span class="o">-</span><span class="n">t</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">velocity</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span>
+            <span class="n">velocity</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">return</span> <span class="n">velocity</span>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the displacement at time t given initial velocity u.</span>
+
+<span class="sd">        __displacement(float, float) -&gt; float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## Let d = damping_factor</span>
+        <span class="c1">##     u = initial velocity</span>
+        <span class="c1">##     t = time in seconds</span>
+        <span class="c1">## we know v(t) = u * d**-t</span>
+        <span class="c1">## s(t) = \int v(t)  dt</span>
+        <span class="c1">##      = \int u * d**-t  dt</span>
+        <span class="c1">##      = -u / log(d) * \int -log(d) * exp(-t*log(d))  dt</span>
+        <span class="c1">##      = -u * exp(-t*log(d)) / log(d) + C</span>
+        <span class="c1">##      = -u * d**-t / log(d) + C</span>
+        <span class="c1">## solving C for s=0 at t=0:</span>
+        <span class="c1">## s(t) = -u * d**-t / log(d) + u / log(d)</span>
+        <span class="c1">##      = (u / log(d)) * (1 - d**-t)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">u</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">damping_factor</span><span class="p">))</span> \
+               <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">damping_factor</span><span class="o">**-</span><span class="n">t</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="PhysicalObject.move">
+<a class="viewcode-back" href="../../pyzui.physicalobject.html#pyzui.physicalobject.PhysicalObject.move">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move the pobject by (`dx`,`dy`).</span>
+
+<span class="sd">        move(float, float) -&gt; None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">+=</span> <span class="n">dx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">+=</span> <span class="n">dy</span></div>
+
+
+
+<div class="viewcode-block" id="PhysicalObject.zoom">
+<a class="viewcode-back" href="../../pyzui.physicalobject.html#pyzui.physicalobject.PhysicalObject.zoom">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Zoom by the given `amount` with the centre maintaining its position</span>
+<span class="sd">        on the screen.</span>
+
+<span class="sd">        zoom(float) -&gt; None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## P is the onscreen position of the centre</span>
+        <span class="c1">## C is the coordinates of the centre</span>
+        <span class="c1">## zoomlevel&#39; = zoomlevel + amount</span>
+        <span class="c1">## P  = pos  + C * 2**zoomlevel</span>
+        <span class="c1">##    =&gt; C = (P - pos) * 2**-zoomlevel</span>
+        <span class="c1">## P&#39; = pos&#39; + C * 2**zoomlevel&#39;</span>
+        <span class="c1">##    = pos&#39; + (P - pos) * 2**(zoomlevel&#39;-zoomlevel)</span>
+        <span class="c1">## solving for P = P&#39; yields:</span>
+        <span class="c1">##   pos&#39; = P - (P - pos) * 2**amount</span>
+
+        <span class="n">Px</span><span class="p">,</span> <span class="n">Py</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">Px</span> <span class="o">-</span> <span class="p">(</span><span class="n">Px</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">amount</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">Py</span> <span class="o">-</span> <span class="p">(</span><span class="n">Py</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">amount</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">+=</span> <span class="n">amount</span></div>
+
+
+
+<div class="viewcode-block" id="PhysicalObject.aim">
+<a class="viewcode-back" href="../../pyzui.physicalobject.html#pyzui.physicalobject.PhysicalObject.aim">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">aim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the initial velocity such that at time `t` the relative</span>
+<span class="sd">        displacement of the pobject will be `s`, and increase the velocity</span>
+<span class="sd">        represented by `v` by this amount.</span>
+
+<span class="sd">        If `t` is omitted then it will be taken that `s` is the limit of the</span>
+<span class="sd">        displacement as `t` approaches infinity</span>
+<span class="sd">        i.e. the initial velocity will be calculated such that the total</span>
+<span class="sd">        displacement will be `s` once the pobject has stopped moving.</span>
+
+<span class="sd">        velocity(string, float[, float]) -&gt; None</span>
+
+<span class="sd">        Precondition: `v` is either &#39;x&#39;, &#39;y&#39;, or &#39;z&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">t</span><span class="p">:</span>
+            <span class="c1">## s(t) = (u / log(d)) * (1 - d**-t)</span>
+            <span class="c1">## =&gt; u = (s(t) * log(d)) / (1 - d**-t)</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="p">(</span><span class="n">s</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">damping_factor</span><span class="p">))</span> \
+                   <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">damping_factor</span><span class="o">**-</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">## s = lim_t-&gt;inf displacement</span>
+            <span class="c1">##   = lim_t-&gt;inf (u / log(d)) * (1 - d**-t)</span>
+            <span class="c1">##   = u / log(d)  since d &gt; 1</span>
+            <span class="c1">## therefore u = s * log(d)</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">damping_factor</span><span class="p">)</span>
+
+        <span class="k">if</span>   <span class="n">v</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vx</span> <span class="o">+=</span> <span class="n">u</span>
+        <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vy</span> <span class="o">+=</span> <span class="n">u</span>
+        <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vz</span> <span class="o">+=</span> <span class="n">u</span></div>
+
+
+
+<div class="viewcode-block" id="PhysicalObject.step">
+<a class="viewcode-back" href="../../pyzui.physicalobject.html#pyzui.physicalobject.PhysicalObject.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Step forward `t` seconds in time.</span>
+
+<span class="sd">        step(float) -&gt; None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vx</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">vy</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">move</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__displacement</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vx</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__displacement</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vy</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__damp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vx</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__damp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vy</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vz</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__displacement</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vz</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__damp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vz</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span></div>
+
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">moving</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Boolean value indicating whether the pobject has a non-zero</span>
+<span class="sd">        velocity.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vx</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">vy</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">vz</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__get_zoomlevel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The zoomlevel of the pobject.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__set_zoomlevel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zoomlevel</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">=</span> <span class="n">zoomlevel</span>
+    <span class="n">zoomlevel</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_zoomlevel</span><span class="p">,</span> <span class="n">__set_zoomlevel</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__get_centre</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The on-screen coordinates of the centre of the pobject (the</span>
+<span class="sd">        point that will maintain its position on the screen as the</span>
+<span class="sd">        pobject is being zoomed).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">## we need to convert pobject-coordinate C to</span>
+        <span class="c1">## screen-coordinate P:</span>
+        <span class="c1">## P = pos + C * 2**zoomlevel</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__set_centre</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">centre</span><span class="p">):</span>
+        <span class="c1">## we need to convert screen-coordinate P to</span>
+        <span class="c1">## pobject-coordinate C:</span>
+        <span class="c1">## P = pos + C * 2**zoomlevel</span>
+        <span class="c1">##   =&gt; C = (P - pos) * 2**-zoomlevel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span> <span class="o">=</span> <span class="p">((</span><span class="n">centre</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**-</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">centre</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**-</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">)</span>
+    <span class="n">centre</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_centre</span><span class="p">,</span> <span class="n">__set_centre</span><span class="p">)</span></div>
+
+
+
+
+
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

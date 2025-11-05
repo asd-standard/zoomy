@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pyzui.dynamictileprovider module &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=086c1757"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pyzui.dynamictileprovider">
+<span id="pyzui-dynamictileprovider-module"></span><h1>pyzui.dynamictileprovider module<a class="headerlink" href="#module-pyzui.dynamictileprovider" title="Link to this heading">¶</a></h1>
+<p>Class for loading tiles into memory from somewhere other than the local
+filesystem (abstract base class).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyzui.dynamictileprovider.DynamicTileProvider">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.dynamictileprovider.</span></span><span class="sig-name descname"><span class="pre">DynamicTileProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tilecache</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/dynamictileprovider.html#DynamicTileProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.dynamictileprovider.DynamicTileProvider" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pyzui.tileprovider.html#pyzui.tileprovider.TileProvider" title="pyzui.tileprovider.TileProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">TileProvider</span></code></a></p>
+<p>DynamicTileProvider objects are used for either generating tiles or
+loading them from a remote host, and then loading them into a TileCache.</p>
+<p>Constructor: DynamicTileProvider(TileCache)</p>
+<p>Create a new TileProvider for loading tiles into the given
+<cite>tilecache</cite>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.dynamictileprovider.DynamicTileProvider.filext">
+<span class="sig-name descname"><span class="pre">filext</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'png'</span></em><a class="headerlink" href="#pyzui.dynamictileprovider.DynamicTileProvider.filext" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.dynamictileprovider.DynamicTileProvider.tilesize">
+<span class="sig-name descname"><span class="pre">tilesize</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">256</span></em><a class="headerlink" href="#pyzui.dynamictileprovider.DynamicTileProvider.tilesize" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.dynamictileprovider.DynamicTileProvider.aspect_ratio">
+<span class="sig-name descname"><span class="pre">aspect_ratio</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.0</span></em><a class="headerlink" href="#pyzui.dynamictileprovider.DynamicTileProvider.aspect_ratio" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/pyzui.dynamictileprovider.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

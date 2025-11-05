@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pyzui.webkitconverter module &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=086c1757"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pyzui.webkitconverter">
+<span id="pyzui-webkitconverter-module"></span><h1>pyzui.webkitconverter module<a class="headerlink" href="#module-pyzui.webkitconverter" title="Link to this heading">¶</a></h1>
+<p>Webpage renderer based upon QtWebKit.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyzui.webkitconverter.WebKitConverter">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.webkitconverter.</span></span><span class="sig-name descname"><span class="pre">WebKitConverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/webkitconverter.html#WebKitConverter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.webkitconverter.WebKitConverter" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pyzui.converter.html#pyzui.converter.Converter" title="pyzui.converter.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>WebKitConverter objects are used for rendering webpages.</p>
+<p><cite>infile</cite> may be either a URI or the location of a local file.</p>
+<p>Supported output formats are: BMP, JPG/JPEG, PNG, PPM, TIFF, XBM, XPM
+(see &lt;<a class="reference external" href="http://doc.trolltech.com/qimage.html">http://doc.trolltech.com/qimage.html</a>
+#reading-and-writing-image-files&gt;)</p>
+<p>Constructor: WebKitConverter(string, string)</p>
+<p>Create a new Converter for converting media at the location given by
+<cite>infile</cite> to the location given by <cite>outfile</cite>.</p>
+<p>Where appropriate, the output format will be determined from the file
+extension of <cite>outfile</cite>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.webkitconverter.WebKitConverter.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/webkitconverter.html#WebKitConverter.start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.webkitconverter.WebKitConverter.start" title="Link to this definition">¶</a></dt>
+<dd><p>If a global QApplication has already been instantiated, then this
+method will call <cite>run()</cite> directly, as Qt requires us to call <cite>run()</cite>
+from the same thread as the global QApplication. This will not block as
+Qt will then handle the threading.</p>
+<p>Otherwise, if no QApplication exists yet, then the default
+<cite>Converter.start()</cite> method will be called allowing Python to natively
+handle the threading.</p>
+<p>start() -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.webkitconverter.WebKitConverter.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/webkitconverter.html#WebKitConverter.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.webkitconverter.WebKitConverter.run" title="Link to this definition">¶</a></dt>
+<dd><p>Run the conversion. If any errors are encountered then <cite>self.error</cite>
+will be set to a string describing the error.</p>
+<p>run() -&gt; None</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/pyzui.webkitconverter.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

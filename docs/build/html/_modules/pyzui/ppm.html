@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyzui.ppm &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=12dfc556" />
+    <script src="../../_static/documentation_options.js?v=086c1757"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pyzui.ppm</h1><div class="highlight"><pre>
+<span></span><span class="c1"># %%</span>
+<span class="c1">## PyZUI 0.1 - Python Zooming User Interface</span>
+
+<span class="c1">## Copyright (C) 2009  David Roberts &lt;d@vidr.cc&gt;</span>
+<span class="c1">##</span>
+<span class="c1">## This program is free software; you can redistribute it and/or</span>
+<span class="c1">## modify it under the terms of the GNU General Public License</span>
+<span class="c1">## as published by the Free Software Foundation; either version 2</span>
+<span class="c1">## of the License, or (at your option) any later version.</span>
+<span class="c1">##</span>
+<span class="c1">## This program is distributed in the hope that it will be useful,</span>
+<span class="c1">## but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1">## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1">## GNU General Public License for more details.</span>
+<span class="c1">##</span>
+<span class="c1">## You should have received a copy of the GNU General Public License</span>
+<span class="c1">## along with this program; if not, write to the Free Software</span>
+<span class="c1">## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA</span>
+<span class="c1">## 02110-1301, USA.</span>
+
+<span class="sd">&quot;&quot;&quot;Module for reading PPM images.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.tiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tiler</span>
+
+<div class="viewcode-block" id="read_ppm_header">
+<a class="viewcode-back" href="../../pyzui.ppm.html#pyzui.ppm.read_ppm_header">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_ppm_header</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the PPM header in the given file object `f` and return a tuple</span>
+<span class="sd">    representing the dimensions of the image.</span>
+
+<span class="sd">    Raises `IOError` if the header is invalid and/or unsupported (must be &#39;P6&#39;</span>
+<span class="sd">    binary PPM format with maxval=255).</span>
+
+<span class="sd">    read_ppm_header(file) -&gt; (long, long)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+            <span class="c1">## we&#39;ve hit EOF</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;not enough entries in PPM header&quot;</span><span class="p">)</span>
+
+        <span class="n">header</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+        
+    <span class="n">magic</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">magic</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;P6&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;can only load binary PPM (P6 format)&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">maxval</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;invalid PPM header&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">maxval</span> <span class="o">!=</span> <span class="mi">255</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;PPM maxval must equal 255&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="enlarge_ppm_file">
+<a class="viewcode-back" href="../../pyzui.ppm.html#pyzui.ppm.enlarge_ppm_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">enlarge_ppm_file</span><span class="p">(</span><span class="n">PPmFile</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">spacing</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">PPmContent</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PPmFile</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;latin-1&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">r</span> <span class="p">:</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="p">:</span>        
+            <span class="n">PPmContent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
+    
+    <span class="n">spacing_chars</span> <span class="o">=</span> <span class="s1">&#39;\FF&#39;</span><span class="o">*</span><span class="n">spacing</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;LEN SPACING CHARS&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">spacing_chars</span><span class="p">))</span>    
+    
+    <span class="n">headless_enlarged_PPmContent</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="p">:</span>    
+        <span class="n">headless_enlarged_PPmContent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">PPmContent</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="n">spacing_chars</span><span class="p">)</span>
+              
+    
+    <span class="n">enlarged_PPmContent</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">enlarged_PPmContent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">enlarged_PPmContent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">width</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">spacing_chars</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">height</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">enlarged_PPmContent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">headless_enlarged_PPmContent</span><span class="p">))</span> <span class="p">:</span>
+        <span class="n">enlarged_PPmContent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">headless_enlarged_PPmContent</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PPmFile</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;latin-1&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">enlarged_PPmContent</span><span class="p">))</span> <span class="p">:</span>        
+            <span class="n">w</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">enlarged_PPmContent</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">return</span></div>
+
+
+
+<div class="viewcode-block" id="PPMTiler">
+<a class="viewcode-back" href="../../pyzui.ppm.html#pyzui.ppm.PPMTiler">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PPMTiler</span><span class="p">(</span><span class="n">Tiler</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;PPMTiler objects are used for tiling PPM images. \n</span>
+<span class="sd">    Constructor: PPMTiler(string[, string[, string[, int]]]) \n</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">media_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filext</span><span class="o">=</span><span class="s1">&#39;jpg&#39;</span><span class="p">,</span> <span class="n">tilesize</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+        
+        
+        <span class="n">Tiler</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">filext</span><span class="p">,</span> <span class="n">tilesize</span><span class="p">)</span>
+        
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ppm_fileobj</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_infile</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="k">raise</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="n">read_ppm_header</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ppm_fileobj</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bytes_per_pixel</span> <span class="o">=</span> <span class="mi">3</span>
+        
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_scanchunk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Scan a chunk of ppm image bytes correspondent of a tile row \n</span>
+<span class="sd">            the row lenght of the tile is given by self._bytes_per_pixel*self._width \n </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ppm_fileobj</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bytes_per_pixel</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">)</span> 
+         
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ppm_fileobj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+
+
+
+
+
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pyzui.globalmosaictileprovider module &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=086c1757"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pyzui.globalmosaictileprovider">
+<span id="pyzui-globalmosaictileprovider-module"></span><h1>pyzui.globalmosaictileprovider module<a class="headerlink" href="#module-pyzui.globalmosaictileprovider" title="Link to this heading">¶</a></h1>
+<p>Dynamic tile provider for the WMS Global Mosaic.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyzui.globalmosaictileprovider.GlobalMosaicTileProvider">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.globalmosaictileprovider.</span></span><span class="sig-name descname"><span class="pre">GlobalMosaicTileProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tilecache</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/globalmosaictileprovider.html#GlobalMosaicTileProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pyzui.dynamictileprovider.html#pyzui.dynamictileprovider.DynamicTileProvider" title="pyzui.dynamictileprovider.DynamicTileProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicTileProvider</span></code></a></p>
+<p>GlobalMosaicTileProvider objects are used for downloading tiles from the
+WMS Global Mosaic server &lt;<a class="reference external" href="http://onearth.jpl.nasa.gov/">http://onearth.jpl.nasa.gov/</a>&gt;.</p>
+<p>Constructor: GlobalMosaicTileProvider(TileCache)</p>
+<p>Create a new TileProvider for loading tiles into the given
+<cite>tilecache</cite>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.filext">
+<span class="sig-name descname"><span class="pre">filext</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'jpg'</span></em><a class="headerlink" href="#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.filext" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.tilesize">
+<span class="sig-name descname"><span class="pre">tilesize</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">256</span></em><a class="headerlink" href="#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.tilesize" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.aspect_ratio">
+<span class="sig-name descname"><span class="pre">aspect_ratio</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2.0</span></em><a class="headerlink" href="#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.aspect_ratio" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.base_url">
+<span class="sig-name descname"><span class="pre">base_url</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'http://wms.jpl.nasa.gov/wms.cgi?'</span></em><a class="headerlink" href="#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.base_url" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.base_params">
+<span class="sig-name descname"><span class="pre">base_params</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'format':</span> <span class="pre">'image/jpeg',</span> <span class="pre">'height':</span> <span class="pre">512,</span> <span class="pre">'layers':</span> <span class="pre">'global_mosaic',</span> <span class="pre">'request':</span> <span class="pre">'GetMap',</span> <span class="pre">'srs':</span> <span class="pre">'EPSG:4326',</span> <span class="pre">'styles':</span> <span class="pre">'visual',</span> <span class="pre">'version':</span> <span class="pre">'1.1.1',</span> <span class="pre">'width':</span> <span class="pre">512}</span></em><a class="headerlink" href="#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.base_params" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/pyzui.globalmosaictileprovider.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

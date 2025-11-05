@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pyzui.physicalobject module &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=086c1757"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pyzui.physicalobject">
+<span id="pyzui-physicalobject-module"></span><h1>pyzui.physicalobject module<a class="headerlink" href="#module-pyzui.physicalobject" title="Link to this heading">¶</a></h1>
+<p>An object that obeys the laws of physics.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyzui.physicalobject.PhysicalObject">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.physicalobject.</span></span><span class="sig-name descname"><span class="pre">PhysicalObject</span></span><a class="reference internal" href="_modules/pyzui/physicalobject.html#PhysicalObject"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.physicalobject.PhysicalObject" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Physicalobject pobjects are used to represent anything that has a
+3-dimensional position and velocity, where the z-dimension represents a
+zoomlevel.</p>
+<p>Constructor: Physicalpobject()</p>
+<p>Create a new Physicalpobject at the origin with zero velocity.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.physicalobject.PhysicalObject.damping_factor">
+<span class="sig-name descname"><span class="pre">damping_factor</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">512</span></em><a class="headerlink" href="#pyzui.physicalobject.PhysicalObject.damping_factor" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.physicalobject.PhysicalObject.move">
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/physicalobject.html#PhysicalObject.move"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.physicalobject.PhysicalObject.move" title="Link to this definition">¶</a></dt>
+<dd><p>Move the pobject by (<cite>dx</cite>,`dy`).</p>
+<p>move(float, float) -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.physicalobject.PhysicalObject.zoom">
+<span class="sig-name descname"><span class="pre">zoom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amount</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/physicalobject.html#PhysicalObject.zoom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.physicalobject.PhysicalObject.zoom" title="Link to this definition">¶</a></dt>
+<dd><p>Zoom by the given <cite>amount</cite> with the centre maintaining its position
+on the screen.</p>
+<p>zoom(float) -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.physicalobject.PhysicalObject.aim">
+<span class="sig-name descname"><span class="pre">aim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/physicalobject.html#PhysicalObject.aim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.physicalobject.PhysicalObject.aim" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the initial velocity such that at time <cite>t</cite> the relative
+displacement of the pobject will be <cite>s</cite>, and increase the velocity
+represented by <cite>v</cite> by this amount.</p>
+<p>If <cite>t</cite> is omitted then it will be taken that <cite>s</cite> is the limit of the
+displacement as <cite>t</cite> approaches infinity
+i.e. the initial velocity will be calculated such that the total
+displacement will be <cite>s</cite> once the pobject has stopped moving.</p>
+<p>velocity(string, float[, float]) -&gt; None</p>
+<p>Precondition: <cite>v</cite> is either ‘x’, ‘y’, or ‘z’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.physicalobject.PhysicalObject.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/physicalobject.html#PhysicalObject.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.physicalobject.PhysicalObject.step" title="Link to this definition">¶</a></dt>
+<dd><p>Step forward <cite>t</cite> seconds in time.</p>
+<p>step(float) -&gt; None</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyzui.physicalobject.PhysicalObject.moving">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">moving</span></span><a class="headerlink" href="#pyzui.physicalobject.PhysicalObject.moving" title="Link to this definition">¶</a></dt>
+<dd><p>Boolean value indicating whether the pobject has a non-zero
+velocity.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyzui.physicalobject.PhysicalObject.zoomlevel">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zoomlevel</span></span><a class="headerlink" href="#pyzui.physicalobject.PhysicalObject.zoomlevel" title="Link to this definition">¶</a></dt>
+<dd><p>The zoomlevel of the pobject.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyzui.physicalobject.PhysicalObject.centre">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">centre</span></span><a class="headerlink" href="#pyzui.physicalobject.PhysicalObject.centre" title="Link to this definition">¶</a></dt>
+<dd><p>The on-screen coordinates of the centre of the pobject (the
+point that will maintain its position on the screen as the
+pobject is being zoomed).</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/pyzui.physicalobject.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
