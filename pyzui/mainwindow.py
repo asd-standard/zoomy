@@ -416,13 +416,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__action_save_screenshot, "Ctrl+H")
         self.__create_action('open_media_local', "Open &Local Media",
             self.__action_open_media_local, "Ctrl+L")
-        self.__create_action('open_media_string', "Open Media by &String",
+        self.__create_action('open_media_string', "Open new &String",
             self.__action_open_media_string, "Ctrl+U")
         self.__create_action('open_media_dir', "Open Media &Directory",
             self.__action_open_media_dir, "Ctrl+D")
         self.__create_action('quit', "&Quit",
             self.__action_confirm_quit, "Ctrl+Q")
-        self.__create_action('set_zoom_sensitivity', "adjust &sensitivity",
+        self.__create_action('set_zoom_sensitivity', "Adjust &Sensitivity",
             self.__action_set_zoom_sensitivity)
 
         self.__action['group_set_fps'] = QtWidgets.QActionGroup(self)

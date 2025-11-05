@@ -43,7 +43,9 @@ class SVGMediaObject(MediaObject):
     transparent = True
 
     def render(self, painter, mode):
-        if min(self.onscreen_size) > 1 and mode != RenderMode.Invisible:
+        if min(self.onscreen_size) > int((min(self._scene.viewport_size))/44) and \
+        max(self.onscreen_size) < int((max(self._scene.viewport_size))/1.3) and mode \
+        != RenderMode.Invisible:
             ## don't bother rendering if the string is too
             ## small to be seen, or invisible mode is set
 

@@ -36,8 +36,10 @@ from .pdfconverter import PDFConverter
 from .magickconverter import MagickConverter
 
 class TiledMediaObject(MediaObject):
-    """TileMedia object Wrap given media_id in MediaObject type, 
-        (calling converter if necessary) the so that it that can be rendered in the ZUI.
+    """
+    TileMedia object Wrap given media_id in MediaObject type, 
+    (calling converter if necessary) the so that it that can be 
+    rendered in the ZUI.
     
     If `autofit` is True, then once the media has loaded it will be fitted to
     the area occupied by the placeholder.

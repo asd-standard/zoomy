@@ -159,6 +159,7 @@ class QZUI(QtWidgets.QWidget, Thread):
                 ## shift-click won't change the selection
                 self.scene.right_selection = self.scene.get(self.__mousepos)
 
+
     def mouseMoveEvent(self, event):
         if (event.buttons()&QtCore.Qt.LeftButton) and self.__mouse_left_down:
             mx = event.x() - self.__mousepos[0]

@@ -35,21 +35,34 @@ from .stringmediaobject import StringMediaObject
 from .svgmediaobject import SVGMediaObject
 
 class Scene(PhysicalObject):
-    """Scene objects are used to hold a collection of MediaObjects.
-        This class manages all the objects that can be rendered in the interface.
-    Constructor: Scene()
-
     """
-    ## an arbitrary size that is common to all scenes upon creation
+    Constructor :
+        Scene()
+    Parameters :
+        None
+    Scene objects are used to hold a collection of MediaObjects.
+    This class manages all the objects that can be rendered in the interface.
+    """
+
+    #: an arbitrary size that is common to all scenes upon creation
     standard_viewport_size = (256,256)
+
     def __init__(self):
 
-        """Create a new scene."""
+        """
+        New scene is made by initiating a :doc:`physicalobject <pyzui.physicalobject>`, 
+
+        creating an objects list `__objects` and thread safe selection for `__objects`
+        given by declaring RLock list `__objects_lock`, 
+        
+        set up `__viewport_size`
+
+        mouse selection variables `selection` and `right_selection` and logger setup
+        `__logger`. 
+        """
+
         #initialize mediobject centre, position and velocity
         PhysicalObject.__init__(self)        
-        #self.PhysicalObject = PhysicalObject()
-        #self.PhysicalObject.start()
-        
 
         self.__objects = []
         self.__objects_lock = RLock()
@@ -60,25 +73,44 @@ class Scene(PhysicalObject):
         
         #commented out on 20250314 
         self.__logger = logging.getLogger("Scene")
-         
 
-    ## an arbitrary size that is common to all scenes upon creation
-    #standard_viewport_size = (256,256)
 
     def save(self, filename):
-        """Save the scene to the location given by `filename`.
+        """
+        Constructor : 
+            Scene.save(filename)
+        Parameters :
+            filename['string']
+
+        save(filename) --> None
+
+        Save the scene to the location given by `filename`.
 
         It is recommended (but not compulsory) that the file extension of
         filename be '.pzs'.
-
-        save(string) -> None
+        
+        open a file `filename`, writes on the first line zoom level (z) and 
+        position (x, y) of the scene origin defined by Scene.__set_origin()
+        then thread safely, once sorted `__objects`, cicles through them, 
+        writing for each of them a line on `fielname` with:  
+            object type: `type(mediaobject).__name__`
+            
+            media id: mediaobject.media_id (replacing '%3A' with :) 
+            
+            zoomlevel: mediaobject.zoomlevel 
+            
+            x position: mediaobject.pos[0]
+            
+            y position: mediaobject.pos[1]
         """
         
+        """viewport_size it's saved in a temporary variable `actual_viewport_size`
+        so that saving of the scene can be done in a standard size.
+        By doing this once the scene it's loaded it can be then scaled to fit
+        whatever viewport the user currently has, independent of the viewport 
+        the scene was having when it was saved."""
         actual_viewport_size = self.viewport_size
-        ## set the viewport to a standard size before saving, so that
-        ## when it is loaded the scene can be scaled to fit whatever
-        ## viewport the user currently has, independent of the viewport
-        ## size when the scene was saved
+        # setting `viewport_size` to standard size
         self.viewport_size = self.standard_viewport_size
 
         f = open(filename, 'w')
@@ -99,29 +131,58 @@ class Scene(PhysicalObject):
 
         f.close()
 
+        # setting `viewport_size` to it's actual size 
         self.viewport_size = actual_viewport_size
 
 
     def add(self, mediaobject):
-        
-        """Add `mediaobject` to this scene.
-
-        This has no effect if `mediaobject` is already in the scene.
-
-        add(MediaObject) -> None
         """
+        Constructor :
+            Scene.add(mediaobject)
+        Parameters :
+            mediaobject[':doc:`mediaobject <pyzui.mediaobject>`']
+
+        add(mediaobject) --> None
+
+        Add mediaobject from the list of elements that get to
+        be rendered on the scene.
+
+        Inside a thread safe selection: add `mediaobject` to this scene by 
+        checking if given mediaobject is already in `__objects` list, if 
+        it is nothing is done, otherwise mediaobject it's appended to the 
+        `__objects` list.
+        """
+
         with self.__objects_lock:
             if mediaobject not in self.__objects:
 
                 self.__objects.append(mediaobject)
 
     def remove(self, mediaobject):
-        """Remove `mediaobject` from scene.
-
-        This has no effect if `mediaobject` is not in the scene.
-
-        remove(MediaObject) -> None
         """
+        Constructor :
+            Scene.remove(mediaobject)
+        Parameters :
+            mediaobject[':doc:`mediaobject <pyzui.mediaobject>`']
+
+        remove(mediaobject) --> None
+
+        Remove mediaobject from the list of elements that get to
+        be rendered on the scene and purge all'related tiles through
+        TileManager.purge('media_id') method.
+
+        Thread safely cycle through `__objects` until `mediaobject`
+        match with the respective element of the `__objects` list
+        and removes it from the `__objects` list. Then gets
+        mediaobject.media_id attribute and check if other `__objects`
+        elements have the same media_id, if it's not the case the media_id
+        gets purged from the TileManager. 
+
+        See: `tilemanager.purge <file:///home/asd/Projects/pyzui/docs/build/
+        html/_modules/pyzui/tilemanager.html#purge>`_
+
+        """
+
         with self.__objects_lock:
             if mediaobject in self.__objects:
                 self.__objects.remove(mediaobject)
@@ -140,25 +201,51 @@ class Scene(PhysicalObject):
 
 
     def __sort_objects(self):
-        """Sort self.__objects from largest to smallest area.
-            20250319 sorting based on zoomlevel ._z attribute of class mediaobject
+        """
+        Contructor :
+            `internal method` self.__sort_objects()
+        Parameters :
+            None
 
-        __sort_objects() -> None
+        __sort_objects() --> None
+
+        Sort self.__objects from largest to smallest area using 
+        mediaobject.onscreen_area attribute wich return mediaobject
+        current onscreen area.
+
+        See :  mediaobject.onscreen_area 
+
         """
         with self.__objects_lock:
-            
-            self.__objects.sort(key=lambda mediaobject: mediaobject._z)
-            #print(self.__objects)
+            self.__objects.sort(key=lambda mediaobject: \
+                mediaobject.onscreen_area)
             
 
 
     def get(self, pos):
-        """Return the foremost visible `MediaObject` which overlaps the
-        on-screen point `pos`.
+        """
+        Contructors :
+            Scene.get(pos)
+        Parameters :
+            pos[tuple[float,float]]
+
+        get(pos) --> None
+        
+        Return the foremost visible `MediaObject` which overlaps the
+        on-screen point `pos`. `pos` is the mouse polition at the last
+        left or right click mouse event.
 
         Return None if there are no `MediaObject`s overlapping the point.
 
-        get(tuple<float,float>) -> MediaObject or None
+        get(tuple[float,float]) --> MediaObject or None
+
+        Mouse click event is catched by: `qzui.mousePressEvent <file:///home/
+        asd/Projects/pyzui/docs/build/html/_modules/pyzui/qzui.html#QZUI.mouse
+        PressEvent>`_ wich returns mouse position `pos`
+        
+        Thread safely cycle through `__objects`. for each mediaobject checks if 
+        `pos` is within mediaobject area, if it is the mediaobject is returned as 
+        `foremost` 
         """
         foremost = None
 
@@ -175,7 +262,15 @@ class Scene(PhysicalObject):
 
 
     def render(self, painter, draft):
-        """Render the scene using the given `painter`.
+        """
+        Constructor :
+            Scene.render(painter, draft)
+        Parameters :
+            painter['QtGui.QPainter'], draft['bool']
+        
+        render(painter, draft) --> errors['MediaObject.LoadError']
+
+        Render the scene using the given `painter`.
 
         If `draft` is True, draft mode is enabled. Otherwise High-Quality mode
         is enabled.
@@ -184,23 +279,37 @@ class Scene(PhysicalObject):
         be removed from the scene and a list of tuples representing the errors
         will be returned. Otherwise the empty list will be returned.
 
-        render(QPainter, bool) -> list<tuple<MediaObject,
-        MediaObject.LoadError> >
+        render(QPainter, bool) -> list[tuple[MediaObject,MediaObject.LoadError]]
+        
+        See source code comments :
+
+            `Source <file:///home/asd/Projects/pyzui/docs/build/html/_modules/
+            pyzui/scene.html#Scene.render>`_ 
+
         """
 
+        #Error list to be filled with MediaObject.LoadError.
         errors = []
 
+        """Sort __objects from least to most displayed area and thread safely 
+        cycle through them""" 
         with self.__objects_lock:
             self.__sort_objects()
-            #print(self.__objects)
+            #If hidden=True mediaobject is added to hidden_objects set 
             hidden = False
+            #Creates an empty set for hidden mediaobjects
             hidden_objects = set()
+            """cycles through __objects in reverse order, from smallest area to
+            biggest area, if they result hidden they don't get to be rendered
+            and they're added to hidden_objects set""" 
             for mediaobject in reversed(self.__objects):
                 if hidden:
                     hidden_objects.add(mediaobject)
                 else:
+                    #gets topleft and bottomright coordinates
                     x1, y1 = mediaobject.topleft
                     x2, y2 = mediaobject.bottomright
+
                     if x1 <= 0 and y1 <= 0 and \
                        x2 >= self.viewport_size[0] and \
                        y2 >= self.viewport_size[1]:
@@ -210,8 +319,12 @@ class Scene(PhysicalObject):
                         ## as hidden
                         hidden = True
 
+            """Set of hidden_objects it's updated: now we cycle through __objects
+            once again setting mediaobject.RenderMode, we set Invisible is 
+            mediaobject is in hidden_objects, we set in Draft if draft class input
+            parameter is passed as True, otherwise we set HighQuality"""
+
             for mediaobject in self.__objects:
-                #print(vars(mediaobject))
                 if mediaobject in hidden_objects:
                     mode = MediaObject.RenderMode.Invisible
                 elif draft:
@@ -219,22 +332,32 @@ class Scene(PhysicalObject):
                 else:
                     mode = MediaObject.RenderMode.HighQuality
                 
+                """Now we try to render using mediaobject.render() method wich is 
+                inherited from the specific type of mediaobject, namely: 
+                tilemediaobject, stringmediaobject, scgmediaobject, each of these
+                mediaobjects has it's specific render method"""
                 try:   
                     mediaobject.render(painter, mode)
                 except MediaObject.LoadError :
-                    print('ERROR IN scene.render() \n')
-                    print(vars(mediaobject))
+                    """If mediaobject render fails MediaObject.LoadError type is 
+                    returned and appended to errors list"""
                     errors.append((mediaobject))
                     
             for mediaobject in errors:
                 ## remove mediaobjects that have raised errors
                 print('## remove mediaobjects that have raised MediaObject.LoadError')
-                ##print(vars(mediaobject))
+                print(mediaobject)
+                #Remove mediaobject using the Scene.remove() method
                 self.remove(mediaobject)
             
-            ## draw border around selected object
-            ## self.selection
+            """qzui.mousePressEvent handles mouse selection and adjourn `selection`
+            and right_selection, assigning to them the mouse selected mediaobject. 
+            If selection or right_selection isn't None a colored border gets drawn 
+            around selected of right_selected mediaobject using QtGui.QPainter 
+            `painter`"""
+
             if self.selection :
+                #using mediaobject.topleft mediaobject.toptight attributes
                 x1, y1 = self.selection.topleft
                 x2, y2 = self.selection.bottomright
 
@@ -243,21 +366,44 @@ class Scene(PhysicalObject):
                 y1 = max(0, min(int(y1), self.viewport_size[1] - 1))
                 x2 = max(0, min(int(x2), self.viewport_size[0] - 1))
                 y2 = max(0, min(int(y2), self.viewport_size[1] - 1))
-
+                #Draing border using QtGui.QPainter attributes
                 painter.setPen(QtCore.Qt.green)
                 painter.drawRect(x1, y1, x2-x1, y2-y1)
+                
 
             if self.right_selection :
-                print('RIGHT SELECTED \n')
+                #using mediaobject.topleft mediaobject.toptight attributes
+                x1, y1 = self.right_selection.topleft
+                x2, y2 = self.right_selection.bottomright
 
+                ## clamp values
+                x1 = max(0, min(int(x1), self.viewport_size[0] - 1))
+                y1 = max(0, min(int(y1), self.viewport_size[1] - 1))
+                x2 = max(0, min(int(x2), self.viewport_size[0] - 1))
+                y2 = max(0, min(int(y2), self.viewport_size[1] - 1))
+                #Draing border using QtGui.QPainter attributes
+                painter.setPen(QtCore.Qt.blue)
+                painter.drawRect(x1, y1, x2-x1, y2-y1)
+        #returning MediaObject.LoadError
         return errors
 
 
     def step(self, t):
-        """Step the scene and all contained `MediaObject`s forward `t` seconds
-        in time.
+        """
+        Constructor : 
+            Scene.step(t)
+        Parameters :
+            t['float']
+        
+        step(t) --> None
 
-        step(float) -> None
+        Step the scene and all contained `MediaObjects` forward `t` seconds
+        in time.
+    
+        Thread safely cycle through `__objects` mediaobjects set and for each of 
+        them call `PhysicalObject.step(self, t) <file:///home/asd/Projects/
+        pyzui/docs/build/html/_modules/pyzui/physicalobject.html#
+        PhysicalObject.step>`_ inherited method.
         """
         
         with self.__objects_lock:

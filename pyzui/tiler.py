@@ -214,7 +214,7 @@ class Tiler(Thread):
 
         __tiles(int, int) -> list<Tile>
         """
-        #print('HERE--HERE Tiler227 \n')
+        
         if tilelevel == self.__maxtilelevel:
             try : 
             

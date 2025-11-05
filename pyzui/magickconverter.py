@@ -58,9 +58,6 @@ class MagickConverter(Converter):
             stdout = process.communicate()[0]
 
         if process.returncode != 0:
-            #print('InFILE', self._infile)
-            #print('OutFILE', self._outfile)
-            #print('IM HERE!!! FOR REAL!!!')
             self.error = "conversion failed with return code " \
                 "%d:\n%s" % (process.returncode, stdout)
             self._logger.error(self.error)
