@@ -8,6 +8,7 @@
     <title>pyzui.qzui module &#8212; PyZui 0.11 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=cc7d0dec" />
     <script src="_static/documentation_options.js?v=086c1757"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -67,6 +68,22 @@ arguments is the optional sequence of the names of the signal’s arguments.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyzui.qzui.QZUI.__zoom">
+<span class="sig-name descname"><span class="pre">__zoom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_steps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.qzui.QZUI.__zoom" title="Link to this definition">¶</a></dt>
+<dd><p>Increase the z velocity of the appropriate object by an amount
+proportional to num_steps.</p>
+<p>__zoom(float) -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.qzui.QZUI.__centre">
+<span class="sig-name descname"><span class="pre">__centre</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.qzui.QZUI.__centre" title="Link to this definition">¶</a></dt>
+<dd><p>Aim the appropriate object such that the point under the cursor will
+move to the centre of the screen</p>
+<p>__centre() -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyzui.qzui.QZUI.paintEvent">
 <span class="sig-name descname"><span class="pre">paintEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/qzui.html#QZUI.paintEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.qzui.QZUI.paintEvent" title="Link to this definition">¶</a></dt>
 <dd><p>method that allows you to perform custom painting on a widget.
@@ -115,10 +132,37 @@ It is part of the event handling system, and you typically override it in a subc
 <dd></dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="pyzui.qzui.QZUI.__active_object">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__active_object</span></span><a class="headerlink" href="#pyzui.qzui.QZUI.__active_object" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.qzui.QZUI.__get_framerate">
+<span class="sig-name descname"><span class="pre">__get_framerate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.qzui.QZUI.__get_framerate" title="Link to this definition">¶</a></dt>
+<dd><p>Rendering framerate.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.qzui.QZUI.__set_framerate">
+<span class="sig-name descname"><span class="pre">__set_framerate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">framerate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.qzui.QZUI.__set_framerate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="pyzui.qzui.QZUI.framerate">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">framerate</span></span><a class="headerlink" href="#pyzui.qzui.QZUI.framerate" title="Link to this definition">¶</a></dt>
 <dd><p>Rendering framerate.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.qzui.QZUI.__get_scene">
+<span class="sig-name descname"><span class="pre">__get_scene</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.qzui.QZUI.__get_scene" title="Link to this definition">¶</a></dt>
+<dd><p>Scene currently being viewed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.qzui.QZUI.__set_scene">
+<span class="sig-name descname"><span class="pre">__set_scene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scene</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.qzui.QZUI.__set_scene" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyzui.qzui.QZUI.scene">

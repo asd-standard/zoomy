@@ -8,6 +8,7 @@
     <title>pyzui.tiler module &#8212; PyZui 0.11 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=cc7d0dec" />
     <script src="_static/documentation_options.js?v=086c1757"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -70,6 +71,68 @@ The example below will have a self.numtiles_across_total = 2</p>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tiler.Tiler._scanline">
+<span class="sig-name descname"><span class="pre">_scanline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tiler.html#Tiler._scanline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tiler.Tiler._scanline" title="Link to this definition">¶</a></dt>
+<dd><p>Return string containing pixels of the next row.</p>
+<p>_scanline() -&gt; string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tiler.Tiler.__savetile">
+<span class="sig-name descname"><span class="pre">__savetile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tilelevel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tiler.Tiler.__savetile" title="Link to this definition">¶</a></dt>
+<dd><p>Save the given tile to disk.</p>
+<p>__save(Tile, int, int, int) -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tiler.Tiler.__load_row_from_file">
+<span class="sig-name descname"><span class="pre">__load_row_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tiler.Tiler.__load_row_from_file" title="Link to this definition">¶</a></dt>
+<dd><p>Load the requested row from the image file.</p>
+<p>__load_row_from_file(int) -&gt; list&lt;Tile&gt;</p>
+<p>Precondition: calls to this function must take consecutive values for
+row i.e. the first call must have row=0, then the next call must have
+row=1, etc.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tiler.Tiler.__mergerows">
+<span class="sig-name descname"><span class="pre">__mergerows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tiler.Tiler.__mergerows" title="Link to this definition">¶</a></dt>
+<dd><p>Merge blocks of 4 tiles (or blocks of 2 if row_b is None) into a
+single tile.</p>
+<p>__mergerows(list&lt;Tile&gt;[, list&lt;Tile&gt;]) -&gt; list&lt;Tile&gt;</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tiler.Tiler.__tiles">
+<span class="sig-name descname"><span class="pre">__tiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tilelevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tiler.Tiler.__tiles" title="Link to this definition">¶</a></dt>
+<dd><p>Recursive function which retrieves the tiles in the given row, saves
+them, scales each dimension by 1/2, and then returns them as a list.</p>
+<p>As the function is recursive, all higher-resolution sub-tiles contained
+within the requested tile will be saved in the process. Therefore,
+requesting row 0 from tilelevel 0 will result in the entire image being
+tiled.</p>
+<p>__tiles(int, int) -&gt; list&lt;Tile&gt;</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tiler.Tiler.__calculate_maxtilelevel">
+<span class="sig-name descname"><span class="pre">__calculate_maxtilelevel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tiler.Tiler.__calculate_maxtilelevel" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the maxtilelevel, which is the smallest non-negative
+integer such that:
+tilesize * (2**maxtilelevel) &gt;= max(width, height)
+i.e. if tilelevel 0 contains a single tile, then the tiles in
+maxtilelevel are the same resolution as the input image</p>
+<p>__calculate_maxtilelevel() -&gt; int</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tiler.Tiler.__calculate_numtiles">
+<span class="sig-name descname"><span class="pre">__calculate_numtiles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tiler.Tiler.__calculate_numtiles" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the total number of tiles required.</p>
+<p>__calculate_numtiles() -&gt; int</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.tiler.Tiler.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tiler.html#Tiler.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tiler.Tiler.run" title="Link to this definition">¶</a></dt>

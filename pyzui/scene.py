@@ -40,6 +40,9 @@ class Scene(PhysicalObject):
         Scene()
     Parameters :
         None
+
+    Scene() --> None
+
     Scene objects are used to hold a collection of MediaObjects.
     This class manages all the objects that can be rendered in the interface.
     """
@@ -82,7 +85,7 @@ class Scene(PhysicalObject):
         Parameters :
             filename['string']
 
-        save(filename) --> None
+        Scene.save(filename) --> None
 
         Save the scene to the location given by `filename`.
 
@@ -93,6 +96,7 @@ class Scene(PhysicalObject):
         position (x, y) of the scene origin defined by Scene.__set_origin()
         then thread safely, once sorted `__objects`, cicles through them, 
         writing for each of them a line on `fielname` with:  
+            
             object type: `type(mediaobject).__name__`
             
             media id: mediaobject.media_id (replacing '%3A' with :) 
@@ -142,7 +146,7 @@ class Scene(PhysicalObject):
         Parameters :
             mediaobject[':doc:`mediaobject <pyzui.mediaobject>`']
 
-        add(mediaobject) --> None
+        Scene.add(mediaobject) --> None
 
         Add mediaobject from the list of elements that get to
         be rendered on the scene.
@@ -165,7 +169,7 @@ class Scene(PhysicalObject):
         Parameters :
             mediaobject[':doc:`mediaobject <pyzui.mediaobject>`']
 
-        remove(mediaobject) --> None
+        Scene.remove(mediaobject) --> None
 
         Remove mediaobject from the list of elements that get to
         be rendered on the scene and purge all'related tiles through
@@ -213,7 +217,9 @@ class Scene(PhysicalObject):
         mediaobject.onscreen_area attribute wich return mediaobject
         current onscreen area.
 
-        See :  mediaobject.onscreen_area 
+        See :  `mediaobject.onscreen_area <file:///home/asd/
+        Projects/pyzui/docs/build/html/pyzui.mediaobject.html
+        #module-pyzui.mediaobject>`_ 
 
         """
         with self.__objects_lock:
@@ -229,7 +235,7 @@ class Scene(PhysicalObject):
         Parameters :
             pos[tuple[float,float]]
 
-        get(pos) --> None
+        Scene.get(pos) --> None
         
         Return the foremost visible `MediaObject` which overlaps the
         on-screen point `pos`. `pos` is the mouse polition at the last
@@ -268,7 +274,7 @@ class Scene(PhysicalObject):
         Parameters :
             painter['QtGui.QPainter'], draft['bool']
         
-        render(painter, draft) --> errors['MediaObject.LoadError']
+        Scene.render(painter, draft) --> errors['MediaObject.LoadError']
 
         Render the scene using the given `painter`.
 
@@ -395,13 +401,13 @@ class Scene(PhysicalObject):
         Parameters :
             t['float']
         
-        step(t) --> None
+        Scene.step(t) --> None
 
         Step the scene and all contained `MediaObjects` forward `t` seconds
         in time.
     
         Thread safely cycle through `__objects` mediaobjects set and for each of 
-        them call `PhysicalObject.step(self, t) <file:///home/asd/Projects/
+        them call `PhysicalObject.step(t) <file:///home/asd/Projects/
         pyzui/docs/build/html/_modules/pyzui/physicalobject.html#
         PhysicalObject.step>`_ inherited method.
         """
@@ -414,8 +420,27 @@ class Scene(PhysicalObject):
 
     @property
     def moving(self):
-        """Boolean value indicating whether the scene or any contained
-        `MediaObject`s have a non-zero velocity."""
+        """
+        Constructor : 
+            Scene.moving
+        Parameters :
+            None
+
+        Scene.moving --> bool
+
+        Boolean value indicating whether the scene or any contained
+        `MediaObject`s have a non-zero velocity.
+
+        Checks if the inherited, vx, vy and vz values from `PhysicalObject`
+        are not zero. If it is that means the scene is moving and True is 
+        returned, If thats not the case it thread safely cycle trough 
+        mediaobjects in `__objects` checking if `mediaobject.moving` is
+        True. If it is True is returned. `mediaobject.moving` is also 
+        inherited property of `PhysicalObject` class.
+
+        See : `physicalobject <file:///home/asd/Projects/pyzui/docs/build/html/
+        pyzui.physicalobject.html#module-pyzui.physicalobject>`_ 
+        """
         if not (self.vx == self.vy == self.vz == 0):
             return True
         else:
@@ -426,20 +451,63 @@ class Scene(PhysicalObject):
 
         return False
 
-
     def __get_origin(self):
-        """Location of the scene's origin."""
+        """
+        Constructor :
+            __get_origin
+        Parameters :
+            None
+
+        __get_origin --> PhysicalObject._x['float'], PhysicalObject._y['float'] 
+
+        Returns the Scene origin by retrieving _x, and _y variables
+        inherited by PhysicalObject class
+        """
         return (self._x, self._y)
 
     def __set_origin(self, origin):
+        """
+        Constructor :
+            __set_origin
+        Parameters :
+            origin[__get_origin[PhysicalObject._x['float'], 
+            PhysicalObject._y['float']]]
+
+        __set_origin --> None
+
+        Set PhysicalObject._x and PhysicalObject._y parameters to new values 
+        given as input parameters.
+        """
         self._x, self._y = origin
+
     origin = property(__get_origin, __set_origin)
+    """Creating Scene.origin property with __get_origin as getter and 
+    __set_origin as setter"""
 
     def __get_viewport_size(self):
-        """Dimensions of the viewport."""
+        """
+        Contructor :
+            __get_viewport_size
+        Parameters :
+            None
+
+        __get_viewport_size --> self.__viewport_size 
+        
+        Return the current dimensions of the viewport.
+        """
         return self.__viewport_size
 
     def __set_viewport_size(self, viewport_size):
+        """
+        Constructor :
+            __set_viewport_size(viewport_size)
+        Parameters :
+            viewport_size['__get_viewport_size']
+
+        __get_viewport_size --> None
+
+        
+        """
         ## centre the scene in the new viewport
         old_viewport_size = self.__viewport_size
         self._x += (viewport_size[0] - old_viewport_size[0]) / 2
@@ -458,9 +526,15 @@ class Scene(PhysicalObject):
 
 
 def new():
-    """Create and return a new `Scene` object.
+    """
+    Constructor :
+        Scene.new()
+    Parameters :
+        None
 
-    new() -> Scene
+    new() --> Scene['PhysicaObject']
+
+    Create and return a new `Scene` object.
     """
     return Scene()
 

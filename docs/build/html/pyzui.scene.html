@@ -8,6 +8,7 @@
     <title>pyzui.scene module &#8212; PyZui 0.11 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=cc7d0dec" />
     <script src="_static/documentation_options.js?v=086c1757"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -43,6 +44,7 @@
 <dt>Parameters :</dt><dd><p>None</p>
 </dd>
 </dl>
+<p>Scene() –&gt; None</p>
 <p>Scene objects are used to hold a collection of MediaObjects.
 This class manages all the objects that can be rendered in the interface.</p>
 <p>New scene is made by initiating a <a class="reference internal" href="pyzui.physicalobject.html"><span class="doc">physicalobject</span></a>,</p>
@@ -66,7 +68,7 @@ given by declaring RLock list <cite>__objects_lock</cite>,</p>
 <dt>Parameters :</dt><dd><p>filename[‘string’]</p>
 </dd>
 </dl>
-<p>save(filename) –&gt; None</p>
+<p>Scene.save(filename) –&gt; None</p>
 <p>Save the scene to the location given by <cite>filename</cite>.</p>
 <p>It is recommended (but not compulsory) that the file extension of
 filename be ‘.pzs’.</p>
@@ -92,7 +94,7 @@ writing for each of them a line on <cite>fielname</cite> with:</p>
 <dt>Parameters :</dt><dd><p>mediaobject[’<a class="reference internal" href="pyzui.mediaobject.html"><span class="doc">mediaobject</span></a>’]</p>
 </dd>
 </dl>
-<p>add(mediaobject) –&gt; None</p>
+<p>Scene.add(mediaobject) –&gt; None</p>
 <p>Add mediaobject from the list of elements that get to
 be rendered on the scene.</p>
 <p>Inside a thread safe selection: add <cite>mediaobject</cite> to this scene by
@@ -110,7 +112,7 @@ it is nothing is done, otherwise mediaobject it’s appended to the
 <dt>Parameters :</dt><dd><p>mediaobject[’<a class="reference internal" href="pyzui.mediaobject.html"><span class="doc">mediaobject</span></a>’]</p>
 </dd>
 </dl>
-<p>remove(mediaobject) –&gt; None</p>
+<p>Scene.remove(mediaobject) –&gt; None</p>
 <p>Remove mediaobject from the list of elements that get to
 be rendered on the scene and purge all’related tiles through
 TileManager.purge(‘media_id’) method.</p>
@@ -124,6 +126,22 @@ gets purged from the TileManager.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyzui.scene.Scene.__sort_objects">
+<span class="sig-name descname"><span class="pre">__sort_objects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.scene.Scene.__sort_objects" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Contructor :</dt><dd><p><cite>internal method</cite> self.__sort_objects()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__sort_objects() –&gt; None</p>
+<p>Sort self.__objects from largest to smallest area using
+mediaobject.onscreen_area attribute wich return mediaobject
+current onscreen area.</p>
+<p>See :  <a class="reference external" href="file:///home/asd/Projects/pyzui/docs/build/html/pyzui.mediaobject.html#module-pyzui.mediaobject">mediaobject.onscreen_area</a></p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyzui.scene.Scene.get">
 <span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/scene.html#Scene.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.scene.Scene.get" title="Link to this definition">¶</a></dt>
 <dd><dl class="simple">
@@ -132,7 +150,7 @@ gets purged from the TileManager.</p>
 <dt>Parameters :</dt><dd><p>pos[tuple[float,float]]</p>
 </dd>
 </dl>
-<p>get(pos) –&gt; None</p>
+<p>Scene.get(pos) –&gt; None</p>
 <p>Return the foremost visible <cite>MediaObject</cite> which overlaps the
 on-screen point <cite>pos</cite>. <cite>pos</cite> is the mouse polition at the last
 left or right click mouse event.</p>
@@ -153,7 +171,7 @@ left or right click mouse event.</p>
 <dt>Parameters :</dt><dd><p>painter[‘QtGui.QPainter’], draft[‘bool’]</p>
 </dd>
 </dl>
-<p>render(painter, draft) –&gt; errors[‘MediaObject.LoadError’]</p>
+<p>Scene.render(painter, draft) –&gt; errors[‘MediaObject.LoadError’]</p>
 <p>Render the scene using the given <cite>painter</cite>.</p>
 <p>If <cite>draft</cite> is True, draft mode is enabled. Otherwise High-Quality mode
 is enabled.</p>
@@ -176,25 +194,79 @@ will be returned. Otherwise the empty list will be returned.</p>
 <dt>Parameters :</dt><dd><p>t[‘float’]</p>
 </dd>
 </dl>
-<p>step(t) –&gt; None</p>
+<p>Scene.step(t) –&gt; None</p>
 <p>Step the scene and all contained <cite>MediaObjects</cite> forward <cite>t</cite> seconds
 in time.</p>
-<p>Thread safely cycle through __objects mediaobject set and for each of
-them call <a class="reference external" href="file:///home/asd/Projects/pyzui/docs/build/html/_modules/pyzui/physicalobject.html#PhysicalObject.step">PhysicalObject.step(self, t)</a> inherited method</p>
+<p>Thread safely cycle through <cite>__objects</cite> mediaobjects set and for each of
+them call <a class="reference external" href="file:///home/asd/Projects/pyzui/docs/build/html/_modules/pyzui/physicalobject.html#PhysicalObject.step">PhysicalObject.step(t)</a> inherited method.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyzui.scene.Scene.moving">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">moving</span></span><a class="headerlink" href="#pyzui.scene.Scene.moving" title="Link to this definition">¶</a></dt>
-<dd><p>Boolean value indicating whether the scene or any contained
+<dd><dl class="simple">
+<dt>Constructor:</dt><dd><p>Scene.moving</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>Scene.moving –&gt; bool</p>
+<p>Boolean value indicating whether the scene or any contained
 <a href="#id5"><span class="problematic" id="id6">`</span></a>MediaObject`s have a non-zero velocity.</p>
+<p>Checks if the inherited, vx, vy and vz values from <cite>PhysicalObject</cite>
+are not zero. If it is that means the scene is moving and True is
+returned, If thats not the case it thread safely cycle trough
+mediaobjects in <cite>__objects</cite> checking if <cite>mediaobject.moving</cite> is
+True. If it is True is returned. <cite>mediaobject.moving</cite> is also
+inherited property of <cite>PhysicalObject</cite> class.</p>
+<p>See : <a class="reference external" href="file:///home/asd/Projects/pyzui/docs/build/html/pyzui.physicalobject.html#module-pyzui.physicalobject">physicalobject</a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.scene.Scene.__get_origin">
+<span class="sig-name descname"><span class="pre">__get_origin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.scene.Scene.__get_origin" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Constructor :</dt><dd><p>__get_origin</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__get_origin –&gt; PhysicalObject._x[‘float’], PhysicalObject._y[‘float’]</p>
+<p>Returns the Scene origin by retrieving _x, and _y variables
+inherited by PhysicalObject class</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.scene.Scene.__set_origin">
+<span class="sig-name descname"><span class="pre">__set_origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.scene.Scene.__set_origin" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Constructor :</dt><dd><p>__set_origin</p>
+</dd>
+<dt>Parameters :</dt><dd><p>__get_origin[PhysicalObject._x[‘float’], PhysicalObject._y[‘float’]]</p>
+</dd>
+</dl>
+<p>__set_origin –&gt; None</p>
+<p>Set PhysicalObject._x and PhysicalObject._y parameters to new values
+given as input parameters.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyzui.scene.Scene.origin">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">origin</span></span><a class="headerlink" href="#pyzui.scene.Scene.origin" title="Link to this definition">¶</a></dt>
-<dd><p>Location of the scene’s origin.</p>
+<dd><p>Creating Scene.origin property with __get_origin as getter and
+__set_origin as setter</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.scene.Scene.__get_viewport_size">
+<span class="sig-name descname"><span class="pre">__get_viewport_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.scene.Scene.__get_viewport_size" title="Link to this definition">¶</a></dt>
+<dd><p>Dimensions of the viewport.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.scene.Scene.__set_viewport_size">
+<span class="sig-name descname"><span class="pre">__set_viewport_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewport_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.scene.Scene.__set_viewport_size" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyzui.scene.Scene.viewport_size">

@@ -8,6 +8,7 @@
     <title>pyzui.mainwindow module &#8212; PyZui 0.11 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=cc7d0dec" />
     <script src="_static/documentation_options.js?v=086c1757"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -58,6 +59,149 @@ in qzui class</p>
 <dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.minimumSizeHint">
 <span class="sig-name descname"><span class="pre">minimumSizeHint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QSize</span></span></span><a class="reference internal" href="_modules/pyzui/mainwindow.html#MainWindow.minimumSizeHint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.mainwindow.MainWindow.minimumSizeHint" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__show_error">
+<span class="sig-name descname"><span class="pre">__show_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">details</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__show_error" title="Link to this definition">¶</a></dt>
+<dd><p>Show an error dialog with the given text and details.</p>
+<p>__show_error(string, string) -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__create_action">
+<span class="sig-name descname"><span class="pre">__create_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shortcut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__create_action" title="Link to this definition">¶</a></dt>
+<dd><p>Create a QAction and store it in self.__action[key].</p>
+<p>__create_action(string, string, function, string, bool) -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_new_scene">
+<span class="sig-name descname"><span class="pre">__action_new_scene</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_new_scene" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new scene.</p>
+<p>__action_new_scene() -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_open_scene">
+<span class="sig-name descname"><span class="pre">__action_open_scene</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_open_scene" title="Link to this definition">¶</a></dt>
+<dd><p>Open a scene from the location chosen by the user in a file
+selection dialog.</p>
+<p>__action_open_scene() -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_open_scene_home">
+<span class="sig-name descname"><span class="pre">__action_open_scene_home</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_open_scene_home" title="Link to this definition">¶</a></dt>
+<dd><p>Open the Home scene.</p>
+<p>__action_open_scene_home() -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_save_scene">
+<span class="sig-name descname"><span class="pre">__action_save_scene</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_save_scene" title="Link to this definition">¶</a></dt>
+<dd><p>Save the scene to the location chosen by the user in a file
+selection dialog.</p>
+<p>__action_save_scene() -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_save_screenshot">
+<span class="sig-name descname"><span class="pre">__action_save_screenshot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_save_screenshot" title="Link to this definition">¶</a></dt>
+<dd><p>Save a screenshot to the location chosen by the user in a file
+selection dialog.</p>
+<p>__action_save_screenshot() -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__open_media">
+<span class="sig-name descname"><span class="pre">__open_media</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">media_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__open_media" title="Link to this definition">¶</a></dt>
+<dd><p>Open the media with the given media_id.</p>
+<p>If add is True then the media will be fit to the screen and added to
+the scene. Otherwise it will be returned.</p>
+<p>__open_media(string[, bool]) -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_open_media_local">
+<span class="sig-name descname"><span class="pre">__action_open_media_local</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_open_media_local" title="Link to this definition">¶</a></dt>
+<dd><p>Open media from the location chosen by the user in a file
+selection dialog.</p>
+<p>__action_open_media_local() -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_open_media_string">
+<span class="sig-name descname"><span class="pre">__action_open_media_string</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_open_media_string" title="Link to this definition">¶</a></dt>
+<dd><p>Render string given by the user in an input dialog.</p>
+<p>__action_open_media_string() -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_open_media_dir">
+<span class="sig-name descname"><span class="pre">__action_open_media_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_open_media_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Open media from the directory chosen by the user in a file
+selection dialog.</p>
+<p>__action_open_media_dir() -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_set_fps">
+<span class="sig-name descname"><span class="pre">__action_set_fps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">act</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_set_fps" title="Link to this definition">¶</a></dt>
+<dd><p>Set the framerate to the value specified in act.</p>
+<p>__action_set_fps(QAction) -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_fullscreen">
+<span class="sig-name descname"><span class="pre">__action_fullscreen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_fullscreen" title="Link to this definition">¶</a></dt>
+<dd><p>Toggles fullscreen mode.</p>
+<p>__action_fullscreen() -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_about">
+<span class="sig-name descname"><span class="pre">__action_about</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_about" title="Link to this definition">¶</a></dt>
+<dd><p>Display the PyZUI about dialog.</p>
+<p>__action_about() -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_about_qt">
+<span class="sig-name descname"><span class="pre">__action_about_qt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_about_qt" title="Link to this definition">¶</a></dt>
+<dd><p>Display the Qt about dialog.</p>
+<p>__action_about_qt() -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_save_and_quit">
+<span class="sig-name descname"><span class="pre">__action_save_and_quit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_save_and_quit" title="Link to this definition">¶</a></dt>
+<dd><p>Calls the __action_save_scene and then quit.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_confirm_quit">
+<span class="sig-name descname"><span class="pre">__action_confirm_quit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_confirm_quit" title="Link to this definition">¶</a></dt>
+<dd><p>Ask user if it really wants to quit.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__action_set_zoom_sensitivity">
+<span class="sig-name descname"><span class="pre">__action_set_zoom_sensitivity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__action_set_zoom_sensitivity" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__create_actions">
+<span class="sig-name descname"><span class="pre">__create_actions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__create_actions" title="Link to this definition">¶</a></dt>
+<dd><p>Create the QActions required for the interface.</p>
+<p>__create_actions() -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.__create_menus">
+<span class="sig-name descname"><span class="pre">__create_menus</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mainwindow.MainWindow.__create_menus" title="Link to this definition">¶</a></dt>
+<dd><p>Create the menus.</p>
+<p>__create_menus() -&gt; None</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.mainwindow.MainWindow.showEvent">

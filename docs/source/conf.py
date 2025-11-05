@@ -20,10 +20,11 @@ release = '0.11'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',        # automatically document Python docstrings
-    'sphinx.ext.autosummary',    # create summary tables
-    'sphinx.ext.napoleon',       # support for Google/NumPy-style docstrings
-    'sphinx.ext.viewcode',       # add links to highlighted source code
+    'sphinx.ext.autodoc',           # automatically document Python docstrings
+    'sphinx.ext.autosummary',       # create summary tables
+    'sphinx.ext.napoleon',          # support for Google/NumPy-style docstrings
+    'sphinx.ext.viewcode',          # add links to highlighted source code
+    "sphinx.ext.autodoc.typehints", # To show type hints 
 ] 
 
 templates_path = ['_templates']
@@ -35,6 +36,10 @@ autosummary_generate = True
 
 # -- Options for autodoc -----------------------------------------------------
 
+autodoc_default_options = {
+    'members': True,
+    'private-members': True,   # include names starting with _ or __
+}
 autodoc_member_order = 'bysource'
 autodoc_typehints = 'description'
 autoclass_content = 'both'
@@ -45,3 +50,4 @@ autoclass_content = 'both'
 
 html_theme = 'alabaster'
 html_static_path = ['_static']
+html_css_files = ['custom.css']
