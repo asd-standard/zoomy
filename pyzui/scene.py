@@ -47,8 +47,8 @@ class Scene(PhysicalObject):
     This class manages all the objects that can be rendered in the interface.
     """
 
-    #: an arbitrary size that is common to all scenes upon creation
-    standard_viewport_size = (256,256)
+    #: an arbitrary size that is common to all scenes upon creation `scene size`
+    standard_viewport_size = (1280,720)
 
     def __init__(self):
 
@@ -506,8 +506,17 @@ class Scene(PhysicalObject):
 
         __get_viewport_size --> None
 
-        
+        Centers PhysicalObject._x and PhysicalObject._y to the new input 
+        parameter viewport_size center, also adjourn PhysicalObject.centre. 
+        Calculates the ratio between previous viewport_size center and the 
+        input parameter viewport_size, then calls PhysicalObject.zoom() and
+        zooms the scene by base 2 log of the ratio between old and new 
+        viewport.
+
+        then adjourn the __viewport_size variable with the value given by 
+        the input parameter viewport_size.        
         """
+
         ## centre the scene in the new viewport
         old_viewport_size = self.__viewport_size
         self._x += (viewport_size[0] - old_viewport_size[0]) / 2
@@ -521,9 +530,11 @@ class Scene(PhysicalObject):
         self.zoom(math.log(scale, 2))
 
         self.__viewport_size = viewport_size
+
         
     viewport_size = property(__get_viewport_size, __set_viewport_size)
-
+    """Creating Scene.viewport_size property with __get_viewport_size as 
+    getter and __set_viewport_size as setter"""
 
 def new():
     """
@@ -540,27 +551,52 @@ def new():
 
 
 def load_scene(filename):
-    """Load the scene stored in the file given by `filename`.
+    """
+    Constructor :
+        Scene.load_scene(filename)
+    Parameters :
+        filename['string']
 
-    open(string) -> Scene
+    Scene.load_scene(filename) --> Scene['PhysicalObject']
 
-    Precondition: `filename` refers to a file in the same format as produced by
-    `Scene.save`
+    Load the scene stored in the file given by `filename`.
+
+    Precondition: `filename` refers to a file in the same format as 
+    produced by `Scene.save`
+
+    See source code comments:
+
+        `source <file:///home/asd/Projects/pyzui/docs/build/html/_modules/pyzui/
+        scene.html#load_scene>`_
     """
 
+    #Declares a new Scene() object
     scene = Scene()
     
-    #print(filename)
-    
-    f = open(filename) #removed , 'U' as second argument
+    f = open(filename) 
 
+    #First line of a scene file ale zoomlevel _x and _y of th scene origin
     zoomlevel, ox, oy = f.readline().split()
     scene.zoomlevel = float(zoomlevel)
     scene.origin = (float(ox), float(oy))
 
+    """
+    Any line then represent a mediaobject, namely composed by :    
+            
+            media id: mediaobject.media_id (replacing '%3A' with :) 
+            
+            zoomlevel: mediaobject.zoomlevel 
+            
+            x position: mediaobject.pos[0]
+            
+            y position: mediaobject.pos[1]
+    """
     for line in f:
         class_name, media_id, zoomlevel, x, y = line.split()
         media_id = urllib.parse.unquote(media_id)
+
+        """ mediaobjects are sorted by their mediaobject type and 
+        initialized by their appropiate classes"""
 
         if class_name == 'TiledMediaObject' or \
            class_name == 'StringMediaObject' or \
@@ -576,8 +612,11 @@ def load_scene(filename):
                 mediaobject = SVGMediaObject(
                     media_id, scene)
 
+            #mediaobjects are zoomed by the level read in the loaded scene file
             mediaobject.zoomlevel = float(zoomlevel)
+            #mediaobjects are placed in the position red in the loaded scene file
             mediaobject.pos = (float(x), float(y))
+            #mediaobjects are added to the scene
             scene.add(mediaobject)
         else:
             ## ignore instances of any other class

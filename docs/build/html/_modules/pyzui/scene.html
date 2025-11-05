@@ -82,8 +82,8 @@
 <span class="sd">    This class manages all the objects that can be rendered in the interface.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1">#: an arbitrary size that is common to all scenes upon creation</span>
-    <span class="n">standard_viewport_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span><span class="mi">256</span><span class="p">)</span>
+    <span class="c1">#: an arbitrary size that is common to all scenes upon creation `scene size`</span>
+    <span class="n">standard_viewport_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1280</span><span class="p">,</span><span class="mi">720</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -523,7 +523,8 @@
 <span class="sd">        Constructor :</span>
 <span class="sd">            __set_origin</span>
 <span class="sd">        Parameters :</span>
-<span class="sd">            __get_origin[PhysicalObject._x[&#39;float&#39;], PhysicalObject._y[&#39;float&#39;]]</span>
+<span class="sd">            origin[__get_origin[PhysicalObject._x[&#39;float&#39;], </span>
+<span class="sd">            PhysicalObject._y[&#39;float&#39;]]]</span>
 
 <span class="sd">        __set_origin --&gt; None</span>
 
@@ -534,13 +535,41 @@
 
     <span class="n">origin</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_origin</span><span class="p">,</span> <span class="n">__set_origin</span><span class="p">)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creating Scene.origin property with __get_origin as getter and </span>
-<span class="sd">    __set_origin as setter &quot;&quot;&quot;</span>
+<span class="sd">    __set_origin as setter&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__get_viewport_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dimensions of the viewport.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Contructor :</span>
+<span class="sd">            __get_viewport_size</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        __get_viewport_size --&gt; self.__viewport_size </span>
+<span class="sd">        </span>
+<span class="sd">        Return the current dimensions of the viewport.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__viewport_size</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__set_viewport_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">viewport_size</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor :</span>
+<span class="sd">            __set_viewport_size(viewport_size)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            viewport_size[&#39;__get_viewport_size&#39;]</span>
+
+<span class="sd">        __get_viewport_size --&gt; None</span>
+
+<span class="sd">        Centers PhysicalObject._x and PhysicalObject._y to the new input </span>
+<span class="sd">        parameter viewport_size center, also adjourn PhysicalObject.centre. </span>
+<span class="sd">        Calculates the ratio between previous viewport_size center and the </span>
+<span class="sd">        input parameter viewport_size, then calls PhysicalObject.zoom() and</span>
+<span class="sd">        zooms the scene by base 2 log of the ratio between old and new </span>
+<span class="sd">        viewport.</span>
+
+<span class="sd">        then adjourn the __viewport_size variable with the value given by </span>
+<span class="sd">        the input parameter viewport_size.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1">## centre the scene in the new viewport</span>
         <span class="n">old_viewport_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__viewport_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">+=</span> <span class="p">(</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">old_viewport_size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
@@ -554,17 +583,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__viewport_size</span> <span class="o">=</span> <span class="n">viewport_size</span>
-        
-    <span class="n">viewport_size</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_viewport_size</span><span class="p">,</span> <span class="n">__set_viewport_size</span><span class="p">)</span></div>
 
+        
+    <span class="n">viewport_size</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_viewport_size</span><span class="p">,</span> <span class="n">__set_viewport_size</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creating Scene.viewport_size property with __get_viewport_size as </span>
+<span class="sd">    getter and __set_viewport_size as setter&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="new">
 <a class="viewcode-back" href="../../pyzui.scene.html#pyzui.scene.new">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">new</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create and return a new `Scene` object.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructor :</span>
+<span class="sd">        Scene.new()</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        None</span>
 
-<span class="sd">    new() -&gt; Scene</span>
+<span class="sd">    new() --&gt; Scene[&#39;PhysicaObject&#39;]</span>
+
+<span class="sd">    Create and return a new `Scene` object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Scene</span><span class="p">()</span></div>
 
@@ -573,27 +610,52 @@
 <div class="viewcode-block" id="load_scene">
 <a class="viewcode-back" href="../../pyzui.scene.html#pyzui.scene.load_scene">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_scene</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the scene stored in the file given by `filename`.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructor :</span>
+<span class="sd">        Scene.load_scene(filename)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        filename[&#39;string&#39;]</span>
 
-<span class="sd">    open(string) -&gt; Scene</span>
+<span class="sd">    Scene.load_scene(filename) --&gt; Scene[&#39;PhysicalObject&#39;]</span>
 
-<span class="sd">    Precondition: `filename` refers to a file in the same format as produced by</span>
-<span class="sd">    `Scene.save`</span>
+<span class="sd">    Load the scene stored in the file given by `filename`.</span>
+
+<span class="sd">    Precondition: `filename` refers to a file in the same format as </span>
+<span class="sd">    produced by `Scene.save`</span>
+
+<span class="sd">    See source code comments:</span>
+
+<span class="sd">        `source &lt;file:///home/asd/Projects/pyzui/docs/build/html/_modules/pyzui/</span>
+<span class="sd">        scene.html#load_scene&gt;`_</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1">#Declares a new Scene() object</span>
     <span class="n">scene</span> <span class="o">=</span> <span class="n">Scene</span><span class="p">()</span>
     
-    <span class="c1">#print(filename)</span>
-    
-    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="c1">#removed , &#39;U&#39; as second argument</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> 
 
+    <span class="c1">#First line of a scene file ale zoomlevel _x and _y of th scene origin</span>
     <span class="n">zoomlevel</span><span class="p">,</span> <span class="n">ox</span><span class="p">,</span> <span class="n">oy</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
     <span class="n">scene</span><span class="o">.</span><span class="n">zoomlevel</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">zoomlevel</span><span class="p">)</span>
     <span class="n">scene</span><span class="o">.</span><span class="n">origin</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ox</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">oy</span><span class="p">))</span>
 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Any line then represent a mediaobject, namely composed by :    </span>
+<span class="sd">            </span>
+<span class="sd">            media id: mediaobject.media_id (replacing &#39;%3A&#39; with :) </span>
+<span class="sd">            </span>
+<span class="sd">            zoomlevel: mediaobject.zoomlevel </span>
+<span class="sd">            </span>
+<span class="sd">            x position: mediaobject.pos[0]</span>
+<span class="sd">            </span>
+<span class="sd">            y position: mediaobject.pos[1]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">class_name</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">zoomlevel</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
         <span class="n">media_id</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">unquote</span><span class="p">(</span><span class="n">media_id</span><span class="p">)</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; mediaobjects are sorted by their mediaobject type and </span>
+<span class="sd">        initialized by their appropiate classes&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">class_name</span> <span class="o">==</span> <span class="s1">&#39;TiledMediaObject&#39;</span> <span class="ow">or</span> \
            <span class="n">class_name</span> <span class="o">==</span> <span class="s1">&#39;StringMediaObject&#39;</span> <span class="ow">or</span> \
@@ -609,8 +671,11 @@
                 <span class="n">mediaobject</span> <span class="o">=</span> <span class="n">SVGMediaObject</span><span class="p">(</span>
                     <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
 
+            <span class="c1">#mediaobjects are zoomed by the level read in the loaded scene file</span>
             <span class="n">mediaobject</span><span class="o">.</span><span class="n">zoomlevel</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">zoomlevel</span><span class="p">)</span>
+            <span class="c1">#mediaobjects are placed in the position red in the loaded scene file</span>
             <span class="n">mediaobject</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+            <span class="c1">#mediaobjects are added to the scene</span>
             <span class="n">scene</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mediaobject</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1">## ignore instances of any other class</span>

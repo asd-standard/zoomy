@@ -55,8 +55,8 @@ given by declaring RLock list <cite>__objects_lock</cite>,</p>
 <cite>__logger</cite>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyzui.scene.Scene.standard_viewport_size">
-<span class="sig-name descname"><span class="pre">standard_viewport_size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(256,</span> <span class="pre">256)</span></em><a class="headerlink" href="#pyzui.scene.Scene.standard_viewport_size" title="Link to this definition">¶</a></dt>
-<dd><p>an arbitrary size that is common to all scenes upon creation</p>
+<span class="sig-name descname"><span class="pre">standard_viewport_size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(1280,</span> <span class="pre">720)</span></em><a class="headerlink" href="#pyzui.scene.Scene.standard_viewport_size" title="Link to this definition">¶</a></dt>
+<dd><p>an arbitrary size that is common to all scenes upon creation <cite>scene size</cite></p>
 </dd></dl>
 
 <dl class="py method">
@@ -242,7 +242,8 @@ inherited by PhysicalObject class</p>
 <dd><dl class="simple">
 <dt>Constructor :</dt><dd><p>__set_origin</p>
 </dd>
-<dt>Parameters :</dt><dd><p>__get_origin[PhysicalObject._x[‘float’], PhysicalObject._y[‘float’]]</p>
+<dt>Parameters :</dt><dd><p>origin[__get_origin[PhysicalObject._x[‘float’],
+PhysicalObject._y[‘float’]]]</p>
 </dd>
 </dl>
 <p>__set_origin –&gt; None</p>
@@ -260,18 +261,41 @@ __set_origin as setter</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.scene.Scene.__get_viewport_size">
 <span class="sig-name descname"><span class="pre">__get_viewport_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.scene.Scene.__get_viewport_size" title="Link to this definition">¶</a></dt>
-<dd><p>Dimensions of the viewport.</p>
+<dd><dl class="simple">
+<dt>Contructor :</dt><dd><p>__get_viewport_size</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__get_viewport_size –&gt; self.__viewport_size</p>
+<p>Return the current dimensions of the viewport.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.scene.Scene.__set_viewport_size">
 <span class="sig-name descname"><span class="pre">__set_viewport_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewport_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.scene.Scene.__set_viewport_size" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="simple">
+<dt>Constructor :</dt><dd><p>__set_viewport_size(viewport_size)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>viewport_size[‘__get_viewport_size’]</p>
+</dd>
+</dl>
+<p>__get_viewport_size –&gt; None</p>
+<p>Centers PhysicalObject._x and PhysicalObject._y to the new input
+parameter viewport_size center, also adjourn PhysicalObject.centre.
+Calculates the ratio between previous viewport_size center and the
+input parameter viewport_size, then calls PhysicalObject.zoom() and
+zooms the scene by base 2 log of the ratio between old and new
+viewport.</p>
+<p>then adjourn the __viewport_size variable with the value given by
+the input parameter viewport_size.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyzui.scene.Scene.viewport_size">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">viewport_size</span></span><a class="headerlink" href="#pyzui.scene.Scene.viewport_size" title="Link to this definition">¶</a></dt>
-<dd><p>Dimensions of the viewport.</p>
+<dd><p>Creating Scene.viewport_size property with __get_viewport_size as
+getter and __set_viewport_size as setter</p>
 </dd></dl>
 
 </dd></dl>
@@ -279,17 +303,33 @@ __set_origin as setter</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.scene.new">
 <span class="sig-prename descclassname"><span class="pre">pyzui.scene.</span></span><span class="sig-name descname"><span class="pre">new</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/scene.html#new"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.scene.new" title="Link to this definition">¶</a></dt>
-<dd><p>Create and return a new <cite>Scene</cite> object.</p>
-<p>new() -&gt; Scene</p>
+<dd><dl class="simple">
+<dt>Constructor :</dt><dd><p>Scene.new()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>new() –&gt; Scene[‘PhysicaObject’]</p>
+<p>Create and return a new <cite>Scene</cite> object.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.scene.load_scene">
 <span class="sig-prename descclassname"><span class="pre">pyzui.scene.</span></span><span class="sig-name descname"><span class="pre">load_scene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/scene.html#load_scene"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.scene.load_scene" title="Link to this definition">¶</a></dt>
-<dd><p>Load the scene stored in the file given by <cite>filename</cite>.</p>
-<p>open(string) -&gt; Scene</p>
-<p>Precondition: <cite>filename</cite> refers to a file in the same format as produced by
-<cite>Scene.save</cite></p>
+<dd><dl class="simple">
+<dt>Constructor :</dt><dd><p>Scene.load_scene(filename)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>filename[‘string’]</p>
+</dd>
+</dl>
+<p>Scene.load_scene(filename) –&gt; Scene[‘PhysicalObject’]</p>
+<p>Load the scene stored in the file given by <cite>filename</cite>.</p>
+<p>Precondition: <cite>filename</cite> refers to a file in the same format as
+produced by <cite>Scene.save</cite></p>
+<p>See source code comments:</p>
+<blockquote>
+<div><p><a class="reference external" href="file:///home/asd/Projects/pyzui/docs/build/html/_modules/pyzui/scene.html#load_scene">source</a></p>
+</div></blockquote>
 </dd></dl>
 
 </section>
