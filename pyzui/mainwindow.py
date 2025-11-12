@@ -243,7 +243,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         __action_open_media_string() -> None
         """
-        dialog = DialogWindows._open_string_input_dialog()
+        dialog = DialogWindows.open_new_string_input_dialog()
         try :
             ok, uri = dialog._run_dialog() 
         except Exception as e :

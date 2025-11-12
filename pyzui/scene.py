@@ -26,7 +26,9 @@ import math
 
 
 from PyQt5 import QtCore
+from PyQt5.QtGui import QColor
 
+from .dialogwindows import DialogWindows
 from .physicalobject import PhysicalObject
 from . import tilemanager as TileManager
 from . import mediaobject as MediaObject
@@ -395,6 +397,49 @@ class Scene(PhysicalObject):
                 #Draing border using QtGui.QPainter attributes
                 painter.setPen(QtCore.Qt.blue)
                 painter.drawRect(x1, y1, x2-x1, y2-y1)
+
+            if type(self.right_selection).__name__ == 'StringMediaObject' :
+
+                for i in range(len(self.__objects)) :
+
+                    if self.__objects[i]._media_id[14:] ==\
+                      self.right_selection._media_id[14:] :                        
+                        
+                        dialog = DialogWindows.modify_string_input_dialog(\
+                            self.__objects[i]._media_id)
+                        try :
+                            ok, media_id, string_color, edited_text = dialog._run_dialog() 
+
+                        except Exception as e :   
+                            ok = False
+                            media_id = False      
+                        if ok and media_id: 
+                            
+                            lines = []
+                            lines.append([])
+
+                            j=0
+                            for k in list(edited_text) :  
+                                    # If a \n char is encountered a new sublist is appended to self.lines              
+                                    if k == '\n' :                    
+                                        lines.append([])
+                                        j += 1
+                                    else :
+                                    # Otherwise the char is appended to the currend self.lines sublist
+                                        lines[j] += str(k)
+                            
+                            self.__objects[i].lines = lines
+                            self.__objects[i]._media_id = media_id
+                            self.__objects[i]._StringMediaObject__str = edited_text
+                            self.__objects[i]._StringMediaObject__color =\
+                                QColor('#'+string_color)
+                            #print(self.__objects[i].__dict__)
+                        self.right_selection = None
+                        break
+
+
+
+
         #returning MediaObject.LoadError
         return errors
 

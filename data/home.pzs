@@ -1,6 +1,7 @@
-0.0	0.0	0.0
-TiledMediaObject	dynamic:fern	-0.4	-50.0	30.0
-StringMediaObject	string:64aa00:Py	0.75	95.0	40.0
-StringMediaObject	string:ffffff:ZUI	0.75	160.0	40.0
+-0.3853729826791517	86.8520921321732	59.91224286415377
 StringMediaObject	string:64aa00:0.1	-2.0	250.0	50.0
-StringMediaObject	string:64aa00:http%3A//da.vidr.cc/projects/pyzui/	-4.0	163.0	92.0
+StringMediaObject	string:64aa00:http://da.vidr.cc/projects/pyzui/	-4.0	163.0	92.0
+StringMediaObject	string:64aa00:0.11	-0.06565961197165839	1304.263004430353	424.51639781605303
+StringMediaObject	string:ffffff:ZUI	3.0245419179585635	839.1943786939611	153.5845000785136
+TiledMediaObject	dynamic:fern	1.266521295783774	-105.0481962079321	66.23238128307545
+StringMediaObject	string:64aa00:Py	3.7960249399381545	325.5361433633896	-43.83508048774999

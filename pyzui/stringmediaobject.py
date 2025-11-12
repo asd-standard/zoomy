@@ -24,14 +24,22 @@ from PyQt5 import QtCore, QtGui
 from .mediaobject import MediaObject, LoadError, RenderMode
 
 class StringMediaObject(MediaObject): #, Thread
-    """StringMediaObject objects are used to represent strings that can be
+    """
+    StringMediaObject['MediaObject']
+
+    Constructor : 
+        StringMediaObject(string, scene)
+    Parameters :
+        media_id['string'], scene['Scene']
+
+    StringMediaObject(media_id, scene) --> None
+
+    StringMediaObject objects are used to represent strings that can be
     rendered in the zui"
 
     `media_id` should be of the form 'string:rrggbb:foobar', where 'rrggbb' is
     a string of three two-digit hexadecimal numbers representing the colour of
     the text, and 'foobar' is the string to be displayed.
-
-    Constructor: StringMediaObject(string, Scene)
     """
     def __init__(self, media_id, scene):
         
@@ -42,6 +50,7 @@ class StringMediaObject(MediaObject): #, Thread
             raise LoadError("the supplied colour is invalid")
         
         self.__str = self._media_id[len('string:rrggbb:'):] 
+
         self.lines = []
         self.lines.append([])
         
@@ -88,7 +97,6 @@ class StringMediaObject(MediaObject): #, Thread
         != RenderMode.Invisible:
             ## don't bother rendering if the string is too
             ## small to be seen, or invisible mode is set
-
             
             painter.setPen(self.__color)
             painter.setFont(self.__font)
@@ -107,7 +115,7 @@ class StringMediaObject(MediaObject): #, Thread
             if len(self.lines) > 1 :
                 yr = y                
                 rectlist = []
-                            
+                
                 for i in range(len(self.lines)) :
                     '''for every line in self.lines a QRectF is created below the previous one 
                     for the line to be painted on by QtPainter.drawText method
@@ -162,13 +170,13 @@ class StringMediaObject(MediaObject): #, Thread
             
             if len(self.lines) > 1 :
                 # Returns the width of the longest line in the paragraph stack.
-                w = fontmetrics.width(''.join(sorted(self.lines, key=len, reverse=True)[0][:])+'--------')         
+                w = fontmetrics.width(''.join(sorted(self.lines, key=len, reverse=True)[0][:])+'-------')         
                 # Returns the font height times the number of lines in the paragraph stack                
                 h = fontmetrics.height()*len(self.lines)
                 
             else :
                 # Is the sting is not a paragraph just gives the lenght of the string 
-                w = fontmetrics.width(self.__str+'--')
+                w = fontmetrics.width(self.__str+'-')
                 # and the height of the font
                 h = fontmetrics.height()                
             return (w,h)
