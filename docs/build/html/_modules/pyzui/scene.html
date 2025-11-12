@@ -67,6 +67,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.stringmediaobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringMediaObject</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.svgmediaobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">SVGMediaObject</span>
 
+
 <div class="viewcode-block" id="Scene">
 <a class="viewcode-back" href="../../pyzui.scene.html#pyzui.scene.Scene">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Scene</span><span class="p">(</span><span class="n">PhysicalObject</span><span class="p">):</span>
@@ -78,8 +79,13 @@
 
 <span class="sd">    Scene() --&gt; None</span>
 
-<span class="sd">    Scene objects are used to hold a collection of MediaObjects.</span>
-<span class="sd">    This class manages all the objects that can be rendered in the interface.</span>
+<span class="sd">    `Scene` objects are used to hold a collection of `MediaObjects`.</span>
+<span class="sd">    This class manages all the objects that can be rendered in the interface,</span>
+<span class="sd">    Their positioning (_x, _y) on the scene and their zoom (_z) and the acces to </span>
+<span class="sd">    them.</span>
+
+<span class="sd">    Scene objects can also be saved to files, and loaded from files.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">#: an arbitrary size that is common to all scenes upon creation `scene size`</span>
@@ -99,8 +105,8 @@
 <span class="sd">        `__logger`. </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1">#initialize mediobject centre, position and velocity</span>
-        <span class="n">PhysicalObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>        
+        <span class="c1">#initialize mediobject centre, position and velocity </span>
+        <span class="n">PhysicalObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>        
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__objects_lock</span> <span class="o">=</span> <span class="n">RLock</span><span class="p">()</span>
@@ -717,7 +723,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Reading Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html#project-structure">Project structure</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

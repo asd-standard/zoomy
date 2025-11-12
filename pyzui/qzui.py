@@ -24,11 +24,21 @@ from threading import Thread
 from . import scene as Scene
 from . import tilemanager as TileManager
 
-class QZUI(QtWidgets.QWidget, Thread):
-    """QZUI widgets that are used for rendering the ZUI.
-        This class defines all the methods to retieve events, Mouse, Keyboard, ecc
-    Constructor: QZUI([QWidget])
+class QZUI(QtWidgets.QWidget, Thread) : 
     """
+    Constructor :
+        QZUI(QtWidgets.QWidget)
+    Parameters :
+        QtWidGets.QWidget
+
+    qzui.QZUI(QtWidgets.QWidget) --> None
+
+    QZUI widgets that are used for rendering the ZUI.
+    This class defines all the methods to retieve events, Mouse, Keyboard, ecc
+    
+    """
+
+    #: link error variable to QtCore.pyqtSignal()
     error = QtCore.pyqtSignal()
 
     def __init__(self, parent=None, framerate=10, zoom_sensitivity=50):

@@ -72,6 +72,8 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     
+<div class="viewcode-block" id="DialogWindows._open_zoom_sensitivity_input_dialog">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows._open_zoom_sensitivity_input_dialog">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_open_zoom_sensitivity_input_dialog</span><span class="p">(</span><span class="n">current_sensitivity</span><span class="p">):</span>
         
         <span class="n">dialog</span> <span class="o">=</span> <span class="n">QInputDialog</span><span class="p">()</span>
@@ -83,10 +85,13 @@
         <span class="n">ok_pressed</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
         <span class="n">text_input</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">textValue</span><span class="p">()</span>
         
-        <span class="k">return</span> <span class="n">ok_pressed</span><span class="p">,</span> <span class="n">text_input</span>     
+        <span class="k">return</span> <span class="n">ok_pressed</span><span class="p">,</span> <span class="n">text_input</span>     </div>
 
 
 
+
+<div class="viewcode-block" id="DialogWindows._open_string_input_dialog">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows._open_string_input_dialog">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">_open_string_input_dialog</span><span class="p">():</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;gather the string trough a dialog and let select the color.</span>
 <span class="sd">also gives a selection column of the last 20 used colors. </span>
@@ -131,6 +136,8 @@
                     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;0000ff</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
                     <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
+<div class="viewcode-block" id="DialogWindows._open_string_input_dialog._color_square">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows._open_string_input_dialog._color_square">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="nf">_color_square</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color_code</span><span class="p">):</span>
             <span class="n">color_square</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
             <span class="n">color</span> <span class="o">=</span> <span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">color_code</span><span class="p">))</span>
@@ -142,11 +149,17 @@
 
             <span class="n">color_square</span><span class="o">.</span><span class="n">paintEvent</span> <span class="o">=</span> <span class="n">paintEvent</span>
             
-            <span class="k">return</span> <span class="n">color_square</span>
+            <span class="k">return</span> <span class="n">color_square</span></div>
 
+
+<div class="viewcode-block" id="DialogWindows._open_string_input_dialog._color_button_click">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows._open_string_input_dialog._color_button_click">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="nf">_color_button_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">string_color</span> <span class="o">=</span> <span class="n">color</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">string_color</span> <span class="o">=</span> <span class="n">color</span></div>
 
+
+<div class="viewcode-block" id="DialogWindows._open_string_input_dialog._color_button">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows._open_string_input_dialog._color_button">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="nf">_color_button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color_code</span><span class="p">):</span>
             
             <span class="n">color_widget</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
@@ -177,9 +190,12 @@
             <span class="n">main_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
             <span class="n">main_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
 
-            <span class="k">return</span> <span class="n">color_widget</span>
+            <span class="k">return</span> <span class="n">color_widget</span></div>
+
                 
                 
+<div class="viewcode-block" id="DialogWindows._open_string_input_dialog._main_dialog">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows._open_string_input_dialog._main_dialog">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="nf">_main_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
 
             <span class="n">dialog</span> <span class="o">=</span> <span class="n">QDialog</span><span class="p">()</span>
@@ -226,8 +242,11 @@
             <span class="n">main_layout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">text_layout</span><span class="p">)</span>
             <span class="n">main_layout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">color_layout</span><span class="p">)</span>
             
-            <span class="k">return</span> <span class="n">dialog</span>
+            <span class="k">return</span> <span class="n">dialog</span></div>
 
+
+<div class="viewcode-block" id="DialogWindows._open_string_input_dialog._run_dialog">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows._open_string_input_dialog._run_dialog">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="nf">_run_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="n">dialog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main_dialog</span><span class="p">()</span>
             <span class="c1"># Run dialog and get result</span>
@@ -249,6 +268,8 @@
             
             <span class="k">if</span> <span class="n">ok</span> <span class="ow">and</span> <span class="n">uri</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">ok</span><span class="p">,</span> <span class="n">uri</span></div>
+</div>
+</div>
 
         
 
@@ -285,7 +306,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Reading Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html#project-structure">Project structure</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

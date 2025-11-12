@@ -45,8 +45,11 @@
 </dd>
 </dl>
 <p>Scene() –&gt; None</p>
-<p>Scene objects are used to hold a collection of MediaObjects.
-This class manages all the objects that can be rendered in the interface.</p>
+<p><cite>Scene</cite> objects are used to hold a collection of <cite>MediaObjects</cite>.
+This class manages all the objects that can be rendered in the interface,
+Their positioning (_x, _y) on the scene and their zoom (_z) and the acces to
+them.</p>
+<p>Scene objects can also be saved to files, and loaded from files.</p>
 <p>New scene is made by initiating a <a class="reference internal" href="pyzui.physicalobject.html"><span class="doc">physicalobject</span></a>,</p>
 <p>creating an objects list <cite>__objects</cite> and thread safe selection for <cite>__objects</cite>
 given by declaring RLock list <cite>__objects_lock</cite>,</p>
@@ -364,7 +367,8 @@ produced by <cite>Scene.save</cite></p>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation.html">Reading Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation.html#project-structure">Project structure</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

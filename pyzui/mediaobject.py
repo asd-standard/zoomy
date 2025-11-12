@@ -20,22 +20,26 @@
 
 import math
 
-from .physicalobject import PhysicalObject
+from .physicalobject import PhysicalObject        
 
-class MediaObject(PhysicalObject):
-    """MediaObject objects are used to represent media that can be rendered in
+class MediaObject(PhysicalObject) :
+    """
+    Constructor : 
+        MediaObject(media_id, scene)
+    Parameters :
+        media_id['string'], scene['Scene']
+
+    Media_object(media_id, scene) --> None
+
+    MediaObject objects are used to represent media that can be rendered in
     the ZUI.
 
-    Constructor: MediaObject(string, Scene)
     """
     def __init__(self, media_id, scene):
         """Create a new MediaObject from the media identified by `media_id`,
         and the parent Scene referenced by `scene`."""
-        #initialize mediobject centre, position and velocity        
+        #initialize mediobject centre, position and velocity
         PhysicalObject.__init__(self)
-        #self.PhysicalObject = PhysicalObject()        
-        #self.PhysicalObject.start()        
-        
 
         self._media_id = media_id
         self._scene = scene

@@ -43,8 +43,13 @@ class Scene(PhysicalObject):
 
     Scene() --> None
 
-    Scene objects are used to hold a collection of MediaObjects.
-    This class manages all the objects that can be rendered in the interface.
+    `Scene` objects are used to hold a collection of `MediaObjects`.
+    This class manages all the objects that can be rendered in the interface,
+    Their positioning (_x, _y) on the scene and their zoom (_z) and the acces to 
+    them.
+
+    Scene objects can also be saved to files, and loaded from files.
+
     """
 
     #: an arbitrary size that is common to all scenes upon creation `scene size`
@@ -64,7 +69,7 @@ class Scene(PhysicalObject):
         `__logger`. 
         """
 
-        #initialize mediobject centre, position and velocity
+        #initialize mediobject centre, position and velocity    
         PhysicalObject.__init__(self)        
 
         self.__objects = []

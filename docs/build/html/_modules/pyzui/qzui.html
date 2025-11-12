@@ -59,11 +59,21 @@
 
 <div class="viewcode-block" id="QZUI">
 <a class="viewcode-back" href="../../pyzui.qzui.html#pyzui.qzui.QZUI">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">QZUI</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Thread</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;QZUI widgets that are used for rendering the ZUI.</span>
-<span class="sd">        This class defines all the methods to retieve events, Mouse, Keyboard, ecc</span>
-<span class="sd">    Constructor: QZUI([QWidget])</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">QZUI</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Thread</span><span class="p">)</span> <span class="p">:</span> 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructor :</span>
+<span class="sd">        QZUI(QtWidgets.QWidget)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        QtWidGets.QWidget</span>
+
+<span class="sd">    qzui.QZUI(QtWidgets.QWidget) --&gt; None</span>
+
+<span class="sd">    QZUI widgets that are used for rendering the ZUI.</span>
+<span class="sd">    This class defines all the methods to retieve events, Mouse, Keyboard, ecc</span>
+<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: link error variable to QtCore.pyqtSignal()</span>
     <span class="n">error</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">framerate</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">zoom_sensitivity</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
@@ -362,7 +372,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Reading Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html#project-structure">Project structure</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

@@ -51,22 +51,30 @@
 
 <span class="sd">&quot;&quot;&quot;An object that obeys the laws of physics.&quot;&quot;&quot;</span>
 
-<span class="c1">#from threading import Thread</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Thread</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 
 <div class="viewcode-block" id="PhysicalObject">
 <a class="viewcode-back" href="../../pyzui.physicalobject.html#pyzui.physicalobject.PhysicalObject">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PhysicalObject</span><span class="p">():</span> <span class="c1">#removed object from class argument and Thread</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Physicalobject pobjects are used to represent anything that has a</span>
-<span class="sd">    3-dimensional position and velocity, where the z-dimension represents a</span>
-<span class="sd">    zoomlevel.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructor : </span>
+<span class="sd">        PhysicalObject()</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        None</span>
 
-<span class="sd">    Constructor: Physicalpobject()</span>
+<span class="sd">    PhysicalObject() --&gt; None</span>
+
+<span class="sd">    Physicalobject objects are sets of declarations and methods that are used </span>
+<span class="sd">    to represent anything that has a 3-dimensional position and velocity, </span>
+<span class="sd">    where the z-dimension represents a zoomlevel. </span>
+
+<span class="sd">    PhysicalObject gets declared on MediaObject and Scene initializations, </span>
+<span class="sd">    giving them the necessary attributes, (position, zoomlevel, damp factor</span>
+<span class="sd">    zoomlevel, eccetera).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new Physicalpobject at the origin with zero velocity.&quot;&quot;&quot;</span>
-              
-        <span class="c1">#Thread.__init__(self)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -79,9 +87,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 
 
-    <span class="c1">## the velocity is damped at each frame such that each second it is</span>
-    <span class="c1">## reduced by a factor of damping_factor:</span>
-    <span class="c1">##   v = u * damping_factor**-t</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;the velocity is damped at each frame such that each second it is </span>
+<span class="sd">    reduced by a factor of damping_factor: v = u * damping_factor**-t&quot;&quot;&quot;</span>
     <span class="n">damping_factor</span> <span class="o">=</span> <span class="mi">512</span> <span class="c1">#256</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__damp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
@@ -279,7 +286,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Reading Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html#project-structure">Project structure</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

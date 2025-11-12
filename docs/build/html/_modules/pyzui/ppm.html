@@ -152,12 +152,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_bytes_per_pixel</span> <span class="o">=</span> <span class="mi">3</span>
         
 
+<div class="viewcode-block" id="PPMTiler._scanchunk">
+<a class="viewcode-back" href="../../pyzui.ppm.html#pyzui.ppm.PPMTiler._scanchunk">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_scanchunk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">            Scan a chunk of ppm image bytes correspondent of a tile row \n</span>
 <span class="sd">            the row lenght of the tile is given by self._bytes_per_pixel*self._width \n </span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ppm_fileobj</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bytes_per_pixel</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">)</span> 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ppm_fileobj</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bytes_per_pixel</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">)</span> </div>
+
          
 
 
@@ -203,7 +206,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Reading Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html#project-structure">Project structure</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

@@ -71,6 +71,8 @@
     <span class="n">tilesize</span> <span class="o">=</span> <span class="mi">256</span>
     <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="mf">1.0</span>
 
+<div class="viewcode-block" id="OSMTileProvider._load_dynamic">
+<a class="viewcode-back" href="../../pyzui.osmtileprovider.html#pyzui.osmtileprovider.OSMTileProvider._load_dynamic">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_dynamic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">,</span> <span class="n">outfile</span><span class="p">):</span>
         <span class="n">media_id</span><span class="p">,</span> <span class="n">tilelevel</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="n">tile_id</span>
 
@@ -87,6 +89,7 @@
             <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;cannot reach server&quot;</span><span class="p">)</span></div>
+</div>
 
 </pre></div>
 
@@ -119,7 +122,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Reading Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html#project-structure">Project structure</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

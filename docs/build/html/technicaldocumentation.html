@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Project structure &#8212; PyZui 0.11 documentation</title>
+    <title>Reading Guide &#8212; PyZui 0.11 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=cc7d0dec" />
@@ -33,9 +33,43 @@
 
           <div class="body" role="main">
             
-  <section id="project-structure">
+  <section id="reading-guide">
+<h1>Reading Guide<a class="headerlink" href="#reading-guide" title="Link to this heading">¶</a></h1>
+<p>Each class or method, (private or pubblic), has it’s docstring,
+all’docstring starts with such form:</p>
+<dl class="simple">
+<dt>Constructor:</dt><dd><p>Class[‘var1’, ‘var2’, …]</p>
+</dd>
+</dl>
+<p>How the method is called or the class is initialized properly.</p>
+<p>‘var1’, ‘var2’, … are the class/method internal variable
+names on wich the input parameters are passed on.</p>
+<dl class="simple">
+<dt>Parameters :</dt><dd><p>var1[‘type(var1)’], var2[‘type(var2)’], …</p>
+</dd>
+</dl>
+<p>type(var1), type(var2) are variables types. In order to
+correctly call or initialize the method or class types
+have to match</p>
+<blockquote>
+<div><p>Class(‘var1’, ‘var2’, …) –&gt; type(Class(‘var1’, ‘var2’, …))</p>
+</div></blockquote>
+<p>Type returned by a proper call of the method or class initialization.</p>
+</section>
+<section id="project-structure">
 <h1>Project structure<a class="headerlink" href="#project-structure" title="Link to this heading">¶</a></h1>
 <ul class="simple">
+<li><dl class="simple">
+<dt><a class="reference internal" href="pyzui.physicalobject.html"><span class="doc">physicalobject</span></a></dt><dd><ul>
+<li><dl class="simple">
+<dt><a class="reference internal" href="pyzui.mediaobject.html"><span class="doc">mediaobject</span></a></dt><dd><ul>
+<li><p><a class="reference internal" href="pyzui.tiledmediaobject.html"><span class="doc">tiledmediaobject</span></a></p></li>
+<li><p><a class="reference internal" href="pyzui.stringmediaobject.html"><span class="doc">stringmediaobject</span></a></p></li>
+<li><p><a class="reference internal" href="pyzui.svgmediaobject.html"><span class="doc">svgmediaobject</span></a></p></li>
+</ul>
+</dd>
+</dl>
+</li>
 <li><dl class="simple">
 <dt><a class="reference internal" href="pyzui.scene.html"><span class="doc">scene</span></a></dt><dd><ul>
 <li><p><a class="reference internal" href="pyzui.qzui.html"><span class="doc">qzui</span></a></p></li>
@@ -46,17 +80,6 @@
 </dd>
 </dl>
 </li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><a class="reference internal" href="pyzui.physicalobject.html"><span class="doc">physicalobject</span></a></dt><dd><ul>
-<li><dl class="simple">
-<dt><a class="reference internal" href="pyzui.mediaobject.html"><span class="doc">mediaobject</span></a></dt><dd><ul>
-<li><p><a class="reference internal" href="pyzui.tiledmediaobject.html"><span class="doc">tiledmediaobject</span></a></p></li>
-<li><p><a class="reference internal" href="pyzui.stringmediaobject.html"><span class="doc">stringmediaobject</span></a></p></li>
-<li><p><a class="reference internal" href="pyzui.svgmediaobject.html"><span class="doc">svgmediaobject</span></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -76,6 +99,7 @@
 </li>
 <li><p><a class="reference internal" href="pyzui.ppm.html"><span class="doc">ppm</span></a></p></li>
 <li><p><a class="reference internal" href="pyzui.tilestore.html"><span class="doc">tilestore</span></a></p></li>
+<li><p><a class="reference internal" href="pyzui.tilecache.html"><span class="doc">tilecache</span></a></p></li>
 <li><dl class="simple">
 <dt><a class="reference internal" href="pyzui.tile.html"><span class="doc">tile</span></a></dt><dd><ul>
 <li><p><a class="reference internal" href="pyzui.tilemanager.html"><span class="doc">tilemanager</span></a></p></li>
@@ -83,9 +107,9 @@
 <li><dl class="simple">
 <dt><a class="reference internal" href="pyzui.tileprovider.html"><span class="doc">tileprovider</span></a></dt><dd><ul>
 <li><p><a class="reference internal" href="pyzui.statictileprovider.html"><span class="doc">statictileprovider</span></a></p></li>
-<li><p><a class="reference internal" href="pyzui.dynamictileprovider.html"><span class="doc">dynamictileprovider</span></a></p></li>
 <li><dl class="simple">
-<dt><a class="reference internal" href="pyzui.osmtileprovider.html"><span class="doc">osmtileprovider</span></a></dt><dd><ul>
+<dt><a class="reference internal" href="pyzui.dynamictileprovider.html"><span class="doc">dynamictileprovider</span></a></dt><dd><ul>
+<li><p><a class="reference internal" href="pyzui.osmtileprovider.html"><span class="doc">osmtileprovider</span></a></p></li>
 <li><p><a class="reference internal" href="pyzui.globalmosaictileprovider.html"><span class="doc">globalmosaictileprovider</span></a></p></li>
 <li><p><a class="reference internal" href="pyzui.mandeltileprovider.html"><span class="doc">mandeltileprovider</span></a></p></li>
 <li><p><a class="reference internal" href="pyzui.ferntileprovider.html"><span class="doc">ferntileprovider</span></a></p></li>
@@ -134,7 +158,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Project structure</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Reading Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#project-structure">Project structure</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

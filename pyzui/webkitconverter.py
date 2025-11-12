@@ -30,7 +30,14 @@ from PyQt5 import QtCore, QtGui, QtSvg, QtWebEngineWidgets, QtWidgets
 from .converter import Converter
 
 class WebKitConverter(Converter):
-    """WebKitConverter objects are used for rendering webpages.
+    """
+    Constructor : 
+        WebKitConverter(Converter)
+    Parameters :
+        Converter['string','string']
+    
+    
+    WebKitConverter objects are used for rendering webpages.
 
     `infile` may be either a URI or the location of a local file.
 
@@ -38,7 +45,6 @@ class WebKitConverter(Converter):
     (see <http://doc.trolltech.com/qimage.html
     #reading-and-writing-image-files>)
 
-    Constructor: WebKitConverter(string, string)
     """
     def __init__(self, infile, outfile):
         Converter.__init__(self, infile, outfile)

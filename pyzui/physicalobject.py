@@ -22,16 +22,24 @@
 import math
 
 class PhysicalObject(): #removed object from class argument and Thread
-    """Physicalobject pobjects are used to represent anything that has a
-    3-dimensional position and velocity, where the z-dimension represents a
-    zoomlevel.
+    """
+    Constructor : 
+        PhysicalObject()
+    Parameters :
+        None
 
-    Constructor: Physicalpobject()
+    PhysicalObject() --> None
+
+    Physicalobject objects are sets of declarations and methods that are used 
+    to represent anything that has a 3-dimensional position and velocity, 
+    where the z-dimension represents a zoomlevel. 
+
+    PhysicalObject gets declared on MediaObject and Scene initializations, 
+    giving them the necessary attributes, (position, zoomlevel, damp factor
+    zoomlevel, eccetera).
     """
     def __init__(self):
         """Create a new Physicalpobject at the origin with zero velocity."""
-              
-        #Thread.__init__(self)
 
         self._x = 0.0
         self._y = 0.0
@@ -44,9 +52,8 @@ class PhysicalObject(): #removed object from class argument and Thread
         self._centre = (0,0)
 
 
-    ## the velocity is damped at each frame such that each second it is
-    ## reduced by a factor of damping_factor:
-    ##   v = u * damping_factor**-t
+    """the velocity is damped at each frame such that each second it is 
+    reduced by a factor of damping_factor: v = u * damping_factor**-t"""
     damping_factor = 512 #256
 
     def __damp(self, velocity, t):

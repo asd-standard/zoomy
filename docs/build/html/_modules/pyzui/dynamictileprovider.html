@@ -76,15 +76,20 @@
     <span class="n">tilesize</span> <span class="o">=</span> <span class="mi">256</span>
     <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="c1">## width / height</span>
 
+<div class="viewcode-block" id="DynamicTileProvider._load_dynamic">
+<a class="viewcode-back" href="../../pyzui.dynamictileprovider.html#pyzui.dynamictileprovider.DynamicTileProvider._load_dynamic">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_dynamic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">,</span> <span class="n">outfile</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform whatever actions necessary to load the tile identified by</span>
 <span class="sd">        the given tile_id into the location given by outfile.</span>
 
 <span class="sd">        _load_dynamic(tuple&lt;string,int,int,int&gt;, string)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
+        <span class="k">pass</span></div>
 
 
+
+<div class="viewcode-block" id="DynamicTileProvider._load">
+<a class="viewcode-back" href="../../pyzui.dynamictileprovider.html#pyzui.dynamictileprovider.DynamicTileProvider._load">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">):</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">TileStore</span><span class="o">.</span><span class="n">get_tile_path</span><span class="p">(</span>
             <span class="n">tile_id</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">filext</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filext</span><span class="p">)</span>
@@ -99,6 +104,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;error loading tile, &quot;</span>
                 <span class="s2">&quot;assuming it is unavailable&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span></div>
+</div>
 
 </pre></div>
 
@@ -131,7 +137,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Reading Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html#project-structure">Project structure</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

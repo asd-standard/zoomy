@@ -53,24 +53,28 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.physicalobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhysicalObject</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.physicalobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhysicalObject</span>        
 
 <div class="viewcode-block" id="MediaObject">
 <a class="viewcode-back" href="../../pyzui.mediaobject.html#pyzui.mediaobject.MediaObject">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">MediaObject</span><span class="p">(</span><span class="n">PhysicalObject</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;MediaObject objects are used to represent media that can be rendered in</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MediaObject</span><span class="p">(</span><span class="n">PhysicalObject</span><span class="p">)</span> <span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructor : </span>
+<span class="sd">        MediaObject(media_id, scene)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        media_id[&#39;string&#39;], scene[&#39;Scene&#39;]</span>
+
+<span class="sd">    Media_object(media_id, scene) --&gt; None</span>
+
+<span class="sd">    MediaObject objects are used to represent media that can be rendered in</span>
 <span class="sd">    the ZUI.</span>
 
-<span class="sd">    Constructor: MediaObject(string, Scene)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new MediaObject from the media identified by `media_id`,</span>
 <span class="sd">        and the parent Scene referenced by `scene`.&quot;&quot;&quot;</span>
-        <span class="c1">#initialize mediobject centre, position and velocity        </span>
-        <span class="n">PhysicalObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="c1">#self.PhysicalObject = PhysicalObject()        </span>
-        <span class="c1">#self.PhysicalObject.start()        </span>
-        
+        <span class="c1">#initialize mediobject centre, position and velocity</span>
+        <span class="n">PhysicalObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span> <span class="o">=</span> <span class="n">media_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span> <span class="o">=</span> <span class="n">scene</span>
@@ -359,7 +363,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Reading Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html#project-structure">Project structure</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
