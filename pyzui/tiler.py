@@ -122,9 +122,9 @@ class Tiler(Thread):
         row i.e. the first call must have row=0, then the next call must have
         row=1, etc.
         """
-        print('Tiler 125, Row', row)
+        #print('Tiler 125, Row', row)
         if row >= self.__numtiles_down_total:
-            print('tiler127 requested row does not exist')
+            #print('tiler127 requested row does not exist')
             ## requested row does not exist
             return None
 

@@ -385,6 +385,7 @@ also gives a selection column of the last 20 used colors.
                     print('Error')
                 try :
                     media_id = 'string:'+str(self.string_color)+str(':') + str(self.text_edit.toPlainText())
+                    
                 except Exception as e :
                     print('Error', e)
                 ok = True

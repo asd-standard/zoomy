@@ -25,8 +25,6 @@ from .mediaobject import MediaObject, LoadError, RenderMode
 
 class StringMediaObject(MediaObject): #, Thread
     """
-    StringMediaObject['MediaObject']
-
     Constructor : 
         StringMediaObject(string, scene)
     Parameters :
@@ -35,40 +33,38 @@ class StringMediaObject(MediaObject): #, Thread
     StringMediaObject(media_id, scene) --> None
 
     StringMediaObject objects are used to represent strings that can be
-    rendered in the zui"
+    rendered in the zui
 
-    `media_id` should be of the form 'string:rrggbb:foobar', where 'rrggbb' is
-    a string of three two-digit hexadecimal numbers representing the colour of
-    the text, and 'foobar' is the string to be displayed.
+    `StringMediaObject.media_id` should be of the form 'string:rrggbb:foobar', 
+    where 'rrggbb' is a string of three two-digit hexadecimal numbers 
+    representing the colour of the text, and 'foobar' is the string to be 
+    displayed.
     """
     def __init__(self, media_id, scene):
         
+        """Initialize a new MediaObject from the media identified by `media_id`,
+        and the parent Scene referenced by `scene`."""
         MediaObject.__init__(self, media_id, scene)
+        
+        #Get color code 'rrggbb' form media_id string and assing it to hexcol variable
         hexcol = self._media_id[len('string:'):len('string:rrggbb')]
+        #initialize and assign QtGui.QColor wich can then be passed to QtPainter.setpen 
         self.__color = QtGui.QColor('#' + hexcol)
+        #checks if color is valid to QtGuiQColor() and if not an error is raised 
         if not self.__color.isValid():
             raise LoadError("the supplied colour is invalid")
         
+        """Gets to be displayed text `foobar` from media_id string and assing it
+        to self.__str variable.
+        """
         self.__str = self._media_id[len('string:rrggbb:'):] 
 
         self.lines = []
         self.lines.append([])
         
-        # in order for a multi line string to be rendered of the exact size self.lines have to be 
-        # set to the right value before self.onscreen_size method gets called
-        '''
-        cdef char* c_str = self.__str
-        j=0
-        i=0
-        while c_str[i] != 0:
-            if c_str[i] == 10:  # ASCII value of '\n'
-                self.lines.append([])
-                j += 1
-            else:
-                self.lines[j].append(c_str[i].decode('ascii'))  # convert char to Python str
-            i += 1
-            #gives error, expected bytes, str found
-        '''
+        """in order for a multi line string to be rendered of the exact size self.lines 
+        have to be set to the right value before self.onscreen_size method gets called"""
+        
         j=0
         for i in list(self.__str) :  
                 # If a \n char is encountered a new sublist is appended to self.lines              
