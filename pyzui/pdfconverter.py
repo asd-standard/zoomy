@@ -61,6 +61,7 @@ class PDFConverter(Converter):
             ## determine which files are for which page
             ## filename[5:-4] extracts '1234' from 'page-1234.ppm'
             page_filename[int(filename[5:-4])] = filename
+        
         num_pages = len(page_filename)
         f = []
 
@@ -105,6 +106,7 @@ class PDFConverter(Converter):
             shutil.copyfileobj(f[i], fout)
 
         fout.close()
+        
 
 
     def run(self):
@@ -118,9 +120,9 @@ class PDFConverter(Converter):
             stdout = process.communicate()[0]
 
             if process.returncode == 0:
-                #try:
-                self.__merge(tmpdir)
-                '''
+                try:
+                    self.__merge(tmpdir)
+            
                 except Exception as e:
                     self.error = 'Error in PDFConverter.__merge() \n' + str(e)
                     self._logger.error(self.error)
@@ -130,7 +132,7 @@ class PDFConverter(Converter):
                     except:
                         self.__logger.exception("unable to unlink temporary "
                             "file '%s'" % self._outfile)
-                 '''         
+                          
             else:
                 self.error = "conversion failed with return code %d:\n%s" % \
                     (process.returncode, stdout)
