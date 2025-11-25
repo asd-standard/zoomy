@@ -98,7 +98,7 @@ class PhysicalObject(): #removed object from class argument and Thread
         self._x += dx
         self._y += dy
 
-
+    
     def zoom(self, amount):
         """Zoom by the given `amount` with the centre maintaining its position
         on the screen.
@@ -106,7 +106,7 @@ class PhysicalObject(): #removed object from class argument and Thread
         zoom(float) -> None
         """
 
-        ## P is the onscreen position of the centre
+        ## P is the onscreen objec position of the centre
         ## C is the coordinates of the centre
         ## zoomlevel' = zoomlevel + amount
         ## P  = pos  + C * 2**zoomlevel
@@ -116,11 +116,12 @@ class PhysicalObject(): #removed object from class argument and Thread
         ## solving for P = P' yields:
         ##   pos' = P - (P - pos) * 2**amount
 
+
         Px, Py = self.centre
         self._x = Px - (Px - self._x) * 2**amount
         self._y = Py - (Py - self._y) * 2**amount
         self._z += amount
-
+    
 
     def aim(self, v, s, t=None):
         """Calculate the initial velocity such that at time `t` the relative
@@ -183,24 +184,31 @@ class PhysicalObject(): #removed object from class argument and Thread
     def __set_zoomlevel(self, zoomlevel):
         self._z = zoomlevel
     zoomlevel = property(__get_zoomlevel, __set_zoomlevel)
-
+    
+    '''
+    TN (take note) this center setter getter definition applies to Scenes 
+    objects, MediaObjects have their own centre definition.
+    '''
     def __get_centre(self):
-        """The on-screen coordinates of the centre of the pobject (the
+        """The on-screen coordinates of the centre of the object (the
         point that will maintain its position on the screen as the
-        pobject is being zoomed).
+        object is being zoomed).
         """
         ## we need to convert pobject-coordinate C to
         ## screen-coordinate P:
         ## P = pos + C * 2**zoomlevel
         return (self._x + self._centre[0] * 2**self._z,
                 self._y + self._centre[1] * 2**self._z)
+    
     def __set_centre(self, centre):
         ## we need to convert screen-coordinate P to
-        ## pobject-coordinate C:
+        ## object-coordinate C:
         ## P = pos + C * 2**zoomlevel
         ##   => C = (P - pos) * 2**-zoomlevel
+
         self._centre = ((centre[0] - self._x) * 2**-self._z,
                         (centre[1] - self._y) * 2**-self._z)
+    
     centre = property(__get_centre, __set_centre)
 
 

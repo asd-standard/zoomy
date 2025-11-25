@@ -18,7 +18,7 @@
 
 """PDF rasterizer based upon either Xpdf or Poppler."""
 
-
+import inspect
 
 import subprocess
 import tempfile
@@ -52,7 +52,7 @@ class PDFConverter(Converter):
         self._logger.info("merging pages")
         self._progress = 0.5
 
-        total_width = 0
+        #total_width = 0
         total_height = 0
 
         page_filename = {}
@@ -68,38 +68,23 @@ class PDFConverter(Converter):
         for i in range(num_pages):
             ## open files and process headers
             wip_file = os.path.join(tmpdir, page_filename[i+1])
-            print('WIP_FILE \n', wip_file)
+            
             f.append(open(wip_file, 'rb'))
             try:
                 width, height = read_ppm_header(f[i])
+            
             except IOError as e:
-                raise IOError("error loading PPM images "
+                print("error loading PPM images ",\
                     "produced by pdftoppm: %s" % e)
+                print("Truncating PDF")
+                        
 
             total_height += height
             
-            if total_width == 0:
-                total_width = width
-                
-            elif total_width != width:
-                #raise IOError("all pages must have the same width", i)
-                if total_width > width :
-                    print('WIP_FILE 1 \n', wip_file)
-                    print(width, ' ', height, ' ', total_width)
-                    enlarge_ppm_file(wip_file, width, height, (total_width-width))
-                    #except Exception as e :
-                    #    print(e)
-                elif width > total_width :
-                    print('WIP_FILE 2\n', wip_file)                    
-                    for j in range(i) :
-                        print(j)                        
-                        enlarge_ppm_file(wip_file, total_width, height, (width-total_width))
-
 
         fout = open(self._outfile, 'wb')
-        print('TOTAL_WIDTH \n', total_width)
-        print('outfile', self._outfile)
-        fout.write(("P6\n" + str(total_width) + " " + str(total_height) + "\n255\n").encode('latin-1'))
+        
+        fout.write(("P6\n" + str(width) + " " + str(total_height) + "\n255\n").encode('latin-1'))
 
         for i in range(num_pages):
             ## concatenate pixel data into output file
@@ -108,8 +93,9 @@ class PDFConverter(Converter):
         fout.close()
         
 
-
+    #'-scale-to',str(1000),
     def run(self):
+
         with TileStore.disk_lock:
             tmpdir = tempfile.mkdtemp()
             self._logger.info("calling pdftoppm")
@@ -122,7 +108,7 @@ class PDFConverter(Converter):
             if process.returncode == 0:
                 try:
                     self.__merge(tmpdir)
-            
+                
                 except Exception as e:
                     self.error = 'Error in PDFConverter.__merge() \n' + str(e)
                     self._logger.error(self.error)

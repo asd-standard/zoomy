@@ -34,6 +34,65 @@ class MediaObject(PhysicalObject) :
     MediaObject objects are used to represent media that can be rendered in
     the ZUI.
 
+    Screen view it's fixed unless user change mainwindow size on the screen.
+    Both scene and MediaObjects have their own reference systems so that zooms
+    can be applied bot to Scene and Mediaobject indipendently trough their 
+    reference system transformation.
+
+    You can think about it as fixed window looking at a scene that can strecth or
+    shrink beneath it, at the same time individual mediaobject can also strecth 
+    or shrink. The fixed window can move on the 2d plane.
+
+    World 
+     --------------------------------------->
+    |   Scene
+    |  @ ------------------------------+--->
+    |  |  ViewPort        MediaObj     |                 
+    |  |  (Screen View)   *-------+--> |       
+    |  |                  |   &   |    |   
+    |  |               %  +-------"    |      
+    |  |                  |            |
+    |  |                  ∨            |
+    |  |                               | 
+    |  +-------------------------------#
+    |  |
+    |  ∨
+    ∨  
+
+    Legend:
+    (All attributes are relative to screen view)
+    * -> MediaObject.topleft()
+    " -> MediaObject.bottomright()
+    & -> MediaObject.center() 
+    # -> Scene.viewport_size()
+    % -> Scene.center()
+    @ -> Scene.origin()
+
+    MediaObject topleft coordinates relative to screen view are given by:
+
+    MediaObject.topleft[0-1] = \
+    self._scene.origin[0-1] + self.pos[0-1] * (2 ** self._scene.zoomlevel)
+
+    Where self.pos[0-1] it's MediaObject position relative to Scene reference 
+    system wich get's scaled by 2** of scene zoom level
+
+    MediaObject centre coordinates relative to screen view are given firstly by
+    calculating image center coordinates relative to Scene reference coordinates:
+
+    C_s[0-1] = self.pos[0-1] + self._centre[0-1] * 2**self._z
+
+    Where self._centre[0-1] are center coordinates relative to the mediaobject
+    frame of reference and self._z it's MediaObject reference frame scaling 
+    (zoom).
+
+    Take note that self.pos[0-1] dosen't get to be scaled by self._z as that 
+    position it's relative to Scene reference frame.
+
+    Then we can calculate MediaObject centre coordinates relative to screen view as:
+
+    MediaObject.centre[0-1] = self._scene.origin[0] + C_s[0-1] * 2**self._scene.zoomlevel
+
+    
     """
     def __init__(self, media_id, scene):
         """Create a new MediaObject from the media identified by `media_id`,
@@ -62,6 +121,9 @@ class MediaObject(PhysicalObject) :
 
         move(float, float) -> None
         """
+
+        #self._x and self._y correspond to self.pos[0] and self.pos[1], but 
+        #mediaobject.pos dosen't support += operation
         self._x += dx * (2 ** -self._scene.zoomlevel)
         self._y += dy * (2 ** -self._scene.zoomlevel)
 
@@ -193,7 +255,15 @@ class MediaObject(PhysicalObject) :
 
     @property
     def topleft(self):
-        """The on-screen positon of the top-left corner of the image."""
+        """The on-screen positon of the top-left corner of the image.
+        self._scene.origin -> the world-space X coordinate of the top-left of the 
+        screen view (the camera/view origin)
+        self.pos -> the object’s position inside the view before applying zoom
+        (a coordinate in the camera’s internal coordinate system)
+        
+        here self.pos() is mediaobject 
+        """
+        
         x = self._scene.origin[0] + self.pos[0] * (2 ** self._scene.zoomlevel)
         y = self._scene.origin[1] + self.pos[1] * (2 ** self._scene.zoomlevel)
         return (x,y)
@@ -201,7 +271,11 @@ class MediaObject(PhysicalObject) :
 
     @property
     def onscreen_size(self):
-        """The on-screen size of the image."""
+        """
+        The on-screen size of the image.
+        This gets inherited by higher order classes (StringMedia obj
+        TiledMedia obj ecc)
+        """
         pass
 
 
@@ -220,23 +294,50 @@ class MediaObject(PhysicalObject) :
         """The number of pixels the image occupies on the screen."""
         w,h = self.onscreen_size
         return w * h
-
+    
     def __get_pos(self):
-        """The position of the object."""
+        """
+        Constructor :
+            __get_pos
+        Parameters :
+            None
+
+        __set_origin --> MediaObject[float['_x']], MediaObject[float['_y']] 
+        """
         return (self._x, self._y)
+
     def __set_pos(self, pos):
+        '''
+        Constructor :
+            __set_pos(pos)
+        Parameters :
+            pos[MediaObject[float['_x']], MediaObject[float['_y']]]
+
+        __set_origin --> None
+
+        Set self._x, self._y variables to MediaObject position 
+        '''
         self._x, self._y = pos
+
     pos = property(__get_pos, __set_pos)
+    """Creating MediaObject.pos property with __get_pos as 
+    getter and __set_pos as setter"""
 
     def __get_centre(self):
         ## we need to convert image-coordinate C_i to
         ## screen-coordinate P (through scene-coordinate C_s):
         ##   P = scene.origin + C_s * 2**zoomlevel_s
         ## C_s = self.pos + C_i * 2**zoomlevel_i
-        C_s = (self._x + self._centre[0] * 2**self._z,
-               self._y + self._centre[1] * 2**self._z)
+
+        #This are the image coordinates relative to scene coordinates.
+
+        C_s = (self.pos[0] + self._centre[0] * 2**self._z,
+               self.pos[1] + self._centre[1] * 2**self._z)
+
+        #
         return (self._scene.origin[0] + C_s[0] * 2**self._scene.zoomlevel,
                 self._scene.origin[1] + C_s[1] * 2**self._scene.zoomlevel)
+
     def __set_centre(self, centre):
         ## we need to convert screen-coordinate P to
         ## image-coordinate C_i (through scene-coordinate C_s):
@@ -248,6 +349,7 @@ class MediaObject(PhysicalObject) :
                (centre[1] - self._scene.origin[1]) * 2**-self._scene.zoomlevel)
         self._centre = ((C_s[0] - self._x) * 2**-self._z,
                         (C_s[1] - self._y) * 2**-self._z)
+
     centre = property(__get_centre, __set_centre)
 
     def __str__(self):

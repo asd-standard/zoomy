@@ -153,7 +153,7 @@ def tiled(media_id):
     """
     #print('pyzui.tilestore-154',media_id)
     path = get_media_path(media_id)
-    #print(path)
+
     ##We have to understand what this return function does
     #print(os.path.join(path, "metadata"))
     return os.path.exists(os.path.join(path, "metadata")) and \

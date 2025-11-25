@@ -44,13 +44,12 @@ Project structure
     - :doc:`pdfconverter <pyzui.pdfconverter>`
     - :doc:`webkitconverter <pyzui.webkitconverter>`
 - :doc:`ppm <pyzui.ppm>`
-
+    - :doc:`tiler <pyzui.tiler>`
 - :doc:`tilestore <pyzui.tilestore>`
 - :doc:`tilecache <pyzui.tilecache>`
 
 - :doc:`tile <pyzui.tile>`
     - :doc:`tilemanager <pyzui.tilemanager>`
-    - :doc:`tiler <pyzui.tiler>`
     - :doc:`tileprovider <pyzui.tileprovider>`
         - :doc:`statictileprovider <pyzui.statictileprovider>`
         - :doc:`dynamictileprovider <pyzui.dynamictileprovider>`

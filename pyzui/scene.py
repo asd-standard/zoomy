@@ -69,6 +69,45 @@ class Scene(PhysicalObject):
 
         mouse selection variables `selection` and `right_selection` and logger setup
         `__logger`. 
+        
+        World::
+
+             --------------------------------------->
+            |   Scene
+            |  @ ------------------------------+--->
+            |  |  ViewPort        MediaObj     |                 
+            |  |  (Screen View)   *-------+--> |       
+            |  |                  |   &   |    |   
+            |  |               %  +-------"    |      
+            |  |                  |            |
+            |  |                  ∨            |
+            |  |                               | 
+            |  +-------------------------------#
+            |  |
+            |  ∨
+            ∨  
+
+        Legend:
+        (All MediaObject attributes are relative to screen view)
+        * -> MediaObject.topleft()
+        " -> MediaObject.bottomright()
+        & -> MediaObject.center() 
+        # -> Scene.viewport_size()
+        % -> Scene.center()
+        @ -> Scene.origin() 
+
+        We have a center relative to the scene, 'center' and a center relative
+        to the absolute frame of reference _center
+        
+        @ origin position of the scene it's relative to an absolute frame of 
+        reference, with 0,0 as it's origin.
+
+        % Scene center it's given by
+          scene.centre[0] = scene.origin + (Scene.viewport_size[0]/2)*2**(zoomlevel)
+          scene.centre[1] = scene.origin + (Scene.viewport_size[1]/2)*2**(zoomlevel)
+
+
+
         """
 
         #initialize mediobject centre, position and velocity    
@@ -83,7 +122,6 @@ class Scene(PhysicalObject):
         
         #commented out on 20250314 
         self.__logger = logging.getLogger("Scene")
-
 
     def save(self, filename):
         """
@@ -273,6 +311,29 @@ class Scene(PhysicalObject):
 
         return foremost
 
+    def zoom(self, amount):
+        """Zoom by the given `amount` with the centre maintaining its position
+        on the screen.
+
+        zoom(float) -> None
+        """
+
+        ## P is the onscreen objec position of the centre
+        ## C is the coordinates of the centre
+        ## zoomlevel' = zoomlevel + amount
+        ## P  = pos  + C * 2**zoomlevel
+        ##    => C = (P - pos) * 2**-zoomlevel
+        ## P' = pos' + C * 2**zoomlevel'
+        ##    = pos' + (P - pos) * 2**(zoomlevel'-zoomlevel)
+        ## solving for P = P' yields:
+        ##   pos' = P - (P - pos) * 2**amount
+
+
+        Px, Py = self.centre
+        self._x = Px - (Px - self._x) * 2**amount
+        self._y = Py - (Py - self._y) * 2**amount
+        self._z += amount
+    
 
     def render(self, painter, draft):
         """
@@ -370,7 +431,7 @@ class Scene(PhysicalObject):
             `painter`"""
 
             if self.selection :
-                #using mediaobject.topleft mediaobject.toptight attributes
+                #using mediaobject.topleft mediaobject.topright attributes
                 x1, y1 = self.selection.topleft
                 x2, y2 = self.selection.bottomright
 
@@ -518,7 +579,7 @@ class Scene(PhysicalObject):
     def __set_origin(self, origin):
         """
         Constructor :
-            __set_origin
+            __set_origin(origin)
         Parameters :
             origin[__get_origin[PhysicalObject._x['float'], 
             PhysicalObject._y['float']]]
@@ -555,6 +616,10 @@ class Scene(PhysicalObject):
             viewport_size['__get_viewport_size']
 
         __get_viewport_size --> None
+        
+        Happens when mainwindow gets resized or a scene get's loaded having 
+        different viewport_size that the currewn mainwindow size. All necessary
+        adjustement are handled here
 
         Centers PhysicalObject._x and PhysicalObject._y to the new input 
         parameter viewport_size center, also adjourn PhysicalObject.centre. 
@@ -564,7 +629,40 @@ class Scene(PhysicalObject):
         viewport.
 
         then adjourn the __viewport_size variable with the value given by 
-        the input parameter viewport_size.        
+        the input parameter viewport_size.
+
+        old_viewport::
+
+            --------------------------------->
+            |
+            |      ----------------------#
+            |     |                      |                 
+            |     |             *------  |       
+            |     |           % |      | |   
+            |     |             +------" |      
+            |     |                      |
+            |     @----------------------
+            |
+            |
+            ∨
+        
+        new_viewport::
+
+            ----------------------------------->
+            |
+            |  ------------------------------#
+            | |                              |
+            | |                              |
+            | |                              |                 
+            | |                *------       |       
+            | |              % |      |      |   
+            | |                +------"      |      
+            | |                              |
+            | |                              | 
+            | @------------------------------
+            |
+            |
+            ∨
         """
 
         ## centre the scene in the new viewport
@@ -577,6 +675,8 @@ class Scene(PhysicalObject):
         ## dimension of the new viewport
         self.centre = (viewport_size[0]/2, viewport_size[1]/2)
         scale = float(min(viewport_size)) / min(old_viewport_size)
+        
+        #we have math.log(scale, 2) as pos' = pos+2**zoomlevel
         self.zoom(math.log(scale, 2))
 
         self.__viewport_size = viewport_size
@@ -629,6 +729,8 @@ def load_scene(filename):
     zoomlevel, ox, oy = f.readline().split()
     scene.zoomlevel = float(zoomlevel)
     scene.origin = (float(ox), float(oy))
+    #print('HERE', '\n', '\n', '\n', '\n')
+    #print(float(ox),float(oy))
 
     """
     Any line then represent a mediaobject, namely composed by :    
@@ -664,7 +766,7 @@ def load_scene(filename):
 
             #mediaobjects are zoomed by the level read in the loaded scene file
             mediaobject.zoomlevel = float(zoomlevel)
-            #mediaobjects are placed in the position red in the loaded scene file
+            #mediaobjects are placed in the position read in the loaded scene file
             mediaobject.pos = (float(x), float(y))
             #mediaobjects are added to the scene
             scene.add(mediaobject)

@@ -61,8 +61,10 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.mediaobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">MediaObject</span><span class="p">,</span> <span class="n">LoadError</span><span class="p">,</span> <span class="n">RenderMode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilemanager</span> <span class="k">as</span> <span class="n">TileManager</span>
+
 <span class="c1"># Sbdivide a ppm image into tiles that fit the mediaobject frame </span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.ppm</span><span class="w"> </span><span class="kn">import</span> <span class="n">PPMTiler</span>
+
 <span class="c1"># The classes that convert various format to ppm images</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.webkitconverter</span><span class="w"> </span><span class="kn">import</span>  <span class="n">WebKitConverter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.pdfconverter</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDFConverter</span>
@@ -80,6 +82,9 @@
 <span class="sd">    the area occupied by the placeholder.</span>
 
 <span class="sd">    Constructor: TiledMediaObject(string, Scene[, bool])</span>
+
+<span class="sd">    For any acceptable filetype the adeguate converter get&#39;s called.</span>
+<span class="sd">    The converter return a ppm image file on wich we can run the tiler on.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">autofit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="n">MediaObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
@@ -107,7 +112,8 @@
         
         <span class="c1">#print(&#39;tiledmediaobject-70-TileManager.tiled(self._media_id):&#39;,TileManager.tiled(self._media_id))</span>
         
-        <span class="k">if</span> <span class="n">TileManager</span><span class="o">.</span><span class="n">tiled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">):</span>          
+        <span class="k">if</span> <span class="n">TileManager</span><span class="o">.</span><span class="n">tiled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">):</span>   
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">)</span>       
             <span class="n">TileManager</span><span class="o">.</span><span class="n">load_tile</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
             
         <span class="k">else</span><span class="p">:</span>

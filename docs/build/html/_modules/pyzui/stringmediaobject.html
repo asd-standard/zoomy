@@ -59,42 +59,47 @@
 <div class="viewcode-block" id="StringMediaObject">
 <a class="viewcode-back" href="../../pyzui.stringmediaobject.html#pyzui.stringmediaobject.StringMediaObject">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StringMediaObject</span><span class="p">(</span><span class="n">MediaObject</span><span class="p">):</span> <span class="c1">#, Thread</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;StringMediaObject objects are used to represent strings that can be</span>
-<span class="sd">    rendered in the zui&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructor : </span>
+<span class="sd">        StringMediaObject(string, scene)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        media_id[&#39;string&#39;], scene[&#39;Scene&#39;]</span>
 
-<span class="sd">    `media_id` should be of the form &#39;string:rrggbb:foobar&#39;, where &#39;rrggbb&#39; is</span>
-<span class="sd">    a string of three two-digit hexadecimal numbers representing the colour of</span>
-<span class="sd">    the text, and &#39;foobar&#39; is the string to be displayed.</span>
+<span class="sd">    StringMediaObject(media_id, scene) --&gt; None</span>
 
-<span class="sd">    Constructor: StringMediaObject(string, Scene)</span>
+<span class="sd">    StringMediaObject objects are used to represent strings that can be</span>
+<span class="sd">    rendered in the zui</span>
+
+<span class="sd">    `StringMediaObject.media_id` should be of the form &#39;string:rrggbb:foobar&#39;, </span>
+<span class="sd">    where &#39;rrggbb&#39; is a string of three two-digit hexadecimal numbers </span>
+<span class="sd">    representing the colour of the text, and &#39;foobar&#39; is the string to be </span>
+<span class="sd">    displayed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">):</span>
-        
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a new MediaObject from the media identified by `media_id`,</span>
+<span class="sd">        and the parent Scene referenced by `scene`.&quot;&quot;&quot;</span>
         <span class="n">MediaObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
+        
+        <span class="c1">#Get color code &#39;rrggbb&#39; form media_id string and assing it to hexcol variable</span>
         <span class="n">hexcol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;string:&#39;</span><span class="p">):</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;string:rrggbb&#39;</span><span class="p">)]</span>
+        <span class="c1">#initialize and assign QtGui.QColor wich can then be passed to QtPainter.setpen </span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__color</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="n">hexcol</span><span class="p">)</span>
+        <span class="c1">#checks if color is valid to QtGuiQColor() and if not an error is raised </span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__color</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
             <span class="k">raise</span> <span class="n">LoadError</span><span class="p">(</span><span class="s2">&quot;the supplied colour is invalid&quot;</span><span class="p">)</span>
-        
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets to be displayed text `foobar` from media_id string and assing it</span>
+<span class="sd">        to self.__str variable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;string:rrggbb:&#39;</span><span class="p">):]</span> 
+
         <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;in order for a multi line string to be rendered of the exact size self.lines </span>
+<span class="sd">        have to be set to the right value before self.onscreen_size method gets called&quot;&quot;&quot;</span>
         
-        <span class="c1"># in order for a multi line string to be rendered of the exact size self.lines have to be </span>
-        <span class="c1"># set to the right value before self.onscreen_size method gets called</span>
-<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        cdef char* c_str = self.__str</span>
-<span class="sd">        j=0</span>
-<span class="sd">        i=0</span>
-<span class="sd">        while c_str[i] != 0:</span>
-<span class="sd">            if c_str[i] == 10:  # ASCII value of &#39;\n&#39;</span>
-<span class="sd">                self.lines.append([])</span>
-<span class="sd">                j += 1</span>
-<span class="sd">            else:</span>
-<span class="sd">                self.lines[j].append(c_str[i].decode(&#39;ascii&#39;))  # convert char to Python str</span>
-<span class="sd">            i += 1</span>
-<span class="sd">            #gives error, expected bytes, str found</span>
-<span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">j</span><span class="o">=</span><span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__str</span><span class="p">)</span> <span class="p">:</span>  
                 <span class="c1"># If a \n char is encountered a new sublist is appended to self.lines              </span>
@@ -125,7 +130,6 @@
         <span class="o">!=</span> <span class="n">RenderMode</span><span class="o">.</span><span class="n">Invisible</span><span class="p">:</span>
             <span class="c1">## don&#39;t bother rendering if the string is too</span>
             <span class="c1">## small to be seen, or invisible mode is set</span>
-
             
             <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__color</span><span class="p">)</span>
             <span class="n">painter</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__font</span><span class="p">)</span>
@@ -144,7 +148,7 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">:</span>
                 <span class="n">yr</span> <span class="o">=</span> <span class="n">y</span>                
                 <span class="n">rectlist</span> <span class="o">=</span> <span class="p">[]</span>
-                            
+                
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">))</span> <span class="p">:</span>
 <span class="w">                    </span><span class="sd">&#39;&#39;&#39;for every line in self.lines a QRectF is created below the previous one </span>
 <span class="sd">                    for the line to be painted on by QtPainter.drawText method</span>
@@ -200,13 +204,13 @@
             
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">:</span>
                 <span class="c1"># Returns the width of the longest line in the paragraph stack.</span>
-                <span class="n">w</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">width</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">][:])</span><span class="o">+</span><span class="s1">&#39;--------&#39;</span><span class="p">)</span>         
+                <span class="n">w</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">width</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">][:])</span><span class="o">+</span><span class="s1">&#39;-------&#39;</span><span class="p">)</span>         
                 <span class="c1"># Returns the font height times the number of lines in the paragraph stack                </span>
                 <span class="n">h</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span>
                 
             <span class="k">else</span> <span class="p">:</span>
                 <span class="c1"># Is the sting is not a paragraph just gives the lenght of the string </span>
-                <span class="n">w</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">width</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__str</span><span class="o">+</span><span class="s1">&#39;--&#39;</span><span class="p">)</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">width</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__str</span><span class="o">+</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
                 <span class="c1"># and the height of the font</span>
                 <span class="n">h</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>                
             <span class="k">return</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>

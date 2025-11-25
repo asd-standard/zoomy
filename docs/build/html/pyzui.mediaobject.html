@@ -47,6 +47,56 @@
 <p>Media_object(media_id, scene) –&gt; None</p>
 <p>MediaObject objects are used to represent media that can be rendered in
 the ZUI.</p>
+<p>Screen view it’s fixed unless user change mainwindow size on the screen.
+Both scene and MediaObjects have their own reference systems so that zooms
+can be applied bot to Scene and Mediaobject indipendently trough their
+reference system transformation.</p>
+<p>You can think about it as fixed window looking at a scene that can strecth or
+shrink beneath it, at the same time individual mediaobject can also strecth
+or shrink. The fixed window can move on the 2d plane.</p>
+<dl class="simple">
+<dt>World</dt><dd><p>—————————————&gt;</p>
+</dd>
+</dl>
+<div class="line-block">
+<div class="line-block">
+<div class="line">Scene</div>
+</div>
+<div class="line">&#64; ——————————+—&gt;</div>
+<div class="line">|  ViewPort        MediaObj     |</div>
+<div class="line">|  (Screen View)   <a href="#id1"><span class="problematic" id="id2">*</span></a>——-+–&gt; |</div>
+<div class="line">|                  |   &amp;   |    |</div>
+<div class="line">|               %  +——-”    |</div>
+<div class="line">|                  |            |</div>
+<div class="line">|                  ∨            |</div>
+<div class="line">|                               |</div>
+<div class="line">+——————————-#</div>
+<div class="line"><a href="#id3"><span class="problematic" id="id4">|</span></a></div>
+<div class="line">∨</div>
+</div>
+<p>∨</p>
+<p>Legend:
+(All attributes are relative to screen view)
+* -&gt; MediaObject.topleft()
+“ -&gt; MediaObject.bottomright()
+&amp; -&gt; MediaObject.center()
+# -&gt; Scene.viewport_size()
+% -&gt; Scene.center()
+&#64; -&gt; Scene.origin()</p>
+<p>MediaObject topleft coordinates relative to screen view are given by:</p>
+<p>MediaObject.topleft[0-1] =     self._scene.origin[0-1] + self.pos[0-1] * (2 ** self._scene.zoomlevel)</p>
+<p>Where self.pos[0-1] it’s MediaObject position relative to Scene reference
+system wich get’s scaled by 2** of scene zoom level</p>
+<p>MediaObject centre coordinates relative to screen view are given firstly by
+calculating image center coordinates relative to Scene reference coordinates:</p>
+<p>C_s[0-1] = self.pos[0-1] + self._centre[0-1] * 2**self._z</p>
+<p>Where self._centre[0-1] are center coordinates relative to the mediaobject
+frame of reference and self._z it’s MediaObject reference frame scaling
+(zoom).</p>
+<p>Take note that self.pos[0-1] dosen’t get to be scaled by self._z as that
+position it’s relative to Scene reference frame.</p>
+<p>Then we can calculate MediaObject centre coordinates relative to screen view as:</p>
+<p>MediaObject.centre[0-1] = self._scene.origin[0] + C_s[0-1] * 2**self._scene.zoomlevel</p>
 <p>Create a new MediaObject from the media identified by <cite>media_id</cite>,
 and the parent Scene referenced by <cite>scene</cite>.</p>
 <dl class="py method">
@@ -107,13 +157,20 @@ when rendering it to the screen.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pyzui.mediaobject.MediaObject.topleft">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">topleft</span></span><a class="headerlink" href="#pyzui.mediaobject.MediaObject.topleft" title="Link to this definition">¶</a></dt>
-<dd><p>The on-screen positon of the top-left corner of the image.</p>
+<dd><p>The on-screen positon of the top-left corner of the image.
+self._scene.origin -&gt; the world-space X coordinate of the top-left of the
+screen view (the camera/view origin)
+self.pos -&gt; the object’s position inside the view before applying zoom
+(a coordinate in the camera’s internal coordinate system)</p>
+<p>here self.pos() is mediaobject</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyzui.mediaobject.MediaObject.onscreen_size">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">onscreen_size</span></span><a class="headerlink" href="#pyzui.mediaobject.MediaObject.onscreen_size" title="Link to this definition">¶</a></dt>
-<dd><p>The on-screen size of the image.</p>
+<dd><p>The on-screen size of the image.
+This gets inherited by higher order classes (StringMedia obj
+TiledMedia obj ecc)</p>
 </dd></dl>
 
 <dl class="py property">
@@ -131,18 +188,33 @@ when rendering it to the screen.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.mediaobject.MediaObject.__get_pos">
 <span class="sig-name descname"><span class="pre">__get_pos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mediaobject.MediaObject.__get_pos" title="Link to this definition">¶</a></dt>
-<dd><p>The position of the object.</p>
+<dd><dl class="simple">
+<dt>Constructor :</dt><dd><p>__get_pos</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__set_origin –&gt; MediaObject[float[‘_x’]], MediaObject[float[‘_y’]]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.mediaobject.MediaObject.__set_pos">
 <span class="sig-name descname"><span class="pre">__set_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.mediaobject.MediaObject.__set_pos" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="simple">
+<dt>Constructor :</dt><dd><p>__set_pos(pos)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>pos[MediaObject[float[‘_x’]], MediaObject[float[‘_y’]]]</p>
+</dd>
+</dl>
+<p>__set_origin –&gt; None</p>
+<p>Set self._x, self._y variables to MediaObject position</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyzui.mediaobject.MediaObject.pos">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pos</span></span><a class="headerlink" href="#pyzui.mediaobject.MediaObject.pos" title="Link to this definition">¶</a></dt>
-<dd><p>The position of the object.</p>
+<dd><p>Creating MediaObject.pos property with __get_pos as
+getter and __set_pos as setter</p>
 </dd></dl>
 
 <dl class="py method">
@@ -158,9 +230,9 @@ when rendering it to the screen.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pyzui.mediaobject.MediaObject.centre">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">centre</span></span><a class="headerlink" href="#pyzui.mediaobject.MediaObject.centre" title="Link to this definition">¶</a></dt>
-<dd><p>The on-screen coordinates of the centre of the pobject (the
+<dd><p>The on-screen coordinates of the centre of the object (the
 point that will maintain its position on the screen as the
-pobject is being zoomed).</p>
+object is being zoomed).</p>
 </dd></dl>
 
 </dd></dl>

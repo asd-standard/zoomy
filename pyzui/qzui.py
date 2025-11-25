@@ -189,7 +189,7 @@ class QZUI(QtWidgets.QWidget, Thread) :
 
     def keyPressEvent(self, event):
         if self.__alt_held:
-            move_amount = 1
+            move_amount = 16
         else:
             move_amount = 16
 

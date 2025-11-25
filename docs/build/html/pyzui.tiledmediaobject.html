@@ -44,6 +44,8 @@ rendered in the ZUI.</p>
 <p>If <cite>autofit</cite> is True, then once the media has loaded it will be fitted to
 the area occupied by the placeholder.</p>
 <p>Constructor: TiledMediaObject(string, Scene[, bool])</p>
+<p>For any acceptable filetype the adeguate converter get’s called.
+The converter return a ppm image file on wich we can run the tiler on.</p>
 <p>Create a new MediaObject from the media identified by <cite>media_id</cite>,
 and the parent Scene referenced by <cite>scene</cite>.</p>
 <dl class="py attribute">
@@ -135,7 +137,9 @@ the tiler on).</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pyzui.tiledmediaobject.TiledMediaObject.onscreen_size">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">onscreen_size</span></span><a class="headerlink" href="#pyzui.tiledmediaobject.TiledMediaObject.onscreen_size" title="Link to this definition">¶</a></dt>
-<dd><p>The on-screen size of the image.</p>
+<dd><p>The on-screen size of the image.
+This gets inherited by higher order classes (StringMedia obj
+TiledMedia obj ecc)</p>
 </dd></dl>
 
 </dd></dl>

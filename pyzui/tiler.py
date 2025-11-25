@@ -221,7 +221,7 @@ class Tiler(Thread):
                 tiles = self.__load_row_from_file(row)
                 
             except Exception as e :
-                print('HERE--HERE Tiler222 \n')
+                #print('HERE--HERE Tiler222 \n')
                 self.error = str(e)
                 outpath = TileStore.get_media_path(self.__media_id)
                 shutil.rmtree(outpath, ignore_errors=True)
@@ -237,7 +237,7 @@ class Tiler(Thread):
                 tiles = self.__mergerows(row_a, row_b)
                 
             except Exception as e :
-                print('HERE--HERE Tiler236 \n')
+                #print('HERE--HERE Tiler236 \n')
                 self.error = str(e)
                 outpath = TileStore.get_media_path(self.__media_id)
                 shutil.rmtree(outpath, ignore_errors=True)

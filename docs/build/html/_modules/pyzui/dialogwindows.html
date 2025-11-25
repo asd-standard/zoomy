@@ -90,14 +90,19 @@
 
 
 
-<div class="viewcode-block" id="DialogWindows._open_string_input_dialog">
-<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows._open_string_input_dialog">[docs]</a>
-    <span class="k">class</span><span class="w"> </span><span class="nc">_open_string_input_dialog</span><span class="p">():</span>
+<div class="viewcode-block" id="DialogWindows.open_new_string_input_dialog">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows.open_new_string_input_dialog">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">open_new_string_input_dialog</span><span class="p">():</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;gather the string trough a dialog and let select the color.</span>
 <span class="sd">also gives a selection column of the last 20 used colors. </span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">string_color</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">passed_color</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+
                 <span class="c1">## set the default tilestore directory, this can be overridden if required</span>
             <span class="k">if</span> <span class="s1">&#39;APPDATA&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
                 <span class="c1">## Windows</span>
@@ -105,10 +110,6 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1">## Unix</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">color_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">),</span> <span class="s2">&quot;.pyzui&quot;</span><span class="p">,</span> <span class="s2">&quot;colorstore&quot;</span><span class="p">)</span>
-            
-            <span class="bp">self</span><span class="o">.</span><span class="n">string_color</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">passed_color</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_dir</span><span class="o">+</span><span class="s1">&#39;/color_list.txt&#39;</span><span class="p">):</span>
                     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_dir</span><span class="o">+</span><span class="s1">&#39;/color_list.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span> <span class="p">:</span>
@@ -136,8 +137,8 @@
                     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;0000ff</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
                     <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-<div class="viewcode-block" id="DialogWindows._open_string_input_dialog._color_square">
-<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows._open_string_input_dialog._color_square">[docs]</a>
+<div class="viewcode-block" id="DialogWindows.open_new_string_input_dialog._color_square">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows.open_new_string_input_dialog._color_square">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="nf">_color_square</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color_code</span><span class="p">):</span>
             <span class="n">color_square</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
             <span class="n">color</span> <span class="o">=</span> <span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">color_code</span><span class="p">))</span>
@@ -152,14 +153,14 @@
             <span class="k">return</span> <span class="n">color_square</span></div>
 
 
-<div class="viewcode-block" id="DialogWindows._open_string_input_dialog._color_button_click">
-<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows._open_string_input_dialog._color_button_click">[docs]</a>
+<div class="viewcode-block" id="DialogWindows.open_new_string_input_dialog._color_button_click">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows.open_new_string_input_dialog._color_button_click">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="nf">_color_button_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">string_color</span> <span class="o">=</span> <span class="n">color</span></div>
 
 
-<div class="viewcode-block" id="DialogWindows._open_string_input_dialog._color_button">
-<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows._open_string_input_dialog._color_button">[docs]</a>
+<div class="viewcode-block" id="DialogWindows.open_new_string_input_dialog._color_button">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows.open_new_string_input_dialog._color_button">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="nf">_color_button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color_code</span><span class="p">):</span>
             
             <span class="n">color_widget</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
@@ -194,8 +195,8 @@
 
                 
                 
-<div class="viewcode-block" id="DialogWindows._open_string_input_dialog._main_dialog">
-<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows._open_string_input_dialog._main_dialog">[docs]</a>
+<div class="viewcode-block" id="DialogWindows.open_new_string_input_dialog._main_dialog">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows.open_new_string_input_dialog._main_dialog">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="nf">_main_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
 
             <span class="n">dialog</span> <span class="o">=</span> <span class="n">QDialog</span><span class="p">()</span>
@@ -245,8 +246,8 @@
             <span class="k">return</span> <span class="n">dialog</span></div>
 
 
-<div class="viewcode-block" id="DialogWindows._open_string_input_dialog._run_dialog">
-<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows._open_string_input_dialog._run_dialog">[docs]</a>
+<div class="viewcode-block" id="DialogWindows.open_new_string_input_dialog._run_dialog">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows.open_new_string_input_dialog._run_dialog">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="nf">_run_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="n">dialog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main_dialog</span><span class="p">()</span>
             <span class="c1"># Run dialog and get result</span>
@@ -269,9 +270,204 @@
             <span class="k">if</span> <span class="n">ok</span> <span class="ow">and</span> <span class="n">uri</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">ok</span><span class="p">,</span> <span class="n">uri</span></div>
 </div>
-</div>
 
         
+<div class="viewcode-block" id="DialogWindows.modify_string_input_dialog">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows.modify_string_input_dialog">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">modify_string_input_dialog</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;gather the string trough a dialog and let select the color.</span>
+<span class="sd">            also gives a selection column of the last 20 used colors. </span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">)</span> <span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">string_color</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">passed_color</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">media_id</span> <span class="o">==</span> <span class="kc">None</span> <span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">media_id</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;string&#39;</span> <span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">string_color</span> <span class="o">=</span> <span class="n">media_id</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">13</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">start_string</span> <span class="o">=</span> <span class="n">media_id</span><span class="p">[</span><span class="mi">14</span><span class="p">:]</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="k">pass</span>
+
+
+                <span class="c1">## set the default tilestore directory, this can be overridden if required</span>
+            <span class="k">if</span> <span class="s1">&#39;APPDATA&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+                <span class="c1">## Windows</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">color_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;APPDATA&#39;</span><span class="p">],</span> <span class="s2">&quot;pyzui&quot;</span><span class="p">,</span> <span class="s2">&quot;colorstore&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">## Unix</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">color_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">),</span> <span class="s2">&quot;.pyzui&quot;</span><span class="p">,</span> <span class="s2">&quot;colorstore&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_dir</span><span class="o">+</span><span class="s1">&#39;/color_list.txt&#39;</span><span class="p">):</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_dir</span><span class="o">+</span><span class="s1">&#39;/color_list.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span> <span class="p">:</span>
+                        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span> <span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                            
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_dir</span><span class="p">):</span>                
+                    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_dir</span><span class="o">+</span><span class="s1">&#39;/color_list.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;ff0000&#39;</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ff0000</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;00ff00&#39;</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;00ff00</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;0000ff&#39;</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;0000ff</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">else</span> <span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_dir</span><span class="p">)</span>
+                    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_dir</span><span class="o">+</span><span class="s1">&#39;/color_list.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;ff0000&#39;</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ff0000</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;00ff00&#39;</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;00ff00</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;0000ff&#39;</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;0000ff</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DialogWindows.modify_string_input_dialog._color_square">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows.modify_string_input_dialog._color_square">[docs]</a>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_color_square</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color_code</span><span class="p">):</span>
+            <span class="n">color_square</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">color_code</span><span class="p">))</span>
+            <span class="n">color_square</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">paintEvent</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+                <span class="n">painter</span> <span class="o">=</span> <span class="n">QPainter</span><span class="p">(</span><span class="n">color_square</span><span class="p">)</span>
+                <span class="n">painter</span><span class="o">.</span><span class="n">fillRect</span><span class="p">(</span><span class="n">color_square</span><span class="o">.</span><span class="n">rect</span><span class="p">(),</span> <span class="n">color</span><span class="p">)</span>
+
+            <span class="n">color_square</span><span class="o">.</span><span class="n">paintEvent</span> <span class="o">=</span> <span class="n">paintEvent</span>
+            
+            <span class="k">return</span> <span class="n">color_square</span></div>
+
+
+<div class="viewcode-block" id="DialogWindows.modify_string_input_dialog._color_button_click">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows.modify_string_input_dialog._color_button_click">[docs]</a>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_color_button_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">string_color</span> <span class="o">=</span> <span class="n">color</span></div>
+
+
+<div class="viewcode-block" id="DialogWindows.modify_string_input_dialog._color_button">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows.modify_string_input_dialog._color_button">[docs]</a>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_color_button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color_code</span><span class="p">):</span>
+            
+            <span class="n">color_widget</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
+
+            <span class="n">layout</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+            
+            <span class="n">color_square</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_color_square</span><span class="p">(</span><span class="n">color_code</span><span class="p">)</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">color_code</span><span class="p">)</span>
+
+            <span class="c1"># Create a QPushButton but use a QWidget wrapper to hold square + label</span>
+            <span class="n">button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">()</span>
+            <span class="n">button</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+            <span class="n">button</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">)</span>
+
+            <span class="c1"># Add widget and label to the layout inside the button</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">color_square</span><span class="p">)</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
+
+            <span class="c1"># Make the whole widget act like a button by forwarding clicks</span>
+            
+            <span class="n">button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_color_button_click</span><span class="p">(</span><span class="n">color_code</span><span class="p">))</span>
+
+            <span class="c1"># Our main layout for this widget is the button only</span>
+            <span class="n">main_layout</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">(</span><span class="n">color_widget</span><span class="p">)</span>
+            <span class="n">main_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">main_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">color_widget</span></div>
+
+                
+                
+<div class="viewcode-block" id="DialogWindows.modify_string_input_dialog._main_dialog">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows.modify_string_input_dialog._main_dialog">[docs]</a>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_main_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+
+            <span class="n">dialog</span> <span class="o">=</span> <span class="n">QDialog</span><span class="p">()</span>
+            <span class="n">dialog</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;String input:&quot;</span><span class="p">)</span>
+            <span class="n">dialog</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">900</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span>
+
+            <span class="c1"># Create text edit widget</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span> <span class="o">=</span> <span class="n">QTextEdit</span><span class="p">(</span><span class="n">dialog</span><span class="p">)</span> <span class="c1">#Input string it&#39;s going to be typed in here </span>
+            <span class="n">font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">()</span>
+            <span class="n">font</span><span class="o">.</span><span class="n">setPointSize</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>  <span class="c1"># Set desired font size</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_string</span><span class="p">)</span>
+            <span class="c1"># Align text to top-left (horizontal only by default)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">)</span>
+            
+            <span class="c1"># Create a text input field for custom color entry</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">custom_color_input</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="n">dialog</span><span class="p">)</span> <span class="c1">#Color code it&#39;s going to be typed here</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">custom_color_input</span><span class="o">.</span><span class="n">setPlaceholderText</span><span class="p">(</span><span class="s2">&quot;Enter custom color (e.g., #ff5733)&quot;</span><span class="p">)</span>    
+            
+            <span class="c1"># Create OK/Cancel buttons</span>
+            <span class="n">buttons</span> <span class="o">=</span> <span class="n">QDialogButtonBox</span><span class="p">(</span><span class="n">QDialogButtonBox</span><span class="o">.</span><span class="n">Ok</span> <span class="o">|</span> <span class="n">QDialogButtonBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">,</span> <span class="n">dialog</span><span class="p">)</span>
+            <span class="n">buttons</span><span class="o">.</span><span class="n">accepted</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">dialog</span><span class="o">.</span><span class="n">accept</span><span class="p">)</span>
+            <span class="n">buttons</span><span class="o">.</span><span class="n">rejected</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">dialog</span><span class="o">.</span><span class="n">reject</span><span class="p">)</span>
+
+            <span class="c1"># Layout setup</span>
+            <span class="n">main_layout</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">(</span><span class="n">dialog</span><span class="p">)</span>
+            <span class="n">color_layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>        
+            <span class="n">color_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">color_layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            
+
+            <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span><span class="p">:</span>
+                <span class="n">btn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_color_button</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+                <span class="n">btn</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">120</span><span class="p">)</span>
+                <span class="n">color_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">btn</span><span class="p">)</span>
+            
+            <span class="n">color_layout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
+            
+            <span class="n">text_layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>        
+            <span class="n">text_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="p">)</span>
+            <span class="n">text_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">custom_color_input</span><span class="p">)</span>
+            <span class="n">text_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">buttons</span><span class="p">)</span>
+            
+            <span class="n">main_layout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">text_layout</span><span class="p">)</span>
+            <span class="n">main_layout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">color_layout</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="n">dialog</span></div>
+
+
+<div class="viewcode-block" id="DialogWindows.modify_string_input_dialog._run_dialog">
+<a class="viewcode-back" href="../../pyzui.dialogwindows.html#pyzui.dialogwindows.DialogWindows.modify_string_input_dialog._run_dialog">[docs]</a>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_run_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">dialog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main_dialog</span><span class="p">()</span>
+            <span class="c1"># Run dialog and get result</span>
+            <span class="k">if</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span> <span class="o">==</span> <span class="n">QDialog</span><span class="o">.</span><span class="n">Accepted</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">string_color</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">6</span> <span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">string_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_color_input</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">string_color</span><span class="p">)</span>
+                    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_dir</span><span class="o">+</span><span class="s1">&#39;/color_list.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span> <span class="p">:</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">string_color</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">6</span> <span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error&#39;</span><span class="p">)</span>
+                <span class="k">try</span> <span class="p">:</span>
+                    <span class="n">media_id</span> <span class="o">=</span> <span class="s1">&#39;string:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">string_color</span><span class="p">)</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">())</span>
+                    
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span> <span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="n">ok</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="n">ok</span> <span class="o">=</span> <span class="kc">False</span>
+            
+            <span class="k">if</span> <span class="n">ok</span> <span class="ow">and</span> <span class="n">media_id</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">ok</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">string_color</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span></div>
+</div>
+</div>
 
     
 

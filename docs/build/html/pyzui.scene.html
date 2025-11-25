@@ -56,6 +56,40 @@ given by declaring RLock list <cite>__objects_lock</cite>,</p>
 <p>set up <cite>__viewport_size</cite></p>
 <p>mouse selection variables <cite>selection</cite> and <cite>right_selection</cite> and logger setup
 <cite>__logger</cite>.</p>
+<p>World:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> ---------------------------------------&gt;
+|   Scene
+|  @ ------------------------------+---&gt;
+|  |  ViewPort        MediaObj     |
+|  |  (Screen View)   *-------+--&gt; |
+|  |                  |   &amp;   |    |
+|  |               %  +-------&quot;    |
+|  |                  |            |
+|  |                  ∨            |
+|  |                               |
+|  +-------------------------------#
+|  |
+|  ∨
+∨
+</pre></div>
+</div>
+<p>Legend:
+(All MediaObject attributes are relative to screen view)
+* -&gt; MediaObject.topleft()
+“ -&gt; MediaObject.bottomright()
+&amp; -&gt; MediaObject.center()
+# -&gt; Scene.viewport_size()
+% -&gt; Scene.center()
+&#64; -&gt; Scene.origin()</p>
+<p>We have a center relative to the scene, ‘center’ and a center relative
+to the absolute frame of reference _center</p>
+<p>&#64; origin position of the scene it’s relative to an absolute frame of
+reference, with 0,0 as it’s origin.</p>
+<dl class="simple">
+<dt>% Scene center it’s given by</dt><dd><p>scene.centre[0] = scene.origin + (Scene.viewport_size[0]/2)*2**(zoomlevel)
+scene.centre[1] = scene.origin + (Scene.viewport_size[1]/2)*2**(zoomlevel)</p>
+</dd>
+</dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyzui.scene.Scene.standard_viewport_size">
 <span class="sig-name descname"><span class="pre">standard_viewport_size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(1280,</span> <span class="pre">720)</span></em><a class="headerlink" href="#pyzui.scene.Scene.standard_viewport_size" title="Link to this definition">¶</a></dt>
@@ -243,7 +277,7 @@ inherited by PhysicalObject class</p>
 <dt class="sig sig-object py" id="pyzui.scene.Scene.__set_origin">
 <span class="sig-name descname"><span class="pre">__set_origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.scene.Scene.__set_origin" title="Link to this definition">¶</a></dt>
 <dd><dl class="simple">
-<dt>Constructor :</dt><dd><p>__set_origin</p>
+<dt>Constructor :</dt><dd><p>__set_origin(origin)</p>
 </dd>
 <dt>Parameters :</dt><dd><p>origin[__get_origin[PhysicalObject._x[‘float’],
 PhysicalObject._y[‘float’]]]</p>
@@ -284,6 +318,9 @@ __set_origin as setter</p>
 </dd>
 </dl>
 <p>__get_viewport_size –&gt; None</p>
+<p>Happens when mainwindow gets resized or a scene get’s loaded having
+different viewport_size that the currewn mainwindow size. All necessary
+adjustement are handled here</p>
 <p>Centers PhysicalObject._x and PhysicalObject._y to the new input
 parameter viewport_size center, also adjourn PhysicalObject.centre.
 Calculates the ratio between previous viewport_size center and the
@@ -292,6 +329,39 @@ zooms the scene by base 2 log of the ratio between old and new
 viewport.</p>
 <p>then adjourn the __viewport_size variable with the value given by
 the input parameter viewport_size.</p>
+<p>old_viewport:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>---------------------------------&gt;
+|
+|      ----------------------#
+|     |                      |
+|     |             *------  |
+|     |           % |      | |
+|     |             +------&quot; |
+|     |                      |
+|     @----------------------
+|
+|
+∨
+</pre></div>
+</div>
+<p>new_viewport:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>-----------------------------------&gt;
+|
+|  ------------------------------#
+| |                              |
+| |                              |
+| |                              |
+| |                *------       |
+| |              % |      |      |
+| |                +------&quot;      |
+| |                              |
+| |                              |
+| @------------------------------
+|
+|
+∨
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py property">

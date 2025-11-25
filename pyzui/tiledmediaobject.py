@@ -28,8 +28,10 @@ from PIL import ImageQt
 
 from .mediaobject import MediaObject, LoadError, RenderMode
 from . import tilemanager as TileManager
+
 # Sbdivide a ppm image into tiles that fit the mediaobject frame 
 from .ppm import PPMTiler
+
 # The classes that convert various format to ppm images
 from .webkitconverter import  WebKitConverter
 from .pdfconverter import PDFConverter
@@ -45,6 +47,9 @@ class TiledMediaObject(MediaObject):
     the area occupied by the placeholder.
 
     Constructor: TiledMediaObject(string, Scene[, bool])
+
+    For any acceptable filetype the adeguate converter get's called.
+    The converter return a ppm image file on wich we can run the tiler on.
     """
     def __init__(self, media_id, scene, autofit=True):
         MediaObject.__init__(self, media_id, scene)
@@ -72,7 +77,8 @@ class TiledMediaObject(MediaObject):
         
         #print('tiledmediaobject-70-TileManager.tiled(self._media_id):',TileManager.tiled(self._media_id))
         
-        if TileManager.tiled(self._media_id):          
+        if TileManager.tiled(self._media_id):   
+            print(self._media_id)       
             TileManager.load_tile((self._media_id, 0, 0, 0))
             
         else:

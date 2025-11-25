@@ -38,13 +38,20 @@
 <dt class="sig sig-object py" id="pyzui.stringmediaobject.StringMediaObject">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.stringmediaobject.</span></span><span class="sig-name descname"><span class="pre">StringMediaObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">media_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/stringmediaobject.html#StringMediaObject"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.stringmediaobject.StringMediaObject" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="pyzui.mediaobject.html#pyzui.mediaobject.MediaObject" title="pyzui.mediaobject.MediaObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MediaObject</span></code></a></p>
+<dl class="simple">
+<dt>Constructor :</dt><dd><p>StringMediaObject(string, scene)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>media_id[‘string’], scene[‘Scene’]</p>
+</dd>
+</dl>
+<p>StringMediaObject(media_id, scene) –&gt; None</p>
 <p>StringMediaObject objects are used to represent strings that can be
-rendered in the zui”</p>
-<p><cite>media_id</cite> should be of the form ‘string:rrggbb:foobar’, where ‘rrggbb’ is
-a string of three two-digit hexadecimal numbers representing the colour of
-the text, and ‘foobar’ is the string to be displayed.</p>
-<p>Constructor: StringMediaObject(string, Scene)</p>
-<p>Create a new MediaObject from the media identified by <cite>media_id</cite>,
+rendered in the zui</p>
+<p><cite>StringMediaObject.media_id</cite> should be of the form ‘string:rrggbb:foobar’,
+where ‘rrggbb’ is a string of three two-digit hexadecimal numbers
+representing the colour of the text, and ‘foobar’ is the string to be
+displayed.</p>
+<p>Initialize a new MediaObject from the media identified by <cite>media_id</cite>,
 and the parent Scene referenced by <cite>scene</cite>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyzui.stringmediaobject.StringMediaObject.transparent">

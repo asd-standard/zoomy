@@ -69,12 +69,71 @@
 <span class="sd">    MediaObject objects are used to represent media that can be rendered in</span>
 <span class="sd">    the ZUI.</span>
 
+<span class="sd">    Screen view it&#39;s fixed unless user change mainwindow size on the screen.</span>
+<span class="sd">    Both scene and MediaObjects have their own reference systems so that zooms</span>
+<span class="sd">    can be applied bot to Scene and Mediaobject indipendently trough their </span>
+<span class="sd">    reference system transformation.</span>
+
+<span class="sd">    You can think about it as fixed window looking at a scene that can strecth or</span>
+<span class="sd">    shrink beneath it, at the same time individual mediaobject can also strecth </span>
+<span class="sd">    or shrink. The fixed window can move on the 2d plane.</span>
+
+<span class="sd">    World </span>
+<span class="sd">     ---------------------------------------&gt;</span>
+<span class="sd">    |   Scene</span>
+<span class="sd">    |  @ ------------------------------+---&gt;</span>
+<span class="sd">    |  |  ViewPort        MediaObj     |                 </span>
+<span class="sd">    |  |  (Screen View)   *-------+--&gt; |       </span>
+<span class="sd">    |  |                  |   &amp;   |    |   </span>
+<span class="sd">    |  |               %  +-------&quot;    |      </span>
+<span class="sd">    |  |                  |            |</span>
+<span class="sd">    |  |                  ∨            |</span>
+<span class="sd">    |  |                               | </span>
+<span class="sd">    |  +-------------------------------#</span>
+<span class="sd">    |  |</span>
+<span class="sd">    |  ∨</span>
+<span class="sd">    ∨  </span>
+
+<span class="sd">    Legend:</span>
+<span class="sd">    (All attributes are relative to screen view)</span>
+<span class="sd">    * -&gt; MediaObject.topleft()</span>
+<span class="sd">    &quot; -&gt; MediaObject.bottomright()</span>
+<span class="sd">    &amp; -&gt; MediaObject.center() </span>
+<span class="sd">    # -&gt; Scene.viewport_size()</span>
+<span class="sd">    % -&gt; Scene.center()</span>
+<span class="sd">    @ -&gt; Scene.origin()</span>
+
+<span class="sd">    MediaObject topleft coordinates relative to screen view are given by:</span>
+
+<span class="sd">    MediaObject.topleft[0-1] = \</span>
+<span class="sd">    self._scene.origin[0-1] + self.pos[0-1] * (2 ** self._scene.zoomlevel)</span>
+
+<span class="sd">    Where self.pos[0-1] it&#39;s MediaObject position relative to Scene reference </span>
+<span class="sd">    system wich get&#39;s scaled by 2** of scene zoom level</span>
+
+<span class="sd">    MediaObject centre coordinates relative to screen view are given firstly by</span>
+<span class="sd">    calculating image center coordinates relative to Scene reference coordinates:</span>
+
+<span class="sd">    C_s[0-1] = self.pos[0-1] + self._centre[0-1] * 2**self._z</span>
+
+<span class="sd">    Where self._centre[0-1] are center coordinates relative to the mediaobject</span>
+<span class="sd">    frame of reference and self._z it&#39;s MediaObject reference frame scaling </span>
+<span class="sd">    (zoom).</span>
+
+<span class="sd">    Take note that self.pos[0-1] dosen&#39;t get to be scaled by self._z as that </span>
+<span class="sd">    position it&#39;s relative to Scene reference frame.</span>
+
+<span class="sd">    Then we can calculate MediaObject centre coordinates relative to screen view as:</span>
+
+<span class="sd">    MediaObject.centre[0-1] = self._scene.origin[0] + C_s[0-1] * 2**self._scene.zoomlevel</span>
+
+<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new MediaObject from the media identified by `media_id`,</span>
 <span class="sd">        and the parent Scene referenced by `scene`.&quot;&quot;&quot;</span>
         <span class="c1">#initialize mediobject centre, position and velocity</span>
-        <span class="n">PhysicalObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="n">PhysicalObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span> <span class="o">=</span> <span class="n">media_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span> <span class="o">=</span> <span class="n">scene</span>
@@ -102,6 +161,9 @@
 
 <span class="sd">        move(float, float) -&gt; None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">#self._x and self._y correspond to self.pos[0] and self.pos[1], but </span>
+        <span class="c1">#mediaobject.pos dosen&#39;t support += operation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">+=</span> <span class="n">dx</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">zoomlevel</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">+=</span> <span class="n">dy</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">zoomlevel</span><span class="p">)</span></div>
 
@@ -243,7 +305,15 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">topleft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The on-screen positon of the top-left corner of the image.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The on-screen positon of the top-left corner of the image.</span>
+<span class="sd">        self._scene.origin -&gt; the world-space X coordinate of the top-left of the </span>
+<span class="sd">        screen view (the camera/view origin)</span>
+<span class="sd">        self.pos -&gt; the object’s position inside the view before applying zoom</span>
+<span class="sd">        (a coordinate in the camera’s internal coordinate system)</span>
+<span class="sd">        </span>
+<span class="sd">        here self.pos() is mediaobject </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">origin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">zoomlevel</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">origin</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">zoomlevel</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
@@ -251,7 +321,11 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">onscreen_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The on-screen size of the image.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The on-screen size of the image.</span>
+<span class="sd">        This gets inherited by higher order classes (StringMedia obj</span>
+<span class="sd">        TiledMedia obj ecc)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
 
@@ -270,23 +344,50 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The number of pixels the image occupies on the screen.&quot;&quot;&quot;</span>
         <span class="n">w</span><span class="p">,</span><span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onscreen_size</span>
         <span class="k">return</span> <span class="n">w</span> <span class="o">*</span> <span class="n">h</span>
-
+    
     <span class="k">def</span><span class="w"> </span><span class="nf">__get_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The position of the object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor :</span>
+<span class="sd">            __get_pos</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        __set_origin --&gt; MediaObject[float[&#39;_x&#39;]], MediaObject[float[&#39;_y&#39;]] </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">__set_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Constructor :</span>
+<span class="sd">            __set_pos(pos)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            pos[MediaObject[float[&#39;_x&#39;]], MediaObject[float[&#39;_y&#39;]]]</span>
+
+<span class="sd">        __set_origin --&gt; None</span>
+
+<span class="sd">        Set self._x, self._y variables to MediaObject position </span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">pos</span>
+
     <span class="n">pos</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_pos</span><span class="p">,</span> <span class="n">__set_pos</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creating MediaObject.pos property with __get_pos as </span>
+<span class="sd">    getter and __set_pos as setter&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__get_centre</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1">## we need to convert image-coordinate C_i to</span>
         <span class="c1">## screen-coordinate P (through scene-coordinate C_s):</span>
         <span class="c1">##   P = scene.origin + C_s * 2**zoomlevel_s</span>
         <span class="c1">## C_s = self.pos + C_i * 2**zoomlevel_i</span>
-        <span class="n">C_s</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">,</span>
-               <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">)</span>
+
+        <span class="c1">#This are the image coordinates relative to scene coordinates.</span>
+
+        <span class="n">C_s</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">)</span>
+
+        <span class="c1">#</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">origin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">C_s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">zoomlevel</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">origin</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">C_s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">zoomlevel</span><span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">__set_centre</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">centre</span><span class="p">):</span>
         <span class="c1">## we need to convert screen-coordinate P to</span>
         <span class="c1">## image-coordinate C_i (through scene-coordinate C_s):</span>
@@ -298,6 +399,7 @@
                <span class="p">(</span><span class="n">centre</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">origin</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**-</span><span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">zoomlevel</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span> <span class="o">=</span> <span class="p">((</span><span class="n">C_s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**-</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">,</span>
                         <span class="p">(</span><span class="n">C_s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**-</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">)</span>
+
     <span class="n">centre</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_centre</span><span class="p">,</span> <span class="n">__set_centre</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
