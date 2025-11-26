@@ -64,9 +64,12 @@ class MagickConverter(Converter):
                         
             try:
                 os.unlink(self._outfile)
-            except:
-                self.__logger.exception("unable to unlink temporary file "
-                    "'%s'" % self._outfile)
+            except Exception:
+                try:
+                    self._logger.exception("unable to unlink temporary file "
+                        "'%s'" % self._outfile)
+                except AttributeError:
+                    pass  # Logger not initialized
             
         self._progress = 1.0
 

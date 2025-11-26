@@ -194,7 +194,7 @@ class PhysicalObject(): #removed object from class argument and Thread
         point that will maintain its position on the screen as the
         object is being zoomed).
         """
-        ## we need to convert pobject-coordinate C to
+        ## we need to convert pobject-coorte C to
         ## screen-coordinate P:
         ## P = pos + C * 2**zoomlevel
         return (self._x + self._centre[0] * 2**self._z,

@@ -121,7 +121,10 @@ class PPMTiler(Tiler):
 
 
     def __del__(self):
-        self.__ppm_fileobj.close()
+        try:
+            self.__ppm_fileobj.close()
+        except AttributeError:
+            pass  # Object was never fully initialized
 
 
 

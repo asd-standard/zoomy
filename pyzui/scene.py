@@ -635,13 +635,13 @@ class Scene(PhysicalObject):
 
             --------------------------------->
             |
-            |      ----------------------#
+            |      ----------------------
             |     |                      |                 
             |     |             *------  |       
             |     |           % |      | |   
             |     |             +------" |      
             |     |                      |
-            |     @----------------------
+            |      ----------------------#
             |
             |
             ∨
@@ -650,7 +650,7 @@ class Scene(PhysicalObject):
 
             ----------------------------------->
             |
-            |  ------------------------------#
+            |  ------------------------------
             | |                              |
             | |                              |
             | |                              |                 
@@ -659,7 +659,7 @@ class Scene(PhysicalObject):
             | |                +------"      |      
             | |                              |
             | |                              | 
-            | @------------------------------
+            |  ------------------------------#
             |
             |
             ∨
@@ -729,8 +729,6 @@ def load_scene(filename):
     zoomlevel, ox, oy = f.readline().split()
     scene.zoomlevel = float(zoomlevel)
     scene.origin = (float(ox), float(oy))
-    #print('HERE', '\n', '\n', '\n', '\n')
-    #print(float(ox),float(oy))
 
     """
     Any line then represent a mediaobject, namely composed by :    
