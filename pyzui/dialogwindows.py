@@ -21,13 +21,13 @@
 import os
 from collections import deque
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import (
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtWidgets import (
     QApplication, QDialog, QTextEdit, QVBoxLayout, QPushButton, QDialogButtonBox, QInputDialog, QLineEdit, QWidget, QLabel, QHBoxLayout, QSizePolicy
 )
 
-from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QFont, QColor, QPainter
+from PySide6.QtCore import Qt, QPoint
+from PySide6.QtGui import QFont, QColor, QPainter
 
 
 
@@ -45,7 +45,7 @@ class DialogWindows():
         #dialog.setLabelText("sentitivity goes from 0 to 100")
         dialog.resize(300, 80)  # Set the size here
 
-        ok_pressed = dialog.exec_()
+        ok_pressed = dialog.exec()
         text_input = dialog.textValue()
         
         return ok_pressed, text_input     
@@ -197,7 +197,7 @@ also gives a selection column of the last 20 used colors.
         def _run_dialog(self):
             dialog = self._main_dialog()
             # Run dialog and get result
-            if dialog.exec_() == QDialog.Accepted:
+            if dialog.exec() == QDialog.Accepted:
                 if len(self.string_color) != 6 :
                     self.string_color = self.custom_color_input.text()
                     self.color_codes.append(self.string_color)
@@ -372,7 +372,7 @@ also gives a selection column of the last 20 used colors.
         def _run_dialog(self):
             dialog = self._main_dialog()
             # Run dialog and get result
-            if dialog.exec_() == QDialog.Accepted:
+            if dialog.exec() == QDialog.Accepted:
                 if len(self.string_color) != 6 :
                     self.string_color = self.custom_color_input.text()
                     self.color_codes.append(self.string_color)

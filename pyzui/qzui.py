@@ -18,7 +18,7 @@
 
 """QWidget for displaying the ZUI."""
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 from threading import Thread
 
 from . import scene as Scene
@@ -27,22 +27,26 @@ from . import tilemanager as TileManager
 class QZUI(QtWidgets.QWidget, Thread) : 
     """
     Constructor :
-        QZUI(QtWidgets.QWidget)
+        QZUI()
     Parameters :
-        QtWidGets.QWidget
+        parent['QWidget'], framerate['int'], zoom_sensitivity['int']
 
-    qzui.QZUI(QtWidgets.QWidget) --> None
+    QZUI(parent, framerate, zoom_sensitivity) --> QtWidgets.QWidget, Thread
 
     QZUI widgets that are used for rendering the ZUI.
     This class defines all the methods to retieve events, Mouse, Keyboard, ecc
     
     """
 
-    #: link error variable to QtCore.pyqtSignal()
-    error = QtCore.pyqtSignal()
+    #: link error variable to QtCore.Signal()
+    error = QtCore.Signal()
 
-    def __init__(self, parent=None, framerate=10, zoom_sensitivity=50):
-        """Create a new QZUI QWidget with the given `parent` widget."""
+    def __init__(self, parent=None, framerate=10, zoom_sensitivity=20):
+        
+        """
+        Create a new QZUI QWidget with the given `parent` widget.
+
+        """
         QtWidgets.QWidget.__init__(self, parent)
 
         Thread.__init__(self)
@@ -151,20 +155,20 @@ class QZUI(QtWidgets.QWidget, Thread) :
         num_degrees = event.angleDelta().y() #/ 8
         num_steps = round(num_degrees / self.zoom_sensitivity , 3) #15
         self.__zoom(num_steps)
-        self.__mousepos = (event.x(), event.y())
+        self.__mousepos = (int(event.position().x()), int(event.position().y()))
 
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
             self.__mouse_left_down = True
-            self.__mousepos = (event.x(), event.y())
+            self.__mousepos = (int(event.position().x()), int(event.position().y()))
             if not self.__shift_held:
                 ## shift-click won't change the selection
                 self.scene.selection = self.scene.get(self.__mousepos)
-        
+
         if event.button() == QtCore.Qt.RightButton:
             self.__mouse_right_down = True
-            self.__mousepos = (event.x(), event.y())
+            self.__mousepos = (int(event.position().x()), int(event.position().y()))
             if not self.__shift_held:
                 ## shift-click won't change the selection
                 self.scene.right_selection = self.scene.get(self.__mousepos)
@@ -172,14 +176,14 @@ class QZUI(QtWidgets.QWidget, Thread) :
 
     def mouseMoveEvent(self, event):
         if (event.buttons()&QtCore.Qt.LeftButton) and self.__mouse_left_down:
-            mx = event.x() - self.__mousepos[0]
-            my = event.y() - self.__mousepos[1]
+            mx = int(event.position().x()) - self.__mousepos[0]
+            my = int(event.position().y()) - self.__mousepos[1]
 
             t = 1.0 / self.framerate
             self.__active_object.aim('x', mx, t)
             self.__active_object.aim('y', my, t)
 
-        self.__mousepos = (event.x(), event.y())
+        self.__mousepos = (int(event.position().x()), int(event.position().y()))
 
 
     def mouseReleaseEvent(self, event):
@@ -254,6 +258,7 @@ class QZUI(QtWidgets.QWidget, Thread) :
             self.__timer.start(int(1000/self.__framerate), self)
         elif self.__timer.isActive():
             self.__timer.stop()
+    
     framerate = property(__get_framerate, __set_framerate)
 
     def __get_scene(self):

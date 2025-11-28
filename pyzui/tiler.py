@@ -46,18 +46,18 @@ class Tiler(Thread):
         dimensions given by `tilesize`.
 
         images are tiled with the following procedure:
-        the number of tiles to cover a row of the image is calculated, the last tile 
-        of the row is of the minimum width to finish the image and standard height (256). 
-        the last row tiles are of the minimum heigh to finish the image and the last tile is of 
+        the number of tiles to cover a row of the image is calculated, the last tile
+        of the row is of the minimum width to finish the image and standard height (256).
+        the last row tiles are of the minimum heigh to finish the image and the last tile is of
         the minimum size to cover the bottom right corner of the image.
-        The example below will have a self.numtiles_across_total = 2
+        The example below will have a self.numtiles_across_total = 2::
 
-       +-------+
-       | t1 |t2|
-       |    |  |
-       |----+--|
-       | t3 |t4|
-       +-------+
+           +-------+
+           | t1 |t2|
+           |    |  |
+           |----+--|
+           | t3 |t4|
+           +-------+
         """
         
         Thread.__init__(self)

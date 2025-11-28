@@ -21,7 +21,7 @@ filesystem (abstract base class)."""
 
 import os
 
-from PyQt5 import QtCore, QtGui
+from PySide6 import QtCore, QtGui
 
 from .tileprovider import TileProvider
 from . import tilestore as TileStore

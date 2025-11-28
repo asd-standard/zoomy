@@ -54,13 +54,13 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">QApplication</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QTextEdit</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span> <span class="n">QDialogButtonBox</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QLineEdit</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QSizePolicy</span>
 <span class="p">)</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QPoint</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QPainter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QPoint</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QPainter</span>
 
 
 
@@ -82,7 +82,7 @@
         <span class="c1">#dialog.setLabelText(&quot;sentitivity goes from 0 to 100&quot;)</span>
         <span class="n">dialog</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>  <span class="c1"># Set the size here</span>
 
-        <span class="n">ok_pressed</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+        <span class="n">ok_pressed</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
         <span class="n">text_input</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">textValue</span><span class="p">()</span>
         
         <span class="k">return</span> <span class="n">ok_pressed</span><span class="p">,</span> <span class="n">text_input</span>     </div>
@@ -251,7 +251,7 @@
         <span class="k">def</span><span class="w"> </span><span class="nf">_run_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="n">dialog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main_dialog</span><span class="p">()</span>
             <span class="c1"># Run dialog and get result</span>
-            <span class="k">if</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span> <span class="o">==</span> <span class="n">QDialog</span><span class="o">.</span><span class="n">Accepted</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span> <span class="o">==</span> <span class="n">QDialog</span><span class="o">.</span><span class="n">Accepted</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">string_color</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">6</span> <span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">string_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_color_input</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">string_color</span><span class="p">)</span>
@@ -444,7 +444,7 @@
         <span class="k">def</span><span class="w"> </span><span class="nf">_run_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="n">dialog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main_dialog</span><span class="p">()</span>
             <span class="c1"># Run dialog and get result</span>
-            <span class="k">if</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span> <span class="o">==</span> <span class="n">QDialog</span><span class="o">.</span><span class="n">Accepted</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span> <span class="o">==</span> <span class="n">QDialog</span><span class="o">.</span><span class="n">Accepted</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">string_color</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">6</span> <span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">string_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_color_input</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">color_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">string_color</span><span class="p">)</span>
@@ -508,6 +508,11 @@
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
 </ul>
 
 <div class="relations">

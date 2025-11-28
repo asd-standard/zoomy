@@ -29,7 +29,7 @@ class MediaObject(PhysicalObject) :
     Parameters :
         media_id['string'], scene['Scene']
 
-    Media_object(media_id, scene) --> None
+    Media_object(media_id, scene) --> PhysicalObject
 
     MediaObject objects are used to represent media that can be rendered in
     the ZUI.
@@ -40,33 +40,38 @@ class MediaObject(PhysicalObject) :
     reference system transformation.
 
     You can think about it as fixed window looking at a scene that can strecth or
-    shrink beneath it, at the same time individual mediaobject can also strecth 
-    or shrink. The fixed window can move on the 2d plane.
+    shrink beneath it, with this stretch or shrink always having it's origin
+    at the Scene center for scene zoom and MediaObject center for the mediobject
+    zoom as at the same time individual mediaobject can also strecth 
+    or shrink. The fixed window can then move on the 2d plane bringing objects 
+    into view.
 
-    World 
-     --------------------------------------->
-    |   Scene
-    |  @ ------------------------------+--->
-    |  |  ViewPort        MediaObj     |                 
-    |  |  (Screen View)   *-------+--> |       
-    |  |                  |   &   |    |   
-    |  |               %  +-------"    |      
-    |  |                  |            |
-    |  |                  ∨            |
-    |  |                               | 
-    |  +-------------------------------#
-    |  |
-    |  ∨
-    ∨  
+    World::
 
-    Legend:
-    (All attributes are relative to screen view)
-    * -> MediaObject.topleft()
-    " -> MediaObject.bottomright()
-    & -> MediaObject.center() 
-    # -> Scene.viewport_size()
-    % -> Scene.center()
-    @ -> Scene.origin()
+         --------------------------------------->
+        |   Scene
+        |  @ ------------------------------+--->
+        |  |  ViewPort        MediaObj     |                 
+        |  |  (Screen View)   *-------+--> |       
+        |  |                  |   &   |    |   
+        |  |               %  +-------"    |      
+        |  |                  |            |
+        |  |                  ∨            |
+        |  |                               | 
+        |  +-------------------------------#
+        |  |
+        |  ∨
+        ∨  
+
+    Legend::
+
+        (All attributes are relative to screen view)
+        * -> MediaObject.topleft()
+        " -> MediaObject.bottomright()
+        & -> MediaObject.center() 
+        # -> Scene.viewport_size()
+        % -> Scene.center()
+        @ -> Scene.origin()
 
     MediaObject topleft coordinates relative to screen view are given by:
 

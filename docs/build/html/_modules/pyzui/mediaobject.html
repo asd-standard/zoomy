@@ -64,7 +64,7 @@
 <span class="sd">    Parameters :</span>
 <span class="sd">        media_id[&#39;string&#39;], scene[&#39;Scene&#39;]</span>
 
-<span class="sd">    Media_object(media_id, scene) --&gt; None</span>
+<span class="sd">    Media_object(media_id, scene) --&gt; PhysicalObject</span>
 
 <span class="sd">    MediaObject objects are used to represent media that can be rendered in</span>
 <span class="sd">    the ZUI.</span>
@@ -75,33 +75,38 @@
 <span class="sd">    reference system transformation.</span>
 
 <span class="sd">    You can think about it as fixed window looking at a scene that can strecth or</span>
-<span class="sd">    shrink beneath it, at the same time individual mediaobject can also strecth </span>
-<span class="sd">    or shrink. The fixed window can move on the 2d plane.</span>
+<span class="sd">    shrink beneath it, with this stretch or shrink always having it&#39;s origin</span>
+<span class="sd">    at the Scene center for scene zoom and MediaObject center for the mediobject</span>
+<span class="sd">    zoom as at the same time individual mediaobject can also strecth </span>
+<span class="sd">    or shrink. The fixed window can then move on the 2d plane bringing objects </span>
+<span class="sd">    into view.</span>
 
-<span class="sd">    World </span>
-<span class="sd">     ---------------------------------------&gt;</span>
-<span class="sd">    |   Scene</span>
-<span class="sd">    |  @ ------------------------------+---&gt;</span>
-<span class="sd">    |  |  ViewPort        MediaObj     |                 </span>
-<span class="sd">    |  |  (Screen View)   *-------+--&gt; |       </span>
-<span class="sd">    |  |                  |   &amp;   |    |   </span>
-<span class="sd">    |  |               %  +-------&quot;    |      </span>
-<span class="sd">    |  |                  |            |</span>
-<span class="sd">    |  |                  ∨            |</span>
-<span class="sd">    |  |                               | </span>
-<span class="sd">    |  +-------------------------------#</span>
-<span class="sd">    |  |</span>
-<span class="sd">    |  ∨</span>
-<span class="sd">    ∨  </span>
+<span class="sd">    World::</span>
 
-<span class="sd">    Legend:</span>
-<span class="sd">    (All attributes are relative to screen view)</span>
-<span class="sd">    * -&gt; MediaObject.topleft()</span>
-<span class="sd">    &quot; -&gt; MediaObject.bottomright()</span>
-<span class="sd">    &amp; -&gt; MediaObject.center() </span>
-<span class="sd">    # -&gt; Scene.viewport_size()</span>
-<span class="sd">    % -&gt; Scene.center()</span>
-<span class="sd">    @ -&gt; Scene.origin()</span>
+<span class="sd">         ---------------------------------------&gt;</span>
+<span class="sd">        |   Scene</span>
+<span class="sd">        |  @ ------------------------------+---&gt;</span>
+<span class="sd">        |  |  ViewPort        MediaObj     |                 </span>
+<span class="sd">        |  |  (Screen View)   *-------+--&gt; |       </span>
+<span class="sd">        |  |                  |   &amp;   |    |   </span>
+<span class="sd">        |  |               %  +-------&quot;    |      </span>
+<span class="sd">        |  |                  |            |</span>
+<span class="sd">        |  |                  ∨            |</span>
+<span class="sd">        |  |                               | </span>
+<span class="sd">        |  +-------------------------------#</span>
+<span class="sd">        |  |</span>
+<span class="sd">        |  ∨</span>
+<span class="sd">        ∨  </span>
+
+<span class="sd">    Legend::</span>
+
+<span class="sd">        (All attributes are relative to screen view)</span>
+<span class="sd">        * -&gt; MediaObject.topleft()</span>
+<span class="sd">        &quot; -&gt; MediaObject.bottomright()</span>
+<span class="sd">        &amp; -&gt; MediaObject.center() </span>
+<span class="sd">        # -&gt; Scene.viewport_size()</span>
+<span class="sd">        % -&gt; Scene.center()</span>
+<span class="sd">        @ -&gt; Scene.origin()</span>
 
 <span class="sd">    MediaObject topleft coordinates relative to screen view are given by:</span>
 
@@ -471,6 +476,11 @@
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
 </ul>
 
 <div class="relations">

@@ -19,7 +19,7 @@
 """Class for representing image tiles."""
 
 from PIL import Image, ImageQt 
-from PyQt5 import QtCore, QtGui
+from PySide6 import QtCore, QtGui
 import traceback
 
 #REMOVED object 

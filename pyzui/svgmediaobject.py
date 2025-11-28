@@ -18,7 +18,7 @@
 
 """SVG objects to be displayed in the ZUI."""
 
-from PyQt5 import QtCore, QtSvg
+from PySide6 import QtCore, QtSvg
 
 from .mediaobject import MediaObject, LoadError, RenderMode
 

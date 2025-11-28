@@ -23,7 +23,7 @@ import os
 import math
 import logging
 
-from PyQt5 import QtCore, QtGui
+from PySide6 import QtCore, QtGui
 from PIL import ImageQt
 
 from .mediaobject import MediaObject, LoadError, RenderMode
@@ -33,7 +33,12 @@ from . import tilemanager as TileManager
 from .ppm import PPMTiler
 
 # The classes that convert various format to ppm images
-from .webkitconverter import  WebKitConverter
+try:
+    from .webkitconverter import  WebKitConverter
+    WEBKIT_AVAILABLE = True
+except ImportError:
+    WEBKIT_AVAILABLE = False
+    WebKitConverter = None
 from .pdfconverter import PDFConverter
 from .magickconverter import MagickConverter
 
@@ -78,7 +83,7 @@ class TiledMediaObject(MediaObject):
         #print('tiledmediaobject-70-TileManager.tiled(self._media_id):',TileManager.tiled(self._media_id))
         
         if TileManager.tiled(self._media_id):   
-            print(self._media_id)       
+            #print(self._media_id)       
             TileManager.load_tile((self._media_id, 0, 0, 0))
             
         else:
@@ -90,6 +95,10 @@ class TiledMediaObject(MediaObject):
             if self._media_id.startswith('http://') or \
                self._media_id.lower().endswith('.html') or \
                self._media_id.lower().endswith('.htm'):
+                if not WEBKIT_AVAILABLE:
+                    self.__logger.error("WebKitConverter not available (QtWebEngineWidgets not installed)")
+                    self.__logger.error("Cannot load HTML files or web URLs without QtWebEngineWidgets")
+                    raise ImportError("QtWebEngineWidgets not available - cannot load HTML content")
                 self.__converter = WebKitConverter(
                     self._media_id, self.__tmpfile)
                 self.__ppmfile = self.__tmpfile
@@ -386,6 +395,7 @@ class TiledMediaObject(MediaObject):
         """
         
         if not os.path.exists(self.__ppmfile):
+
             ## there was a problem converting, or the input file
             ## never actually existed
             if self.__converter and self.__converter.error:
@@ -400,7 +410,6 @@ class TiledMediaObject(MediaObject):
             filext = 'png'
 
         try:
-            
             self.__tiler = PPMTiler(self.__ppmfile, self._media_id, filext)
             self.__tiler.start()
             
@@ -409,7 +418,8 @@ class TiledMediaObject(MediaObject):
 
 
     def render(self, painter, mode):
-                
+        
+
         if self.__loaded:
             self.__render_media(painter, mode)
 
@@ -424,6 +434,7 @@ class TiledMediaObject(MediaObject):
             
             self.__try_load()
             if self.__loaded:
+                
                 self.__render_media(painter, mode)
             else:
                 self.__render_placeholder(painter)
@@ -433,6 +444,7 @@ class TiledMediaObject(MediaObject):
             ## the tiler has not been run yet and either
             ## it was assumed that media_id is a local PPM
             ## file or the converter has just finished
+
             self.__run_tiler()
             self.__render_placeholder(painter)
 

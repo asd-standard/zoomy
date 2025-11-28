@@ -25,7 +25,7 @@ import time
 
 #replaced QtWebKitWidgets QtWebEngineWidgets
 
-from PyQt5 import QtCore, QtGui, QtSvg, QtWebEngineWidgets, QtWidgets
+from PySide6 import QtCore, QtGui, QtSvg, QtWebEngineWidgets, QtWidgets
 
 from .converter import Converter
 
@@ -96,7 +96,7 @@ class WebKitConverter(Converter):
         self.__qpage.mainFrame().load(QtCore.QUrl(self._infile))
 
         if self.__qapp is not None:
-            self.__qapp.exec_()
+            self.__qapp.exec()
 
 
     def __load_finished(self, ok):

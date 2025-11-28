@@ -57,10 +57,19 @@ class TestReadPPMHeader:
         with pytest.raises(IOError, match="not enough entries in PPM header"):
             read_ppm_header(f)
 
+    def test_ppm_header_with_comment_lines(self):
+        """Test reading PPM header with comment lines (# character)."""
+        ppm_data = b"P6\n# This is a comment\n100 200\n# Another comment\n255\n"
+        f = BytesIO(ppm_data)
+        width, height = read_ppm_header(f)
+        assert width == 100
+        assert height == 200
+
 
 class TestEnlargePPMFile:
     """Test suite for enlarge_ppm_file function."""
 
+    @pytest.mark.skip(reason="enlarge_ppm_file is currently commented out in ppm.py")
     @patch('builtins.open', new_callable=mock_open, read_data="P6\n10 5\n255\ndata_here")
     def test_enlarge_ppm_file_basic(self, mock_file):
         """Test enlarging PPM file."""
@@ -120,3 +129,64 @@ class TestPPMTiler:
         file_handle = tiler._PPMTiler__ppm_fileobj
         tiler.__del__()
         file_handle.close.assert_called()
+
+    def test_tiff_to_png_tiles_integration(self):
+        """Integration test: Tile large TIFF converted to PPM with PNG output."""
+        import os
+        import tempfile
+        from pyzui.magickconverter import MagickConverter
+        from pyzui import tilestore as TileStore
+
+        tiff_file = "data/eso1031b.tif"
+
+        # Skip if TIFF file doesn't exist
+        if not os.path.exists(tiff_file):
+            pytest.skip(f"Test file not found: {tiff_file}")
+
+        # Convert TIFF to PPM first
+        with tempfile.NamedTemporaryFile(suffix='.ppm', delete=False) as tmp:
+            ppm_file = tmp.name
+
+        try:
+            # Step 1: Convert TIFF to PPM
+            converter = MagickConverter(tiff_file, ppm_file)
+            converter.start()
+            converter.join()
+
+            assert converter.error is None, f"Conversion failed: {converter.error}"
+            assert os.path.exists(ppm_file), "PPM file not created"
+
+            # Step 2: Tile the PPM with PNG output format
+            media_id = tiff_file
+            filext = "png"
+            tilesize = 256
+
+            tiler = PPMTiler(ppm_file, media_id, filext, tilesize)
+
+            # Verify tiler initialized correctly
+            assert tiler._width > 0
+            assert tiler._height > 0
+            assert tiler._bytes_per_pixel == 3
+
+            # Run the tiler
+            tiler.start()
+            tiler.join()
+
+            # Verify tiling completed
+            assert tiler.progress == 1.0, f"Tiling incomplete: {tiler.progress*100}%"
+
+            # Verify PNG tiles were created
+            tile_path = TileStore.get_media_path(media_id)
+            assert os.path.exists(tile_path), f"Tile directory not created: {tile_path}"
+
+            # Count PNG tiles
+            png_tiles = []
+            for root, dirs, files in os.walk(tile_path):
+                png_tiles.extend([f for f in files if f.endswith('.png')])
+
+            assert len(png_tiles) > 0, "No PNG tiles were created"
+
+        finally:
+            # Cleanup PPM file
+            if os.path.exists(ppm_file):
+                os.unlink(ppm_file)

@@ -51,7 +51,7 @@
 
 <span class="sd">&quot;&quot;&quot;SVG objects to be displayed in the ZUI.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtSvg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtSvg</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.mediaobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">MediaObject</span><span class="p">,</span> <span class="n">LoadError</span><span class="p">,</span> <span class="n">RenderMode</span>
 
@@ -66,7 +66,7 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">):</span>
         <span class="n">MediaObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__renderer</span> <span class="o">=</span> <span class="n">QtSvg</span><span class="o">.</span><span class="n">QSvgRendmagickerer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__renderer</span> <span class="o">=</span> <span class="n">QtSvg</span><span class="o">.</span><span class="n">QSvgRenderer</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__renderer</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">LoadError</span><span class="p">(</span><span class="s2">&quot;unable to parse SVG file&quot;</span><span class="p">)</span>
 
@@ -133,6 +133,11 @@
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
 </ul>
 
 <div class="relations">

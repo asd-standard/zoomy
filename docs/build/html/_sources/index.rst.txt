@@ -53,7 +53,9 @@ PyZUI is compatible with the following media formats:
 .. toctree::
    :maxdepth: 2
    :titlesonly:
-   :caption: Contribution Guidelines 
+   :caption: Contribution Guidelines
 
    contributiongiudelines
+
+
 

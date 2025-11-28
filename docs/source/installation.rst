@@ -31,9 +31,7 @@ with all the core dependencies installed trough the default Anaconda channel:
 
 PyZUI depends on the following Python packages:
 
-- pyqt=5.15.10 
-- pyqtwebengine=5.15.10
-
+- pyside6=6.7.2 
 - pillow=9.4.0
 
 The following non-Python packages are also required by certain features of the

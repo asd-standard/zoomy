@@ -58,8 +58,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt5.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QColor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QColor</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.dialogwindows</span><span class="w"> </span><span class="kn">import</span> <span class="n">DialogWindows</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.physicalobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhysicalObject</span>
@@ -106,7 +106,7 @@
 <span class="sd">        `__logger`. </span>
 <span class="sd">        </span>
 <span class="sd">        World::</span>
-<span class="sd">        </span>
+
 <span class="sd">             ---------------------------------------&gt;</span>
 <span class="sd">            |   Scene</span>
 <span class="sd">            |  @ ------------------------------+---&gt;</span>
@@ -122,14 +122,15 @@
 <span class="sd">            |  ∨</span>
 <span class="sd">            ∨  </span>
 
-<span class="sd">        Legend:</span>
-<span class="sd">        (All MediaObject attributes are relative to screen view)</span>
-<span class="sd">        * -&gt; MediaObject.topleft()</span>
-<span class="sd">        &quot; -&gt; MediaObject.bottomright()</span>
-<span class="sd">        &amp; -&gt; MediaObject.center() </span>
-<span class="sd">        # -&gt; Scene.viewport_size()</span>
-<span class="sd">        % -&gt; Scene.center()</span>
-<span class="sd">        @ -&gt; Scene.origin() </span>
+<span class="sd">        Legend::</span>
+<span class="sd">        </span>
+<span class="sd">            (All MediaObject attributes are relative to screen view)</span>
+<span class="sd">            * -&gt; MediaObject.topleft()</span>
+<span class="sd">            &quot; -&gt; MediaObject.bottomright()</span>
+<span class="sd">            &amp; -&gt; MediaObject.center() </span>
+<span class="sd">            # -&gt; Scene.viewport_size()</span>
+<span class="sd">            % -&gt; Scene.center()</span>
+<span class="sd">            @ -&gt; Scene.origin() </span>
 
 <span class="sd">        We have a center relative to the scene, &#39;center&#39; and a center relative</span>
 <span class="sd">        to the absolute frame of reference _center</span>
@@ -157,7 +158,6 @@
         
         <span class="c1">#commented out on 20250314 </span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;Scene&quot;</span><span class="p">)</span>
-
 
 <div class="viewcode-block" id="Scene.save">
 <a class="viewcode-back" href="../../pyzui.scene.html#pyzui.scene.Scene.save">[docs]</a>
@@ -333,7 +333,7 @@
 <span class="sd">        on-screen point `pos`. `pos` is the mouse polition at the last</span>
 <span class="sd">        left or right click mouse event.</span>
 
-<span class="sd">        Return None if there are no `MediaObject`s overlapping the point.</span>
+<span class="sd">        Return None if there are no *MediaObjects* overlapping the point.</span>
 
 <span class="sd">        get(tuple[float,float]) --&gt; MediaObject or None</span>
 
@@ -341,9 +341,9 @@
 <span class="sd">        asd/Projects/pyzui/docs/build/html/_modules/pyzui/qzui.html#QZUI.mouse</span>
 <span class="sd">        PressEvent&gt;`_ wich returns mouse position `pos`</span>
 <span class="sd">        </span>
-<span class="sd">        Thread safely cycle through `__objects`. for each mediaobject checks if </span>
-<span class="sd">        `pos` is within mediaobject area, if it is the mediaobject is returned as </span>
-<span class="sd">        `foremost` </span>
+<span class="sd">        Thread safely cycle through *__objects*. For each mediaobject checks if</span>
+<span class="sd">        *pos* is within mediaobject area, if it is the mediaobject is returned as</span>
+<span class="sd">        *foremost* </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">foremost</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -359,6 +359,32 @@
         <span class="k">return</span> <span class="n">foremost</span></div>
 
 
+<div class="viewcode-block" id="Scene.zoom">
+<a class="viewcode-back" href="../../pyzui.scene.html#pyzui.scene.Scene.zoom">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Zoom by the given `amount` with the centre maintaining its position</span>
+<span class="sd">        on the screen.</span>
+
+<span class="sd">        zoom(float) -&gt; None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## P is the onscreen objec position of the centre</span>
+        <span class="c1">## C is the coordinates of the centre</span>
+        <span class="c1">## zoomlevel&#39; = zoomlevel + amount</span>
+        <span class="c1">## P  = pos  + C * 2**zoomlevel</span>
+        <span class="c1">##    =&gt; C = (P - pos) * 2**-zoomlevel</span>
+        <span class="c1">## P&#39; = pos&#39; + C * 2**zoomlevel&#39;</span>
+        <span class="c1">##    = pos&#39; + (P - pos) * 2**(zoomlevel&#39;-zoomlevel)</span>
+        <span class="c1">## solving for P = P&#39; yields:</span>
+        <span class="c1">##   pos&#39; = P - (P - pos) * 2**amount</span>
+
+
+        <span class="n">Px</span><span class="p">,</span> <span class="n">Py</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">Px</span> <span class="o">-</span> <span class="p">(</span><span class="n">Px</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">amount</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">Py</span> <span class="o">-</span> <span class="p">(</span><span class="n">Py</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">amount</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">+=</span> <span class="n">amount</span></div>
+
+    
 
 <div class="viewcode-block" id="Scene.render">
 <a class="viewcode-back" href="../../pyzui.scene.html#pyzui.scene.Scene.render">[docs]</a>
@@ -376,7 +402,7 @@
 <span class="sd">        If `draft` is True, draft mode is enabled. Otherwise High-Quality mode</span>
 <span class="sd">        is enabled.</span>
 
-<span class="sd">        If any errors occur rendering any of the `MediaObject`s, then they will</span>
+<span class="sd">        If any errors occur rendering any of the *MediaObjects*, then they will</span>
 <span class="sd">        be removed from the scene and a list of tuples representing the errors</span>
 <span class="sd">        will be returned. Otherwise the empty list will be returned.</span>
 
@@ -571,14 +597,14 @@
 <span class="sd">        Scene.moving --&gt; bool</span>
 
 <span class="sd">        Boolean value indicating whether the scene or any contained</span>
-<span class="sd">        `MediaObject`s have a non-zero velocity.</span>
+<span class="sd">        *MediaObjects* have a non-zero velocity.</span>
 
-<span class="sd">        Checks if the inherited, vx, vy and vz values from `PhysicalObject`</span>
-<span class="sd">        are not zero. If it is that means the scene is moving and True is </span>
-<span class="sd">        returned, If thats not the case it thread safely cycle trough </span>
-<span class="sd">        mediaobjects in `__objects` checking if `mediaobject.moving` is</span>
-<span class="sd">        True. If it is True is returned. `mediaobject.moving` is also </span>
-<span class="sd">        inherited property of `PhysicalObject` class.</span>
+<span class="sd">        Checks if the inherited, vx, vy and vz values from *PhysicalObject*</span>
+<span class="sd">        are not zero. If it is that means the scene is moving and True is</span>
+<span class="sd">        returned, If thats not the case it thread safely cycle trough</span>
+<span class="sd">        mediaobjects in *__objects* checking if *mediaobject.moving* is</span>
+<span class="sd">        True. If it is True is returned. *mediaobject.moving* is also</span>
+<span class="sd">        inherited property of *PhysicalObject* class.</span>
 
 <span class="sd">        See : `physicalobject &lt;file:///home/asd/Projects/pyzui/docs/build/html/</span>
 <span class="sd">        pyzui.physicalobject.html#module-pyzui.physicalobject&gt;`_ </span>
@@ -666,13 +692,13 @@
 
 <span class="sd">            ---------------------------------&gt;</span>
 <span class="sd">            |</span>
-<span class="sd">            |      ----------------------#</span>
+<span class="sd">            |      ----------------------</span>
 <span class="sd">            |     |                      |                 </span>
 <span class="sd">            |     |             *------  |       </span>
 <span class="sd">            |     |           % |      | |   </span>
 <span class="sd">            |     |             +------&quot; |      </span>
 <span class="sd">            |     |                      |</span>
-<span class="sd">            |     @----------------------</span>
+<span class="sd">            |      ----------------------#</span>
 <span class="sd">            |</span>
 <span class="sd">            |</span>
 <span class="sd">            ∨</span>
@@ -681,7 +707,7 @@
 
 <span class="sd">            -----------------------------------&gt;</span>
 <span class="sd">            |</span>
-<span class="sd">            |  ------------------------------#</span>
+<span class="sd">            |  ------------------------------</span>
 <span class="sd">            | |                              |</span>
 <span class="sd">            | |                              |</span>
 <span class="sd">            | |                              |                 </span>
@@ -690,7 +716,7 @@
 <span class="sd">            | |                +------&quot;      |      </span>
 <span class="sd">            | |                              |</span>
 <span class="sd">            | |                              | </span>
-<span class="sd">            | @------------------------------</span>
+<span class="sd">            |  ------------------------------#</span>
 <span class="sd">            |</span>
 <span class="sd">            |</span>
 <span class="sd">            ∨</span>
@@ -753,7 +779,7 @@
 
 <span class="sd">    See source code comments:</span>
 
-<span class="sd">        `source &lt;file:///home/asd/Projects/pyzui/docs/build/html/_modules/pyzui/</span>
+<span class="sd">        `load_scene source &lt;file:///home/asd/Projects/pyzui/docs/build/html/_modules/pyzui/</span>
 <span class="sd">        scene.html#load_scene&gt;`_</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -766,8 +792,6 @@
     <span class="n">zoomlevel</span><span class="p">,</span> <span class="n">ox</span><span class="p">,</span> <span class="n">oy</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
     <span class="n">scene</span><span class="o">.</span><span class="n">zoomlevel</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">zoomlevel</span><span class="p">)</span>
     <span class="n">scene</span><span class="o">.</span><span class="n">origin</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ox</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">oy</span><span class="p">))</span>
-    <span class="c1">#print(&#39;HERE&#39;, &#39;\n&#39;, &#39;\n&#39;, &#39;\n&#39;, &#39;\n&#39;)</span>
-    <span class="c1">#print(float(ox),float(oy))</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Any line then represent a mediaobject, namely composed by :    </span>
@@ -853,6 +877,11 @@
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
 </ul>
 
 <div class="relations">

@@ -37,6 +37,7 @@ class PhysicalObject(): #removed object from class argument and Thread
     PhysicalObject gets declared on MediaObject and Scene initializations, 
     giving them the necessary attributes, (position, zoomlevel, damp factor
     zoomlevel, eccetera).
+    
     """
     def __init__(self):
         """Create a new Physicalpobject at the origin with zero velocity."""
@@ -190,10 +191,6 @@ class PhysicalObject(): #removed object from class argument and Thread
     objects, MediaObjects have their own centre definition.
     '''
     def __get_centre(self):
-        """The on-screen coordinates of the centre of the object (the
-        point that will maintain its position on the screen as the
-        object is being zoomed).
-        """
         ## we need to convert pobject-coorte C to
         ## screen-coordinate P:
         ## P = pos + C * 2**zoomlevel

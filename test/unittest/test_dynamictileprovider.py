@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
-from PyQt5 import QtGui
+from PySide6 import QtGui
 from pyzui.dynamictileprovider import DynamicTileProvider
 
 class TestDynamicTileProvider:

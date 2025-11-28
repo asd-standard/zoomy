@@ -72,6 +72,7 @@
 <span class="sd">    PhysicalObject gets declared on MediaObject and Scene initializations, </span>
 <span class="sd">    giving them the necessary attributes, (position, zoomlevel, damp factor</span>
 <span class="sd">    zoomlevel, eccetera).</span>
+<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new Physicalpobject at the origin with zero velocity.&quot;&quot;&quot;</span>
@@ -136,7 +137,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">+=</span> <span class="n">dy</span></div>
 
 
-
+    
 <div class="viewcode-block" id="PhysicalObject.zoom">
 <a class="viewcode-back" href="../../pyzui.physicalobject.html#pyzui.physicalobject.PhysicalObject.zoom">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
@@ -162,7 +163,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">Py</span> <span class="o">-</span> <span class="p">(</span><span class="n">Py</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">amount</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">+=</span> <span class="n">amount</span></div>
 
-
+    
 
 <div class="viewcode-block" id="PhysicalObject.aim">
 <a class="viewcode-back" href="../../pyzui.physicalobject.html#pyzui.physicalobject.PhysicalObject.aim">[docs]</a>
@@ -237,11 +238,7 @@
 <span class="sd">    objects, MediaObjects have their own centre definition.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__get_centre</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The on-screen coordinates of the centre of the object (the</span>
-<span class="sd">        point that will maintain its position on the screen as the</span>
-<span class="sd">        object is being zoomed).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1">## we need to convert pobject-coordinate C to</span>
+        <span class="c1">## we need to convert pobject-coorte C to</span>
         <span class="c1">## screen-coordinate P:</span>
         <span class="c1">## P = pos + C * 2**zoomlevel</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">,</span>
@@ -300,6 +297,11 @@
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
 </ul>
 
 <div class="relations">

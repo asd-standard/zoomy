@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from PyQt5 import QtSvg, QtCore
+from PySide6 import QtSvg, QtCore
 from pyzui.svgmediaobject import SVGMediaObject
 from pyzui.mediaobject import LoadError, RenderMode
 

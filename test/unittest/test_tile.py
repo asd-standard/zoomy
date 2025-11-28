@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, MagicMock, patch
 from PIL import Image
-from PyQt5 import QtGui
+from PySide6 import QtGui
 from pyzui import tile
 from pyzui.tile import Tile
 

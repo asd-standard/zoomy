@@ -19,7 +19,7 @@
 """Strings to be displayed in the ZUI."""
 
 #from threading import Thread
-from PyQt5 import QtCore, QtGui
+from PySide6 import QtCore, QtGui
 
 from .mediaobject import MediaObject, LoadError, RenderMode
 
@@ -166,13 +166,13 @@ class StringMediaObject(MediaObject): #, Thread
             
             if len(self.lines) > 1 :
                 # Returns the width of the longest line in the paragraph stack.
-                w = fontmetrics.width(''.join(sorted(self.lines, key=len, reverse=True)[0][:])+'-------')         
-                # Returns the font height times the number of lines in the paragraph stack                
+                w = fontmetrics.horizontalAdvance(''.join(sorted(self.lines, key=len, reverse=True)[0][:])+'-------')
+                # Returns the font height times the number of lines in the paragraph stack
                 h = fontmetrics.height()*len(self.lines)
-                
+
             else :
-                # Is the sting is not a paragraph just gives the lenght of the string 
-                w = fontmetrics.width(self.__str+'-')
+                # Is the sting is not a paragraph just gives the lenght of the string
+                w = fontmetrics.horizontalAdvance(self.__str+'-')
                 # and the height of the font
                 h = fontmetrics.height()                
             return (w,h)

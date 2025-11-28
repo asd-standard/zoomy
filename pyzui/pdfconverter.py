@@ -26,7 +26,7 @@ import os
 import shutil
 
 from .converter import Converter
-from .ppm import read_ppm_header, enlarge_ppm_file
+from .ppm import read_ppm_header
 from . import tilestore as TileStore
 
 class PDFConverter(Converter):

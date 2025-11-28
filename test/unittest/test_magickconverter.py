@@ -79,3 +79,40 @@ class TestMagickConverter:
         """Test repr representation."""
         converter = MagickConverter("input.jpg", "output.png")
         assert repr(converter) == "MagickConverter('input.jpg', 'output.png')"
+
+    def test_tiff_to_ppm_conversion(self):
+        """Integration test: Convert TIFF file to PPM format."""
+        import os
+        import tempfile
+
+        infile = "data/eso1031b.tif"
+
+        # Skip test if file doesn't exist
+        if not os.path.exists(infile):
+            pytest.skip(f"Test file not found: {infile}")
+
+        # Create temporary output file
+        with tempfile.NamedTemporaryFile(suffix='.ppm', delete=False) as tmp:
+            outfile = tmp.name
+
+        try:
+            # Create and run converter
+            converter = MagickConverter(infile, outfile)
+            converter.start()
+            converter.join()
+
+            # Verify conversion succeeded
+            assert converter.error is None, f"Conversion failed: {converter.error}"
+            assert converter._progress == 1.0
+            assert os.path.exists(outfile), "Output file not created"
+            assert os.path.getsize(outfile) > 0, "Output file is empty"
+
+            # Verify it's a valid PPM file (P6 binary format)
+            with open(outfile, 'rb') as f:
+                magic = f.read(2)
+                assert magic == b'P6', f"Invalid PPM format, magic number: {magic}"
+
+        finally:
+            # Cleanup
+            if os.path.exists(outfile):
+                os.unlink(outfile)

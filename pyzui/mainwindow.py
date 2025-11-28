@@ -22,14 +22,14 @@ import logging
 import math
 import os
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QApplication, QDialog, QTextEdit, QVBoxLayout, QPushButton, QDialogButtonBox, QInputDialog, QLineEdit, QWidget, QLabel, QHBoxLayout, QSizePolicy
 )
 
-from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QFont, QColor, QPainter
+from PySide6.QtCore import Qt, QPoint
+from PySide6.QtGui import QFont, QColor, QPainter
 
 from . import __init__ as PyZUI
 from . import scene as Scene
@@ -92,7 +92,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.setText(text)
         dialog.setDetailedText(str(details))
         dialog.setIcon(QtWidgets.QMessageBox.Warning)
-        dialog.exec_()
+        dialog.exec()
 
 
     def __create_action(self, key, text, callback=None, shortcut=None,
@@ -101,7 +101,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         __create_action(string, string, function, string, bool) -> None
         """
-        self.__action[key] = QtWidgets.QAction(text, self)
+        self.__action[key] = QtGui.QAction(text, self)
 
         if shortcut:
             self.__action[key].setShortcut(shortcut)
@@ -180,7 +180,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "*.xbm *.xpm)"))
 
         if filename :
-            print(filename)
+            #print(filename)
             self.__prev_dir = os.path.dirname(filename[0])
             try:
                 pixmap = self.zui.grab()
@@ -231,8 +231,8 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         filename = QtWidgets.QFileDialog.getOpenFileName(
             self, "Open local media", self.__prev_dir)
-        #print(filename[0])
-        if filename:
+        #print(filename)
+        if filename and filename[0]:
             #print('mainwindow-216-filename', filename)
             self.__prev_dir = os.path.dirname(filename[0])
             self.__open_media(filename[0])
@@ -367,7 +367,12 @@ class MainWindow(QtWidgets.QMainWindow):
         layout = QVBoxLayout(dialog)
         layout.addWidget(label)
         layout.addWidget(buttons)
-        response = dialog.exec_()
+
+        # Make dialog wrap content instead of having fixed large size
+        dialog.adjustSize()
+        dialog.setFixedSize(dialog.sizeHint())
+
+        response = dialog.exec()
 
         if response  == QDialog.Accepted :
             QtWidgets.QApplication.closeAllWindows() 
@@ -384,7 +389,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         dialog.resize(300, 80)  # Set the size here
 
-        ok_pressed = dialog.exec_()
+        ok_pressed = dialog.exec()
         text_input = dialog.textValue()
         '''
            
@@ -425,7 +430,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__create_action('set_zoom_sensitivity', "Adjust &Sensitivity",
             self.__action_set_zoom_sensitivity)
 
-        self.__action['group_set_fps'] = QtWidgets.QActionGroup(self)
+        self.__action['group_set_fps'] = QtGui.QActionGroup(self)
         for i in range(10, 41, 10):
             key = "set_fps_%d" % i
             self.__create_action(key, "%d FPS" % i, checkable=True)
@@ -433,7 +438,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__action['group_set_fps'].addAction(self.__action[key])
         
         
-        self.__action['group_set_fps'].triggered[QtWidgets.QAction].connect(self.__action_set_fps)
+        self.__action['group_set_fps'].triggered[QtGui.QAction].connect(self.__action_set_fps)
         self.__action['set_fps_%d' % self.zui.framerate].setChecked(True)
 
         self.__create_action('fullscreen', "&Fullscreen",

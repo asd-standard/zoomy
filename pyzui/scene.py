@@ -25,8 +25,8 @@ import urllib.request, urllib.parse, urllib.error
 import math
 
 
-from PyQt5 import QtCore
-from PyQt5.QtGui import QColor
+from PySide6 import QtCore
+from PySide6.QtGui import QColor
 
 from .dialogwindows import DialogWindows
 from .physicalobject import PhysicalObject
@@ -87,14 +87,15 @@ class Scene(PhysicalObject):
             |  ∨
             ∨  
 
-        Legend:
-        (All MediaObject attributes are relative to screen view)
-        * -> MediaObject.topleft()
-        " -> MediaObject.bottomright()
-        & -> MediaObject.center() 
-        # -> Scene.viewport_size()
-        % -> Scene.center()
-        @ -> Scene.origin() 
+        Legend::
+        
+            (All MediaObject attributes are relative to screen view)
+            * -> MediaObject.topleft()
+            " -> MediaObject.bottomright()
+            & -> MediaObject.center() 
+            # -> Scene.viewport_size()
+            % -> Scene.center()
+            @ -> Scene.origin() 
 
         We have a center relative to the scene, 'center' and a center relative
         to the absolute frame of reference _center
@@ -286,7 +287,7 @@ class Scene(PhysicalObject):
         on-screen point `pos`. `pos` is the mouse polition at the last
         left or right click mouse event.
 
-        Return None if there are no `MediaObject`s overlapping the point.
+        Return None if there are no *MediaObjects* overlapping the point.
 
         get(tuple[float,float]) --> MediaObject or None
 
@@ -294,9 +295,9 @@ class Scene(PhysicalObject):
         asd/Projects/pyzui/docs/build/html/_modules/pyzui/qzui.html#QZUI.mouse
         PressEvent>`_ wich returns mouse position `pos`
         
-        Thread safely cycle through `__objects`. for each mediaobject checks if 
-        `pos` is within mediaobject area, if it is the mediaobject is returned as 
-        `foremost` 
+        Thread safely cycle through *__objects*. For each mediaobject checks if
+        *pos* is within mediaobject area, if it is the mediaobject is returned as
+        *foremost* 
         """
         foremost = None
 
@@ -349,7 +350,7 @@ class Scene(PhysicalObject):
         If `draft` is True, draft mode is enabled. Otherwise High-Quality mode
         is enabled.
 
-        If any errors occur rendering any of the `MediaObject`s, then they will
+        If any errors occur rendering any of the *MediaObjects*, then they will
         be removed from the scene and a list of tuples representing the errors
         will be returned. Otherwise the empty list will be returned.
 
@@ -540,14 +541,14 @@ class Scene(PhysicalObject):
         Scene.moving --> bool
 
         Boolean value indicating whether the scene or any contained
-        `MediaObject`s have a non-zero velocity.
+        *MediaObjects* have a non-zero velocity.
 
-        Checks if the inherited, vx, vy and vz values from `PhysicalObject`
-        are not zero. If it is that means the scene is moving and True is 
-        returned, If thats not the case it thread safely cycle trough 
-        mediaobjects in `__objects` checking if `mediaobject.moving` is
-        True. If it is True is returned. `mediaobject.moving` is also 
-        inherited property of `PhysicalObject` class.
+        Checks if the inherited, vx, vy and vz values from *PhysicalObject*
+        are not zero. If it is that means the scene is moving and True is
+        returned, If thats not the case it thread safely cycle trough
+        mediaobjects in *__objects* checking if *mediaobject.moving* is
+        True. If it is True is returned. *mediaobject.moving* is also
+        inherited property of *PhysicalObject* class.
 
         See : `physicalobject <file:///home/asd/Projects/pyzui/docs/build/html/
         pyzui.physicalobject.html#module-pyzui.physicalobject>`_ 
@@ -716,7 +717,7 @@ def load_scene(filename):
 
     See source code comments:
 
-        `source <file:///home/asd/Projects/pyzui/docs/build/html/_modules/pyzui/
+        `load_scene source <file:///home/asd/Projects/pyzui/docs/build/html/_modules/pyzui/
         scene.html#load_scene>`_
     """
 

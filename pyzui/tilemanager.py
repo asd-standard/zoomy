@@ -27,7 +27,7 @@ no tiles of the requested resolution are available.
 import logging
 
 from PIL import Image
-from PyQt5 import QtCore
+from PySide6 import QtCore
 
 from . import tilestore as TileStore
 from .tilecache import TileCache
@@ -226,13 +226,13 @@ def get_metadata(media_id, key):
 
 
 def purge(media_id=None):
-    """Purge the specified `media_id` from the `TileProvider`s. If `media_id`
+    """Purge the specified *media_id* from the *TileProviders*. If *media_id*
     is omitted then all media will be purged.
 
     purge([string]) -> None
 
     Precondition: the media to be purged should not be active (i.e. no
-    `MediaObject`s for the media should exist).
+    *MediaObjects* for the media should exist).
     """
     __tp_static.purge(media_id)
     for tp in list(__tp_dynamic.values()):

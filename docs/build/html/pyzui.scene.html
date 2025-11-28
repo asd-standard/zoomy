@@ -14,6 +14,8 @@
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pyzui.statictileprovider module" href="pyzui.statictileprovider.html" />
+    <link rel="prev" title="pyzui.qzui module" href="pyzui.qzui.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -73,14 +75,16 @@ given by declaring RLock list <cite>__objects_lock</cite>,</p>
 ∨
 </pre></div>
 </div>
-<p>Legend:
-(All MediaObject attributes are relative to screen view)
-* -&gt; MediaObject.topleft()
-“ -&gt; MediaObject.bottomright()
-&amp; -&gt; MediaObject.center()
-# -&gt; Scene.viewport_size()
-% -&gt; Scene.center()
-&#64; -&gt; Scene.origin()</p>
+<p>Legend:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">All</span> <span class="n">MediaObject</span> <span class="n">attributes</span> <span class="n">are</span> <span class="n">relative</span> <span class="n">to</span> <span class="n">screen</span> <span class="n">view</span><span class="p">)</span>
+<span class="o">*</span> <span class="o">-&gt;</span> <span class="n">MediaObject</span><span class="o">.</span><span class="n">topleft</span><span class="p">()</span>
+<span class="s2">&quot; -&gt; MediaObject.bottomright()</span>
+<span class="o">&amp;</span> <span class="o">-&gt;</span> <span class="n">MediaObject</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
+<span class="c1"># -&gt; Scene.viewport_size()</span>
+<span class="o">%</span> <span class="o">-&gt;</span> <span class="n">Scene</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
+<span class="o">@</span> <span class="o">-&gt;</span> <span class="n">Scene</span><span class="o">.</span><span class="n">origin</span><span class="p">()</span>
+</pre></div>
+</div>
 <p>We have a center relative to the scene, ‘center’ and a center relative
 to the absolute frame of reference _center</p>
 <p>&#64; origin position of the scene it’s relative to an absolute frame of
@@ -191,12 +195,20 @@ current onscreen area.</p>
 <p>Return the foremost visible <cite>MediaObject</cite> which overlaps the
 on-screen point <cite>pos</cite>. <cite>pos</cite> is the mouse polition at the last
 left or right click mouse event.</p>
-<p>Return None if there are no <a href="#id1"><span class="problematic" id="id2">`</span></a>MediaObject`s overlapping the point.</p>
+<p>Return None if there are no <em>MediaObjects</em> overlapping the point.</p>
 <p>get(tuple[float,float]) –&gt; MediaObject or None</p>
 <p>Mouse click event is catched by: <a class="reference external" href="file:///home/asd/Projects/pyzui/docs/build/html/_modules/pyzui/qzui.html#QZUI.mousePressEvent">qzui.mousePressEvent</a> wich returns mouse position <cite>pos</cite></p>
-<p>Thread safely cycle through <cite>__objects</cite>. for each mediaobject checks if
-<cite>pos</cite> is within mediaobject area, if it is the mediaobject is returned as
-<cite>foremost</cite></p>
+<p>Thread safely cycle through <em>__objects</em>. For each mediaobject checks if
+<em>pos</em> is within mediaobject area, if it is the mediaobject is returned as
+<em>foremost</em></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.scene.Scene.zoom">
+<span class="sig-name descname"><span class="pre">zoom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amount</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/scene.html#Scene.zoom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.scene.Scene.zoom" title="Link to this definition">¶</a></dt>
+<dd><p>Zoom by the given <cite>amount</cite> with the centre maintaining its position
+on the screen.</p>
+<p>zoom(float) -&gt; None</p>
 </dd></dl>
 
 <dl class="py method">
@@ -212,7 +224,7 @@ left or right click mouse event.</p>
 <p>Render the scene using the given <cite>painter</cite>.</p>
 <p>If <cite>draft</cite> is True, draft mode is enabled. Otherwise High-Quality mode
 is enabled.</p>
-<p>If any errors occur rendering any of the <a href="#id3"><span class="problematic" id="id4">`</span></a>MediaObject`s, then they will
+<p>If any errors occur rendering any of the <em>MediaObjects</em>, then they will
 be removed from the scene and a list of tuples representing the errors
 will be returned. Otherwise the empty list will be returned.</p>
 <p>render(QPainter, bool) -&gt; list[tuple[MediaObject,MediaObject.LoadError]]</p>
@@ -249,13 +261,13 @@ them call <a class="reference external" href="file:///home/asd/Projects/pyzui/do
 </dl>
 <p>Scene.moving –&gt; bool</p>
 <p>Boolean value indicating whether the scene or any contained
-<a href="#id5"><span class="problematic" id="id6">`</span></a>MediaObject`s have a non-zero velocity.</p>
-<p>Checks if the inherited, vx, vy and vz values from <cite>PhysicalObject</cite>
+<em>MediaObjects</em> have a non-zero velocity.</p>
+<p>Checks if the inherited, vx, vy and vz values from <em>PhysicalObject</em>
 are not zero. If it is that means the scene is moving and True is
 returned, If thats not the case it thread safely cycle trough
-mediaobjects in <cite>__objects</cite> checking if <cite>mediaobject.moving</cite> is
-True. If it is True is returned. <cite>mediaobject.moving</cite> is also
-inherited property of <cite>PhysicalObject</cite> class.</p>
+mediaobjects in <em>__objects</em> checking if <em>mediaobject.moving</em> is
+True. If it is True is returned. <em>mediaobject.moving</em> is also
+inherited property of <em>PhysicalObject</em> class.</p>
 <p>See : <a class="reference external" href="file:///home/asd/Projects/pyzui/docs/build/html/pyzui.physicalobject.html#module-pyzui.physicalobject">physicalobject</a></p>
 </dd></dl>
 
@@ -332,13 +344,13 @@ the input parameter viewport_size.</p>
 <p>old_viewport:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>---------------------------------&gt;
 |
-|      ----------------------#
+|      ----------------------
 |     |                      |
 |     |             *------  |
 |     |           % |      | |
 |     |             +------&quot; |
 |     |                      |
-|     @----------------------
+|      ----------------------#
 |
 |
 ∨
@@ -347,7 +359,7 @@ the input parameter viewport_size.</p>
 <p>new_viewport:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>-----------------------------------&gt;
 |
-|  ------------------------------#
+|  ------------------------------
 | |                              |
 | |                              |
 | |                              |
@@ -356,7 +368,7 @@ the input parameter viewport_size.</p>
 | |                +------&quot;      |
 | |                              |
 | |                              |
-| @------------------------------
+|  ------------------------------#
 |
 |
 ∨
@@ -401,7 +413,7 @@ getter and __set_viewport_size as setter</p>
 produced by <cite>Scene.save</cite></p>
 <p>See source code comments:</p>
 <blockquote>
-<div><p><a class="reference external" href="file:///home/asd/Projects/pyzui/docs/build/html/_modules/pyzui/scene.html#load_scene">source</a></p>
+<div><p><a class="reference external" href="file:///home/asd/Projects/pyzui/docs/build/html/_modules/pyzui/scene.html#load_scene">load_scene source</a></p>
 </div></blockquote>
 </dd></dl>
 
@@ -444,11 +456,25 @@ produced by <cite>Scene.save</cite></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="contributiongiudelines.html">Contribution guidelines</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="main.html">main module</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyzui</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyzui.html">pyzui package</a></li>
+</ul>
+</li>
+</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">pyzui</a><ul>
+  <li><a href="pyzui.html">pyzui package</a><ul>
+      <li>Previous: <a href="pyzui.qzui.html" title="previous chapter">pyzui.qzui module</a></li>
+      <li>Next: <a href="pyzui.statictileprovider.html" title="next chapter">pyzui.statictileprovider module</a></li>
+  </ul></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>

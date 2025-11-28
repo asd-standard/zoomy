@@ -35,13 +35,19 @@ def read_ppm_header(f):
 
     while len(header) < 4:
         line = f.readline()
-        
+
         if not line:
             ## we've hit EOF
             raise IOError("not enough entries in PPM header")
 
-        header.extend(line.split())
-        
+        # Split line and filter out comments (# and everything after)
+        tokens = line.split()
+        for token in tokens:
+            # Skip comments (lines starting with #)
+            if token.startswith(b'#'):
+                break  # Skip rest of line after #
+            header.append(token)
+
     magic = header[0]
     
     if str(magic) != str(b'P6'):
@@ -59,6 +65,7 @@ def read_ppm_header(f):
 
     return (width, height)
 
+'''
 def enlarge_ppm_file(PPmFile, width, height, spacing) :
     PPmContent = []
     with open(PPmFile,'r', encoding='latin-1') as r :
@@ -68,7 +75,7 @@ def enlarge_ppm_file(PPmFile, width, height, spacing) :
         for i in range(height) :        
             PPmContent.append(r.readline())
     
-    spacing_chars = '\FF'*spacing
+    spacing_chars = '\xFF'*spacing
     print('LEN SPACING CHARS', len(spacing_chars))    
     
     headless_enlarged_PPmContent = []
@@ -88,11 +95,12 @@ def enlarge_ppm_file(PPmFile, width, height, spacing) :
             w.write(enlarged_PPmContent[i])
 
     return
-
+'''
 
 class PPMTiler(Tiler):
-    """PPMTiler objects are used for tiling PPM images. \n
-    Constructor: PPMTiler(string[, string[, string[, int]]]) \n
+    """PPMTiler objects are used for tiling PPM images.
+
+    Constructor: PPMTiler(string[, string[, string[, int]]])
     """
     def __init__(self, infile, media_id=None, filext='jpg', tilesize=256):
         
@@ -112,10 +120,10 @@ class PPMTiler(Tiler):
         
 
     def _scanchunk(self):
-        '''
-            Scan a chunk of ppm image bytes correspondent of a tile row \n
-            the row lenght of the tile is given by self._bytes_per_pixel*self._width \n 
-        '''
+        """Scan a chunk of ppm image bytes correspondent of a tile row.
+
+        The row length of the tile is given by self._bytes_per_pixel*self._width.
+        """
         return self.__ppm_fileobj.read(self._bytes_per_pixel*self._width) 
          
 
