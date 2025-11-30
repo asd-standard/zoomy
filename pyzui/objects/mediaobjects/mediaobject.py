@@ -20,7 +20,7 @@
 
 import math
 
-from .physicalobject import PhysicalObject        
+from pyzui.objects.physicalobject import PhysicalObject        
 
 class MediaObject(PhysicalObject) :
     """

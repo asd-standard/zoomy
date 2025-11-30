@@ -21,8 +21,8 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 from threading import Thread
 
-from . import scene as Scene
-from . import tilemanager as TileManager
+from pyzui.objects.scene import scene as Scene
+from pyzui import tilemanager as TileManager
 
 class QZUI(QtWidgets.QWidget, Thread) : 
     """

@@ -21,26 +21,25 @@
 import tempfile
 import os
 import math
-import logging
 
 from PySide6 import QtCore, QtGui
 from PIL import ImageQt
 
-from .mediaobject import MediaObject, LoadError, RenderMode
-from . import tilemanager as TileManager
+from pyzui.objects.mediaobjects.mediaobject import MediaObject, LoadError, RenderMode
+from pyzui import tilemanager as TileManager
+from pyzui.logger import get_logger
 
 # Sbdivide a ppm image into tiles that fit the mediaobject frame 
-from .ppm import PPMTiler
+from pyzui.ppm import PPMTiler
 
 # The classes that convert various format to ppm images
 try:
-    from .webkitconverter import  WebKitConverter
+    from pyzui.converters import WebKitConverter
     WEBKIT_AVAILABLE = True
 except ImportError:
     WEBKIT_AVAILABLE = False
     WebKitConverter = None
-from .pdfconverter import PDFConverter
-from .vipsconverter import VipsConverter
+from pyzui.converters import PDFConverter, VipsConverter
 
 class TiledMediaObject(MediaObject):
     """
@@ -68,7 +67,7 @@ class TiledMediaObject(MediaObject):
         self.__converter = None
         self.__tiler = None
 
-        self.__logger = logging.getLogger(str(self))
+        self.__logger = get_logger(f'TiledMediaObject.{media_id}')
 
         self.__maxtilelevel = 0
         self.__width, self.__height = self.default_size
@@ -254,7 +253,7 @@ class TiledMediaObject(MediaObject):
         if mode == RenderMode.Draft:
             transform_mode = QtCore.Qt.FastTransformation
         elif mode == RenderMode.HighQuality:
-            transform_mode = QtCore.Qt.SmoothTransformation
+            transform_mode = QtCore.Qt.FastTransformation
 
         viewport_size = self._scene.viewport_size
 

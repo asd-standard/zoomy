@@ -6,8 +6,8 @@ class TestMainWindow:
 
     def test_module_exists(self):
         """Test that mainwindow module exists."""
-        import pyzui.mainwindow
-        assert pyzui.mainwindow is not None
+        import pyzui.objects.scene.mainwindow
+        assert pyzui.objects.scene.mainwindow is not None
 
     def test_placeholder(self):
         """Placeholder test."""

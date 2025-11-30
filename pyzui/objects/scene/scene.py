@@ -19,7 +19,6 @@
 """A collection of media objects."""
 
 
-import logging
 from threading import RLock
 import urllib.request, urllib.parse, urllib.error
 import math
@@ -28,13 +27,14 @@ import math
 from PySide6 import QtCore
 from PySide6.QtGui import QColor
 
-from .dialogwindows import DialogWindows
-from .physicalobject import PhysicalObject
-from . import tilemanager as TileManager
-from . import mediaobject as MediaObject
-from .tiledmediaobject import TiledMediaObject
-from .stringmediaobject import StringMediaObject
-from .svgmediaobject import SVGMediaObject
+from pyzui.dialogwindows import DialogWindows
+from pyzui.objects.physicalobject import PhysicalObject
+from pyzui import tilemanager as TileManager
+from pyzui.objects.mediaobjects import mediaobject as MediaObject
+from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject
+from pyzui.objects.mediaobjects.stringmediaobject import StringMediaObject
+from pyzui.objects.mediaobjects.svgmediaobject import SVGMediaObject
+from pyzui.logger import get_logger
 
 class Scene(PhysicalObject):
     """
@@ -122,7 +122,7 @@ class Scene(PhysicalObject):
         self.right_selection = None
         
         #commented out on 20250314 
-        self.__logger = logging.getLogger("Scene")
+        self.__logger = get_logger("Scene")
 
     def save(self, filename):
         """

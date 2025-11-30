@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from pyzui.mediaobject import MediaObject, LoadError, RenderMode
+from pyzui.objects.mediaobjects.mediaobject import MediaObject, LoadError, RenderMode
 
 class TestMediaObject:
     """Test suite for the MediaObject base class."""

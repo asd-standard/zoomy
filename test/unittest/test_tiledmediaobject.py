@@ -1,12 +1,12 @@
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from pyzui.tiledmediaobject import TiledMediaObject
+from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject
 
 class TestTiledMediaObject:
     """Test suite for the TiledMediaObject class."""
 
-    @patch('pyzui.tiledmediaobject.TileManager.tiled')
-    @patch('pyzui.tiledmediaobject.TileManager.load_tile')
+    @patch('pyzui.objects.mediaobjects.tiledmediaobject.TileManager.tiled')
+    @patch('pyzui.objects.mediaobjects.tiledmediaobject.TileManager.load_tile')
     def test_init_already_tiled(self, mock_load, mock_tiled):
         """Test initialization with already tiled media."""
         mock_tiled.return_value = True
@@ -14,7 +14,7 @@ class TestTiledMediaObject:
         obj = TiledMediaObject("test.jpg", scene)
         assert obj is not None
 
-    @patch('pyzui.tiledmediaobject.TileManager.tiled')
+    @patch('pyzui.objects.mediaobjects.tiledmediaobject.TileManager.tiled')
     @patch('tempfile.mkstemp')
     @patch('os.close')
     def test_init_needs_tiling(self, mock_close, mock_mkstemp, mock_tiled):
@@ -37,21 +37,21 @@ class TestTiledMediaObject:
         """Test tempcache attribute."""
         assert TiledMediaObject.tempcache == 5
 
-    @patch('pyzui.tiledmediaobject.TileManager.tiled')
+    @patch('pyzui.objects.mediaobjects.tiledmediaobject.TileManager.tiled')
     def test_inherits_from_mediaobject(self, mock_tiled):
         """Test that TiledMediaObject inherits from MediaObject."""
-        from pyzui.mediaobject import MediaObject
+        from pyzui.objects.mediaobjects.mediaobject import MediaObject
         mock_tiled.return_value = True
-        with patch('pyzui.tiledmediaobject.TileManager.load_tile'):
+        with patch('pyzui.objects.mediaobjects.tiledmediaobject.TileManager.load_tile'):
             scene = Mock()
             obj = TiledMediaObject("test.jpg", scene)
             assert isinstance(obj, MediaObject)
 
-    @patch('pyzui.tiledmediaobject.TileManager.tiled')
+    @patch('pyzui.objects.mediaobjects.tiledmediaobject.TileManager.tiled')
     def test_onscreen_size_property(self, mock_tiled):
         """Test onscreen_size property."""
         mock_tiled.return_value = True
-        with patch('pyzui.tiledmediaobject.TileManager.load_tile'):
+        with patch('pyzui.objects.mediaobjects.tiledmediaobject.TileManager.load_tile'):
             scene = Mock()
             scene.zoomlevel = 0
             obj = TiledMediaObject("test.jpg", scene)

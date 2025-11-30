@@ -18,7 +18,6 @@
 
 """PyZUI QMainWindow."""
 
-import logging
 import math
 import os
 
@@ -31,15 +30,16 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QFont, QColor, QPainter
 
-from . import __init__ as PyZUI
-from . import scene as Scene
-from . import tilemanager as TileManager
-from .qzui import QZUI
-from .tiledmediaobject import TiledMediaObject
-from .stringmediaobject import StringMediaObject
-from .svgmediaobject import SVGMediaObject
+from pyzui import __init__ as PyZUI
+from pyzui.objects.scene import scene as Scene
+from pyzui import tilemanager as TileManager
+from pyzui.objects.scene.qzui import QZUI
+from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject
+from pyzui.objects.mediaobjects.stringmediaobject import StringMediaObject
+from pyzui.objects.mediaobjects.svgmediaobject import SVGMediaObject
 
-from .dialogwindows import DialogWindows
+from pyzui.dialogwindows import DialogWindows
+from pyzui.logger import get_logger
 
 class MainWindow(QtWidgets.QMainWindow):
     """
@@ -57,7 +57,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         QtWidgets.QMainWindow.__init__(self)
 
-        self.__logger = logging.getLogger("MainWindow")
+        self.__logger = get_logger("MainWindow")
 
         self.__prev_dir = ''
         

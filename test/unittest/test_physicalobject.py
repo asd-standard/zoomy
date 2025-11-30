@@ -1,7 +1,7 @@
 import pytest
 import math
 from unittest.mock import Mock
-from pyzui.physicalobject import PhysicalObject
+from pyzui.objects.physicalobject import PhysicalObject
 
 class TestPhysicalObject:
     """Test suite for the PhysicalObject class."""

@@ -37,11 +37,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 import pyzui.tilemanager as TileManager
 import pyzui.tilestore as TileStore
-from pyzui.magickconverter import MagickConverter
+from pyzui.converters.vipsconverter import VipsConverter
 from pyzui.ppm import PPMTiler, read_ppm_header
-from pyzui.qzui import QZUI
-import pyzui.scene as Scene
-from pyzui.tiledmediaobject import TiledMediaObject
+from pyzui.objects.scene.qzui import QZUI
+import pyzui.objects.scene.scene as Scene
+from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject
 
 def mem(size='rss'):
     """Quick and dirty function to get the memory usage (in KB) of the current
@@ -62,7 +62,7 @@ def benchmark(filename, ppmfile):
     base_mem = mem()
 
     ## conversion
-    c = MagickConverter(filename, ppmfile)
+    c = VipsConverter(filename, ppmfile)
     start_time = time.time()
     print ("Converting to PPM...")
     sys.stdout.flush()

@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import Mock, patch
 from PySide6 import QtGui
-from pyzui.stringmediaobject import StringMediaObject
-from pyzui.mediaobject import LoadError
+from pyzui.objects.mediaobjects.stringmediaobject import StringMediaObject
+from pyzui.objects.mediaobjects.mediaobject import LoadError
 
 class TestStringMediaObject:
     """Test suite for the StringMediaObject class."""
@@ -29,7 +29,7 @@ class TestStringMediaObject:
 
     def test_inherits_from_mediaobject(self):
         """Test that StringMediaObject inherits from MediaObject."""
-        from pyzui.mediaobject import MediaObject
+        from pyzui.objects.mediaobjects.mediaobject import MediaObject
         scene = Mock()
         obj = StringMediaObject("string:000000:Test", scene)
         assert isinstance(obj, MediaObject)
