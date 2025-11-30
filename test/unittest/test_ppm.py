@@ -134,7 +134,7 @@ class TestPPMTiler:
         """Integration test: Tile large TIFF converted to PPM with PNG output."""
         import os
         import tempfile
-        from pyzui.magickconverter import MagickConverter
+        from pyzui.vipsconverter import VipsConverter
         from pyzui import tilestore as TileStore
 
         tiff_file = "data/eso1031b.tif"
@@ -149,7 +149,7 @@ class TestPPMTiler:
 
         try:
             # Step 1: Convert TIFF to PPM
-            converter = MagickConverter(tiff_file, ppm_file)
+            converter = VipsConverter(tiff_file, ppm_file)
             converter.start()
             converter.join()
 

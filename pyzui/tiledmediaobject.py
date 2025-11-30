@@ -40,7 +40,7 @@ except ImportError:
     WEBKIT_AVAILABLE = False
     WebKitConverter = None
 from .pdfconverter import PDFConverter
-from .magickconverter import MagickConverter
+from .vipsconverter import VipsConverter
 
 class TiledMediaObject(MediaObject):
     """
@@ -115,7 +115,7 @@ class TiledMediaObject(MediaObject):
                 self.__ppmfile = self._media_id
                 
             else:
-                self.__converter = MagickConverter(
+                self.__converter = VipsConverter(
                     self._media_id, self.__tmpfile)
                 self.__ppmfile = self.__tmpfile
                 self.__converter.start()

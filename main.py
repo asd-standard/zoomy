@@ -21,7 +21,7 @@ import logging
 import sys
 import os
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from pyzui.qzui import QZUI
 import pyzui.tilemanager as TileManager
@@ -45,12 +45,14 @@ def main():
     TileManager.init()
 
     app = QtWidgets.QApplication(sys.argv)
-    app.setWindowIcon(QtGui.QIcon(os.path.join("data", "icon.png")))
+    icon_path = os.path.join("data", "icon.png")
+    if os.path.exists(icon_path):
+        app.setWindowIcon(QtGui.QIcon(icon_path))
     
     window = MainWindow()
     window.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 if __name__ == '__main__': main()
 

@@ -23,7 +23,7 @@ import subprocess
 import os
 
 from .dynamictileprovider import DynamicTileProvider
-from .magickconverter import MagickConverter
+from .vipsconverter import VipsConverter
 
 class MandelTileProvider(DynamicTileProvider):
     """MandelTileProvider objects are used for generating tiles of the
@@ -77,7 +77,7 @@ class MandelTileProvider(DynamicTileProvider):
                 returncode)
         else:
 
-            converter = MagickConverter(tmpfile, outfile)
+            converter = VipsConverter(tmpfile, outfile)
             converter.start()
             converter.join() ## block until conversion finished
 

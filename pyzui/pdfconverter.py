@@ -34,7 +34,7 @@ class PDFConverter(Converter):
 
     The output format will always be PPM irrespective of the file extension of
     the output file. If another output format is required then PDFConverter
-    should be used in conjunction with MagickConverter.
+    should be used in conjunction with VipsConverter.
 
     Constructor: PDFConverter(string, string)
     """

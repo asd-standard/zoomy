@@ -262,7 +262,8 @@ class Tiler(Thread):
 
 
     def __calculate_maxtilelevel(self):
-        """Calculate the maxtilelevel, which is the smallest non-negative
+        """
+        Calculate the maxtilelevel, which is the smallest non-negative
         integer such that:
         tilesize * (2**maxtilelevel) >= max(width, height)
         i.e. if tilelevel 0 contains a single tile, then the tiles in

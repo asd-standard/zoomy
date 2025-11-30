@@ -56,7 +56,7 @@ __all__ = [
             'mainwindow',
 
     'converter',
-        'magickconverter',
+        'vipsconverter',
         'pdfconverter',
         'webkitconverter',
     'ppm',
