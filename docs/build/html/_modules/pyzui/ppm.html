@@ -53,30 +53,41 @@
 
 <span class="sd">&quot;&quot;&quot;Module for reading PPM images.&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.tiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tiler</span>
 
 <div class="viewcode-block" id="read_ppm_header">
 <a class="viewcode-back" href="../../pyzui.ppm.html#pyzui.ppm.read_ppm_header">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">read_ppm_header</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_ppm_header</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the PPM header in the given file object `f` and return a tuple</span>
 <span class="sd">    representing the dimensions of the image.</span>
 
 <span class="sd">    Raises `IOError` if the header is invalid and/or unsupported (must be &#39;P6&#39;</span>
 <span class="sd">    binary PPM format with maxval=255).</span>
 
-<span class="sd">    read_ppm_header(file) -&gt; (long, long)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        f : Any</span>
+<span class="sd">            File object to read from</span>
+
+<span class="sd">    read_ppm_header(file) -&gt; Tuple[int, int]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
         <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-        
+
         <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
             <span class="c1">## we&#39;ve hit EOF</span>
             <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;not enough entries in PPM header&quot;</span><span class="p">)</span>
 
-        <span class="n">header</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
-        
+        <span class="c1"># Split line and filter out comments (# and everything after)</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">:</span>
+            <span class="c1"># Skip comments (lines starting with #)</span>
+            <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;#&#39;</span><span class="p">):</span>
+                <span class="k">break</span>  <span class="c1"># Skip rest of line after #</span>
+            <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
     <span class="n">magic</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     
     <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">magic</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;P6&#39;</span><span class="p">):</span>
@@ -95,48 +106,56 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="enlarge_ppm_file">
-<a class="viewcode-back" href="../../pyzui.ppm.html#pyzui.ppm.enlarge_ppm_file">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">enlarge_ppm_file</span><span class="p">(</span><span class="n">PPmFile</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">spacing</span><span class="p">)</span> <span class="p">:</span>
-    <span class="n">PPmContent</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PPmFile</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;latin-1&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">r</span> <span class="p">:</span>
-        <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="p">:</span>
-            <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="p">:</span>        
-            <span class="n">PPmContent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
-    
-    <span class="n">spacing_chars</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\xFF</span><span class="s1">&#39;</span><span class="o">*</span><span class="n">spacing</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;LEN SPACING CHARS&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">spacing_chars</span><span class="p">))</span>    
-    
-    <span class="n">headless_enlarged_PPmContent</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="p">:</span>    
-        <span class="n">headless_enlarged_PPmContent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">PPmContent</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="n">spacing_chars</span><span class="p">)</span>
-              
-    
-    <span class="n">enlarged_PPmContent</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">enlarged_PPmContent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-    <span class="n">enlarged_PPmContent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">width</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">spacing_chars</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">height</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">enlarged_PPmContent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">headless_enlarged_PPmContent</span><span class="p">))</span> <span class="p">:</span>
-        <span class="n">enlarged_PPmContent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">headless_enlarged_PPmContent</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-    
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PPmFile</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;latin-1&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span> <span class="p">:</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">enlarged_PPmContent</span><span class="p">))</span> <span class="p">:</span>        
-            <span class="n">w</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">enlarged_PPmContent</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">def enlarge_ppm_file(PPmFile, width, height, spacing) :</span>
+<span class="sd">    PPmContent = []</span>
+<span class="sd">    with open(PPmFile,&#39;r&#39;, encoding=&#39;latin-1&#39;) as r :</span>
+<span class="sd">        header = []</span>
+<span class="sd">        for i in range(3) :</span>
+<span class="sd">            header.append(r.readline())</span>
+<span class="sd">        for i in range(height) :        </span>
+<span class="sd">            PPmContent.append(r.readline())</span>
+<span class="sd">    </span>
+<span class="sd">    spacing_chars = &#39;\xFF&#39;*spacing</span>
+<span class="sd">    print(&#39;LEN SPACING CHARS&#39;, len(spacing_chars))    </span>
+<span class="sd">    </span>
+<span class="sd">    headless_enlarged_PPmContent = []</span>
+<span class="sd">    for i in range(height) :    </span>
+<span class="sd">        headless_enlarged_PPmContent.append(str(PPmContent[i]) + spacing_chars)</span>
+<span class="sd">              </span>
+<span class="sd">    </span>
+<span class="sd">    enlarged_PPmContent = []</span>
+<span class="sd">    enlarged_PPmContent.append(str(header[0]))</span>
+<span class="sd">    enlarged_PPmContent.append(str(width+len(spacing_chars))+&#39; &#39;+str(height)+&#39;\n&#39;)</span>
+<span class="sd">    enlarged_PPmContent.append(str(header[2]))</span>
+<span class="sd">    for i in range(len(headless_enlarged_PPmContent)) :</span>
+<span class="sd">        enlarged_PPmContent.append(headless_enlarged_PPmContent[i])</span>
+<span class="sd">    </span>
+<span class="sd">    with open(PPmFile,&#39;w&#39;, encoding=&#39;latin-1&#39;) as w :</span>
+<span class="sd">        for i in range(len(enlarged_PPmContent)) :        </span>
+<span class="sd">            w.write(enlarged_PPmContent[i])</span>
 
-    <span class="k">return</span></div>
-
-
+<span class="sd">    return</span>
+<span class="sd">&#39;&#39;&#39;</span>
 
 <div class="viewcode-block" id="PPMTiler">
 <a class="viewcode-back" href="../../pyzui.ppm.html#pyzui.ppm.PPMTiler">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PPMTiler</span><span class="p">(</span><span class="n">Tiler</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;PPMTiler objects are used for tiling PPM images.</span>
 
-<span class="sd">    Constructor: PPMTiler(string[, string[, string[, int]]])</span>
+<span class="sd">    Constructor: PPMTiler(infile, media_id, filext, tilesize)</span>
+
+<span class="sd">    Parameters :</span>
+<span class="sd">        infile : str</span>
+<span class="sd">            Input PPM file path</span>
+<span class="sd">        media_id : Optional[str]</span>
+<span class="sd">            Media identifier</span>
+<span class="sd">        filext : str</span>
+<span class="sd">            File extension for output tiles</span>
+<span class="sd">        tilesize : int</span>
+<span class="sd">            Size of tiles in pixels</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">media_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filext</span><span class="o">=</span><span class="s1">&#39;jpg&#39;</span><span class="p">,</span> <span class="n">tilesize</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">media_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">filext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;jpg&#39;</span><span class="p">,</span> <span class="n">tilesize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">256</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         
         
         <span class="n">Tiler</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">filext</span><span class="p">,</span> <span class="n">tilesize</span><span class="p">)</span>
@@ -155,8 +174,13 @@
 
 <div class="viewcode-block" id="PPMTiler._scanchunk">
 <a class="viewcode-back" href="../../pyzui.ppm.html#pyzui.ppm.PPMTiler._scanchunk">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_scanchunk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_scanchunk</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Scan a chunk of ppm image bytes correspondent of a tile row.</span>
+
+<span class="sd">        Method: PPMTiler._scanchunk()</span>
+
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
 
 <span class="sd">        The row length of the tile is given by self._bytes_per_pixel*self._width.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -165,7 +189,14 @@
          
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method: PPMTiler.__del__()</span>
+
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Cleanup method to close the PPM file object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__ppm_fileobj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
@@ -216,11 +247,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
 </ul>
 
 <div class="relations">

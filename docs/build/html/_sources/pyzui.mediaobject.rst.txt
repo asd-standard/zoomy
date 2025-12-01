@@ -1,7 +1,7 @@
-pyzui.mediaobject module
-========================
+pyzui.objects.mediaobjects.mediaobject module
+==============================================
 
-.. automodule:: pyzui.mediaobject
+.. automodule:: pyzui.objects.mediaobjects.mediaobject
    :members:
    :show-inheritance:
    :undoc-members:

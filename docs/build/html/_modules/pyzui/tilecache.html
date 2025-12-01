@@ -51,8 +51,7 @@
 
 <span class="sd">&quot;&quot;&quot;Thread-safe Least Recently Used (LRU) cache for storing tiles.&quot;&quot;&quot;</span>
 
-
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">RLock</span><span class="p">,</span> <span class="n">Thread</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
@@ -60,21 +59,37 @@
 <div class="viewcode-block" id="TileCache">
 <a class="viewcode-back" href="../../pyzui.tilecache.html#pyzui.tilecache.TileCache">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TileCache</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;TileCache objects are used for caching tiles in memory.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructor:</span>
+<span class="sd">        TileCache(maxsize, maxage)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        maxsize : int</span>
+<span class="sd">        maxage : int</span>
 
-<span class="sd">    Tiles can be accessed in much that same way as `dict` objects:</span>
+<span class="sd">    TileCache(maxsize, maxage) --&gt; None</span>
+
+<span class="sd">    TileCache objects are used for caching tiles in memory.</span>
+
+<span class="sd">    Tiles can be accessed in much the same way as `dict` objects:</span>
 <span class="sd">    `tilecache[tile_id]` holds the tile identified by the given `tile_id`.</span>
-
-<span class="sd">    Constructor: TileCache(int, int)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxsize</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">maxage</span><span class="o">=</span><span class="mi">60</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new TileCache object.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span> <span class="n">maxage</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor:</span>
+<span class="sd">            TileCache(maxsize, maxage)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            maxsize : int</span>
+<span class="sd">            maxage : int</span>
+
+<span class="sd">        TileCache(maxsize, maxage) --&gt; None</span>
+
+<span class="sd">        Create a new TileCache object.</span>
 
 <span class="sd">        The maximum number of tiles to store is set by `maxsize`. There will be</span>
 <span class="sd">        no limit if `maxsize` &lt;= 0.</span>
 
 <span class="sd">        The maximum age of the tiles (in seconds) allowed before they are</span>
-<span class="sd">        discarded is set by `maxsize`. There will be no limit if `maxage` &lt;= 0.</span>
+<span class="sd">        discarded is set by `maxage`. There will be no limit if `maxage` &lt;= 0.</span>
 
 <span class="sd">        None tiles and (0,0,0) tiles do not count towards the number of stored</span>
 <span class="sd">        tiles and will therefore not be automatically discarded.</span>
@@ -98,14 +113,22 @@
 
 <div class="viewcode-block" id="TileCache.insert">
 <a class="viewcode-back" href="../../pyzui.tilecache.html#pyzui.tilecache.TileCache.insert">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">,</span> <span class="n">tile</span><span class="p">,</span> <span class="n">maxaccesses</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Insert the `tile` with the given `tile_id` into the cache.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">tile</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">maxaccesses</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            TileCache.insert(tile_id, tile, maxaccesses)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tile_id : Tuple[str, int, int, int]</span>
+<span class="sd">            tile : Any</span>
+<span class="sd">            maxaccesses : int</span>
+
+<span class="sd">        TileCache.insert(tile_id, tile, maxaccesses) --&gt; None</span>
+
+<span class="sd">        Insert the `tile` with the given `tile_id` into the cache.</span>
 
 <span class="sd">        If `maxaccesses` &lt;= 0, then the behaviour is the same as</span>
 <span class="sd">        `tilecache[tile_id]=tile`. Otherwise the tile is set to expire after it</span>
 <span class="sd">        has been accessed `maxaccesses` times.</span>
-
-<span class="sd">        insert(tuple&lt;string,int,int,int&gt;, object, int) -&gt; None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">tile</span>
@@ -137,19 +160,26 @@
     <span class="c1">#     return tile_id in self.__maxaccesses</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__mortal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">,</span> <span class="n">tile</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a bool indicating whether the given tile is mortal.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__mortal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">tile</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __mortal(tile_id, tile)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tile_id : Tuple[str, int, int, int]</span>
+<span class="sd">            tile : Any</span>
+
+<span class="sd">        __mortal(tile_id, tile) --&gt; bool</span>
+
+<span class="sd">        Returns a bool indicating whether the given tile is mortal.</span>
 
 <span class="sd">        The tile will never be removed from the cache if it is immortal.</span>
 
 <span class="sd">        None tiles and (0,0,0) tiles are the only ones considered immortal.</span>
-
-<span class="sd">        __mortal(tuple&lt;string,int,int,int&gt;, object) -&gt; bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">tile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tile_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">tile_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__d</span><span class="p">:</span>
                 <span class="n">tile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__d</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span>
@@ -171,10 +201,16 @@
                 <span class="k">raise</span> <span class="ne">KeyError</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__periodic_clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Periodically remove old tiles based on maxage.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__periodic_clean</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __periodic_clean()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
 
-<span class="sd">        __periodic_clean() -&gt; infinite loop</span>
+<span class="sd">        __periodic_clean() --&gt; infinite loop</span>
+
+<span class="sd">        Periodically remove old tiles based on maxage.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="c1">## make sure the age of tiles never exceeds 4/3 maxage</span>
@@ -188,10 +224,16 @@
                     <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove the least recently used tiles based on maxsize.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__clean</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __clean()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
 
-<span class="sd">        __clean() -&gt; None</span>
+<span class="sd">        __clean() --&gt; None</span>
+
+<span class="sd">        Remove the least recently used tiles based on maxsize.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="p">:</span>
             <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maxsize</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__num_tiles</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maxsize</span><span class="p">:</span>
@@ -199,7 +241,7 @@
                 <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">,</span> <span class="n">tile</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">tile</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">tile_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">tile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -221,7 +263,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">__d</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mortal</span><span class="p">(</span><span class="n">tile_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__d</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__discard_queue</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
@@ -234,17 +276,23 @@
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__d</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">tile_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__d</span>
 
 
 <div class="viewcode-block" id="TileCache.purge">
 <a class="viewcode-back" href="../../pyzui.tilecache.html#pyzui.tilecache.TileCache.purge">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">purge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Purge all tiles from the cache.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">purge</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            TileCache.purge()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
 
-<span class="sd">        purge() -&gt; None</span>
+<span class="sd">        TileCache.purge() --&gt; None</span>
+
+<span class="sd">        Purge all tiles from the cache.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__d</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__atime</span> <span class="o">=</span> <span class="p">{}</span>
@@ -291,11 +339,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
 </ul>
 
 <div class="relations">

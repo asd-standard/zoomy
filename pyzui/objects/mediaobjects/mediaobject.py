@@ -19,6 +19,7 @@
 """Media to be displayed in the ZUI (abstract base class)."""
 
 import math
+from typing import Optional, Tuple, List, Any
 
 from pyzui.objects.physicalobject import PhysicalObject        
 
@@ -99,7 +100,7 @@ class MediaObject(PhysicalObject) :
 
     
     """
-    def __init__(self, media_id, scene):
+    def __init__(self, media_id: str, scene: Any) -> None:
         """Create a new MediaObject from the media identified by `media_id`,
         and the parent Scene referenced by `scene`."""
         #initialize mediobject centre, position and velocity
@@ -109,22 +110,36 @@ class MediaObject(PhysicalObject) :
         self._scene = scene
 
 
-    def render(self, painter, mode):
-        """Render the media using the given `painter` and rendering `mode`.
+    def render(self, painter: Any, mode: int) -> None:
+        """
+        Method :
+            MediaObject.render(painter, mode)
+        Parameters :
+            painter : QPainter
+            mode : int
 
-        render(QPainter, int) -> None
+        MediaObject.render(painter, mode) --> None
+
+        Render the media using the given `painter` and rendering `mode`.
 
         Precondition: `mode` is equal to one of the constants defined in
-        `RenderMode`
+        :class:`RenderMode`
         """
         pass
 
 
-    def move(self, dx, dy):
-        """Move the image relative to the scene, where (`dx`,`dy`) is given as
-        an on-screen distance.
+    def move(self, dx: float, dy: float) -> None:
+        """
+        Method :
+            MediaObject.move(dx, dy)
+        Parameters :
+            dx : float
+            dy : float
 
-        move(float, float) -> None
+        MediaObject.move(dx, dy) --> None
+
+        Move the image relative to the scene, where (`dx`,`dy`) is given as
+        an on-screen distance.
         """
 
         #self._x and self._y correspond to self.pos[0] and self.pos[1], but 
@@ -133,11 +148,17 @@ class MediaObject(PhysicalObject) :
         self._y += dy * (2 ** -self._scene.zoomlevel)
 
 
-    def zoom(self, amount):
-        """Zoom by the given `amount` with the centre maintaining its position
-        on the screen.
+    def zoom(self, amount: float) -> None:
+        """
+        Method :
+            MediaObject.zoom(amount)
+        Parameters :
+            amount : float
 
-        zoom(float) -> None
+        MediaObject.zoom(amount) --> None
+
+        Zoom by the given `amount` with the centre maintaining its position
+        on the screen.
         """
 
         ## C_s is the scene coordinates of the centre
@@ -167,11 +188,17 @@ class MediaObject(PhysicalObject) :
         self._z += amount
 
 
-    def hides(self, other):
-        """Returns True iff `other` is completely hidden behind `self` on the
-        screen.
+    def hides(self, other: 'MediaObject') -> bool:
+        """
+        Method :
+            MediaObject.hides(other)
+        Parameters :
+            other : MediaObject
 
-        hides(MediaObject) -> bool
+        MediaObject.hides(other) --> bool
+
+        Returns True iff `other` is completely hidden behind `self` on the
+        screen.
         """
         if self.transparent:
             ## nothing can be hidden behind a transparent object
@@ -199,12 +226,18 @@ class MediaObject(PhysicalObject) :
                o_right <= s_right and o_bottom <= s_bottom
 
 
-    def fit(self, bbox):
-        """Move and resize the image such that it the greatest size possible
+    def fit(self, bbox: Tuple[float, float, float, float]) -> None:
+        """
+        Method :
+            MediaObject.fit(bbox)
+        Parameters :
+            bbox : Tuple[float, float, float, float]
+
+        MediaObject.fit(bbox) --> None
+
+        Move and resize the image such that it is the greatest size possible
         whilst fitting inside and centred in the onscreen bounding box `bbox`
         (x1,y1,x2,y2).
-
-        fit(tuple<float,float,float,float>) -> None
         """
         
         box_x, box_y, box_x2, box_y2 = list(map(float, bbox))
@@ -236,7 +269,7 @@ class MediaObject(PhysicalObject) :
         #print('self._y',self._y)
 
 
-    def __cmp__(self, other):
+    def __cmp__(self, other: 'MediaObject') -> int:
         if self is other:
             return 0
         elif self.onscreen_area < other.onscreen_area:
@@ -246,47 +279,89 @@ class MediaObject(PhysicalObject) :
 
 
     @property
-    def media_id(self):
-        """The object's media_id."""
+    def media_id(self) -> str:
+        """
+        Property :
+            MediaObject.media_id
+        Parameters :
+            None
+
+        MediaObject.media_id --> str
+
+        The object's media_id.
+        """
         return self._media_id
 
 
     @property
-    def scale(self):
-        """The factor by which each dimension of the image should be scaled
-        when rendering it to the screen."""
+    def scale(self) -> float:
+        """
+        Property :
+            MediaObject.scale
+        Parameters :
+            None
+
+        MediaObject.scale --> float
+
+        The factor by which each dimension of the image should be scaled
+        when rendering it to the screen.
+        """
         return 2 ** (self._scene.zoomlevel + self.zoomlevel)
 
 
     @property
-    def topleft(self):
-        """The on-screen positon of the top-left corner of the image.
-        self._scene.origin -> the world-space X coordinate of the top-left of the 
-        screen view (the camera/view origin)
-        self.pos -> the object’s position inside the view before applying zoom
-        (a coordinate in the camera’s internal coordinate system)
-        
-        here self.pos() is mediaobject 
+    def topleft(self) -> Tuple[float, float]:
         """
-        
+        Property :
+            MediaObject.topleft
+        Parameters :
+            None
+
+        MediaObject.topleft --> Tuple[float, float]
+
+        The on-screen position of the top-left corner of the image.
+        self._scene.origin -> the world-space X coordinate of the top-left of the
+        screen view (the camera/view origin)
+        self.pos -> the object's position inside the view before applying zoom
+        (a coordinate in the camera's internal coordinate system)
+
+        here self.pos() is mediaobject
+        """
+
         x = self._scene.origin[0] + self.pos[0] * (2 ** self._scene.zoomlevel)
         y = self._scene.origin[1] + self.pos[1] * (2 ** self._scene.zoomlevel)
         return (x,y)
 
 
     @property
-    def onscreen_size(self):
+    def onscreen_size(self) -> Tuple[float, float]:
         """
+        Property :
+            MediaObject.onscreen_size
+        Parameters :
+            None
+
+        MediaObject.onscreen_size --> Tuple[float, float]
+
         The on-screen size of the image.
-        This gets inherited by higher order classes (StringMedia obj
-        TiledMedia obj ecc)
+        This gets inherited by higher order classes (StringMediaObject,
+        TiledMediaObject, etc.)
         """
         pass
 
 
     @property
-    def bottomright(self):
-        """The on-screen positon of the bottom-right corner of the image."""
+    def bottomright(self) -> Tuple[float, float]:
+        """
+        Property :
+            MediaObject.bottomright
+        Parameters :
+            None
+
+        MediaObject.bottomright --> Tuple[float, float]
+
+        The on-screen position of the bottom-right corner of the image.
+        """
         o = self.topleft
         s = self.onscreen_size
         x = o[0] + s[0]
@@ -295,40 +370,51 @@ class MediaObject(PhysicalObject) :
 
 
     @property
-    def onscreen_area(self):
-        """The number of pixels the image occupies on the screen."""
+    def onscreen_area(self) -> float:
+        """
+        Property :
+            MediaObject.onscreen_area
+        Parameters :
+            None
+
+        MediaObject.onscreen_area --> float
+
+        The number of pixels the image occupies on the screen.
+        """
         w,h = self.onscreen_size
         return w * h
     
-    def __get_pos(self):
+    def __get_pos(self) -> Tuple[float, float]:
         """
-        Constructor :
+        Method :
             __get_pos
         Parameters :
             None
 
-        __set_origin --> MediaObject[float['_x']], MediaObject[float['_y']] 
+        __get_pos --> Tuple[float, float]
+
+        Return MediaObject position (_x, _y).
         """
         return (self._x, self._y)
 
-    def __set_pos(self, pos):
-        '''
-        Constructor :
+    def __set_pos(self, pos: Tuple[float, float]) -> None:
+        """
+        Method :
             __set_pos(pos)
         Parameters :
-            pos[MediaObject[float['_x']], MediaObject[float['_y']]]
+            pos : Tuple[float, float]
 
-        __set_origin --> None
+        __set_pos --> None
 
-        Set self._x, self._y variables to MediaObject position 
-        '''
+        Set self._x, self._y variables to MediaObject position.
+        """
         self._x, self._y = pos
 
     pos = property(__get_pos, __set_pos)
     """Creating MediaObject.pos property with __get_pos as 
     getter and __set_pos as setter"""
 
-    def __get_centre(self):
+    def __get_centre(self) -> Tuple[float, float]:
         ## we need to convert image-coordinate C_i to
         ## screen-coordinate P (through scene-coordinate C_s):
         ##   P = scene.origin + C_s * 2**zoomlevel_s
@@ -343,7 +429,7 @@ class MediaObject(PhysicalObject) :
         return (self._scene.origin[0] + C_s[0] * 2**self._scene.zoomlevel,
                 self._scene.origin[1] + C_s[1] * 2**self._scene.zoomlevel)
 
-    def __set_centre(self, centre):
+    def __set_centre(self, centre: Tuple[float, float]) -> None:
         ## we need to convert screen-coordinate P to
         ## image-coordinate C_i (through scene-coordinate C_s):
         ##   P = scene.origin + C_s * 2**zoomlevel_s
@@ -357,11 +443,11 @@ class MediaObject(PhysicalObject) :
 
     centre = property(__get_centre, __set_centre)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "%s(%s)" % (type(self).__name__, self._media_id)
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "%s(%s)" % (type(self).__name__, repr(self._media_id))
 
 

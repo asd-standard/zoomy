@@ -14,8 +14,6 @@
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="pyzui.globalmosaictileprovider module" href="pyzui.globalmosaictileprovider.html" />
-    <link rel="prev" title="pyzui.dynamictileprovider module" href="pyzui.dynamictileprovider.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -42,9 +40,19 @@
 <dd><p>Bases: <a class="reference internal" href="pyzui.dynamictileprovider.html#pyzui.dynamictileprovider.DynamicTileProvider" title="pyzui.dynamictileprovider.DynamicTileProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicTileProvider</span></code></a></p>
 <p>FernTileProvider objects are used for generating tiles of Barnsley’s
 fern iterated function system.</p>
-<p>Constructor: FernTileProvider(TileCache)</p>
+<dl class="simple">
+<dt>Constructor :</dt><dd><p>FernTileProvider(tilecache)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tilecache : TileCache</p>
+</dd>
+</dl>
 <p>Create a new TileProvider for loading tiles into the given
 <cite>tilecache</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tilecache</strong> (<em>Any</em>)</p>
+</dd>
+</dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyzui.ferntileprovider.FernTileProvider.filext">
 <span class="sig-name descname"><span class="pre">filext</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'png'</span></em><a class="headerlink" href="#pyzui.ferntileprovider.FernTileProvider.filext" title="Link to this definition">¶</a></dt>
@@ -83,34 +91,103 @@ fern iterated function system.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.ferntileprovider.FernTileProvider.__choose_transformation">
 <span class="sig-name descname"><span class="pre">__choose_transformation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.ferntileprovider.FernTileProvider.__choose_transformation" title="Link to this definition">¶</a></dt>
-<dd><p>Randomly choose a transformation based on the probability of each
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>FernTileProvider.__choose_transformation()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>FernTileProvider.__choose_transformation() –&gt; Tuple[float, float, float, float, float, float]</p>
+<p>Randomly choose a transformation based on the probability of each
 transformation being chosen.</p>
-<p>__choose_transformation() -&gt; tuple&lt;float,float,float,float,float,float&gt;</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[float, float, float, float, float, float]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.ferntileprovider.FernTileProvider.__transform">
 <span class="sig-name descname"><span class="pre">__transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.ferntileprovider.FernTileProvider.__transform" title="Link to this definition">¶</a></dt>
-<dd><p>Randomly choose a transformation and apply it to x and y, returning
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>FernTileProvider.__transform(x, y)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>x : float
+y : float</p>
+</dd>
+</dl>
+<p>FernTileProvider.__transform(x, y) –&gt; Tuple[float, float]</p>
+<p>Randomly choose a transformation and apply it to x and y, returning
 the result as a tuple.</p>
-<p>__transform(float, float) -&gt; tuple&lt;float,float&gt;</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>)</p></li>
+<li><p><strong>y</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tuple</em>[float, float]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.ferntileprovider.FernTileProvider.__draw_point">
 <span class="sig-name descname"><span class="pre">__draw_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tilesize_units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.ferntileprovider.FernTileProvider.__draw_point" title="Link to this definition">¶</a></dt>
-<dd><p>Draw the given point on the given tile.</p>
-<p>__draw_point(Image, float, float, float) -&gt; None</p>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>FernTileProvider.__draw_point(tile, x, y, tilesize_units)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile : Image
+x : float
+y : float
+tilesize_units : float</p>
+</dd>
+</dl>
+<p>FernTileProvider.__draw_point(tile, x, y, tilesize_units) –&gt; None</p>
+<p>Draw the given point on the given tile.</p>
 <p>Precondition: 0.0 &lt;= x &lt;= tilesize_units
 Precondition: 0.0 &lt;= y &lt;= tilesize_units</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tile</strong> (<em>Any</em>)</p></li>
+<li><p><strong>x</strong> (<em>float</em>)</p></li>
+<li><p><strong>y</strong> (<em>float</em>)</p></li>
+<li><p><strong>tilesize_units</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.ferntileprovider.FernTileProvider._load_dynamic">
 <span class="sig-name descname"><span class="pre">_load_dynamic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/ferntileprovider.html#FernTileProvider._load_dynamic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.ferntileprovider.FernTileProvider._load_dynamic" title="Link to this definition">¶</a></dt>
-<dd><p>Perform whatever actions necessary to load the tile identified by
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>DynamicTileProvider._load_dynamic(tile_id, outfile)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]
+outfile : str</p>
+</dd>
+</dl>
+<p>DynamicTileProvider._load_dynamic(tile_id, outfile) –&gt; None</p>
+<p>Perform whatever actions necessary to load the tile identified by
 the given tile_id into the location given by outfile.</p>
-<p>_load_dynamic(tuple&lt;string,int,int,int&gt;, string)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tile_id</strong> (<em>Tuple</em><em>[</em><em>str</em><em>, </em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>)</p></li>
+<li><p><strong>outfile</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -154,25 +231,11 @@ the given tile_id into the location given by outfile.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="contributiongiudelines.html">Contribution guidelines</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="main.html">main module</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyzui</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="pyzui.html">pyzui package</a></li>
-</ul>
-</li>
-</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-  <li><a href="modules.html">pyzui</a><ul>
-  <li><a href="pyzui.html">pyzui package</a><ul>
-      <li>Previous: <a href="pyzui.dynamictileprovider.html" title="previous chapter">pyzui.dynamictileprovider module</a></li>
-      <li>Next: <a href="pyzui.globalmosaictileprovider.html" title="next chapter">pyzui.globalmosaictileprovider module</a></li>
-  </ul></li>
-  </ul></li>
   </ul></li>
 </ul>
 </div>

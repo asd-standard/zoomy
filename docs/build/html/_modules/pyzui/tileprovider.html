@@ -51,23 +51,26 @@
 
 <span class="sd">&quot;&quot;&quot;Threaded class for loading tiles into memory (abstract base class).&quot;&quot;&quot;</span>
 
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Thread</span><span class="p">,</span> <span class="n">Condition</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.tile</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <div class="viewcode-block" id="TileProvider">
 <a class="viewcode-back" href="../../pyzui.tileprovider.html#pyzui.tileprovider.TileProvider">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TileProvider</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;TileProvider objects are used for loading tiles into TileCache objects.</span>
 
-<span class="sd">    Constructor: TileProvider(TileCache)</span>
+<span class="sd">    Constructor :</span>
+<span class="sd">        TileProvider(tilecache)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        tilecache : TileCache</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">):</span>
-<span class="w">        </span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new TileProvider for loading tiles into the given</span>
 <span class="sd">        `tilecache`.&quot;&quot;&quot;</span>
 
@@ -78,22 +81,28 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__tasks</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__tasks_available</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">()</span>
-    
-        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="TileProvider.request">
 <a class="viewcode-back" href="../../pyzui.tileprovider.html#pyzui.tileprovider.TileProvider.request">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Request the tile identified by `tile_id` be loaded into the</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            TileProvider.request(tile_id)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tile_id : Tuple[str, int, int, int]</span>
+
+<span class="sd">        TileProvider.request(tile_id) --&gt; None</span>
+
+<span class="sd">        Request the tile identified by `tile_id` be loaded into the</span>
 <span class="sd">        tilecache.</span>
 
 <span class="sd">        Requests are processed in a LIFO order.</span>
 
 <span class="sd">        If the tile is unavailable, then None will be inserted into the</span>
 <span class="sd">        tilecache to indicate this.</span>
-
-<span class="sd">        request(tuple&lt;string,int,int,int&gt;) -&gt; None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__tasks_available</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
@@ -104,12 +113,18 @@
 
 <div class="viewcode-block" id="TileProvider._load">
 <a class="viewcode-back" href="../../pyzui.tileprovider.html#pyzui.tileprovider.TileProvider._load">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load the requested tile, and return it as an `Image` object.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            TileProvider._load(tile_id)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tile_id : Tuple[str, int, int, int]</span>
+
+<span class="sd">        TileProvider._load(tile_id) --&gt; Image or None</span>
+
+<span class="sd">        Load the requested tile, and return it as an `Image` object.</span>
 
 <span class="sd">        Returns None if the tile does not exist.</span>
-
-<span class="sd">        _load(tuple&lt;string,int,int,int&gt;) -&gt; Image or None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
@@ -117,10 +132,16 @@
 
 <div class="viewcode-block" id="TileProvider.run">
 <a class="viewcode-back" href="../../pyzui.tileprovider.html#pyzui.tileprovider.TileProvider.run">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run a loop to load requested tiles.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            TileProvider.run()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
 
-<span class="sd">        run() -&gt; None</span>
+<span class="sd">        TileProvider.run() --&gt; None</span>
+
+<span class="sd">        Run a loop to load requested tiles.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__tasks_available</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
@@ -149,11 +170,17 @@
 
 <div class="viewcode-block" id="TileProvider.purge">
 <a class="viewcode-back" href="../../pyzui.tileprovider.html#pyzui.tileprovider.TileProvider.purge">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">purge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Purge all tasks for the given `media_id`. All tasks will be purged</span>
-<span class="sd">        if `media_id` is omitted.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">purge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            TileProvider.purge(media_id)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            media_id : Optional[str]</span>
 
-<span class="sd">        purge([string]) -&gt; None</span>
+<span class="sd">        TileProvider.purge(media_id) --&gt; None</span>
+
+<span class="sd">        Purge all tasks for the given `media_id`. All tasks will be purged</span>
+<span class="sd">        if `media_id` is omitted.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__tasks_available</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;purging </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">media_id</span> <span class="ow">or</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span>
@@ -169,11 +196,11 @@
 
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">()&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span></div>
 
 
@@ -215,11 +242,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
 </ul>
 
 <div class="relations">

@@ -18,21 +18,24 @@
 
 """Threaded class for loading tiles into memory (abstract base class)."""
 
-
+from typing import Optional, Tuple, Any
 
 from threading import Thread, Condition
 from collections import deque
-import logging
 
 from .tile import Tile
+from .logger import get_logger
 
 class TileProvider(Thread):
     """TileProvider objects are used for loading tiles into TileCache objects.
 
-    Constructor: TileProvider(TileCache)
+    Constructor :
+        TileProvider(tilecache)
+    Parameters :
+        tilecache : TileCache
     """
-    def __init__(self, tilecache):
-        
+    def __init__(self, tilecache: Any) -> None:
+
         """Create a new TileProvider for loading tiles into the given
         `tilecache`."""
 
@@ -43,20 +46,26 @@ class TileProvider(Thread):
 
         self.__tasks = deque()
         self.__tasks_available = Condition()
-    
-        self._logger = logging.getLogger(str(self))
+
+        self._logger = get_logger(str(self))
 
 
-    def request(self, tile_id):
-        """Request the tile identified by `tile_id` be loaded into the
+    def request(self, tile_id: Tuple[str, int, int, int]) -> None:
+        """
+        Method :
+            TileProvider.request(tile_id)
+        Parameters :
+            tile_id : Tuple[str, int, int, int]
+
+        TileProvider.request(tile_id) --> None
+
+        Request the tile identified by `tile_id` be loaded into the
         tilecache.
 
         Requests are processed in a LIFO order.
 
         If the tile is unavailable, then None will be inserted into the
         tilecache to indicate this.
-
-        request(tuple<string,int,int,int>) -> None
         """
         self.__tasks_available.acquire()
         self.__tasks.append(tile_id)
@@ -64,20 +73,32 @@ class TileProvider(Thread):
         self.__tasks_available.release()
 
 
-    def _load(self, tile_id):
-        """Load the requested tile, and return it as an `Image` object.
+    def _load(self, tile_id: Tuple[str, int, int, int]) -> Optional[Any]:
+        """
+        Method :
+            TileProvider._load(tile_id)
+        Parameters :
+            tile_id : Tuple[str, int, int, int]
+
+        TileProvider._load(tile_id) --> Image or None
+
+        Load the requested tile, and return it as an `Image` object.
 
         Returns None if the tile does not exist.
-
-        _load(tuple<string,int,int,int>) -> Image or None
         """
         pass
 
 
-    def run(self):
-        """Run a loop to load requested tiles.
+    def run(self) -> None:
+        """
+        Method :
+            TileProvider.run()
+        Parameters :
+            None
 
-        run() -> None
+        TileProvider.run() --> None
+
+        Run a loop to load requested tiles.
         """
         while True:
             self.__tasks_available.acquire()
@@ -103,11 +124,17 @@ class TileProvider(Thread):
                     self.__tilecache[tile_id] = None
 
 
-    def purge(self, media_id=None):
-        """Purge all tasks for the given `media_id`. All tasks will be purged
-        if `media_id` is omitted.
+    def purge(self, media_id: Optional[str] = None) -> None:
+        """
+        Method :
+            TileProvider.purge(media_id)
+        Parameters :
+            media_id : Optional[str]
 
-        purge([string]) -> None
+        TileProvider.purge(media_id) --> None
+
+        Purge all tasks for the given `media_id`. All tasks will be purged
+        if `media_id` is omitted.
         """
         self.__tasks_available.acquire()
         self._logger.debug("purging %s", media_id or "all")
@@ -122,11 +149,11 @@ class TileProvider(Thread):
         self.__tasks_available.release()
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         return type(self).__name__
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "%s()" % type(self).__name__
 
 

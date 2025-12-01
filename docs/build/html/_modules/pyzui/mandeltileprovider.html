@@ -51,22 +51,26 @@
 
 <span class="sd">&quot;&quot;&quot;Dynamic tile provider for the Mandelbrot set.&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.dynamictileprovider</span><span class="w"> </span><span class="kn">import</span> <span class="n">DynamicTileProvider</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.magickconverter</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagickConverter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">VipsConverter</span>
 
 <div class="viewcode-block" id="MandelTileProvider">
 <a class="viewcode-back" href="../../pyzui.mandeltileprovider.html#pyzui.mandeltileprovider.MandelTileProvider">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MandelTileProvider</span><span class="p">(</span><span class="n">DynamicTileProvider</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;MandelTileProvider objects are used for generating tiles of the</span>
-<span class="sd">    Mandelbrot set using jrMandel (&lt;http://freshmeat.net/projects/jrmandel/&gt;).</span>
+<span class="sd">    Mandelbrot set using jrMandel (http://freshmeat.net/projects/jrmandel/).</span>
 
-<span class="sd">    Constructor: MandelTileProvider(TileCache)</span>
+<span class="sd">    Constructor :</span>
+<span class="sd">        MandelTileProvider(tilecache)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        tilecache : TileCache</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">DynamicTileProvider</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">)</span>
 
 
@@ -76,7 +80,7 @@
 
 <div class="viewcode-block" id="MandelTileProvider._load_dynamic">
 <a class="viewcode-back" href="../../pyzui.mandeltileprovider.html#pyzui.mandeltileprovider.MandelTileProvider._load_dynamic">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_load_dynamic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">,</span> <span class="n">outfile</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_dynamic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">media_id</span><span class="p">,</span> <span class="n">tilelevel</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="n">tile_id</span>
 
         <span class="k">if</span> <span class="n">row</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">col</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
@@ -114,14 +118,14 @@
                 <span class="n">returncode</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
 
-            <span class="n">converter</span> <span class="o">=</span> <span class="n">MagickConverter</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+            <span class="n">converter</span> <span class="o">=</span> <span class="n">VipsConverter</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
             <span class="n">converter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
             <span class="n">converter</span><span class="o">.</span><span class="n">join</span><span class="p">()</span> <span class="c1">## block until conversion finished</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;unable to unlink temporary file &quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;unable to unlink temporary file &quot;</span>
                 <span class="s2">&quot;&#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">tmpfile</span><span class="p">)</span></div>
 </div>
 
@@ -162,11 +166,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
 </ul>
 
 <div class="relations">

@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="../../">
+<html lang="en" data-content_root="../../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyzui.tiledmediaobject &#8212; PyZui 0.11 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=12dfc556" />
-    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=cc7d0dec" />
-    <script src="../../_static/documentation_options.js?v=086c1757"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
+    <title>pyzui.objects.mediaobjects.tiledmediaobject &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=cc7d0dec" />
+    <script src="../../../../_static/documentation_options.js?v=086c1757"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
    
-  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
   
 
   
@@ -30,7 +30,7 @@
 
           <div class="body" role="main">
             
-  <h1>Source code for pyzui.tiledmediaobject</h1><div class="highlight"><pre>
+  <h1>Source code for pyzui.objects.mediaobjects.tiledmediaobject</h1><div class="highlight"><pre>
 <span></span><span class="c1">## PyZUI 0.1 - Python Zooming User Interface</span>
 <span class="c1">## Copyright (C) 2009  David Roberts &lt;d@vidr.cc&gt;</span>
 <span class="c1">##</span>
@@ -54,39 +54,51 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">ImageQt</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.mediaobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">MediaObject</span><span class="p">,</span> <span class="n">LoadError</span><span class="p">,</span> <span class="n">RenderMode</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilemanager</span> <span class="k">as</span> <span class="n">TileManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.objects.mediaobjects.mediaobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">MediaObject</span><span class="p">,</span> <span class="n">LoadError</span><span class="p">,</span> <span class="n">RenderMode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilemanager</span> <span class="k">as</span> <span class="n">TileManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
-<span class="c1"># Sbdivide a ppm image into tiles that fit the mediaobject frame </span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.ppm</span><span class="w"> </span><span class="kn">import</span> <span class="n">PPMTiler</span>
+<span class="c1"># Subdivide a ppm image into tiles that fit the mediaobject frame </span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.ppm</span><span class="w"> </span><span class="kn">import</span> <span class="n">PPMTiler</span>
 
 <span class="c1"># The classes that convert various format to ppm images</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.webkitconverter</span><span class="w"> </span><span class="kn">import</span>  <span class="n">WebKitConverter</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.pdfconverter</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDFConverter</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.magickconverter</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagickConverter</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">WebKitConverter</span>
+    <span class="n">WEBKIT_AVAILABLE</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">WEBKIT_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">WebKitConverter</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDFConverter</span><span class="p">,</span> <span class="n">VipsConverter</span>
 
 <div class="viewcode-block" id="TiledMediaObject">
-<a class="viewcode-back" href="../../pyzui.tiledmediaobject.html#pyzui.tiledmediaobject.TiledMediaObject">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui.tiledmediaobject.html#pyzui.objects.mediaobjects.tiledmediaobject.TiledMediaObject">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TiledMediaObject</span><span class="p">(</span><span class="n">MediaObject</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    TileMedia object Wrap given media_id in MediaObject type, </span>
-<span class="sd">    (calling converter if necessary) the so that it that can be </span>
+<span class="sd">    Constructor :</span>
+<span class="sd">        TiledMediaObject(media_id, scene, autofit)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        media_id : str</span>
+<span class="sd">        scene : Scene</span>
+<span class="sd">        autofit : bool</span>
+
+<span class="sd">    TiledMediaObject(media_id, scene, autofit) --&gt; None</span>
+
+<span class="sd">    TileMedia object wraps given media_id in MediaObject type,</span>
+<span class="sd">    (calling converter if necessary) so that it can be</span>
 <span class="sd">    rendered in the ZUI.</span>
-<span class="sd">    </span>
+
 <span class="sd">    If `autofit` is True, then once the media has loaded it will be fitted to</span>
 <span class="sd">    the area occupied by the placeholder.</span>
 
-<span class="sd">    Constructor: TiledMediaObject(string, Scene[, bool])</span>
-
-<span class="sd">    For any acceptable filetype the adeguate converter get&#39;s called.</span>
-<span class="sd">    The converter return a ppm image file on wich we can run the tiler on.</span>
+<span class="sd">    For any acceptable filetype the adequate converter gets called.</span>
+<span class="sd">    The converter returns a ppm image file on which we can run the tiler on.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">autofit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scene</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">autofit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">MediaObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__autofit</span> <span class="o">=</span> <span class="n">autofit</span>
@@ -98,7 +110,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;TiledMediaObject.</span><span class="si">{</span><span class="n">media_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__maxtilelevel</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_size</span>
@@ -113,7 +125,7 @@
         <span class="c1">#print(&#39;tiledmediaobject-70-TileManager.tiled(self._media_id):&#39;,TileManager.tiled(self._media_id))</span>
         
         <span class="k">if</span> <span class="n">TileManager</span><span class="o">.</span><span class="n">tiled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">):</span>   
-            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">)</span>       
+            <span class="c1">#print(self._media_id)       </span>
             <span class="n">TileManager</span><span class="o">.</span><span class="n">load_tile</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
             
         <span class="k">else</span><span class="p">:</span>
@@ -125,6 +137,10 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;http://&#39;</span><span class="p">)</span> <span class="ow">or</span> \
                <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.html&#39;</span><span class="p">)</span> <span class="ow">or</span> \
                <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.htm&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">WEBKIT_AVAILABLE</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;WebKitConverter not available (QtWebEngineWidgets not installed)&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot load HTML files or web URLs without QtWebEngineWidgets&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;QtWebEngineWidgets not available - cannot load HTML content&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">WebKitConverter</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span>
@@ -141,7 +157,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span>
                 
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">MagickConverter</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">VipsConverter</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
@@ -157,7 +173,7 @@
     <span class="n">tempcache</span> <span class="o">=</span> <span class="mi">5</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">__progress</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__progress</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="mf">0.0</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -168,11 +184,18 @@
             <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__converter</span><span class="o">.</span><span class="n">progress</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span><span class="o">.</span><span class="n">progress</span><span class="p">)</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__pixpos2rowcol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixpos</span><span class="p">,</span> <span class="n">tilescale</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the on-screen pixel position to to a (row,col) tile</span>
-<span class="sd">        position.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__pixpos2rowcol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixpos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">tilescale</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __pixpos2rowcol(pixpos, tilescale)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            pixpos : Tuple[float, float]</span>
+<span class="sd">            tilescale : float</span>
 
-<span class="sd">        __pixpos2rowcol(tuple&lt;float,float&gt;, float) -&gt; tuple&lt;int,int&gt;</span>
+<span class="sd">        __pixpos2rowcol(pixpos, tilescale) --&gt; Tuple[int, int]</span>
+
+<span class="sd">        Convert the on-screen pixel position to a (row,col) tile</span>
+<span class="sd">        position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">o</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topleft</span>
         <span class="n">col</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">pixpos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">o</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">tilescale</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">__tilesize</span><span class="p">))</span>
@@ -180,10 +203,16 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">)</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__rowcol_bound</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilelevel</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the maximum row and column for the given tilelevel.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__rowcol_bound</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilelevel</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __rowcol_bound(tilelevel)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tilelevel : int</span>
 
-<span class="sd">        __rowcol_bound(int) -&gt; tuple&lt;int,int&gt;</span>
+<span class="sd">        __rowcol_bound(tilelevel) --&gt; Tuple[int, int]</span>
+
+<span class="sd">        Return the maximum row and column for the given tilelevel.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">tilelevel</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">row_bound</span> <span class="o">=</span> <span class="n">col_bound</span> <span class="o">=</span> <span class="mi">0</span>
@@ -205,14 +234,21 @@
         <span class="k">return</span> <span class="n">row_bound</span><span class="p">,</span> <span class="n">col_bound</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__render_tileblock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tileblock_id</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Render, cache, and return the tileblock given the unique</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__render_tileblock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tileblock_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __render_tileblock(tileblock_id, mode)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tileblock_id : Tuple[int, int, int, int, int]</span>
+<span class="sd">            mode : int</span>
+
+<span class="sd">        __render_tileblock(tileblock_id, mode) --&gt; QImage</span>
+
+<span class="sd">        Render, cache, and return the tileblock given the unique</span>
 <span class="sd">        tileblock_id and render mode.</span>
 
-<span class="sd">        __render_tileblock(tuple&lt;int,int,int,int,int&gt;, int) -&gt; QImage</span>
-
-<span class="sd">        Precondition: mode is equal to either RenderMode.Draft or</span>
-<span class="sd">        RenderMode.HighQuality</span>
+<span class="sd">        Precondition: mode is equal to either :attr:`RenderMode.Draft` or</span>
+<span class="sd">        :attr:`RenderMode.HighQuality`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;rendering tileblock&quot;</span><span class="p">)</span>
@@ -264,13 +300,20 @@
         <span class="k">return</span> <span class="n">tileblock</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__render_media</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Render the media using the given painter and render mode.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__render_media</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __render_media(painter, mode)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            painter : QPainter</span>
+<span class="sd">            mode : int</span>
 
-<span class="sd">        __render_media(QPainter, int) -&gt; None</span>
+<span class="sd">        __render_media(painter, mode) --&gt; None</span>
+
+<span class="sd">        Render the media using the given painter and render mode.</span>
 
 <span class="sd">        Precondition: mode is equal to one of the constants defined in</span>
-<span class="sd">        RenderMode</span>
+<span class="sd">        :class:`RenderMode`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onscreen_size</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">RenderMode</span><span class="o">.</span><span class="n">Invisible</span><span class="p">:</span>
@@ -280,7 +323,7 @@
         <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">RenderMode</span><span class="o">.</span><span class="n">Draft</span><span class="p">:</span>
             <span class="n">transform_mode</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">FastTransformation</span>
         <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">RenderMode</span><span class="o">.</span><span class="n">HighQuality</span><span class="p">:</span>
-            <span class="n">transform_mode</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">SmoothTransformation</span>
+            <span class="n">transform_mode</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">FastTransformation</span>
 
         <span class="n">viewport_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">viewport_size</span>
 
@@ -331,11 +374,17 @@
         <span class="n">painter</span><span class="o">.</span><span class="n">drawImage</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">image_scaled</span><span class="p">)</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__render_placeholder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Render a placeholder indicating that the image is still loading,</span>
-<span class="sd">        using the given painter.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__render_placeholder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __render_placeholder(painter)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            painter : QPainter</span>
 
-<span class="sd">        __render_placeholder(QPainter) -&gt; None</span>
+<span class="sd">        __render_placeholder(painter) --&gt; None</span>
+
+<span class="sd">        Render a placeholder indicating that the image is still loading,</span>
+<span class="sd">        using the given painter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topleft</span>
         <span class="n">w</span><span class="p">,</span><span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onscreen_size</span>
@@ -362,10 +411,16 @@
                     <span class="s2">&quot;loading...&quot;</span><span class="p">)</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__try_load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Try to load the (0,0,0) tile from the TileManager.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__try_load</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __try_load()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
 
-<span class="sd">        __try_load() -&gt; None</span>
+<span class="sd">        __try_load() --&gt; None</span>
+
+<span class="sd">        Try to load the (0,0,0) tile from the TileManager.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">try</span><span class="p">:</span>
@@ -413,14 +468,21 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="n">old_centre</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__run_tiler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the tiler (after checking that there is an image to run</span>
-<span class="sd">        the tiler on).</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__run_tiler</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __run_tiler()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
 
-<span class="sd">        __run_tiler() -&gt; None</span>
+<span class="sd">        __run_tiler() --&gt; None</span>
+
+<span class="sd">        Run the tiler (after checking that there is an image to run</span>
+<span class="sd">        the tiler on).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span><span class="p">):</span>
+
             <span class="c1">## there was a problem converting, or the input file</span>
             <span class="c1">## never actually existed</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
@@ -435,7 +497,6 @@
             <span class="n">filext</span> <span class="o">=</span> <span class="s1">&#39;png&#39;</span>
 
         <span class="k">try</span><span class="p">:</span>
-            
             <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span> <span class="o">=</span> <span class="n">PPMTiler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="n">filext</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
             
@@ -444,9 +505,10 @@
 
 
 <div class="viewcode-block" id="TiledMediaObject.render">
-<a class="viewcode-back" href="../../pyzui.tiledmediaobject.html#pyzui.tiledmediaobject.TiledMediaObject.render">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
-                
+<a class="viewcode-back" href="../../../../pyzui.tiledmediaobject.html#pyzui.objects.mediaobjects.tiledmediaobject.TiledMediaObject.render">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__loaded</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__render_media</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
 
@@ -461,6 +523,7 @@
             
             <span class="bp">self</span><span class="o">.</span><span class="n">__try_load</span><span class="p">()</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__loaded</span><span class="p">:</span>
+                
                 <span class="bp">self</span><span class="o">.</span><span class="n">__render_media</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__render_placeholder</span><span class="p">(</span><span class="n">painter</span><span class="p">)</span>
@@ -470,6 +533,7 @@
             <span class="c1">## the tiler has not been run yet and either</span>
             <span class="c1">## it was assumed that media_id is a local PPM</span>
             <span class="c1">## file or the converter has just finished</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">__run_tiler</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__render_placeholder</span><span class="p">(</span><span class="n">painter</span><span class="p">)</span>
 
@@ -479,7 +543,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">onscreen_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onscreen_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__aspect_ratio</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__aspect_ratio</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
                 <span class="c1">## width &gt;= height</span>
@@ -507,7 +571,7 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../../index.html">PyZui</a></h1>
+<h1 class="logo"><a href="../../../../index.html">PyZui</a></h1>
 
 
 
@@ -519,35 +583,30 @@
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../installation.html">PyZui installation instructions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../installation.html#dependencies">Dependencies</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../installation.html#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../installation.html#generating-documentation">Generating documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../usageinstructions.html">User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usageinstructions.html">User interface</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html">Reading Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../technicaldocumentation.html#project-structure">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation.html">Reading Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation.html#project-structure">Project structure</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributiongiudelines.html">Contribution guidelines</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
-  <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../index.html">Module code</a><ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
   </ul></li>
   </ul></li>
 </ul>
@@ -555,7 +614,7 @@
 <search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
-    <form class="search" action="../../search.html" method="get">
+    <form class="search" action="../../../../search.html" method="get">
       <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>

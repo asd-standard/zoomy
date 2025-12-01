@@ -1,7 +1,7 @@
-pyzui.webkitconverter module
-============================
+pyzui.converters.webkitconverter module
+========================================
 
-.. automodule:: pyzui.webkitconverter
+.. automodule:: pyzui.converters.webkitconverter
    :members:
    :show-inheritance:
    :undoc-members:

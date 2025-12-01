@@ -14,8 +14,6 @@
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="pyzui.tileprovider module" href="pyzui.tileprovider.html" />
-    <link rel="prev" title="pyzui.tiledmediaobject module" href="pyzui.tiledmediaobject.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -42,80 +40,206 @@ to do so.</p>
 no tiles of the requested resolution are available.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.tilemanager.init">
-<span class="sig-prename descclassname"><span class="pre">pyzui.tilemanager.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilemanager.html#init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilemanager.init" title="Link to this definition">¶</a></dt>
-<dd><p>Initialise the TileManager. This <strong>must</strong> be called before any other
+<span class="sig-prename descclassname"><span class="pre">pyzui.tilemanager.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_cleanup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup_max_age_days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilemanager.html#init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilemanager.init" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>init(total_cache_size, auto_cleanup, cleanup_max_age_days)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>total_cache_size : int
+auto_cleanup : bool
+cleanup_max_age_days : int</p>
+</dd>
+</dl>
+<p>init(total_cache_size, auto_cleanup, cleanup_max_age_days) –&gt; None</p>
+<p>Initialise the TileManager. This <strong>must</strong> be called before any other
 functions are called.</p>
-<p>init() -&gt; None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>total_cache_size</strong> (<em>int</em>) – Total cache size for tiles (default: 1024)</p></li>
+<li><p><strong>auto_cleanup</strong> (<em>bool</em>) – Enable automatic cleanup of old tiles (default: True)</p></li>
+<li><p><strong>cleanup_max_age_days</strong> (<em>int</em>) – Maximum age in days for tiles (default: 3)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.tilemanager.load_tile">
 <span class="sig-prename descclassname"><span class="pre">pyzui.tilemanager.</span></span><span class="sig-name descname"><span class="pre">load_tile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilemanager.html#load_tile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilemanager.load_tile" title="Link to this definition">¶</a></dt>
-<dd><p>Request that the tile identified by <cite>tile_id</cite> be loaded into the
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>load_tile(tile_id)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]</p>
+</dd>
+</dl>
+<p>load_tile(tile_id) –&gt; None</p>
+<p>Request that the tile identified by <cite>tile_id</cite> be loaded into the
 tilecache.</p>
-<p>load_tile(tuple&lt;string,int,int,int&gt;) -&gt; None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tile_id</strong> (<em>Tuple</em><em>[</em><em>str</em><em>, </em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.tilemanager.get_tile">
 <span class="sig-prename descclassname"><span class="pre">pyzui.tilemanager.</span></span><span class="sig-name descname"><span class="pre">get_tile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilemanager.html#get_tile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilemanager.get_tile" title="Link to this definition">¶</a></dt>
-<dd><p>Return the requested tile identified by <cite>tile_id</cite>.</p>
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>get_tile(tile_id)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]</p>
+</dd>
+</dl>
+<p>get_tile(tile_id) –&gt; Tile</p>
+<p>Return the requested tile identified by <cite>tile_id</cite>.</p>
 <p>If the tile is not available in the tilecache, one of three errors will be
-raised: <cite>MediaNotTiled</cite>, <cite>TileNotLoaded</cite>, or <cite>TileNotAvailable</cite></p>
-<p>get_tile(tuple&lt;string,int,int,int&gt;) -&gt; Tile</p>
+raised: <a class="reference internal" href="#pyzui.tilemanager.MediaNotTiled" title="pyzui.tilemanager.MediaNotTiled"><code class="xref py py-class docutils literal notranslate"><span class="pre">MediaNotTiled</span></code></a>, <a class="reference internal" href="#pyzui.tilemanager.TileNotLoaded" title="pyzui.tilemanager.TileNotLoaded"><code class="xref py py-class docutils literal notranslate"><span class="pre">TileNotLoaded</span></code></a>, or <a class="reference internal" href="#pyzui.tilemanager.TileNotAvailable" title="pyzui.tilemanager.TileNotAvailable"><code class="xref py py-class docutils literal notranslate"><span class="pre">TileNotAvailable</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tile_id</strong> (<em>Tuple</em><em>[</em><em>str</em><em>, </em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Any</em></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.tilemanager.cut_tile">
 <span class="sig-prename descclassname"><span class="pre">pyzui.tilemanager.</span></span><span class="sig-name descname"><span class="pre">cut_tile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tempcache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilemanager.html#cut_tile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilemanager.cut_tile" title="Link to this definition">¶</a></dt>
-<dd><p>Create a tile from resizing and cropping those loaded into the tile
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>cut_tile(tile_id, tempcache)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]
+tempcache : int</p>
+</dd>
+</dl>
+<p>cut_tile(tile_id, tempcache) –&gt; Tuple[Tile, bool]</p>
+<p>Create a tile from resizing and cropping those loaded into the tile
 cache. Returns a tuple containing the tile, and a bool <cite>final</cite> which is
 False iff the tile is not the greatest resolution possible and should
 therefore not be cached indefinitely.</p>
 <p>If <cite>tempcache</cite> &gt; 0, then tiles with <cite>final`=False will cached in the
-TileCache, but will expire after they have been accessed `tempcache</cite> times.</p>
-<p>This function should only be called if a <cite>TileNotLoaded</cite> or
-<cite>TileNotAvailable</cite> error has been encountered.</p>
-<p>cut_tile(tuple&lt;string,int,int,int&gt;, int) -&gt; tuple&lt;Tile,bool&gt;</p>
+:class:`TileCache</cite>, but will expire after they have been accessed <cite>tempcache</cite> times.</p>
+<p>This function should only be called if a <a class="reference internal" href="#pyzui.tilemanager.TileNotLoaded" title="pyzui.tilemanager.TileNotLoaded"><code class="xref py py-class docutils literal notranslate"><span class="pre">TileNotLoaded</span></code></a> or
+<a class="reference internal" href="#pyzui.tilemanager.TileNotAvailable" title="pyzui.tilemanager.TileNotAvailable"><code class="xref py py-class docutils literal notranslate"><span class="pre">TileNotAvailable</span></code></a> error has been encountered.</p>
 <p>Precondition: the (0,0,0) tile exists for the given media
 Precondition: the requested tile doesn’t fall outside the bounds of the
 image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tile_id</strong> (<em>Tuple</em><em>[</em><em>str</em><em>, </em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>)</p></li>
+<li><p><strong>tempcache</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tuple</em>[<em>Any</em>, bool]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.tilemanager.get_tile_robust">
 <span class="sig-prename descclassname"><span class="pre">pyzui.tilemanager.</span></span><span class="sig-name descname"><span class="pre">get_tile_robust</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilemanager.html#get_tile_robust"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilemanager.get_tile_robust" title="Link to this definition">¶</a></dt>
-<dd><p>Will try returning the result of <cite>get_tile</cite>, and if that fails will
-return the result of <cite>cut_tile</cite>.</p>
-<p>This function will not raise <cite>TileNotLoaded</cite> or <cite>TileNotAvailable</cite>, but may
-raise <cite>MediaNotTiled</cite>.</p>
-<p>get_tile_robust(tuple&lt;string,int,int,int&gt;) -&gt; Tile</p>
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>get_tile_robust(tile_id)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]</p>
+</dd>
+</dl>
+<p>get_tile_robust(tile_id) –&gt; Tile</p>
+<p>Will try returning the result of <a class="reference internal" href="#pyzui.tilemanager.get_tile" title="pyzui.tilemanager.get_tile"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_tile()</span></code></a>, and if that fails will
+return the result of <a class="reference internal" href="#pyzui.tilemanager.cut_tile" title="pyzui.tilemanager.cut_tile"><code class="xref py py-func docutils literal notranslate"><span class="pre">cut_tile()</span></code></a>.</p>
+<p>This function will not raise <a class="reference internal" href="#pyzui.tilemanager.TileNotLoaded" title="pyzui.tilemanager.TileNotLoaded"><code class="xref py py-class docutils literal notranslate"><span class="pre">TileNotLoaded</span></code></a> or <a class="reference internal" href="#pyzui.tilemanager.TileNotAvailable" title="pyzui.tilemanager.TileNotAvailable"><code class="xref py py-class docutils literal notranslate"><span class="pre">TileNotAvailable</span></code></a>, but may
+raise <a class="reference internal" href="#pyzui.tilemanager.MediaNotTiled" title="pyzui.tilemanager.MediaNotTiled"><code class="xref py py-class docutils literal notranslate"><span class="pre">MediaNotTiled</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tile_id</strong> (<em>Tuple</em><em>[</em><em>str</em><em>, </em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Any</em></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.tilemanager.tiled">
 <span class="sig-prename descclassname"><span class="pre">pyzui.tilemanager.</span></span><span class="sig-name descname"><span class="pre">tiled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">media_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilemanager.html#tiled"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilemanager.tiled" title="Link to this definition">¶</a></dt>
-<dd><p>Returns True iff the media identified by <cite>media_id</cite> has been tiled.</p>
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>tiled(media_id)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>media_id : str</p>
+</dd>
+</dl>
+<p>tiled(media_id) –&gt; bool</p>
+<p>Returns True iff the media identified by <cite>media_id</cite> has been tiled.</p>
 <p>Will always return True for dynamic media.</p>
-<p>tiled(string) -&gt; bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>media_id</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.tilemanager.get_metadata">
 <span class="sig-prename descclassname"><span class="pre">pyzui.tilemanager.</span></span><span class="sig-name descname"><span class="pre">get_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">media_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilemanager.html#get_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilemanager.get_metadata" title="Link to this definition">¶</a></dt>
-<dd><p>Return the value associated with the given metadata <cite>key</cite> for the given
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>get_metadata(media_id, key)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>media_id : str
+key : str</p>
+</dd>
+</dl>
+<p>get_metadata(media_id, key) –&gt; object or None</p>
+<p>Return the value associated with the given metadata <cite>key</cite> for the given
 <cite>media_id</cite>, None if there is no such value.</p>
-<p>get_metadata(string, string) -&gt; object or None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>media_id</strong> (<em>str</em>)</p></li>
+<li><p><strong>key</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Any</em> | None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.tilemanager.purge">
 <span class="sig-prename descclassname"><span class="pre">pyzui.tilemanager.</span></span><span class="sig-name descname"><span class="pre">purge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">media_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilemanager.html#purge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilemanager.purge" title="Link to this definition">¶</a></dt>
-<dd><p>Purge the specified <em>media_id</em> from the <em>TileProviders</em>. If <em>media_id</em>
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>purge(media_id)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>media_id : Optional[str]</p>
+</dd>
+</dl>
+<p>purge(media_id) –&gt; None</p>
+<p>Purge the specified <em>media_id</em> from the <em>TileProviders</em>. If <em>media_id</em>
 is omitted then all media will be purged.</p>
-<p>purge([string]) -&gt; None</p>
 <p>Precondition: the media to be purged should not be active (i.e. no
 <em>MediaObjects</em> for the media should exist).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>media_id</strong> (<em>str</em><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py exception">
@@ -183,25 +307,11 @@ failed.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="contributiongiudelines.html">Contribution guidelines</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="main.html">main module</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyzui</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="pyzui.html">pyzui package</a></li>
-</ul>
-</li>
-</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-  <li><a href="modules.html">pyzui</a><ul>
-  <li><a href="pyzui.html">pyzui package</a><ul>
-      <li>Previous: <a href="pyzui.tiledmediaobject.html" title="previous chapter">pyzui.tiledmediaobject module</a></li>
-      <li>Next: <a href="pyzui.tileprovider.html" title="next chapter">pyzui.tileprovider module</a></li>
-  </ul></li>
-  </ul></li>
   </ul></li>
 </ul>
 </div>

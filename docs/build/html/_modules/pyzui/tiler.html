@@ -51,28 +51,47 @@
 
 <span class="sd">&quot;&quot;&quot;Threaded image tiler (abstract base class).&quot;&quot;&quot;</span>
 
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Thread</span>
 <span class="c1">#import os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilestore</span> <span class="k">as</span> <span class="n">TileStore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">tile</span> <span class="k">as</span> <span class="n">Tile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="c1">#Thread</span>
 <div class="viewcode-block" id="Tiler">
 <a class="viewcode-back" href="../../pyzui.tiler.html#pyzui.tiler.Tiler">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Tiler</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tiler objects are used for tiling images.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructor:</span>
+<span class="sd">        Tiler(infile, media_id, filext, tilesize)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        infile : str</span>
+<span class="sd">        media_id : Optional[str]</span>
+<span class="sd">        filext : str</span>
+<span class="sd">        tilesize : int</span>
 
-<span class="sd">    Constructor: Tiler(string[, string[, string[, int]]])</span>
+<span class="sd">    Tiler(infile, media_id, filext, tilesize) --&gt; None</span>
+
+<span class="sd">    Tiler objects are used for tiling images.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">media_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filext</span><span class="o">=</span><span class="s1">&#39;jpg&#39;</span><span class="p">,</span> <span class="n">tilesize</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new Tiler for tiling the media given by `media_id` with the</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">media_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">filext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;jpg&#39;</span><span class="p">,</span> <span class="n">tilesize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">256</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor:</span>
+<span class="sd">            Tiler(infile, media_id, filext, tilesize)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            infile : str</span>
+<span class="sd">            media_id : Optional[str]</span>
+<span class="sd">            filext : str</span>
+<span class="sd">            tilesize : int</span>
+
+<span class="sd">        Tiler(infile, media_id, filext, tilesize) --&gt; None</span>
+
+<span class="sd">        Create a new Tiler for tiling the media given by `media_id` with the</span>
 <span class="sd">        image given by `infile`.</span>
 
 <span class="sd">        If `media_id` is omitted, it will be set to `infile`.</span>
@@ -83,7 +102,7 @@
 <span class="sd">        images are tiled with the following procedure:</span>
 <span class="sd">        the number of tiles to cover a row of the image is calculated, the last tile</span>
 <span class="sd">        of the row is of the minimum width to finish the image and standard height (256).</span>
-<span class="sd">        the last row tiles are of the minimum heigh to finish the image and the last tile is of</span>
+<span class="sd">        the last row tiles are of the minimum height to finish the image and the last tile is of</span>
 <span class="sd">        the minimum size to cover the bottom right corner of the image.</span>
 <span class="sd">        The example below will have a self.numtiles_across_total = 2::</span>
 
@@ -114,31 +133,46 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__outpath</span> <span class="o">=</span> <span class="n">TileStore</span><span class="o">.</span><span class="n">get_media_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__media_id</span><span class="p">)</span>
         <span class="c1">#print(&#39;OUTPATH: &#39;, self.__outpath)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">__progress</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Tiler.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__media_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="kc">None</span>
 
         
 
-    
+
 <div class="viewcode-block" id="Tiler._scanline">
 <a class="viewcode-back" href="../../pyzui.tiler.html#pyzui.tiler.Tiler._scanline">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_scanline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return string containing pixels of the next row.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_scanline</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            Tiler._scanline()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
 
-<span class="sd">        _scanline() -&gt; string</span>
+<span class="sd">        Tiler._scanline() --&gt; str</span>
+
+<span class="sd">        Return string containing pixels of the next row.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
     
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__savetile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile</span><span class="p">,</span> <span class="n">tilelevel</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the given tile to disk.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__savetile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">tilelevel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __savetile(tile, tilelevel, row, col)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tile : Tile</span>
+<span class="sd">            tilelevel : int</span>
+<span class="sd">            row : int</span>
+<span class="sd">            col : int</span>
 
-<span class="sd">        __save(Tile, int, int, int) -&gt; None</span>
+<span class="sd">        __savetile(tile, tilelevel, row, col) --&gt; None</span>
+
+<span class="sd">        Save the given tile to disk.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="n">tile_id</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__media_id</span><span class="p">,</span> <span class="n">tilelevel</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
@@ -151,10 +185,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%3d%%</span><span class="s2"> tiled&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__progress</span><span class="o">*</span><span class="mi">100</span><span class="p">))</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__load_row_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load the requested row from the image file.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__load_row_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __load_row_from_file(row)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            row : int</span>
 
-<span class="sd">        __load_row_from_file(int) -&gt; list&lt;Tile&gt;</span>
+<span class="sd">        __load_row_from_file(row) --&gt; Optional[List[Tile]]</span>
+
+<span class="sd">        Load the requested row from the image file.</span>
 
 <span class="sd">        Precondition: calls to this function must take consecutive values for</span>
 <span class="sd">        row i.e. the first call must have row=0, then the next call must have</span>
@@ -214,11 +254,18 @@
         <span class="k">return</span> <span class="n">tiles</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__mergerows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row_a</span><span class="p">,</span> <span class="n">row_b</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Merge blocks of 4 tiles (or blocks of 2 if row_b is None) into a</span>
-<span class="sd">        single tile.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__mergerows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row_a</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">row_b</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __mergerows(row_a, row_b)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            row_a : Optional[List[Tile]]</span>
+<span class="sd">            row_b : Optional[List[Tile]]</span>
 
-<span class="sd">        __mergerows(list&lt;Tile&gt;[, list&lt;Tile&gt;]) -&gt; list&lt;Tile&gt;</span>
+<span class="sd">        __mergerows(row_a, row_b) --&gt; Optional[List[Tile]]</span>
+
+<span class="sd">        Merge blocks of 4 tiles (or blocks of 2 if row_b is None) into a</span>
+<span class="sd">        single tile.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">row_a</span><span class="p">:</span>
             <span class="c1">## requested row does not exist</span>
@@ -241,16 +288,23 @@
         <span class="k">return</span> <span class="n">tiles</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__tiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilelevel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Recursive function which retrieves the tiles in the given row, saves</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__tiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilelevel</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __tiles(tilelevel, row)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tilelevel : int</span>
+<span class="sd">            row : int</span>
+
+<span class="sd">        __tiles(tilelevel, row) --&gt; Optional[List[Tile]]</span>
+
+<span class="sd">        Recursive function which retrieves the tiles in the given row, saves</span>
 <span class="sd">        them, scales each dimension by 1/2, and then returns them as a list.</span>
 
 <span class="sd">        As the function is recursive, all higher-resolution sub-tiles contained</span>
 <span class="sd">        within the requested tile will be saved in the process. Therefore,</span>
 <span class="sd">        requesting row 0 from tilelevel 0 will result in the entire image being</span>
 <span class="sd">        tiled.</span>
-
-<span class="sd">        __tiles(int, int) -&gt; list&lt;Tile&gt;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="n">tilelevel</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__maxtilelevel</span><span class="p">:</span>
@@ -299,14 +353,20 @@
         <span class="k">return</span> <span class="n">tiles</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__calculate_maxtilelevel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the maxtilelevel, which is the smallest non-negative</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__calculate_maxtilelevel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __calculate_maxtilelevel()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        __calculate_maxtilelevel() --&gt; int</span>
+
+<span class="sd">        Calculate the maxtilelevel, which is the smallest non-negative</span>
 <span class="sd">        integer such that:</span>
 <span class="sd">        tilesize * (2**maxtilelevel) &gt;= max(width, height)</span>
 <span class="sd">        i.e. if tilelevel 0 contains a single tile, then the tiles in</span>
 <span class="sd">        maxtilelevel are the same resolution as the input image</span>
-
-<span class="sd">        __calculate_maxtilelevel() -&gt; int</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">maxdim</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">maxdim</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tilesize</span><span class="p">:</span>
@@ -331,10 +391,16 @@
             <span class="k">return</span> <span class="n">maxtilelevel</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__calculate_numtiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the total number of tiles required.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__calculate_numtiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __calculate_numtiles()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
 
-<span class="sd">        __calculate_numtiles() -&gt; int</span>
+<span class="sd">        __calculate_numtiles() --&gt; int</span>
+
+<span class="sd">        Calculate the total number of tiles required.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">numtiles</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">tilelevel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__maxtilelevel</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
@@ -356,11 +422,17 @@
 
 <div class="viewcode-block" id="Tiler.run">
 <a class="viewcode-back" href="../../pyzui.tiler.html#pyzui.tiler.Tiler.run">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tile the image. If any errors are encountered then `self.error` will</span>
-<span class="sd">        be set to a string describing the error.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            Tiler.run()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
 
-<span class="sd">        run() -&gt; None</span>
+<span class="sd">        Tiler.run() --&gt; None</span>
+
+<span class="sd">        Tile the image. If any errors are encountered then `self.error` will</span>
+<span class="sd">        be set to a string describing the error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;beginning tiling process&quot;</span><span class="p">)</span>
@@ -413,18 +485,26 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">progress</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tiling progress ranging from 0.0 to 1.0. A value of 1.0 indicates</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">progress</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property :</span>
+<span class="sd">            Tiler.progress</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Tiler.progress --&gt; float</span>
+
+<span class="sd">        Tiling progress ranging from 0.0 to 1.0. A value of 1.0 indicates</span>
 <span class="sd">        that the tiling has completely finished.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__progress</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;Tiler(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_infile</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;Tiler(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_infile</span><span class="p">)</span></div>
 
 
@@ -468,11 +548,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
 </ul>
 
 <div class="relations">

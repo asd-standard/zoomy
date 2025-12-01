@@ -18,36 +18,45 @@
 
 """PDF rasterizer based upon either Xpdf or Poppler."""
 
+from typing import Optional, Tuple, List, Any
 import inspect
-
 import subprocess
 import tempfile
 import os
 import shutil
 
 from .converter import Converter
-from .ppm import read_ppm_header
-from . import tilestore as TileStore
+from ..ppm import read_ppm_header
+from .. import tilestore as TileStore
 
 class PDFConverter(Converter):
     """PDFConverter objects are used for rasterizing PDFs.
 
     The output format will always be PPM irrespective of the file extension of
-    the output file. If another output format is required then PDFConverter
-    should be used in conjunction with VipsConverter.
+    the output file. If another output format is required then :class:`PDFConverter`
+    should be used in conjunction with :class:`VipsConverter`.
 
-    Constructor: PDFConverter(string, string)
+    Constructor:
+        PDFConverter(infile, outfile)
+    Parameters :
+        infile : str
+        outfile : str
     """
-    def __init__(self, infile, outfile):
+    def __init__(self, infile: str, outfile: str) -> None:
         Converter.__init__(self, infile, outfile)
 
         self.resolution = 300
 
 
-    def __merge(self, tmpdir):
+    def __merge(self, tmpdir: str) -> None:
         """Merge the PPM pages located in tmpdir.
 
-        __merge(string) -> None
+        Method:
+            PDFConverter.__merge(tmpdir)
+        Parameters :
+            tmpdir : str
+
+        PDFConverter.__merge(tmpdir) -> None
         """
         self._logger.info("merging pages")
         self._progress = 0.5
@@ -94,7 +103,7 @@ class PDFConverter(Converter):
         
 
     #'-scale-to',str(1000),
-    def run(self):
+    def run(self) -> None:
 
         with TileStore.disk_lock:
             tmpdir = tempfile.mkdtemp()
@@ -128,11 +137,11 @@ class PDFConverter(Converter):
             self._progress = 1.0
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "PDFConverter(%s, %s)" % (self._infile, self._outfile)
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "PDFConverter(%s, %s)" % \
             (repr(self._infile), repr(self._outfile))
 

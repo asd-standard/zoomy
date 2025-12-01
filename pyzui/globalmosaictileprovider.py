@@ -18,6 +18,7 @@
 
 """Dynamic tile provider for the WMS Global Mosaic."""
 
+from typing import Optional, Tuple, Any
 import urllib.request, urllib.parse, urllib.error
 import tempfile
 import os
@@ -29,11 +30,14 @@ from . import tilestore as TileStore
 
 class GlobalMosaicTileProvider(DynamicTileProvider):
     """GlobalMosaicTileProvider objects are used for downloading tiles from the
-    WMS Global Mosaic server <http://onearth.jpl.nasa.gov/>.
+    WMS Global Mosaic server http://onearth.jpl.nasa.gov/.
 
-    Constructor: GlobalMosaicTileProvider(TileCache)
+    Constructor :
+        GlobalMosaicTileProvider(tilecache)
+    Parameters :
+        tilecache : TileCache
     """
-    def __init__(self, tilecache):
+    def __init__(self, tilecache: Any) -> None:
         DynamicTileProvider.__init__(self, tilecache)
 
 
@@ -53,11 +57,17 @@ class GlobalMosaicTileProvider(DynamicTileProvider):
         'styles': 'visual',
     }
 
-    def __download(self, tile_id):
-        """Download the tile identified by tile_id to a temporary file, and
-        return the location of that tile.
+    def __download(self, tile_id: Tuple[str, int, int, int]) -> str:
+        """
+        Method :
+            GlobalMosaicTileProvider.__download(tile_id)
+        Parameters :
+            tile_id : Tuple[str, int, int, int]
 
-        __download(tuple<string,int,int,int>) -> string
+        GlobalMosaicTileProvider.__download(tile_id) --> str
+
+        Download the tile identified by tile_id to a temporary file, and
+        return the location of that tile.
 
         Precondition: tile_id is valid
         """
@@ -94,8 +104,16 @@ class GlobalMosaicTileProvider(DynamicTileProvider):
         return tmpfile
 
 
-    def __process_big_tile(self, big_tile_id):
-        """Download a 512x512 "big tile" identified by big_tile_id, and cut
+    def __process_big_tile(self, big_tile_id: Tuple[str, int, int, int]) -> None:
+        """
+        Method :
+            GlobalMosaicTileProvider.__process_big_tile(big_tile_id)
+        Parameters :
+            big_tile_id : Tuple[str, int, int, int]
+
+        GlobalMosaicTileProvider.__process_big_tile(big_tile_id) --> None
+
+        Download a 512x512 "big tile" identified by big_tile_id, and cut
         four 256x256 tiles from it, saving each of these tiles to the
         TileStore.
 
@@ -106,8 +124,6 @@ class GlobalMosaicTileProvider(DynamicTileProvider):
         for all the tiles to have approximately the same dimensions so that
         memory usage is approximately proportional to the number of tiles
         loaded into memory.
-
-        __process_big_tile(tuple<string,int,int,int>) -> None
 
         Precondition: tile_id is valid
         """
@@ -135,11 +151,17 @@ class GlobalMosaicTileProvider(DynamicTileProvider):
                 "'%s'" % tmpfile)
 
 
-    def __process_tilelevel1(self, tile_id):
-        """Create the tile identified by tile_id by merging the four sub-tiles
-        and resizing to 256x256, and save it to the TileStore.
+    def __process_tilelevel1(self, tile_id: Tuple[str, int, int, int]) -> None:
+        """
+        Method :
+            GlobalMosaicTileProvider.__process_tilelevel1(tile_id)
+        Parameters :
+            tile_id : Tuple[str, int, int, int]
 
-        __process_tilelevel1(tuple<string,int,int,int>) -> None
+        GlobalMosaicTileProvider.__process_tilelevel1(tile_id) --> None
+
+        Create the tile identified by tile_id by merging the four sub-tiles
+        and resizing to 256x256, and save it to the TileStore.
 
         Precondition: the tilelevel component of tile_id is 1
         Precondition: tile_id is valid
@@ -172,11 +194,17 @@ class GlobalMosaicTileProvider(DynamicTileProvider):
         tile.save(filename)
 
 
-    def __process_tilelevel0(self, media_id):
-        """Create the (0,0,0) tile, and save it to the TileStore using the
-        media indentifier media_id.
+    def __process_tilelevel0(self, media_id: str) -> None:
+        """
+        Method :
+            GlobalMosaicTileProvider.__process_tilelevel0(media_id)
+        Parameters :
+            media_id : str
 
-        __process_tilelevel0(string) -> None
+        GlobalMosaicTileProvider.__process_tilelevel0(media_id) --> None
+
+        Create the (0,0,0) tile, and save it to the TileStore using the
+        media identifier media_id.
 
         Precondition: tile_id is valid
         """
@@ -199,7 +227,7 @@ class GlobalMosaicTileProvider(DynamicTileProvider):
         tile.save(filename)
 
 
-    def _load_dynamic(self, tile_id, outfile):
+    def _load_dynamic(self, tile_id: Tuple[str, int, int, int], outfile: str) -> None:
         media_id, tilelevel, row, col = tile_id
 
         if row < 0 or col < 0:

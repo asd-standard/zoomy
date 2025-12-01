@@ -19,6 +19,7 @@
 """Class for loading tiles into memory from somewhere other than the local
 filesystem (abstract base class)."""
 
+from typing import Optional, Tuple, Any
 import os
 
 from PySide6 import QtCore, QtGui
@@ -30,9 +31,12 @@ class DynamicTileProvider(TileProvider):
     """DynamicTileProvider objects are used for either generating tiles or
     loading them from a remote host, and then loading them into a TileCache.
 
-    Constructor: DynamicTileProvider(TileCache)
+    Constructor :
+        DynamicTileProvider(tilecache)
+    Parameters :
+        tilecache : TileCache
     """
-    def __init__(self, tilecache):
+    def __init__(self, tilecache: Any) -> None:
         TileProvider.__init__(self, tilecache)
 
 
@@ -41,16 +45,23 @@ class DynamicTileProvider(TileProvider):
     tilesize = 256
     aspect_ratio = 1.0 ## width / height
 
-    def _load_dynamic(self, tile_id, outfile):
-        """Perform whatever actions necessary to load the tile identified by
-        the given tile_id into the location given by outfile.
+    def _load_dynamic(self, tile_id: Tuple[str, int, int, int], outfile: str) -> None:
+        """
+        Method :
+            DynamicTileProvider._load_dynamic(tile_id, outfile)
+        Parameters :
+            tile_id : Tuple[str, int, int, int]
+            outfile : str
 
-        _load_dynamic(tuple<string,int,int,int>, string)
+        DynamicTileProvider._load_dynamic(tile_id, outfile) --> None
+
+        Perform whatever actions necessary to load the tile identified by
+        the given tile_id into the location given by outfile.
         """
         pass
 
 
-    def _load(self, tile_id):
+    def _load(self, tile_id: Tuple[str, int, int, int]) -> Optional[Any]:
         filename = TileStore.get_tile_path(
             tile_id, True, filext=self.filext)
 

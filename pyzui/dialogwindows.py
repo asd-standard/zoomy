@@ -18,6 +18,7 @@
 
 """PyZui DialogWindows"""
 
+from typing import Optional, Tuple, List, Any
 import os
 from collections import deque
 
@@ -33,15 +34,22 @@ from PySide6.QtGui import QFont, QColor, QPainter
 
 class DialogWindows():
 
-    """All the windows that require an user input rather than simple click, those are in MainWindow
+    """All the windows that require a user input rather than simple click, those are in MainWindow
 
     """
-    
-    def _open_zoom_sensitivity_input_dialog(current_sensitivity):
-        
+
+    def _open_zoom_sensitivity_input_dialog(current_sensitivity: float) -> Tuple[bool, str]:
+        """Method: _open_zoom_sensitivity_input_dialog(current_sensitivity)
+
+        Parameters :
+            current_sensitivity : float
+                Current zoom sensitivity value
+
+        Opens a dialog to set zoom sensitivity.
+        """
         dialog = QInputDialog()
         dialog.setWindowTitle("Set zoom sensitivity")
-        dialog.setLabelText("sentitivity goes from 0 to 100, current: "+str(int(1000/current_sensitivity)))
+        dialog.setLabelText("sensitivity goes from 0 to 100, current: "+str(int(1000/current_sensitivity)))
         #dialog.setLabelText("sentitivity goes from 0 to 100")
         dialog.resize(300, 80)  # Set the size here
 
@@ -53,11 +61,15 @@ class DialogWindows():
 
 
     class open_new_string_input_dialog():
-        """gather the string trough a dialog and let select the color.
-also gives a selection column of the last 20 used colors. 
+        """Gather the string through a dialog and let select the color.
+        Also gives a selection column of the last 20 used colors.
 
+        Constructor: open_new_string_input_dialog()
+
+        Parameters :
+            None
         """
-        def __init__(self) :
+        def __init__(self) -> None:
 
             self.string_color = ''
             self.passed_color = ''
@@ -97,30 +109,53 @@ also gives a selection column of the last 20 used colors.
                     f.write('0000ff\n')
                     f.close()
 
-        def _color_square(self, color_code):
+        def _color_square(self, color_code: str) -> QWidget:
+            """Method: open_new_string_input_dialog._color_square(color_code)
+
+            Parameters :
+                color_code : str
+                    Hex color code
+
+            Creates a colored square widget.
+            """
             color_square = QWidget()
             color = QColor('#' + str(color_code))
             color_square.setFixedSize(20, 20)
 
-            def paintEvent(event):
+            def paintEvent(event: Any) -> None:
                 painter = QPainter(color_square)
                 painter.fillRect(color_square.rect(), color)
 
             color_square.paintEvent = paintEvent
-            
+
             return color_square
 
-        def _color_button_click(self, color):
+        def _color_button_click(self, color: str) -> None:
+            """Method: open_new_string_input_dialog._color_button_click(color)
+
+            Parameters :
+                color : str
+                    Color code to set
+
+            Handles color button click event.
+            """
             self.string_color = color
 
-        def _color_button(self, color_code):
-            
+        def _color_button(self, color_code: str) -> QWidget:
+            """Method: open_new_string_input_dialog._color_button(color_code)
+
+            Parameters :
+                color_code : str
+                    Hex color code
+
+            Creates a color selection button.
+            """
             color_widget = QWidget()
 
             layout = QHBoxLayout()
             layout.setContentsMargins(5, 2, 5, 2)
             layout.setSpacing(10)
-            
+
             color_square = self._color_square(color_code)
             label = QLabel(color_code)
 
@@ -135,7 +170,7 @@ also gives a selection column of the last 20 used colors.
             layout.addStretch()
 
             # Make the whole widget act like a button by forwarding clicks
-            
+
             button.clicked.connect(lambda: self._color_button_click(color_code))
 
             # Our main layout for this widget is the button only
@@ -144,16 +179,22 @@ also gives a selection column of the last 20 used colors.
             main_layout.addWidget(button)
 
             return color_widget
-                
-                
-        def _main_dialog(self) :
 
+
+        def _main_dialog(self) -> QDialog:
+            """Method: open_new_string_input_dialog._main_dialog()
+
+            Parameters :
+                None
+
+            Creates and configures the main dialog window.
+            """
             dialog = QDialog()
             dialog.setWindowTitle("String input:")
             dialog.resize(900, 600)
 
             # Create text edit widget
-            self.text_edit = QTextEdit(dialog) #Input string it's going to be typed in here 
+            self.text_edit = QTextEdit(dialog) #Input string is going to be typed in here
             font = QFont()
             font.setPointSize(16)  # Set desired font size
             self.text_edit.setFont(font)
@@ -191,10 +232,17 @@ also gives a selection column of the last 20 used colors.
             
             main_layout.addLayout(text_layout)
             main_layout.addLayout(color_layout)
-            
+
             return dialog
 
-        def _run_dialog(self):
+        def _run_dialog(self) -> Tuple[bool, str]:
+            """Method: open_new_string_input_dialog._run_dialog()
+
+            Parameters :
+                None
+
+            Runs the dialog and returns the result.
+            """
             dialog = self._main_dialog()
             # Run dialog and get result
             if dialog.exec() == QDialog.Accepted:
@@ -207,7 +255,7 @@ also gives a selection column of the last 20 used colors.
                     f.close()
 
                 elif len(self.string_color) != 6 :
-                    print('ERRor')     
+                    print('Error')
                 uri = 'string:'+str(self.string_color)+str(':') + str(self.text_edit.toPlainText())
                 ok = True
             else :
@@ -217,11 +265,16 @@ also gives a selection column of the last 20 used colors.
                 return ok, uri
         
     class modify_string_input_dialog():
-        """gather the string trough a dialog and let select the color.
-            also gives a selection column of the last 20 used colors. 
+        """Gather the string through a dialog and let select the color.
+        Also gives a selection column of the last 20 used colors.
 
+        Constructor: modify_string_input_dialog(media_id)
+
+        Parameters :
+            media_id : Optional[str]
+                Media identifier containing color and string information
         """
-        def __init__(self, media_id) :
+        def __init__(self, media_id: Optional[str]) -> None:
 
             self.start_string = ''
             self.string_color = ''
@@ -249,9 +302,9 @@ also gives a selection column of the last 20 used colors.
                     with open(self.color_dir+'/color_list.txt', 'r') as f :
                         for line in f :
                             self.color_codes.append(line.strip())
-                            
+
             else :
-                if os.path.isdir(self.color_dir):                
+                if os.path.isdir(self.color_dir):
                     f = open(self.color_dir+'/color_list.txt', 'w')
                     self.color_codes.append('ff0000')
                     f.write('ff0000\n')
@@ -271,30 +324,53 @@ also gives a selection column of the last 20 used colors.
                     f.write('0000ff\n')
                     f.close()
 
-        def _color_square(self, color_code):
+        def _color_square(self, color_code: str) -> QWidget:
+            """Method: modify_string_input_dialog._color_square(color_code)
+
+            Parameters :
+                color_code : str
+                    Hex color code
+
+            Creates a colored square widget.
+            """
             color_square = QWidget()
             color = QColor('#' + str(color_code))
             color_square.setFixedSize(20, 20)
 
-            def paintEvent(event):
+            def paintEvent(event: Any) -> None:
                 painter = QPainter(color_square)
                 painter.fillRect(color_square.rect(), color)
 
             color_square.paintEvent = paintEvent
-            
+
             return color_square
 
-        def _color_button_click(self, color):
+        def _color_button_click(self, color: str) -> None:
+            """Method: modify_string_input_dialog._color_button_click(color)
+
+            Parameters :
+                color : str
+                    Color code to set
+
+            Handles color button click event.
+            """
             self.string_color = color
 
-        def _color_button(self, color_code):
-            
+        def _color_button(self, color_code: str) -> QWidget:
+            """Method: modify_string_input_dialog._color_button(color_code)
+
+            Parameters :
+                color_code : str
+                    Hex color code
+
+            Creates a color selection button.
+            """
             color_widget = QWidget()
 
             layout = QHBoxLayout()
             layout.setContentsMargins(5, 2, 5, 2)
             layout.setSpacing(10)
-            
+
             color_square = self._color_square(color_code)
             label = QLabel(color_code)
 
@@ -309,7 +385,7 @@ also gives a selection column of the last 20 used colors.
             layout.addStretch()
 
             # Make the whole widget act like a button by forwarding clicks
-            
+
             button.clicked.connect(lambda: self._color_button_click(color_code))
 
             # Our main layout for this widget is the button only
@@ -318,16 +394,22 @@ also gives a selection column of the last 20 used colors.
             main_layout.addWidget(button)
 
             return color_widget
-                
-                
-        def _main_dialog(self) :
 
+
+        def _main_dialog(self) -> QDialog:
+            """Method: modify_string_input_dialog._main_dialog()
+
+            Parameters :
+                None
+
+            Creates and configures the main dialog window.
+            """
             dialog = QDialog()
             dialog.setWindowTitle("String input:")
             dialog.resize(900, 600)
 
             # Create text edit widget
-            self.text_edit = QTextEdit(dialog) #Input string it's going to be typed in here 
+            self.text_edit = QTextEdit(dialog) #Input string is going to be typed in here
             font = QFont()
             font.setPointSize(16)  # Set desired font size
             self.text_edit.setFont(font)
@@ -366,10 +448,17 @@ also gives a selection column of the last 20 used colors.
             
             main_layout.addLayout(text_layout)
             main_layout.addLayout(color_layout)
-            
+
             return dialog
 
-        def _run_dialog(self):
+        def _run_dialog(self) -> Tuple[bool, str, str, str]:
+            """Method: modify_string_input_dialog._run_dialog()
+
+            Parameters :
+                None
+
+            Runs the dialog and returns the result.
+            """
             dialog = self._main_dialog()
             # Run dialog and get result
             if dialog.exec() == QDialog.Accepted:

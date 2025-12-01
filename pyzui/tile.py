@@ -18,19 +18,29 @@
 
 """Class for representing image tiles."""
 
-from PIL import Image, ImageQt 
+from typing import Optional, Tuple, List, Any
+from PIL import Image, ImageQt
 from PySide6 import QtCore, QtGui
 import traceback
 
 #REMOVED object 
 
 class Tile():
-    """Tile objects allow storage and manipulation of image tiles.
-
-    Constructor: Tile(Image or QImage)
     """
-    def __init__(self, image):
-        
+    Constructor:
+        Tile(image)
+    Parameters :
+        image : QImage
+
+    Tile(image) --> None
+
+    A simple wrapper around image data (PIL/QImage) with operations:
+        - crop(), resize(), save(), draw()
+        - merged() - Combines 4 tiles into one (2×2 grid layout)
+
+    """
+    def __init__(self, image: Any) -> None:
+
         """Create a new tile with the given image."""
         if image.__class__ is ImageQt or type(image) is QtGui.QImage:
             self.__image = image
@@ -45,11 +55,17 @@ class Tile():
             
 
 
-    def crop(self, bbox):
-        """Return the region of the tile contained in the bounding box `bbox`
-        (x1,y1,x2,y2).
+    def crop(self, bbox: Tuple[int, int, int, int]) -> 'Tile':
+        """
+        Method :
+            Tile.crop(bbox)
+        Parameters :
+            bbox : Tuple[int, int, int, int]
 
-        crop(tuple<int,int,int,int>) -> Tile
+        Tile.crop(bbox) --> Tile
+
+        Return the region of the tile contained in the bounding box `bbox`
+        (x1,y1,x2,y2).
         """
         x, y, x2, y2 = bbox
         w = x2 - x
@@ -58,52 +74,97 @@ class Tile():
         return Tile(self.__image.copy(int(x), int(y), int(w), int(h)))
 
 
-    def resize(self, width, height):
-        """Return a resized copy of the tile.
+    def resize(self, width: int, height: int) -> 'Tile':
+        """
+        Method :
+            Tile.resize(width, height)
+        Parameters :
+            width : int
+            height : int
 
-        resize(int, int) -> Tile
+        Tile.resize(width, height) --> Tile
+
+        Return a resized copy of the tile.
         """
         return Tile(self.__image.scaled(int(width), int(height),
             QtCore.Qt.IgnoreAspectRatio,
-            QtCore.Qt.SmoothTransformation))
+            QtCore.Qt.FastTransformation))
 
 
-    def save(self, filename):
-        """Save the tile to the location given by `filename`.
+    def save(self, filename: str) -> None:
+        """
+        Method :
+            Tile.save(filename)
+        Parameters :
+            filename : str
 
-        save(string) -> None
+        Tile.save(filename) --> None
+
+        Save the tile to the location given by `filename`.
         """
         self.__image.save(filename)
 
 
-    def draw(self, painter, x, y):
-        """Draw the tile on the given `painter` at the given position.
+    def draw(self, painter: 'QtGui.QPainter', x: int, y: int) -> None:
+        """
+        Method :
+            Tile.draw(painter, x, y)
+        Parameters :
+            painter : QPainter
+            x : int
+            y : int
 
-        paint(QPainter, int, int) -> None
+        Tile.draw(painter, x, y) --> None
+
+        Draw the tile on the given `painter` at the given position.
         """
         painter.drawImage(x, y, self.__image)
 
 
     @property
-    def size(self):
-        """The dimensions of the tile."""
+    def size(self) -> Tuple[int, int]:
+        """
+        Property :
+            Tile.size
+        Parameters :
+            None
+
+        Tile.size --> Tuple[int, int]
+
+        The dimensions of the tile.
+        """
         return (self.__image.width(), self.__image.height())
 
 
 
-def new(width, height):
-    """Create a new tile with the given dimensions.
+def new(width: int, height: int) -> Tile:
+    """
+    Function :
+        new(width, height)
+    Parameters :
+        width : int
+        height : int
 
-    new(int, int) -> Tile
+    new(width, height) --> Tile
+
+    Create a new tile with the given dimensions.
     """
     return Tile(QtGui.QImage(width, height, QtGui.QImage.Format_RGB32))
 
 
-def fromstring(string, width, height):
-    """Create a new tile from a `string` of raw pixels, with the given
-    dimensions.
+def fromstring(string: str, width: int, height: int) -> Tile:
+    """
+    Function :
+        fromstring(string, width, height)
+    Parameters :
+        string : str
+        width : int
+        height : int
 
-    fromstring(string, int, int) -> Tile
+    fromstring(string, width, height) --> Tile
+
+    Create a new tile from a `string` of raw pixels, with the given
+    dimensions.
     """
     #print('STRING UNENCODED \n \n \n', string)
     #print('STRING ENCODED \n ', len(string.encode('latin-1')))   
@@ -126,13 +187,22 @@ def fromstring(string, width, height):
     return Tile(Image.fromarray(array))
     '''
 
-def merged(t1, t2, t3, t4):
-    """Merge the given tiles into a single tile.
+def merged(t1: Tile, t2: Optional[Tile], t3: Optional[Tile], t4: Optional[Tile]) -> Tile:
+    """
+    Function :
+        merged(t1, t2, t3, t4)
+    Parameters :
+        t1 : Tile
+        t2 : Optional[Tile]
+        t3 : Optional[Tile]
+        t4 : Optional[Tile]
+
+    merged(t1, t2, t3, t4) --> Tile
+
+    Merge the given tiles into a single tile.
 
     `t1` must be a Tile, but any or all of `t2`,`t3`,`t4` may be None, in which
     case they will be ignored.
-
-    merged(Tile, Tile or None, Tile or None, Tile or None) -> Tile
     """
 
     ## tiles are merged in the following layout:

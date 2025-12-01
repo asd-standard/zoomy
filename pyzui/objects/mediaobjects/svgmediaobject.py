@@ -18,17 +18,26 @@
 
 """SVG objects to be displayed in the ZUI."""
 
+from typing import Optional, Tuple, List, Any
+
 from PySide6 import QtCore, QtSvg
 
 from .mediaobject import MediaObject, LoadError, RenderMode
 
 class SVGMediaObject(MediaObject):
-    """StringMediaObject objects are used to represent SVG images that can be
-    rendered in the ZUI.
-
-    Constructor: SVGMediaObject(string, Scene)
     """
-    def __init__(self, media_id, scene):
+    Constructor :
+        SVGMediaObject(media_id, scene)
+    Parameters :
+        media_id : str
+        scene : Scene
+
+    SVGMediaObject(media_id, scene) --> None
+
+    SVGMediaObject objects are used to represent SVG images that can be
+    rendered in the ZUI.
+    """
+    def __init__(self, media_id: str, scene: Any) -> None:
         MediaObject.__init__(self, media_id, scene)
 
         self.__renderer = QtSvg.QSvgRenderer()
@@ -42,7 +51,18 @@ class SVGMediaObject(MediaObject):
 
     transparent = True
 
-    def render(self, painter, mode):
+    def render(self, painter: Any, mode: int) -> None:
+        """
+        Method :
+            SVGMediaObject.render(painter, mode)
+        Parameters :
+            painter : QPainter
+            mode : int
+
+        SVGMediaObject.render(painter, mode) --> None
+
+        Render the SVG image using the given painter and render mode.
+        """
         if min(self.onscreen_size) > int((min(self._scene.viewport_size))/44) and \
         max(self.onscreen_size) < int((max(self._scene.viewport_size))/1.3) and mode \
         != RenderMode.Invisible:
@@ -55,5 +75,15 @@ class SVGMediaObject(MediaObject):
 
 
     @property
-    def onscreen_size(self):
+    def onscreen_size(self) -> Tuple[float, float]:
+        """
+        Property :
+            SVGMediaObject.onscreen_size
+        Parameters :
+            None
+
+        SVGMediaObject.onscreen_size --> Tuple[float, float]
+
+        Return the on-screen size of the SVG image.
+        """
         return (self.__width * self.scale, self.__height * self.scale)

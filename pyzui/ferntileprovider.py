@@ -18,6 +18,7 @@
 
 """Dynamic tile provider for Barnsley's fern."""
 
+from typing import Optional, Tuple, Any
 import random
 
 from PIL import Image
@@ -28,9 +29,12 @@ class FernTileProvider(DynamicTileProvider):
     """FernTileProvider objects are used for generating tiles of Barnsley's
     fern iterated function system.
 
-    Constructor: FernTileProvider(TileCache)
+    Constructor :
+        FernTileProvider(tilecache)
+    Parameters :
+        tilecache : TileCache
     """
-    def __init__(self, tilecache):
+    def __init__(self, tilecache: Any) -> None:
         DynamicTileProvider.__init__(self, tilecache)
 
 
@@ -66,11 +70,17 @@ class FernTileProvider(DynamicTileProvider):
     ]
     color = (100, 170, 0)
 
-    def __choose_transformation(self):
-        """Randomly choose a transformation based on the probability of each
-        transformation being chosen.
+    def __choose_transformation(self) -> Tuple[float, float, float, float, float, float]:
+        """
+        Method :
+            FernTileProvider.__choose_transformation()
+        Parameters :
+            None
 
-        __choose_transformation() -> tuple<float,float,float,float,float,float>
+        FernTileProvider.__choose_transformation() --> Tuple[float, float, float, float, float, float]
+
+        Randomly choose a transformation based on the probability of each
+        transformation being chosen.
         """
         n = random.uniform(0,1)
         for probability, transformation in self.transformations:
@@ -81,11 +91,18 @@ class FernTileProvider(DynamicTileProvider):
         return transformation
 
 
-    def __transform(self, x, y):
-        """Randomly choose a transformation and apply it to x and y, returning
-        the result as a tuple.
+    def __transform(self, x: float, y: float) -> Tuple[float, float]:
+        """
+        Method :
+            FernTileProvider.__transform(x, y)
+        Parameters :
+            x : float
+            y : float
 
-        __transform(float, float) -> tuple<float,float>
+        FernTileProvider.__transform(x, y) --> Tuple[float, float]
+
+        Randomly choose a transformation and apply it to x and y, returning
+        the result as a tuple.
         """
         t = self.__choose_transformation()
         x_new = t[0]*x + t[1]*y + t[2]
@@ -93,10 +110,19 @@ class FernTileProvider(DynamicTileProvider):
         return (x_new,y_new)
 
 
-    def __draw_point(self, tile, x, y, tilesize_units):
-        """Draw the given point on the given tile.
+    def __draw_point(self, tile: Any, x: float, y: float, tilesize_units: float) -> None:
+        """
+        Method :
+            FernTileProvider.__draw_point(tile, x, y, tilesize_units)
+        Parameters :
+            tile : Image
+            x : float
+            y : float
+            tilesize_units : float
 
-        __draw_point(Image, float, float, float) -> None
+        FernTileProvider.__draw_point(tile, x, y, tilesize_units) --> None
+
+        Draw the given point on the given tile.
 
         Precondition: 0.0 <= x <= tilesize_units
         Precondition: 0.0 <= y <= tilesize_units
@@ -110,7 +136,7 @@ class FernTileProvider(DynamicTileProvider):
         tile.putpixel((x,y), self.color)
 
 
-    def _load_dynamic(self, tile_id, outfile):
+    def _load_dynamic(self, tile_id: Tuple[str, int, int, int], outfile: str) -> None:
         media_id, tilelevel, row, col = tile_id
 
         if row < 0 or col < 0 or \

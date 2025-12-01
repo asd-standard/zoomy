@@ -51,6 +51,7 @@
 
 <span class="sd">&quot;&quot;&quot;Dynamic tile provider for the WMS Global Mosaic.&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span><span class="o">,</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="o">,</span><span class="w"> </span><span class="nn">urllib.error</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -64,11 +65,14 @@
 <a class="viewcode-back" href="../../pyzui.globalmosaictileprovider.html#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GlobalMosaicTileProvider</span><span class="p">(</span><span class="n">DynamicTileProvider</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;GlobalMosaicTileProvider objects are used for downloading tiles from the</span>
-<span class="sd">    WMS Global Mosaic server &lt;http://onearth.jpl.nasa.gov/&gt;.</span>
+<span class="sd">    WMS Global Mosaic server http://onearth.jpl.nasa.gov/.</span>
 
-<span class="sd">    Constructor: GlobalMosaicTileProvider(TileCache)</span>
+<span class="sd">    Constructor :</span>
+<span class="sd">        GlobalMosaicTileProvider(tilecache)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        tilecache : TileCache</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">DynamicTileProvider</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">)</span>
 
 
@@ -88,11 +92,17 @@
         <span class="s1">&#39;styles&#39;</span><span class="p">:</span> <span class="s1">&#39;visual&#39;</span><span class="p">,</span>
     <span class="p">}</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Download the tile identified by tile_id to a temporary file, and</span>
-<span class="sd">        return the location of that tile.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            GlobalMosaicTileProvider.__download(tile_id)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tile_id : Tuple[str, int, int, int]</span>
 
-<span class="sd">        __download(tuple&lt;string,int,int,int&gt;) -&gt; string</span>
+<span class="sd">        GlobalMosaicTileProvider.__download(tile_id) --&gt; str</span>
+
+<span class="sd">        Download the tile identified by tile_id to a temporary file, and</span>
+<span class="sd">        return the location of that tile.</span>
 
 <span class="sd">        Precondition: tile_id is valid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -129,8 +139,16 @@
         <span class="k">return</span> <span class="n">tmpfile</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__process_big_tile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">big_tile_id</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Download a 512x512 &quot;big tile&quot; identified by big_tile_id, and cut</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__process_big_tile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">big_tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            GlobalMosaicTileProvider.__process_big_tile(big_tile_id)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            big_tile_id : Tuple[str, int, int, int]</span>
+
+<span class="sd">        GlobalMosaicTileProvider.__process_big_tile(big_tile_id) --&gt; None</span>
+
+<span class="sd">        Download a 512x512 &quot;big tile&quot; identified by big_tile_id, and cut</span>
 <span class="sd">        four 256x256 tiles from it, saving each of these tiles to the</span>
 <span class="sd">        TileStore.</span>
 
@@ -141,8 +159,6 @@
 <span class="sd">        for all the tiles to have approximately the same dimensions so that</span>
 <span class="sd">        memory usage is approximately proportional to the number of tiles</span>
 <span class="sd">        loaded into memory.</span>
-
-<span class="sd">        __process_big_tile(tuple&lt;string,int,int,int&gt;) -&gt; None</span>
 
 <span class="sd">        Precondition: tile_id is valid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -170,11 +186,17 @@
                 <span class="s2">&quot;&#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">tmpfile</span><span class="p">)</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__process_tilelevel1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the tile identified by tile_id by merging the four sub-tiles</span>
-<span class="sd">        and resizing to 256x256, and save it to the TileStore.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__process_tilelevel1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            GlobalMosaicTileProvider.__process_tilelevel1(tile_id)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tile_id : Tuple[str, int, int, int]</span>
 
-<span class="sd">        __process_tilelevel1(tuple&lt;string,int,int,int&gt;) -&gt; None</span>
+<span class="sd">        GlobalMosaicTileProvider.__process_tilelevel1(tile_id) --&gt; None</span>
+
+<span class="sd">        Create the tile identified by tile_id by merging the four sub-tiles</span>
+<span class="sd">        and resizing to 256x256, and save it to the TileStore.</span>
 
 <span class="sd">        Precondition: the tilelevel component of tile_id is 1</span>
 <span class="sd">        Precondition: tile_id is valid</span>
@@ -207,11 +229,17 @@
         <span class="n">tile</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__process_tilelevel0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the (0,0,0) tile, and save it to the TileStore using the</span>
-<span class="sd">        media indentifier media_id.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__process_tilelevel0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            GlobalMosaicTileProvider.__process_tilelevel0(media_id)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            media_id : str</span>
 
-<span class="sd">        __process_tilelevel0(string) -&gt; None</span>
+<span class="sd">        GlobalMosaicTileProvider.__process_tilelevel0(media_id) --&gt; None</span>
+
+<span class="sd">        Create the (0,0,0) tile, and save it to the TileStore using the</span>
+<span class="sd">        media identifier media_id.</span>
 
 <span class="sd">        Precondition: tile_id is valid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -236,7 +264,7 @@
 
 <div class="viewcode-block" id="GlobalMosaicTileProvider._load_dynamic">
 <a class="viewcode-back" href="../../pyzui.globalmosaictileprovider.html#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider._load_dynamic">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_load_dynamic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">,</span> <span class="n">outfile</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_dynamic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">media_id</span><span class="p">,</span> <span class="n">tilelevel</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="n">tile_id</span>
 
         <span class="k">if</span> <span class="n">row</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">col</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -304,11 +332,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
 </ul>
 
 <div class="relations">

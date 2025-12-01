@@ -14,8 +14,6 @@
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="pyzui.tiledmediaobject module" href="pyzui.tiledmediaobject.html" />
-    <link rel="prev" title="pyzui.tile module" href="pyzui.tile.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -40,55 +38,149 @@
 <dt class="sig sig-object py" id="pyzui.tilecache.TileCache">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.tilecache.</span></span><span class="sig-name descname"><span class="pre">TileCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilecache.html#TileCache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilecache.TileCache" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="simple">
+<dt>Constructor:</dt><dd><p>TileCache(maxsize, maxage)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>maxsize : int
+maxage : int</p>
+</dd>
+</dl>
+<p>TileCache(maxsize, maxage) –&gt; None</p>
 <p>TileCache objects are used for caching tiles in memory.</p>
-<p>Tiles can be accessed in much that same way as <cite>dict</cite> objects:
+<p>Tiles can be accessed in much the same way as <cite>dict</cite> objects:
 <cite>tilecache[tile_id]</cite> holds the tile identified by the given <cite>tile_id</cite>.</p>
-<p>Constructor: TileCache(int, int)</p>
+<dl class="simple">
+<dt>Constructor:</dt><dd><p>TileCache(maxsize, maxage)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>maxsize : int
+maxage : int</p>
+</dd>
+</dl>
+<p>TileCache(maxsize, maxage) –&gt; None</p>
 <p>Create a new TileCache object.</p>
 <p>The maximum number of tiles to store is set by <cite>maxsize</cite>. There will be
 no limit if <cite>maxsize</cite> &lt;= 0.</p>
 <p>The maximum age of the tiles (in seconds) allowed before they are
-discarded is set by <cite>maxsize</cite>. There will be no limit if <cite>maxage</cite> &lt;= 0.</p>
+discarded is set by <cite>maxage</cite>. There will be no limit if <cite>maxage</cite> &lt;= 0.</p>
 <p>None tiles and (0,0,0) tiles do not count towards the number of stored
 tiles and will therefore not be automatically discarded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>maxsize</strong> (<em>int</em>)</p></li>
+<li><p><strong>maxage</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.tilecache.TileCache.insert">
 <span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxaccesses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilecache.html#TileCache.insert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilecache.TileCache.insert" title="Link to this definition">¶</a></dt>
-<dd><p>Insert the <cite>tile</cite> with the given <cite>tile_id</cite> into the cache.</p>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>TileCache.insert(tile_id, tile, maxaccesses)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]
+tile : Any
+maxaccesses : int</p>
+</dd>
+</dl>
+<p>TileCache.insert(tile_id, tile, maxaccesses) –&gt; None</p>
+<p>Insert the <cite>tile</cite> with the given <cite>tile_id</cite> into the cache.</p>
 <p>If <cite>maxaccesses</cite> &lt;= 0, then the behaviour is the same as
 <cite>tilecache[tile_id]=tile</cite>. Otherwise the tile is set to expire after it
 has been accessed <cite>maxaccesses</cite> times.</p>
-<p>insert(tuple&lt;string,int,int,int&gt;, object, int) -&gt; None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tile_id</strong> (<em>Tuple</em><em>[</em><em>str</em><em>, </em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>)</p></li>
+<li><p><strong>tile</strong> (<em>Any</em>)</p></li>
+<li><p><strong>maxaccesses</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.tilecache.TileCache.__mortal">
 <span class="sig-name descname"><span class="pre">__mortal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tile</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tilecache.TileCache.__mortal" title="Link to this definition">¶</a></dt>
-<dd><p>Returns a bool indicating whether the given tile is mortal.</p>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>__mortal(tile_id, tile)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]
+tile : Any</p>
+</dd>
+</dl>
+<p>__mortal(tile_id, tile) –&gt; bool</p>
+<p>Returns a bool indicating whether the given tile is mortal.</p>
 <p>The tile will never be removed from the cache if it is immortal.</p>
 <p>None tiles and (0,0,0) tiles are the only ones considered immortal.</p>
-<p>__mortal(tuple&lt;string,int,int,int&gt;, object) -&gt; bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tile_id</strong> (<em>Tuple</em><em>[</em><em>str</em><em>, </em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>)</p></li>
+<li><p><strong>tile</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.tilecache.TileCache.__periodic_clean">
 <span class="sig-name descname"><span class="pre">__periodic_clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tilecache.TileCache.__periodic_clean" title="Link to this definition">¶</a></dt>
-<dd><p>Periodically remove old tiles based on maxage.</p>
-<p>__periodic_clean() -&gt; infinite loop</p>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>__periodic_clean()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__periodic_clean() –&gt; infinite loop</p>
+<p>Periodically remove old tiles based on maxage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.tilecache.TileCache.__clean">
 <span class="sig-name descname"><span class="pre">__clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tilecache.TileCache.__clean" title="Link to this definition">¶</a></dt>
-<dd><p>Remove the least recently used tiles based on maxsize.</p>
-<p>__clean() -&gt; None</p>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>__clean()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__clean() –&gt; None</p>
+<p>Remove the least recently used tiles based on maxsize.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.tilecache.TileCache.purge">
 <span class="sig-name descname"><span class="pre">purge</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tilecache.html#TileCache.purge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilecache.TileCache.purge" title="Link to this definition">¶</a></dt>
-<dd><p>Purge all tiles from the cache.</p>
-<p>purge() -&gt; None</p>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>TileCache.purge()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>TileCache.purge() –&gt; None</p>
+<p>Purge all tiles from the cache.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -132,25 +224,11 @@ has been accessed <cite>maxaccesses</cite> times.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="contributiongiudelines.html">Contribution guidelines</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="main.html">main module</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyzui</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="pyzui.html">pyzui package</a></li>
-</ul>
-</li>
-</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-  <li><a href="modules.html">pyzui</a><ul>
-  <li><a href="pyzui.html">pyzui package</a><ul>
-      <li>Previous: <a href="pyzui.tile.html" title="previous chapter">pyzui.tile module</a></li>
-      <li>Next: <a href="pyzui.tiledmediaobject.html" title="next chapter">pyzui.tiledmediaobject module</a></li>
-  </ul></li>
-  </ul></li>
   </ul></li>
 </ul>
 </div>

@@ -1,7 +1,7 @@
-pyzui.scene module
-==================
+pyzui.objects.scene.scene module
+=================================
 
-.. automodule:: pyzui.scene
+.. automodule:: pyzui.objects.scene.scene
    :members:
    :show-inheritance:
    :undoc-members:

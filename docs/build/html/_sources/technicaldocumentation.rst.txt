@@ -40,7 +40,6 @@ Project structure
         - :doc:`main window <pyzui.mainwindow>`
             - :doc:`main <main>`
 - :doc:`converter <pyzui.converter>`
-    - :doc:`magickconverter <pyzui.magickconverter>`
     - :doc:`pdfconverter <pyzui.pdfconverter>`
     - :doc:`webkitconverter <pyzui.webkitconverter>`
 - :doc:`ppm <pyzui.ppm>`

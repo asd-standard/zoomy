@@ -18,24 +18,27 @@
 
 """Image converter based upon libvips (via pyvips)."""
 
-
-
+from typing import Optional, Tuple, List, Any
 import pyvips
 import os
 #import sys
 
 from .converter import Converter
-from . import tilestore as TileStore
+from .. import tilestore as TileStore
 
 class VipsConverter(Converter):
     """VipsConverter objects are used for converting media with libvips.
     libvips is a fast image processing library that can handle very large images
     with low memory usage. For a list of supported image formats see
-    <https://www.libvips.org/API/current/file-format.html>
+    https://www.libvips.org/API/current/file-format.html
 
-    Constructor: VipsConverter(string, string)
+    Constructor:
+        VipsConverter(infile, outfile)
+    Parameters :
+        infile : str
+        outfile : str
     """
-    def __init__(self, infile, outfile):
+    def __init__(self, infile: str, outfile: str) -> None:
         
         Converter.__init__(self, infile, outfile)
 
@@ -43,13 +46,12 @@ class VipsConverter(Converter):
         self.bitdepth = 8
 
 
-    def run(self):
+    def run(self) -> None:
         try:
             with TileStore.disk_lock:
                 self._logger.debug("loading image with libvips")
 
                 # Load the image using libvips
-                # This is much more memory efficient than ImageMagick for large images
                 image = pyvips.Image.new_from_file(self._infile, access='sequential')
 
                 self._logger.debug(f"loaded {image.width}x{image.height} image with {image.bands} bands")
@@ -89,11 +91,11 @@ class VipsConverter(Converter):
         self._progress = 1.0
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "VipsConverter(%s, %s)" %  (self._infile, self._outfile)
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "VipsConverter(%s, %s)" % \
             (repr(self._infile), repr(self._outfile))
 

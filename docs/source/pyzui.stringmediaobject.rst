@@ -1,7 +1,7 @@
-pyzui.stringmediaobject module
-==============================
+pyzui.objects.mediaobjects.stringmediaobject module
+====================================================
 
-.. automodule:: pyzui.stringmediaobject
+.. automodule:: pyzui.objects.mediaobjects.stringmediaobject
    :members:
    :show-inheritance:
    :undoc-members:

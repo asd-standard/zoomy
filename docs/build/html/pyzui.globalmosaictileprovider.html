@@ -14,8 +14,6 @@
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="pyzui.magickconverter module" href="pyzui.magickconverter.html" />
-    <link rel="prev" title="pyzui.ferntileprovider module" href="pyzui.ferntileprovider.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -41,10 +39,20 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.globalmosaictileprovider.</span></span><span class="sig-name descname"><span class="pre">GlobalMosaicTileProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tilecache</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/globalmosaictileprovider.html#GlobalMosaicTileProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="pyzui.dynamictileprovider.html#pyzui.dynamictileprovider.DynamicTileProvider" title="pyzui.dynamictileprovider.DynamicTileProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicTileProvider</span></code></a></p>
 <p>GlobalMosaicTileProvider objects are used for downloading tiles from the
-WMS Global Mosaic server &lt;<a class="reference external" href="http://onearth.jpl.nasa.gov/">http://onearth.jpl.nasa.gov/</a>&gt;.</p>
-<p>Constructor: GlobalMosaicTileProvider(TileCache)</p>
+WMS Global Mosaic server <a class="reference external" href="http://onearth.jpl.nasa.gov/">http://onearth.jpl.nasa.gov/</a>.</p>
+<dl class="simple">
+<dt>Constructor :</dt><dd><p>GlobalMosaicTileProvider(tilecache)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tilecache : TileCache</p>
+</dd>
+</dl>
 <p>Create a new TileProvider for loading tiles into the given
 <cite>tilecache</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tilecache</strong> (<em>Any</em>)</p>
+</dd>
+</dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.filext">
 <span class="sig-name descname"><span class="pre">filext</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'jpg'</span></em><a class="headerlink" href="#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.filext" title="Link to this definition">¶</a></dt>
@@ -73,16 +81,37 @@ WMS Global Mosaic server &lt;<a class="reference external" href="http://onearth.
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.__download">
 <span class="sig-name descname"><span class="pre">__download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.__download" title="Link to this definition">¶</a></dt>
-<dd><p>Download the tile identified by tile_id to a temporary file, and
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>GlobalMosaicTileProvider.__download(tile_id)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]</p>
+</dd>
+</dl>
+<p>GlobalMosaicTileProvider.__download(tile_id) –&gt; str</p>
+<p>Download the tile identified by tile_id to a temporary file, and
 return the location of that tile.</p>
-<p>__download(tuple&lt;string,int,int,int&gt;) -&gt; string</p>
 <p>Precondition: tile_id is valid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tile_id</strong> (<em>Tuple</em><em>[</em><em>str</em><em>, </em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.__process_big_tile">
 <span class="sig-name descname"><span class="pre">__process_big_tile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">big_tile_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.__process_big_tile" title="Link to this definition">¶</a></dt>
-<dd><p>Download a 512x512 “big tile” identified by big_tile_id, and cut
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>GlobalMosaicTileProvider.__process_big_tile(big_tile_id)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>big_tile_id : Tuple[str, int, int, int]</p>
+</dd>
+</dl>
+<p>GlobalMosaicTileProvider.__process_big_tile(big_tile_id) –&gt; None</p>
+<p>Download a 512x512 “big tile” identified by big_tile_id, and cut
 four 256x256 tiles from it, saving each of these tiles to the
 TileStore.</p>
 <p>This is required since the server only provides 512x512 and 480x480
@@ -91,35 +120,88 @@ tiles.</p>
 for all the tiles to have approximately the same dimensions so that
 memory usage is approximately proportional to the number of tiles
 loaded into memory.</p>
-<p>__process_big_tile(tuple&lt;string,int,int,int&gt;) -&gt; None</p>
 <p>Precondition: tile_id is valid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>big_tile_id</strong> (<em>Tuple</em><em>[</em><em>str</em><em>, </em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.__process_tilelevel1">
 <span class="sig-name descname"><span class="pre">__process_tilelevel1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.__process_tilelevel1" title="Link to this definition">¶</a></dt>
-<dd><p>Create the tile identified by tile_id by merging the four sub-tiles
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>GlobalMosaicTileProvider.__process_tilelevel1(tile_id)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]</p>
+</dd>
+</dl>
+<p>GlobalMosaicTileProvider.__process_tilelevel1(tile_id) –&gt; None</p>
+<p>Create the tile identified by tile_id by merging the four sub-tiles
 and resizing to 256x256, and save it to the TileStore.</p>
-<p>__process_tilelevel1(tuple&lt;string,int,int,int&gt;) -&gt; None</p>
 <p>Precondition: the tilelevel component of tile_id is 1
 Precondition: tile_id is valid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tile_id</strong> (<em>Tuple</em><em>[</em><em>str</em><em>, </em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.__process_tilelevel0">
 <span class="sig-name descname"><span class="pre">__process_tilelevel0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">media_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider.__process_tilelevel0" title="Link to this definition">¶</a></dt>
-<dd><p>Create the (0,0,0) tile, and save it to the TileStore using the
-media indentifier media_id.</p>
-<p>__process_tilelevel0(string) -&gt; None</p>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>GlobalMosaicTileProvider.__process_tilelevel0(media_id)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>media_id : str</p>
+</dd>
+</dl>
+<p>GlobalMosaicTileProvider.__process_tilelevel0(media_id) –&gt; None</p>
+<p>Create the (0,0,0) tile, and save it to the TileStore using the
+media identifier media_id.</p>
 <p>Precondition: tile_id is valid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>media_id</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.globalmosaictileprovider.GlobalMosaicTileProvider._load_dynamic">
 <span class="sig-name descname"><span class="pre">_load_dynamic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/globalmosaictileprovider.html#GlobalMosaicTileProvider._load_dynamic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.globalmosaictileprovider.GlobalMosaicTileProvider._load_dynamic" title="Link to this definition">¶</a></dt>
-<dd><p>Perform whatever actions necessary to load the tile identified by
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>DynamicTileProvider._load_dynamic(tile_id, outfile)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]
+outfile : str</p>
+</dd>
+</dl>
+<p>DynamicTileProvider._load_dynamic(tile_id, outfile) –&gt; None</p>
+<p>Perform whatever actions necessary to load the tile identified by
 the given tile_id into the location given by outfile.</p>
-<p>_load_dynamic(tuple&lt;string,int,int,int&gt;, string)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tile_id</strong> (<em>Tuple</em><em>[</em><em>str</em><em>, </em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>)</p></li>
+<li><p><strong>outfile</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -163,25 +245,11 @@ the given tile_id into the location given by outfile.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="contributiongiudelines.html">Contribution guidelines</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="main.html">main module</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyzui</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="pyzui.html">pyzui package</a></li>
-</ul>
-</li>
-</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-  <li><a href="modules.html">pyzui</a><ul>
-  <li><a href="pyzui.html">pyzui package</a><ul>
-      <li>Previous: <a href="pyzui.ferntileprovider.html" title="previous chapter">pyzui.ferntileprovider module</a></li>
-      <li>Next: <a href="pyzui.magickconverter.html" title="next chapter">pyzui.magickconverter module</a></li>
-  </ul></li>
-  </ul></li>
   </ul></li>
 </ul>
 </div>

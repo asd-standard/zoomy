@@ -21,6 +21,7 @@
 import tempfile
 import os
 import math
+from typing import Optional, Tuple, List, Any
 
 from PySide6 import QtCore, QtGui
 from PIL import ImageQt
@@ -29,7 +30,7 @@ from pyzui.objects.mediaobjects.mediaobject import MediaObject, LoadError, Rende
 from pyzui import tilemanager as TileManager
 from pyzui.logger import get_logger
 
-# Sbdivide a ppm image into tiles that fit the mediaobject frame 
+# Subdivide a ppm image into tiles that fit the mediaobject frame 
 from pyzui.ppm import PPMTiler
 
 # The classes that convert various format to ppm images
@@ -43,19 +44,26 @@ from pyzui.converters import PDFConverter, VipsConverter
 
 class TiledMediaObject(MediaObject):
     """
-    TileMedia object Wrap given media_id in MediaObject type, 
-    (calling converter if necessary) the so that it that can be 
+    Constructor :
+        TiledMediaObject(media_id, scene, autofit)
+    Parameters :
+        media_id : str
+        scene : Scene
+        autofit : bool
+
+    TiledMediaObject(media_id, scene, autofit) --> None
+
+    TileMedia object wraps given media_id in MediaObject type,
+    (calling converter if necessary) so that it can be
     rendered in the ZUI.
-    
+
     If `autofit` is True, then once the media has loaded it will be fitted to
     the area occupied by the placeholder.
 
-    Constructor: TiledMediaObject(string, Scene[, bool])
-
-    For any acceptable filetype the adeguate converter get's called.
-    The converter return a ppm image file on wich we can run the tiler on.
+    For any acceptable filetype the adequate converter gets called.
+    The converter returns a ppm image file on which we can run the tiler on.
     """
-    def __init__(self, media_id, scene, autofit=True):
+    def __init__(self, media_id: str, scene: Any, autofit: bool = True) -> None:
         MediaObject.__init__(self, media_id, scene)
 
         self.__autofit = autofit
@@ -130,7 +138,7 @@ class TiledMediaObject(MediaObject):
     tempcache = 5
 
     @property
-    def __progress(self):
+    def __progress(self) -> float:
         if self.__converter is None and self.__tiler is None:
             return 0.0
         elif self.__converter is None:
@@ -141,11 +149,18 @@ class TiledMediaObject(MediaObject):
             return 0.5 * (self.__converter.progress + self.__tiler.progress)
 
 
-    def __pixpos2rowcol(self, pixpos, tilescale):
-        """Convert the on-screen pixel position to to a (row,col) tile
-        position.
+    def __pixpos2rowcol(self, pixpos: Tuple[float, float], tilescale: float) -> Tuple[int, int]:
+        """
+        Method :
+            __pixpos2rowcol(pixpos, tilescale)
+        Parameters :
+            pixpos : Tuple[float, float]
+            tilescale : float
 
-        __pixpos2rowcol(tuple<float,float>, float) -> tuple<int,int>
+        __pixpos2rowcol(pixpos, tilescale) --> Tuple[int, int]
+
+        Convert the on-screen pixel position to a (row,col) tile
+        position.
         """
         o = self.topleft
         col = int((pixpos[0]-o[0]) / (tilescale*self.__tilesize))
@@ -153,10 +168,16 @@ class TiledMediaObject(MediaObject):
         return (row,col)
 
 
-    def __rowcol_bound(self, tilelevel):
-        """Return the maximum row and column for the given tilelevel.
+    def __rowcol_bound(self, tilelevel: int) -> Tuple[int, int]:
+        """
+        Method :
+            __rowcol_bound(tilelevel)
+        Parameters :
+            tilelevel : int
 
-        __rowcol_bound(int) -> tuple<int,int>
+        __rowcol_bound(tilelevel) --> Tuple[int, int]
+
+        Return the maximum row and column for the given tilelevel.
         """
         if tilelevel <= 0:
             row_bound = col_bound = 0
@@ -178,14 +199,21 @@ class TiledMediaObject(MediaObject):
         return row_bound, col_bound
 
 
-    def __render_tileblock(self, tileblock_id, mode):
-        """Render, cache, and return the tileblock given the unique
+    def __render_tileblock(self, tileblock_id: Tuple[int, int, int, int, int], mode: int) -> Any:
+        """
+        Method :
+            __render_tileblock(tileblock_id, mode)
+        Parameters :
+            tileblock_id : Tuple[int, int, int, int, int]
+            mode : int
+
+        __render_tileblock(tileblock_id, mode) --> QImage
+
+        Render, cache, and return the tileblock given the unique
         tileblock_id and render mode.
 
-        __render_tileblock(tuple<int,int,int,int,int>, int) -> QImage
-
-        Precondition: mode is equal to either RenderMode.Draft or
-        RenderMode.HighQuality
+        Precondition: mode is equal to either :attr:`RenderMode.Draft` or
+        :attr:`RenderMode.HighQuality`
         """
         
         self.__logger.debug("rendering tileblock")
@@ -237,13 +265,20 @@ class TiledMediaObject(MediaObject):
         return tileblock
 
 
-    def __render_media(self, painter, mode):
-        """Render the media using the given painter and render mode.
+    def __render_media(self, painter: Any, mode: int) -> None:
+        """
+        Method :
+            __render_media(painter, mode)
+        Parameters :
+            painter : QPainter
+            mode : int
 
-        __render_media(QPainter, int) -> None
+        __render_media(painter, mode) --> None
+
+        Render the media using the given painter and render mode.
 
         Precondition: mode is equal to one of the constants defined in
-        RenderMode
+        :class:`RenderMode`
         """
         
         if min(self.onscreen_size) <= 1 or mode == RenderMode.Invisible:
@@ -304,11 +339,17 @@ class TiledMediaObject(MediaObject):
         painter.drawImage(int(x), int(y), image_scaled)
 
 
-    def __render_placeholder(self, painter):
-        """Render a placeholder indicating that the image is still loading,
-        using the given painter.
+    def __render_placeholder(self, painter: Any) -> None:
+        """
+        Method :
+            __render_placeholder(painter)
+        Parameters :
+            painter : QPainter
 
-        __render_placeholder(QPainter) -> None
+        __render_placeholder(painter) --> None
+
+        Render a placeholder indicating that the image is still loading,
+        using the given painter.
         """
         x,y = self.topleft
         w,h = self.onscreen_size
@@ -335,10 +376,16 @@ class TiledMediaObject(MediaObject):
                     "loading...")
 
 
-    def __try_load(self):
-        """Try to load the (0,0,0) tile from the TileManager.
+    def __try_load(self) -> None:
+        """
+        Method :
+            __try_load()
+        Parameters :
+            None
 
-        __try_load() -> None
+        __try_load() --> None
+
+        Try to load the (0,0,0) tile from the TileManager.
         """
         
         try:
@@ -386,11 +433,17 @@ class TiledMediaObject(MediaObject):
                 self.centre = old_centre
 
 
-    def __run_tiler(self):
-        """Run the tiler (after checking that there is an image to run
-        the tiler on).
+    def __run_tiler(self) -> None:
+        """
+        Method :
+            __run_tiler()
+        Parameters :
+            None
 
-        __run_tiler() -> None
+        __run_tiler() --> None
+
+        Run the tiler (after checking that there is an image to run
+        the tiler on).
         """
         
         if not os.path.exists(self.__ppmfile):
@@ -416,7 +469,7 @@ class TiledMediaObject(MediaObject):
             raise LoadError("there was an error creating the tiler: %s")
 
 
-    def render(self, painter, mode):
+    def render(self, painter: Any, mode: int) -> None:
         
 
         if self.__loaded:
@@ -452,7 +505,7 @@ class TiledMediaObject(MediaObject):
 
 
     @property
-    def onscreen_size(self):
+    def onscreen_size(self) -> Tuple[float, float]:
         if self.__aspect_ratio:
             if self.__aspect_ratio >= 1.0:
                 ## width >= height

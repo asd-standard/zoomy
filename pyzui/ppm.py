@@ -20,16 +20,21 @@
 
 """Module for reading PPM images."""
 
+from typing import Optional, Tuple, List, Any
 from .tiler import Tiler
 
-def read_ppm_header(f):
+def read_ppm_header(f: Any) -> Tuple[int, int]:
     """Read the PPM header in the given file object `f` and return a tuple
     representing the dimensions of the image.
 
     Raises `IOError` if the header is invalid and/or unsupported (must be 'P6'
     binary PPM format with maxval=255).
 
-    read_ppm_header(file) -> (long, long)
+    Parameters :
+        f : Any
+            File object to read from
+
+    read_ppm_header(file) -> Tuple[int, int]
     """
     header = []
 
@@ -100,9 +105,19 @@ def enlarge_ppm_file(PPmFile, width, height, spacing) :
 class PPMTiler(Tiler):
     """PPMTiler objects are used for tiling PPM images.
 
-    Constructor: PPMTiler(string[, string[, string[, int]]])
+    Constructor: PPMTiler(infile, media_id, filext, tilesize)
+
+    Parameters :
+        infile : str
+            Input PPM file path
+        media_id : Optional[str]
+            Media identifier
+        filext : str
+            File extension for output tiles
+        tilesize : int
+            Size of tiles in pixels
     """
-    def __init__(self, infile, media_id=None, filext='jpg', tilesize=256):
+    def __init__(self, infile: str, media_id: Optional[str] = None, filext: str = 'jpg', tilesize: int = 256) -> None:
         
         
         Tiler.__init__(self, infile, media_id, filext, tilesize)
@@ -119,8 +134,13 @@ class PPMTiler(Tiler):
         self._bytes_per_pixel = 3
         
 
-    def _scanchunk(self):
+    def _scanchunk(self) -> bytes:
         """Scan a chunk of ppm image bytes correspondent of a tile row.
+
+        Method: PPMTiler._scanchunk()
+
+        Parameters :
+            None
 
         The row length of the tile is given by self._bytes_per_pixel*self._width.
         """
@@ -128,7 +148,14 @@ class PPMTiler(Tiler):
          
 
 
-    def __del__(self):
+    def __del__(self) -> None:
+        """Method: PPMTiler.__del__()
+
+        Parameters :
+            None
+
+        Cleanup method to close the PPM file object.
+        """
         try:
             self.__ppm_fileobj.close()
         except AttributeError:

@@ -20,6 +20,7 @@
 
 import math
 import os
+from typing import Optional, Tuple, List, Any
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -44,16 +45,23 @@ from pyzui.logger import get_logger
 class MainWindow(QtWidgets.QMainWindow):
     """
     MainWindow windows are used for displaying the PyZUI interface.
-    This class defines all'the interface affordances, menus, widgets, frames ecc.
+    This class defines all the interface affordances, menus, widgets, frames etc.
     Framerate and zoom_sensitivity variables have to be declared the same value as
     in qzui class
-    
+
     Constructor: MainWindow()
     """
 
 
-    def __init__(self, framerate=10, zoom_sensitivity=50):
-        """Create a new MainWindow."""
+    def __init__(self, framerate: int = 10, zoom_sensitivity: int = 50) -> None:
+        """Create a new MainWindow.
+
+        Constructor :
+            MainWindow(framerate, zoom_sensitivity)
+        Parameters :
+            framerate : int
+            zoom_sensitivity : int
+        """
         
         QtWidgets.QMainWindow.__init__(self)
 
@@ -75,15 +83,39 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__action_open_scene_home()
 
 
-    def sizeHint(self):
+    def sizeHint(self) -> QtCore.QSize:
+        """Method :
+            MainWindow.sizeHint()
+        Parameters :
+            None
+
+        MainWindow.sizeHint() --> QtCore.QSize
+
+        Return the recommended size for the widget.
+        """
         return QtCore.QSize(1280,720)
 
-    def minimumSizeHint(self):
+    def minimumSizeHint(self) -> QtCore.QSize:
+        """Method :
+            MainWindow.minimumSizeHint()
+        Parameters :
+            None
+
+        MainWindow.minimumSizeHint() --> QtCore.QSize
+
+        Return the minimum size hint for the widget.
+        """
         return QtCore.QSize(160,120)
 
 
-    def __show_error(self, text, details):
+    def __show_error(self, text: str, details: Any) -> None:
         """Show an error dialog with the given text and details.
+
+        Method :
+            __show_error(text, details)
+        Parameters :
+            text : str
+            details : Any
 
         __show_error(string, string) -> None
         """
@@ -95,9 +127,18 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.exec()
 
 
-    def __create_action(self, key, text, callback=None, shortcut=None,
-                        checkable=False):
+    def __create_action(self, key: str, text: str, callback: Optional[Any] = None,
+                        shortcut: Optional[str] = None, checkable: bool = False) -> None:
         """Create a QAction and store it in self.__action[key].
+
+        Method :
+            __create_action(key, text, callback, shortcut, checkable)
+        Parameters :
+            key : str
+            text : str
+            callback : Optional[Any]
+            shortcut : Optional[str]
+            checkable : bool
 
         __create_action(string, string, function, string, bool) -> None
         """
@@ -112,17 +153,27 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__action[key].setCheckable(checkable)
 
 
-    def __action_new_scene(self):
+    def __action_new_scene(self) -> None:
         """Create a new scene.
+
+        Method :
+            __action_new_scene()
+        Parameters :
+            None
 
         __action_new_scene() -> None
         """
         self.zui.scene = Scene.new()
 
 
-    def __action_open_scene(self):
+    def __action_open_scene(self) -> None:
         """Open a scene from the location chosen by the user in a file
         selection dialog.
+
+        Method :
+            __action_open_scene()
+        Parameters :
+            None
 
         __action_open_scene() -> None
         """
@@ -137,20 +188,30 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.__show_error("Unable to open scene ERROR in mainwindow.__action_open_scene \n", e)
 
 
-    def __action_open_scene_home(self):
+    def __action_open_scene_home(self) -> None:
         """Open the Home scene.
+
+        Method :
+            __action_open_scene_home()
+        Parameters :
+            None
 
         __action_open_scene_home() -> None
         """
         try:
-            self.zui.scene = Scene.load_scene(os.path.join("data", "home.pzs")) #"/home/asd/Projects/pyzui/data/home.pzs"
+            self.zui.scene = Scene.load_scene(os.path.join("data", "home.pzs"))
         except Exception as e:
             self.__show_error('Unable to open the Home scene, ERROR in mainwindow.__action_open_scene_home \n', str(e))
 
 
-    def __action_save_scene(self):
+    def __action_save_scene(self) -> None:
         """Save the scene to the location chosen by the user in a file
         selection dialog.
+
+        Method :
+            __action_save_scene()
+        Parameters :
+            None
 
         __action_save_scene() -> None
         """
@@ -167,9 +228,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.__show_error("Unable to save scene ERROR in mainwindow.__action_save_scene \n", e)
 
 
-    def __action_save_screenshot(self):
+    def __action_save_screenshot(self) -> None:
         """Save a screenshot to the location chosen by the user in a file
         selection dialog.
+
+        Method :
+            __action_save_screenshot()
+        Parameters :
+            None
 
         __action_save_screenshot() -> None
         """
@@ -189,11 +255,17 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.__show_error("Unable to save screenshot ERROR in mainwindow.__action_save_screenshot", e)
 
 
-    def __open_media(self, media_id, add=True):
+    def __open_media(self, media_id: str, add: bool = True) -> Optional[Any]:
         """Open the media with the given media_id.
 
         If add is True then the media will be fit to the screen and added to
         the scene. Otherwise it will be returned.
+
+        Method :
+            __open_media(media_id, add)
+        Parameters :
+            media_id : str
+            add : bool
 
         __open_media(string[, bool]) -> None
         """
@@ -223,9 +295,14 @@ class MainWindow(QtWidgets.QMainWindow):
             return mediaobject
         
 
-    def __action_open_media_local(self):
+    def __action_open_media_local(self) -> None:
         """Open media from the location chosen by the user in a file
         selection dialog.
+
+        Method :
+            __action_open_media_local()
+        Parameters :
+            None
 
         __action_open_media_local() -> None
         """
@@ -238,8 +315,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__open_media(filename[0])
 
 
-    def __action_open_media_string(self):
+    def __action_open_media_string(self) -> None:
         """Render string given by the user in an input dialog.
+
+        Method :
+            __action_open_media_string()
+        Parameters :
+            None
 
         __action_open_media_string() -> None
         """
@@ -254,9 +336,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__open_media(uri)
         
 
-    def __action_open_media_dir(self):
+    def __action_open_media_dir(self) -> None:
         """Open media from the directory chosen by the user in a file
         selection dialog.
+
+        Method :
+            __action_open_media_dir()
+        Parameters :
+            None
 
         __action_open_media_dir() -> None
         """
@@ -298,24 +385,39 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.zui.scene.add(mediaobject)
 
 
-    def __action_set_fps(self, act):
+    def __action_set_fps(self, act: QtGui.QAction) -> None:
         """Set the framerate to the value specified in act.
+
+        Method :
+            __action_set_fps(act)
+        Parameters :
+            act : QtGui.QAction
 
         __action_set_fps(QAction) -> None
         """
         self.zui.framerate = int(act.fps/2)
 
 
-    def __action_fullscreen(self):
+    def __action_fullscreen(self) -> None:
         """Toggles fullscreen mode.
+
+        Method :
+            __action_fullscreen()
+        Parameters :
+            None
 
         __action_fullscreen() -> None
         """
         self.setWindowState(self.windowState() ^ QtCore.Qt.WindowFullScreen)
 
 
-    def __action_about(self):
+    def __action_about(self) -> None:
         """Display the PyZUI about dialog.
+
+        Method :
+            __action_about()
+        Parameters :
+            None
 
         __action_about() -> None
         """
@@ -326,23 +428,40 @@ class MainWindow(QtWidgets.QMainWindow):
             PyZUI.__copyright_notice__)
 
 
-    def __action_about_qt(self) :
+    def __action_about_qt(self) -> None:
         """Display the Qt about dialog.
+
+        Method :
+            __action_about_qt()
+        Parameters :
+            None
 
         __action_about_qt() -> None
         """
         QtWidgets.QMessageBox.aboutQt(self)
 
-    def __action_save_and_quit(self) :
+    def __action_save_and_quit(self) -> None:
         """Calls the __action_save_scene and then quit.
-            
+
+        Method :
+            __action_save_and_quit()
+        Parameters :
+            None
+
+        __action_save_and_quit() -> None
         """
         self.__action_save_scene()
         QtWidgets.QApplication.closeAllWindows()
     
-    def __action_confirm_quit(self) :
+    def __action_confirm_quit(self) -> None:
         """Ask user if it really wants to quit.
-                    
+
+        Method :
+            __action_confirm_quit()
+        Parameters :
+            None
+
+        __action_confirm_quit() -> None
         """
         # Create the dialog window
         dialog = QDialog()
@@ -379,8 +498,16 @@ class MainWindow(QtWidgets.QMainWindow):
         elif response == QDialog.Rejected :
             dialog.close()
     
-    def __action_set_zoom_sensitivity(self) :
+    def __action_set_zoom_sensitivity(self) -> None:
+        """Set the zoom sensitivity for the ZUI.
 
+        Method :
+            __action_set_zoom_sensitivity()
+        Parameters :
+            None
+
+        __action_set_zoom_sensitivity() -> None
+        """
         ok_pressed, text_input = DialogWindows._open_zoom_sensitivity_input_dialog(self.zui.zoom_sensitivity)
 
         '''
@@ -402,8 +529,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.zui.zoom_sensitivity = int(1000 / int(text_input)) 
             
 
-    def __create_actions(self):
+    def __create_actions(self) -> None:
         """Create the QActions required for the interface.
+
+        Method :
+            __create_actions()
+        Parameters :
+            None
 
         __create_actions() -> None
         """
@@ -448,8 +580,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__create_action('about_qt', "About &Qt", self.__action_about_qt)
 
 
-    def __create_menus(self):
+    def __create_menus(self) -> None:
         """Create the menus.
+
+        Method :
+            __create_menus()
+        Parameters :
+            None
 
         __create_menus() -> None
         """
@@ -477,6 +614,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__menu['help'].addAction(self.__action['about_qt'])
 
 
-    def showEvent(self, event):
+    def showEvent(self, event: QtGui.QShowEvent) -> None:
+        """Handle show event by focusing the QZUI widget.
+
+        Method :
+            showEvent(event)
+        Parameters :
+            event : QtGui.QShowEvent
+
+        showEvent(event) -> None
+        """
         ## focus the QZUI widget whenever this window is shown
         self.zui.setFocus(QtCore.Qt.OtherFocusReason)

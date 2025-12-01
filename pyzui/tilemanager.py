@@ -24,8 +24,7 @@ It is also responsible for creating new tiles from available ones when
 no tiles of the requested resolution are available.
 """
 
-import logging
-
+from typing import Optional, Tuple, List, Any
 from PIL import Image
 from PySide6 import QtCore
 
@@ -36,25 +35,39 @@ from .osmtileprovider import OSMTileProvider
 from .globalmosaictileprovider import GlobalMosaicTileProvider
 from .mandeltileprovider import MandelTileProvider
 from .ferntileprovider import FernTileProvider
+from .logger import get_logger
 
 
 
 #192
-def init(total_cache_size=1024):
-    """Initialise the TileManager. This **must** be called before any other
+def init(total_cache_size: int = 1024, auto_cleanup: bool = True, cleanup_max_age_days: int = 3) -> None:
+    """
+    Function :
+        init(total_cache_size, auto_cleanup, cleanup_max_age_days)
+    Parameters :
+        total_cache_size : int
+        auto_cleanup : bool
+        cleanup_max_age_days : int
+
+    init(total_cache_size, auto_cleanup, cleanup_max_age_days) --> None
+
+    Initialise the TileManager. This **must** be called before any other
     functions are called.
-    
-    init() -> None
+
+    Args:
+        total_cache_size (int): Total cache size for tiles (default: 1024)
+        auto_cleanup (bool): Enable automatic cleanup of old tiles (default: True)
+        cleanup_max_age_days (int): Maximum age in days for tiles (default: 3)
     """
     global __tilecache, __temptilecache, __tp_static, __tp_dynamic, __logger
-    
-    
+
+
     __tilecache =     TileCache(0.8 * total_cache_size)
     __temptilecache = TileCache(0.2 * total_cache_size)
 
     __tp_static = StaticTileProvider(__tilecache)
     __tp_static.start()
-    
+
     __tp_dynamic = {
         'dynamic:osm':    OSMTileProvider(__tilecache),
         'dynamic:gm':     GlobalMosaicTileProvider(__tilecache),
@@ -64,13 +77,26 @@ def init(total_cache_size=1024):
     for tp in list(__tp_dynamic.values()):
         tp.start()
 
-    __logger = logging.getLogger("TileManager")
+    __logger = get_logger("TileManager")
 
-def load_tile(tile_id):
-    """Request that the tile identified by `tile_id` be loaded into the
+    # Run automatic cleanup if enabled
+    if auto_cleanup:
+        __logger.info('Running tilestore cleanup on startup')
+        TileStore.auto_cleanup(max_age_days=cleanup_max_age_days, enable=True)
+    else:
+        __logger.debug('Tilestore auto cleanup disabled')
+
+def load_tile(tile_id: Tuple[str, int, int, int]) -> None:
+    """
+    Function :
+        load_tile(tile_id)
+    Parameters :
+        tile_id : Tuple[str, int, int, int]
+
+    load_tile(tile_id) --> None
+
+    Request that the tile identified by `tile_id` be loaded into the
     tilecache.
-
-    load_tile(tuple<string,int,int,int>) -> None
     """
     
     media_id = tile_id[0]
@@ -81,13 +107,19 @@ def load_tile(tile_id):
         __tp_static.request(tile_id)
 
 
-def get_tile(tile_id):
-    """Return the requested tile identified by `tile_id`.
+def get_tile(tile_id: Tuple[str, int, int, int]) -> Any:
+    """
+    Function :
+        get_tile(tile_id)
+    Parameters :
+        tile_id : Tuple[str, int, int, int]
+
+    get_tile(tile_id) --> Tile
+
+    Return the requested tile identified by `tile_id`.
 
     If the tile is not available in the tilecache, one of three errors will be
-    raised: `MediaNotTiled`, `TileNotLoaded`, or `TileNotAvailable`
-
-    get_tile(tuple<string,int,int,int>) -> Tile
+    raised: :class:`MediaNotTiled`, :class:`TileNotLoaded`, or :class:`TileNotAvailable`
     """
 
     if tile_id[1] < 0:
@@ -110,19 +142,26 @@ def get_tile(tile_id):
         raise TileNotAvailable
 
 
-def cut_tile(tile_id, tempcache=0):
-    """Create a tile from resizing and cropping those loaded into the tile
+def cut_tile(tile_id: Tuple[str, int, int, int], tempcache: int = 0) -> Tuple[Any, bool]:
+    """
+    Function :
+        cut_tile(tile_id, tempcache)
+    Parameters :
+        tile_id : Tuple[str, int, int, int]
+        tempcache : int
+
+    cut_tile(tile_id, tempcache) --> Tuple[Tile, bool]
+
+    Create a tile from resizing and cropping those loaded into the tile
     cache. Returns a tuple containing the tile, and a bool `final` which is
     False iff the tile is not the greatest resolution possible and should
     therefore not be cached indefinitely.
 
     If `tempcache` > 0, then tiles with `final`=False will cached in the
-    TileCache, but will expire after they have been accessed `tempcache` times.
+    :class:`TileCache`, but will expire after they have been accessed `tempcache` times.
 
-    This function should only be called if a `TileNotLoaded` or
-    `TileNotAvailable` error has been encountered.
-
-    cut_tile(tuple<string,int,int,int>, int) -> tuple<Tile,bool>
+    This function should only be called if a :class:`TileNotLoaded` or
+    :class:`TileNotAvailable` error has been encountered.
 
     Precondition: the (0,0,0) tile exists for the given media
     Precondition: the requested tile doesn't fall outside the bounds of the
@@ -184,14 +223,20 @@ def cut_tile(tile_id, tempcache=0):
     return tile, final
 
 
-def get_tile_robust(tile_id):
-    """Will try returning the result of `get_tile`, and if that fails will
-    return the result of `cut_tile`.
+def get_tile_robust(tile_id: Tuple[str, int, int, int]) -> Any:
+    """
+    Function :
+        get_tile_robust(tile_id)
+    Parameters :
+        tile_id : Tuple[str, int, int, int]
 
-    This function will not raise `TileNotLoaded` or `TileNotAvailable`, but may
-    raise `MediaNotTiled`.
+    get_tile_robust(tile_id) --> Tile
 
-    get_tile_robust(tuple<string,int,int,int>) -> Tile
+    Will try returning the result of :func:`get_tile`, and if that fails will
+    return the result of :func:`cut_tile`.
+
+    This function will not raise :class:`TileNotLoaded` or :class:`TileNotAvailable`, but may
+    raise :class:`MediaNotTiled`.
     """
     try:
         return get_tile(tile_id)
@@ -199,21 +244,34 @@ def get_tile_robust(tile_id):
         return cut_tile(tile_id)[0]
 
 
-def tiled(media_id):
-    """Returns True iff the media identified by `media_id` has been tiled.
+def tiled(media_id: str) -> bool:
+    """
+    Function :
+        tiled(media_id)
+    Parameters :
+        media_id : str
+
+    tiled(media_id) --> bool
+
+    Returns True iff the media identified by `media_id` has been tiled.
 
     Will always return True for dynamic media.
-
-    tiled(string) -> bool
     """
     return media_id.startswith('dynamic:') or TileStore.tiled(media_id)
 
 
-def get_metadata(media_id, key):
-    """Return the value associated with the given metadata `key` for the given
-    `media_id`, None if there is no such value.
+def get_metadata(media_id: str, key: str) -> Optional[Any]:
+    """
+    Function :
+        get_metadata(media_id, key)
+    Parameters :
+        media_id : str
+        key : str
 
-    get_metadata(string, string) -> object or None
+    get_metadata(media_id, key) --> object or None
+
+    Return the value associated with the given metadata `key` for the given
+    `media_id`, None if there is no such value.
     """
     if media_id in __tp_dynamic:
         tp = __tp_dynamic[media_id]
@@ -225,11 +283,17 @@ def get_metadata(media_id, key):
         return TileStore.get_metadata(media_id, key)
 
 
-def purge(media_id=None):
-    """Purge the specified *media_id* from the *TileProviders*. If *media_id*
-    is omitted then all media will be purged.
+def purge(media_id: Optional[str] = None) -> None:
+    """
+    Function :
+        purge(media_id)
+    Parameters :
+        media_id : Optional[str]
 
-    purge([string]) -> None
+    purge(media_id) --> None
+
+    Purge the specified *media_id* from the *TileProviders*. If *media_id*
+    is omitted then all media will be purged.
 
     Precondition: the media to be purged should not be active (i.e. no
     *MediaObjects* for the media should exist).

@@ -51,6 +51,7 @@
 
 <span class="sd">&quot;&quot;&quot;Dynamic tile provider for Barnsley&#39;s fern.&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
@@ -63,9 +64,12 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;FernTileProvider objects are used for generating tiles of Barnsley&#39;s</span>
 <span class="sd">    fern iterated function system.</span>
 
-<span class="sd">    Constructor: FernTileProvider(TileCache)</span>
+<span class="sd">    Constructor :</span>
+<span class="sd">        FernTileProvider(tilecache)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        tilecache : TileCache</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">DynamicTileProvider</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">)</span>
 
 
@@ -101,11 +105,17 @@
     <span class="p">]</span>
     <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">170</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__choose_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Randomly choose a transformation based on the probability of each</span>
-<span class="sd">        transformation being chosen.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__choose_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            FernTileProvider.__choose_transformation()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
 
-<span class="sd">        __choose_transformation() -&gt; tuple&lt;float,float,float,float,float,float&gt;</span>
+<span class="sd">        FernTileProvider.__choose_transformation() --&gt; Tuple[float, float, float, float, float, float]</span>
+
+<span class="sd">        Randomly choose a transformation based on the probability of each</span>
+<span class="sd">        transformation being chosen.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">n</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">probability</span><span class="p">,</span> <span class="n">transformation</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transformations</span><span class="p">:</span>
@@ -116,11 +126,18 @@
         <span class="k">return</span> <span class="n">transformation</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Randomly choose a transformation and apply it to x and y, returning</span>
-<span class="sd">        the result as a tuple.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            FernTileProvider.__transform(x, y)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            x : float</span>
+<span class="sd">            y : float</span>
 
-<span class="sd">        __transform(float, float) -&gt; tuple&lt;float,float&gt;</span>
+<span class="sd">        FernTileProvider.__transform(x, y) --&gt; Tuple[float, float]</span>
+
+<span class="sd">        Randomly choose a transformation and apply it to x and y, returning</span>
+<span class="sd">        the result as a tuple.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__choose_transformation</span><span class="p">()</span>
         <span class="n">x_new</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
@@ -128,10 +145,19 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">x_new</span><span class="p">,</span><span class="n">y_new</span><span class="p">)</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__draw_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tilesize_units</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Draw the given point on the given tile.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__draw_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">tilesize_units</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            FernTileProvider.__draw_point(tile, x, y, tilesize_units)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tile : Image</span>
+<span class="sd">            x : float</span>
+<span class="sd">            y : float</span>
+<span class="sd">            tilesize_units : float</span>
 
-<span class="sd">        __draw_point(Image, float, float, float) -&gt; None</span>
+<span class="sd">        FernTileProvider.__draw_point(tile, x, y, tilesize_units) --&gt; None</span>
+
+<span class="sd">        Draw the given point on the given tile.</span>
 
 <span class="sd">        Precondition: 0.0 &lt;= x &lt;= tilesize_units</span>
 <span class="sd">        Precondition: 0.0 &lt;= y &lt;= tilesize_units</span>
@@ -147,7 +173,7 @@
 
 <div class="viewcode-block" id="FernTileProvider._load_dynamic">
 <a class="viewcode-back" href="../../pyzui.ferntileprovider.html#pyzui.ferntileprovider.FernTileProvider._load_dynamic">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_load_dynamic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">,</span> <span class="n">outfile</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_dynamic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">media_id</span><span class="p">,</span> <span class="n">tilelevel</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="n">tile_id</span>
 
         <span class="k">if</span> <span class="n">row</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">col</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
@@ -226,11 +252,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
 </ul>
 
 <div class="relations">

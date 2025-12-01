@@ -14,8 +14,6 @@
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="pyzui.tilecache module" href="pyzui.tilecache.html" />
-    <link rel="prev" title="pyzui.svgmediaobject module" href="pyzui.svgmediaobject.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -40,42 +38,132 @@
 <dt class="sig sig-object py" id="pyzui.tile.Tile">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.tile.</span></span><span class="sig-name descname"><span class="pre">Tile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tile.html#Tile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tile.Tile" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Tile objects allow storage and manipulation of image tiles.</p>
-<p>Constructor: Tile(Image or QImage)</p>
+<dl class="simple">
+<dt>Constructor:</dt><dd><p>Tile(image)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>image : QImage</p>
+</dd>
+</dl>
+<p>Tile(image) –&gt; None</p>
+<dl class="simple">
+<dt>A simple wrapper around image data (PIL/QImage) with operations:</dt><dd><ul class="simple">
+<li><p>crop(), resize(), save(), draw()</p></li>
+<li><p>merged() - Combines 4 tiles into one (2×2 grid layout)</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new tile with the given image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>Any</em>)</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.tile.Tile.crop">
 <span class="sig-name descname"><span class="pre">crop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bbox</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tile.html#Tile.crop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tile.Tile.crop" title="Link to this definition">¶</a></dt>
-<dd><p>Return the region of the tile contained in the bounding box <cite>bbox</cite>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>Tile.crop(bbox)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>bbox : Tuple[int, int, int, int]</p>
+</dd>
+</dl>
+<p>Tile.crop(bbox) –&gt; Tile</p>
+<p>Return the region of the tile contained in the bounding box <cite>bbox</cite>
 (x1,y1,x2,y2).</p>
-<p>crop(tuple&lt;int,int,int,int&gt;) -&gt; Tile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>bbox</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>, </em><em>int</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pyzui.tile.Tile" title="pyzui.tile.Tile"><em>Tile</em></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.tile.Tile.resize">
 <span class="sig-name descname"><span class="pre">resize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tile.html#Tile.resize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tile.Tile.resize" title="Link to this definition">¶</a></dt>
-<dd><p>Return a resized copy of the tile.</p>
-<p>resize(int, int) -&gt; Tile</p>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>Tile.resize(width, height)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>width : int
+height : int</p>
+</dd>
+</dl>
+<p>Tile.resize(width, height) –&gt; Tile</p>
+<p>Return a resized copy of the tile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> (<em>int</em>)</p></li>
+<li><p><strong>height</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pyzui.tile.Tile" title="pyzui.tile.Tile"><em>Tile</em></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.tile.Tile.save">
 <span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tile.html#Tile.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tile.Tile.save" title="Link to this definition">¶</a></dt>
-<dd><p>Save the tile to the location given by <cite>filename</cite>.</p>
-<p>save(string) -&gt; None</p>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>Tile.save(filename)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>filename : str</p>
+</dd>
+</dl>
+<p>Tile.save(filename) –&gt; None</p>
+<p>Save the tile to the location given by <cite>filename</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.tile.Tile.draw">
 <span class="sig-name descname"><span class="pre">draw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">painter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tile.html#Tile.draw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tile.Tile.draw" title="Link to this definition">¶</a></dt>
-<dd><p>Draw the tile on the given <cite>painter</cite> at the given position.</p>
-<p>paint(QPainter, int, int) -&gt; None</p>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>Tile.draw(painter, x, y)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>painter : QPainter
+x : int
+y : int</p>
+</dd>
+</dl>
+<p>Tile.draw(painter, x, y) –&gt; None</p>
+<p>Draw the tile on the given <cite>painter</cite> at the given position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>painter</strong> (<em>QPainter</em>)</p></li>
+<li><p><strong>x</strong> (<em>int</em>)</p></li>
+<li><p><strong>y</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyzui.tile.Tile.size">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">size</span></span><a class="headerlink" href="#pyzui.tile.Tile.size" title="Link to this definition">¶</a></dt>
-<dd><p>The dimensions of the tile.</p>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyzui.tile.Tile.size" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Property:</dt><dd><p>Tile.size</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>Tile.size –&gt; Tuple[int, int]</p>
+<p>The dimensions of the tile.</p>
 </dd></dl>
 
 </dd></dl>
@@ -83,25 +171,85 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.tile.new">
 <span class="sig-prename descclassname"><span class="pre">pyzui.tile.</span></span><span class="sig-name descname"><span class="pre">new</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tile.html#new"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tile.new" title="Link to this definition">¶</a></dt>
-<dd><p>Create a new tile with the given dimensions.</p>
-<p>new(int, int) -&gt; Tile</p>
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>new(width, height)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>width : int
+height : int</p>
+</dd>
+</dl>
+<p>new(width, height) –&gt; Tile</p>
+<p>Create a new tile with the given dimensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> (<em>int</em>)</p></li>
+<li><p><strong>height</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pyzui.tile.Tile" title="pyzui.tile.Tile"><em>Tile</em></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.tile.fromstring">
 <span class="sig-prename descclassname"><span class="pre">pyzui.tile.</span></span><span class="sig-name descname"><span class="pre">fromstring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tile.html#fromstring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tile.fromstring" title="Link to this definition">¶</a></dt>
-<dd><p>Create a new tile from a <cite>string</cite> of raw pixels, with the given
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>fromstring(string, width, height)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>string : str
+width : int
+height : int</p>
+</dd>
+</dl>
+<p>fromstring(string, width, height) –&gt; Tile</p>
+<p>Create a new tile from a <cite>string</cite> of raw pixels, with the given
 dimensions.</p>
-<p>fromstring(string, int, int) -&gt; Tile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>string</strong> (<em>str</em>)</p></li>
+<li><p><strong>width</strong> (<em>int</em>)</p></li>
+<li><p><strong>height</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pyzui.tile.Tile" title="pyzui.tile.Tile"><em>Tile</em></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.tile.merged">
 <span class="sig-prename descclassname"><span class="pre">pyzui.tile.</span></span><span class="sig-name descname"><span class="pre">merged</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/tile.html#merged"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tile.merged" title="Link to this definition">¶</a></dt>
-<dd><p>Merge the given tiles into a single tile.</p>
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>merged(t1, t2, t3, t4)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>t1 : Tile
+t2 : Optional[Tile]
+t3 : Optional[Tile]
+t4 : Optional[Tile]</p>
+</dd>
+</dl>
+<p>merged(t1, t2, t3, t4) –&gt; Tile</p>
+<p>Merge the given tiles into a single tile.</p>
 <p><cite>t1</cite> must be a Tile, but any or all of <cite>t2</cite>,`t3`,`t4` may be None, in which
 case they will be ignored.</p>
-<p>merged(Tile, Tile or None, Tile or None, Tile or None) -&gt; Tile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t1</strong> (<a class="reference internal" href="#pyzui.tile.Tile" title="pyzui.tile.Tile"><em>Tile</em></a>)</p></li>
+<li><p><strong>t2</strong> (<a class="reference internal" href="#pyzui.tile.Tile" title="pyzui.tile.Tile"><em>Tile</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>t3</strong> (<a class="reference internal" href="#pyzui.tile.Tile" title="pyzui.tile.Tile"><em>Tile</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>t4</strong> (<a class="reference internal" href="#pyzui.tile.Tile" title="pyzui.tile.Tile"><em>Tile</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pyzui.tile.Tile" title="pyzui.tile.Tile"><em>Tile</em></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -143,25 +291,11 @@ case they will be ignored.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="contributiongiudelines.html">Contribution guidelines</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="main.html">main module</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyzui</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="pyzui.html">pyzui package</a></li>
-</ul>
-</li>
-</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-  <li><a href="modules.html">pyzui</a><ul>
-  <li><a href="pyzui.html">pyzui package</a><ul>
-      <li>Previous: <a href="pyzui.svgmediaobject.html" title="previous chapter">pyzui.svgmediaobject module</a></li>
-      <li>Next: <a href="pyzui.tilecache.html" title="next chapter">pyzui.tilecache module</a></li>
-  </ul></li>
-  </ul></li>
   </ul></li>
 </ul>
 </div>

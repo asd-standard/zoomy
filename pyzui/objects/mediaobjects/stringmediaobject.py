@@ -19,60 +19,63 @@
 """Strings to be displayed in the ZUI."""
 
 #from threading import Thread
+from typing import Optional, Tuple, List, Any
+
 from PySide6 import QtCore, QtGui
 
 from .mediaobject import MediaObject, LoadError, RenderMode
 
 class StringMediaObject(MediaObject): #, Thread
     """
-    Constructor : 
-        StringMediaObject(string, scene)
+    Constructor :
+        StringMediaObject(media_id, scene)
     Parameters :
-        media_id['string'], scene['Scene']
+        media_id : str
+        scene : Scene
 
     StringMediaObject(media_id, scene) --> None
 
     StringMediaObject objects are used to represent strings that can be
-    rendered in the zui
+    rendered in the ZUI.
 
-    `StringMediaObject.media_id` should be of the form 'string:rrggbb:foobar', 
-    where 'rrggbb' is a string of three two-digit hexadecimal numbers 
-    representing the colour of the text, and 'foobar' is the string to be 
+    `StringMediaObject.media_id` should be of the form 'string:rrggbb:foobar',
+    where 'rrggbb' is a string of three two-digit hexadecimal numbers
+    representing the colour of the text, and 'foobar' is the string to be
     displayed.
     """
-    def __init__(self, media_id, scene):
-        
+    def __init__(self, media_id: str, scene: Any) -> None:
+
         """Initialize a new MediaObject from the media identified by `media_id`,
         and the parent Scene referenced by `scene`."""
         MediaObject.__init__(self, media_id, scene)
-        
-        #Get color code 'rrggbb' form media_id string and assing it to hexcol variable
+
+        #Get color code 'rrggbb' from media_id string and assign it to hexcol variable
         hexcol = self._media_id[len('string:'):len('string:rrggbb')]
-        #initialize and assign QtGui.QColor wich can then be passed to QtPainter.setpen 
+        #initialize and assign QtGui.QColor which can then be passed to QtPainter.setPen 
         self.__color = QtGui.QColor('#' + hexcol)
-        #checks if color is valid to QtGuiQColor() and if not an error is raised 
+        #checks if color is valid to QtGui.QColor() and if not an error is raised 
         if not self.__color.isValid():
             raise LoadError("the supplied colour is invalid")
-        
-        """Gets to be displayed text `foobar` from media_id string and assing it
+
+        """Gets to be displayed text `foobar` from media_id string and assign it
         to self.__str variable.
         """
         self.__str = self._media_id[len('string:rrggbb:'):] 
 
         self.lines = []
         self.lines.append([])
-        
-        """in order for a multi line string to be rendered of the exact size self.lines 
+
+        """in order for a multi line string to be rendered of the exact size self.lines
         have to be set to the right value before self.onscreen_size method gets called"""
-        
+
         j=0
-        for i in list(self.__str) :  
-                # If a \n char is encountered a new sublist is appended to self.lines              
-                if i == '\n' :                    
+        for i in list(self.__str) :
+                # If a \n char is encountered a new sublist is appended to self.lines
+                if i == '\n' :
                     self.lines.append([])
                     j += 1
                 else :
-                # Otherwise the char is appended to the currend self.lines sublist
+                # Otherwise the char is appended to the current self.lines sublist
                     self.lines[j] += str(i)
         
         
@@ -83,10 +86,19 @@ class StringMediaObject(MediaObject): #, Thread
     ## point size of the font when the scale is 100%
     base_pointsize = 24.0
 
-    def render(self, painter, mode):
-        '''Given QtPainter and Rendering mode renders the string calculating the 
-           rendering rectangle and using QtPainter.DrawText
-        '''
+    def render(self, painter: Any, mode: int) -> None:
+        """
+        Method :
+            StringMediaObject.render(painter, mode)
+        Parameters :
+            painter : QPainter
+            mode : int
+
+        StringMediaObject.render(painter, mode) --> None
+
+        Given QPainter and Rendering mode renders the string calculating the
+        rendering rectangle and using QtPainter.drawText
+        """
         
         if min(self.onscreen_size) > int((min(self._scene.viewport_size))/44) and \
         max(self.onscreen_size) < int((max(self._scene.viewport_size))/1.3) and mode \
@@ -109,13 +121,13 @@ class StringMediaObject(MediaObject): #, Thread
                      
             
             if len(self.lines) > 1 :
-                yr = y                
+                yr = y
                 rectlist = []
-                
+
                 for i in range(len(self.lines)) :
-                    '''for every line in self.lines a QRectF is created below the previous one 
+                    """for every line in self.lines a QRectF is created below the previous one
                     for the line to be painted on by QtPainter.drawText method
-                    '''
+                    """
             
                     rectlist.append(QtCore.QRectF(int(x), int(yr), int(w), int(hl)))
                     yr += hl  
@@ -139,12 +151,12 @@ class StringMediaObject(MediaObject): #, Thread
 
 
     @property
-    def __pointsize(self):
+    def __pointsize(self) -> float:
         return self.base_pointsize * self.scale
 
 
     @property
-    def __font(self):
+    def __font(self) -> Optional[Any]:
         pointsize = self.__pointsize
         if pointsize < 1:
             ## too small to be seen
@@ -156,9 +168,17 @@ class StringMediaObject(MediaObject): #, Thread
 
 
     @property
-    def onscreen_size(self):
-        '''Returns with and height of the MediaObject passed to the StringMediaObject Class
-        '''
+    def onscreen_size(self) -> Tuple[float, float]:
+        """
+        Property :
+            StringMediaObject.onscreen_size
+        Parameters :
+            None
+
+        StringMediaObject.onscreen_size --> Tuple[float, float]
+
+        Returns width and height of the MediaObject passed to the StringMediaObject Class.
+        """
         font = self.__font
 
         if font:
@@ -171,7 +191,7 @@ class StringMediaObject(MediaObject): #, Thread
                 h = fontmetrics.height()*len(self.lines)
 
             else :
-                # Is the sting is not a paragraph just gives the lenght of the string
+                # If the string is not a paragraph just gives the length of the string
                 w = fontmetrics.horizontalAdvance(self.__str+'-')
                 # and the height of the font
                 h = fontmetrics.height()                

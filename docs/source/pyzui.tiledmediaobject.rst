@@ -1,7 +1,7 @@
-pyzui.tiledmediaobject module
-=============================
+pyzui.objects.mediaobjects.tiledmediaobject module
+===================================================
 
-.. automodule:: pyzui.tiledmediaobject
+.. automodule:: pyzui.objects.mediaobjects.tiledmediaobject
    :members:
    :show-inheritance:
    :undoc-members:

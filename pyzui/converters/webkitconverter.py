@@ -18,9 +18,9 @@
 
 """Webpage renderer based upon QtWebKit."""
 
+from typing import Optional, Tuple, List, Any
 import os
 import sys
-import logging
 import time
 
 #replaced QtWebKitWidgets QtWebEngineWidgets
@@ -30,37 +30,39 @@ from PySide6 import QtCore, QtGui, QtSvg, QtWebEngineWidgets, QtWidgets
 from .converter import Converter
 
 class WebKitConverter(Converter):
-    """
-    Constructor : 
-        WebKitConverter(Converter)
-    Parameters :
-        Converter['string','string']
-    
-    
-    WebKitConverter objects are used for rendering webpages.
+    """WebKitConverter objects are used for rendering webpages.
 
     `infile` may be either a URI or the location of a local file.
 
     Supported output formats are: BMP, JPG/JPEG, PNG, PPM, TIFF, XBM, XPM
-    (see <http://doc.trolltech.com/qimage.html
-    #reading-and-writing-image-files>)
+    (see http://doc.trolltech.com/qimage.html#reading-and-writing-image-files)
 
+    Constructor:
+        WebKitConverter(infile, outfile)
+    Parameters :
+        infile : str
+        outfile : str
     """
-    def __init__(self, infile, outfile):
+    def __init__(self, infile: str, outfile: str) -> None:
         Converter.__init__(self, infile, outfile)
 
 
-    def start(self):
+    def start(self) -> None:
         """If a global QApplication has already been instantiated, then this
-        method will call `run()` directly, as Qt requires us to call `run()`
+        method will call :meth:`run` directly, as Qt requires us to call :meth:`run`
         from the same thread as the global QApplication. This will not block as
         Qt will then handle the threading.
 
         Otherwise, if no QApplication exists yet, then the default
-        `Converter.start()` method will be called allowing Python to natively
+        :meth:`Converter.start` method will be called allowing Python to natively
         handle the threading.
 
-        start() -> None
+        Method:
+            WebKitConverter.start()
+        Parameters :
+            None
+
+        WebKitConverter.start() -> None
         """
         if QtWidgets.QApplication.instance() is None:
             self._logger.info("using Python threading")
@@ -70,7 +72,7 @@ class WebKitConverter(Converter):
             self.run()
 
 
-    def run(self):
+    def run(self) -> None:
         if QtWidgets.QApplication.instance() is None:
             ## no QApplication exists yet
             self.__qapp = QtWidgets.QApplication([])
@@ -99,10 +101,15 @@ class WebKitConverter(Converter):
             self.__qapp.exec()
 
 
-    def __load_finished(self, ok):
+    def __load_finished(self, ok: bool) -> None:
         """Qt slot called when the page has finished loading.
 
-        __load_finished(bool) -> None
+        Method:
+            WebKitConverter.__load_finished(ok)
+        Parameters :
+            ok : bool
+
+        WebKitConverter.__load_finished(ok) -> None
         """
         if ok and self.__qpage.mainFrame().contentsSize().height() != 0:
             ## load was successful
@@ -145,20 +152,25 @@ class WebKitConverter(Converter):
         self._progress = 1.0
 
 
-    def __load_progress(self, progress):
+    def __load_progress(self, progress: int) -> None:
         """Qt slot called when the page load progress changes.
 
-        __load_progress(int) -> None
+        Method:
+            WebKitConverter.__load_progress(progress)
+        Parameters :
+            progress : int
+
+        WebKitConverter.__load_progress(progress) -> None
         """
         self._logger.info("page %3d%% loaded", progress)
         self._progress = 0.01*progress
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "WebKitConverter(%s, %s)" % (self._infile, self._outfile)
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "WebKitConverter(%s, %s)" % \
             (repr(self._infile), repr(self._outfile))
 

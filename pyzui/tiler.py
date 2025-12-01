@@ -18,26 +18,45 @@
 
 """Threaded image tiler (abstract base class)."""
 
-
+from typing import Optional, Tuple, List, Any
 import traceback
-
 from threading import Thread
 #import os
 import math
-import logging
 import shutil
 
 from . import tilestore as TileStore
 from . import tile as Tile
+from .logger import get_logger
 
 #Thread
 class Tiler(Thread):
-    """Tiler objects are used for tiling images.
-
-    Constructor: Tiler(string[, string[, string[, int]]])
     """
-    def __init__(self, infile, media_id=None, filext='jpg', tilesize=256):
-        """Create a new Tiler for tiling the media given by `media_id` with the
+    Constructor:
+        Tiler(infile, media_id, filext, tilesize)
+    Parameters :
+        infile : str
+        media_id : Optional[str]
+        filext : str
+        tilesize : int
+
+    Tiler(infile, media_id, filext, tilesize) --> None
+
+    Tiler objects are used for tiling images.
+    """
+    def __init__(self, infile: str, media_id: Optional[str] = None, filext: str = 'jpg', tilesize: int = 256) -> None:
+        """
+        Constructor:
+            Tiler(infile, media_id, filext, tilesize)
+        Parameters :
+            infile : str
+            media_id : Optional[str]
+            filext : str
+            tilesize : int
+
+        Tiler(infile, media_id, filext, tilesize) --> None
+
+        Create a new Tiler for tiling the media given by `media_id` with the
         image given by `infile`.
 
         If `media_id` is omitted, it will be set to `infile`.
@@ -48,7 +67,7 @@ class Tiler(Thread):
         images are tiled with the following procedure:
         the number of tiles to cover a row of the image is calculated, the last tile
         of the row is of the minimum width to finish the image and standard height (256).
-        the last row tiles are of the minimum heigh to finish the image and the last tile is of
+        the last row tiles are of the minimum height to finish the image and the last tile is of
         the minimum size to cover the bottom right corner of the image.
         The example below will have a self.numtiles_across_total = 2::
 
@@ -79,28 +98,43 @@ class Tiler(Thread):
 
         self.__outpath = TileStore.get_media_path(self.__media_id)
         #print('OUTPATH: ', self.__outpath)
-        
+
         self.__progress = 0.0
 
-        self.__logger = logging.getLogger(str(self))
+        self.__logger = get_logger(f'Tiler.{self.__media_id}')
 
         self.error = None
 
         
 
-    
-    def _scanline(self):
-        """Return string containing pixels of the next row.
 
-        _scanline() -> string
+    def _scanline(self) -> str:
+        """
+        Method :
+            Tiler._scanline()
+        Parameters :
+            None
+
+        Tiler._scanline() --> str
+
+        Return string containing pixels of the next row.
         """
         pass
     
 
-    def __savetile(self, tile, tilelevel, row, col):
-        """Save the given tile to disk.
+    def __savetile(self, tile: Any, tilelevel: int, row: int, col: int) -> None:
+        """
+        Method :
+            __savetile(tile, tilelevel, row, col)
+        Parameters :
+            tile : Tile
+            tilelevel : int
+            row : int
+            col : int
 
-        __save(Tile, int, int, int) -> None
+        __savetile(tile, tilelevel, row, col) --> None
+
+        Save the given tile to disk.
         """
         
         tile_id = (self.__media_id, tilelevel, row, col)
@@ -113,10 +147,16 @@ class Tiler(Thread):
         self.__logger.info("%3d%% tiled", int(self.__progress*100))
 
 
-    def __load_row_from_file(self, row):
-        """Load the requested row from the image file.
+    def __load_row_from_file(self, row: int) -> Optional[List[Any]]:
+        """
+        Method :
+            __load_row_from_file(row)
+        Parameters :
+            row : int
 
-        __load_row_from_file(int) -> list<Tile>
+        __load_row_from_file(row) --> Optional[List[Tile]]
+
+        Load the requested row from the image file.
 
         Precondition: calls to this function must take consecutive values for
         row i.e. the first call must have row=0, then the next call must have
@@ -176,11 +216,18 @@ class Tiler(Thread):
         return tiles
 
 
-    def __mergerows(self, row_a, row_b=None):
-        """Merge blocks of 4 tiles (or blocks of 2 if row_b is None) into a
-        single tile.
+    def __mergerows(self, row_a: Optional[List[Any]], row_b: Optional[List[Any]] = None) -> Optional[List[Any]]:
+        """
+        Method :
+            __mergerows(row_a, row_b)
+        Parameters :
+            row_a : Optional[List[Tile]]
+            row_b : Optional[List[Tile]]
 
-        __mergerows(list<Tile>[, list<Tile>]) -> list<Tile>
+        __mergerows(row_a, row_b) --> Optional[List[Tile]]
+
+        Merge blocks of 4 tiles (or blocks of 2 if row_b is None) into a
+        single tile.
         """
         if not row_a:
             ## requested row does not exist
@@ -203,16 +250,23 @@ class Tiler(Thread):
         return tiles
 
 
-    def __tiles(self, tilelevel=0, row=0):
-        """Recursive function which retrieves the tiles in the given row, saves
+    def __tiles(self, tilelevel: int = 0, row: int = 0) -> Optional[List[Any]]:
+        """
+        Method :
+            __tiles(tilelevel, row)
+        Parameters :
+            tilelevel : int
+            row : int
+
+        __tiles(tilelevel, row) --> Optional[List[Tile]]
+
+        Recursive function which retrieves the tiles in the given row, saves
         them, scales each dimension by 1/2, and then returns them as a list.
 
         As the function is recursive, all higher-resolution sub-tiles contained
         within the requested tile will be saved in the process. Therefore,
         requesting row 0 from tilelevel 0 will result in the entire image being
         tiled.
-
-        __tiles(int, int) -> list<Tile>
         """
         
         if tilelevel == self.__maxtilelevel:
@@ -261,15 +315,20 @@ class Tiler(Thread):
         return tiles
 
 
-    def __calculate_maxtilelevel(self):
+    def __calculate_maxtilelevel(self) -> int:
         """
+        Method :
+            __calculate_maxtilelevel()
+        Parameters :
+            None
+
+        __calculate_maxtilelevel() --> int
+
         Calculate the maxtilelevel, which is the smallest non-negative
         integer such that:
         tilesize * (2**maxtilelevel) >= max(width, height)
         i.e. if tilelevel 0 contains a single tile, then the tiles in
         maxtilelevel are the same resolution as the input image
-
-        __calculate_maxtilelevel() -> int
         """
         maxdim = max(self._width, self._height)
         if maxdim <= self.__tilesize:
@@ -294,10 +353,16 @@ class Tiler(Thread):
             return maxtilelevel
 
 
-    def __calculate_numtiles(self):
-        """Calculate the total number of tiles required.
+    def __calculate_numtiles(self) -> int:
+        """
+        Method :
+            __calculate_numtiles()
+        Parameters :
+            None
 
-        __calculate_numtiles() -> int
+        __calculate_numtiles() --> int
+
+        Calculate the total number of tiles required.
         """
         numtiles = 0
         for tilelevel in range(self.__maxtilelevel+1):
@@ -317,11 +382,17 @@ class Tiler(Thread):
         return numtiles
 
 
-    def run(self):
-        """Tile the image. If any errors are encountered then `self.error` will
-        be set to a string describing the error.
+    def run(self) -> None:
+        """
+        Method :
+            Tiler.run()
+        Parameters :
+            None
 
-        run() -> None
+        Tiler.run() --> None
+
+        Tile the image. If any errors are encountered then `self.error` will
+        be set to a string describing the error.
         """
 
         self.__logger.debug("beginning tiling process")
@@ -373,18 +444,26 @@ class Tiler(Thread):
 
 
     @property
-    def progress(self):
-        """Tiling progress ranging from 0.0 to 1.0. A value of 1.0 indicates
+    def progress(self) -> float:
+        """
+        Property :
+            Tiler.progress
+        Parameters :
+            None
+
+        Tiler.progress --> float
+
+        Tiling progress ranging from 0.0 to 1.0. A value of 1.0 indicates
         that the tiling has completely finished.
         """
         return self.__progress
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "Tiler(%s)" % self._infile
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Tiler(%s)" % repr(self._infile)
 
 

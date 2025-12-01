@@ -52,6 +52,7 @@
 <span class="sd">&quot;&quot;&quot;Class for loading tiles into memory from somewhere other than the local</span>
 <span class="sd">filesystem (abstract base class).&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
@@ -65,9 +66,12 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;DynamicTileProvider objects are used for either generating tiles or</span>
 <span class="sd">    loading them from a remote host, and then loading them into a TileCache.</span>
 
-<span class="sd">    Constructor: DynamicTileProvider(TileCache)</span>
+<span class="sd">    Constructor :</span>
+<span class="sd">        DynamicTileProvider(tilecache)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        tilecache : TileCache</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">TileProvider</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">)</span>
 
 
@@ -78,11 +82,18 @@
 
 <div class="viewcode-block" id="DynamicTileProvider._load_dynamic">
 <a class="viewcode-back" href="../../pyzui.dynamictileprovider.html#pyzui.dynamictileprovider.DynamicTileProvider._load_dynamic">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_load_dynamic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">,</span> <span class="n">outfile</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform whatever actions necessary to load the tile identified by</span>
-<span class="sd">        the given tile_id into the location given by outfile.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_dynamic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            DynamicTileProvider._load_dynamic(tile_id, outfile)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tile_id : Tuple[str, int, int, int]</span>
+<span class="sd">            outfile : str</span>
 
-<span class="sd">        _load_dynamic(tuple&lt;string,int,int,int&gt;, string)</span>
+<span class="sd">        DynamicTileProvider._load_dynamic(tile_id, outfile) --&gt; None</span>
+
+<span class="sd">        Perform whatever actions necessary to load the tile identified by</span>
+<span class="sd">        the given tile_id into the location given by outfile.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
@@ -90,7 +101,7 @@
 
 <div class="viewcode-block" id="DynamicTileProvider._load">
 <a class="viewcode-back" href="../../pyzui.dynamictileprovider.html#pyzui.dynamictileprovider.DynamicTileProvider._load">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">TileStore</span><span class="o">.</span><span class="n">get_tile_path</span><span class="p">(</span>
             <span class="n">tile_id</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">filext</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filext</span><span class="p">)</span>
 
@@ -143,11 +154,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
 </ul>
 
 <div class="relations">

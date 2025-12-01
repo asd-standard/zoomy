@@ -51,7 +51,8 @@
 
 <span class="sd">&quot;&quot;&quot;Class for representing image tiles.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageQt</span> 
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageQt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
 
@@ -60,12 +61,21 @@
 <div class="viewcode-block" id="Tile">
 <a class="viewcode-back" href="../../pyzui.tile.html#pyzui.tile.Tile">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Tile</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tile objects allow storage and manipulation of image tiles.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructor:</span>
+<span class="sd">        Tile(image)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        image : QImage</span>
 
-<span class="sd">    Constructor: Tile(Image or QImage)</span>
+<span class="sd">    Tile(image) --&gt; None</span>
+
+<span class="sd">    A simple wrapper around image data (PIL/QImage) with operations:</span>
+<span class="sd">        - crop(), resize(), save(), draw()</span>
+<span class="sd">        - merged() - Combines 4 tiles into one (2×2 grid layout)</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
-<span class="w">        </span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new tile with the given image.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">image</span><span class="o">.</span><span class="vm">__class__</span> <span class="ow">is</span> <span class="n">ImageQt</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> <span class="ow">is</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="o">=</span> <span class="n">image</span>
@@ -82,11 +92,17 @@
 
 <div class="viewcode-block" id="Tile.crop">
 <a class="viewcode-back" href="../../pyzui.tile.html#pyzui.tile.Tile.crop">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">crop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bbox</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the region of the tile contained in the bounding box `bbox`</span>
-<span class="sd">        (x1,y1,x2,y2).</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">crop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s1">&#39;Tile&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            Tile.crop(bbox)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            bbox : Tuple[int, int, int, int]</span>
 
-<span class="sd">        crop(tuple&lt;int,int,int,int&gt;) -&gt; Tile</span>
+<span class="sd">        Tile.crop(bbox) --&gt; Tile</span>
+
+<span class="sd">        Return the region of the tile contained in the bounding box `bbox`</span>
+<span class="sd">        (x1,y1,x2,y2).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">bbox</span>
         <span class="n">w</span> <span class="o">=</span> <span class="n">x2</span> <span class="o">-</span> <span class="n">x</span>
@@ -98,23 +114,36 @@
 
 <div class="viewcode-block" id="Tile.resize">
 <a class="viewcode-back" href="../../pyzui.tile.html#pyzui.tile.Tile.resize">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">resize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a resized copy of the tile.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Tile&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            Tile.resize(width, height)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            width : int</span>
+<span class="sd">            height : int</span>
 
-<span class="sd">        resize(int, int) -&gt; Tile</span>
+<span class="sd">        Tile.resize(width, height) --&gt; Tile</span>
+
+<span class="sd">        Return a resized copy of the tile.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">scaled</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">width</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">height</span><span class="p">),</span>
             <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">IgnoreAspectRatio</span><span class="p">,</span>
-            <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">SmoothTransformation</span><span class="p">))</span></div>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">FastTransformation</span><span class="p">))</span></div>
 
 
 
 <div class="viewcode-block" id="Tile.save">
 <a class="viewcode-back" href="../../pyzui.tile.html#pyzui.tile.Tile.save">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the tile to the location given by `filename`.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            Tile.save(filename)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            filename : str</span>
 
-<span class="sd">        save(string) -&gt; None</span>
+<span class="sd">        Tile.save(filename) --&gt; None</span>
+
+<span class="sd">        Save the tile to the location given by `filename`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
 
@@ -122,18 +151,35 @@
 
 <div class="viewcode-block" id="Tile.draw">
 <a class="viewcode-back" href="../../pyzui.tile.html#pyzui.tile.Tile.draw">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Draw the tile on the given `painter` at the given position.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="s1">&#39;QtGui.QPainter&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            Tile.draw(painter, x, y)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            painter : QPainter</span>
+<span class="sd">            x : int</span>
+<span class="sd">            y : int</span>
 
-<span class="sd">        paint(QPainter, int, int) -&gt; None</span>
+<span class="sd">        Tile.draw(painter, x, y) --&gt; None</span>
+
+<span class="sd">        Draw the tile on the given `painter` at the given position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">painter</span><span class="o">.</span><span class="n">drawImage</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="p">)</span></div>
 
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The dimensions of the tile.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property :</span>
+<span class="sd">            Tile.size</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Tile.size --&gt; Tuple[int, int]</span>
+
+<span class="sd">        The dimensions of the tile.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">height</span><span class="p">())</span></div>
 
 
@@ -141,10 +187,17 @@
 
 <div class="viewcode-block" id="new">
 <a class="viewcode-back" href="../../pyzui.tile.html#pyzui.tile.new">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">new</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new tile with the given dimensions.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">new</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tile</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function :</span>
+<span class="sd">        new(width, height)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        width : int</span>
+<span class="sd">        height : int</span>
 
-<span class="sd">    new(int, int) -&gt; Tile</span>
+<span class="sd">    new(width, height) --&gt; Tile</span>
+
+<span class="sd">    Create a new tile with the given dimensions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Tile</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="o">.</span><span class="n">Format_RGB32</span><span class="p">))</span></div>
 
@@ -152,11 +205,19 @@
 
 <div class="viewcode-block" id="fromstring">
 <a class="viewcode-back" href="../../pyzui.tile.html#pyzui.tile.fromstring">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">fromstring</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new tile from a `string` of raw pixels, with the given</span>
-<span class="sd">    dimensions.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fromstring</span><span class="p">(</span><span class="n">string</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tile</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function :</span>
+<span class="sd">        fromstring(string, width, height)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        string : str</span>
+<span class="sd">        width : int</span>
+<span class="sd">        height : int</span>
 
-<span class="sd">    fromstring(string, int, int) -&gt; Tile</span>
+<span class="sd">    fromstring(string, width, height) --&gt; Tile</span>
+
+<span class="sd">    Create a new tile from a `string` of raw pixels, with the given</span>
+<span class="sd">    dimensions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#print(&#39;STRING UNENCODED \n \n \n&#39;, string)</span>
     <span class="c1">#print(&#39;STRING ENCODED \n &#39;, len(string.encode(&#39;latin-1&#39;)))   </span>
@@ -182,13 +243,22 @@
 
 <div class="viewcode-block" id="merged">
 <a class="viewcode-back" href="../../pyzui.tile.html#pyzui.tile.merged">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">merged</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">t3</span><span class="p">,</span> <span class="n">t4</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Merge the given tiles into a single tile.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">merged</span><span class="p">(</span><span class="n">t1</span><span class="p">:</span> <span class="n">Tile</span><span class="p">,</span> <span class="n">t2</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tile</span><span class="p">],</span> <span class="n">t3</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tile</span><span class="p">],</span> <span class="n">t4</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tile</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tile</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function :</span>
+<span class="sd">        merged(t1, t2, t3, t4)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        t1 : Tile</span>
+<span class="sd">        t2 : Optional[Tile]</span>
+<span class="sd">        t3 : Optional[Tile]</span>
+<span class="sd">        t4 : Optional[Tile]</span>
+
+<span class="sd">    merged(t1, t2, t3, t4) --&gt; Tile</span>
+
+<span class="sd">    Merge the given tiles into a single tile.</span>
 
 <span class="sd">    `t1` must be a Tile, but any or all of `t2`,`t3`,`t4` may be None, in which</span>
 <span class="sd">    case they will be ignored.</span>
-
-<span class="sd">    merged(Tile, Tile or None, Tile or None, Tile or None) -&gt; Tile</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">## tiles are merged in the following layout:</span>
@@ -252,11 +322,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributiongiudelines.html">Contribution guidelines</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">main module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyzui</a></li>
 </ul>
 
 <div class="relations">

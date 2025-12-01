@@ -18,20 +18,24 @@
 
 """Dynamic tile provider for the Mandelbrot set."""
 
+from typing import Optional, Tuple, Any
 import tempfile
 import subprocess
 import os
 
 from .dynamictileprovider import DynamicTileProvider
-from .vipsconverter import VipsConverter
+from .converters import VipsConverter
 
 class MandelTileProvider(DynamicTileProvider):
     """MandelTileProvider objects are used for generating tiles of the
-    Mandelbrot set using jrMandel (<http://freshmeat.net/projects/jrmandel/>).
+    Mandelbrot set using jrMandel (http://freshmeat.net/projects/jrmandel/).
 
-    Constructor: MandelTileProvider(TileCache)
+    Constructor :
+        MandelTileProvider(tilecache)
+    Parameters :
+        tilecache : TileCache
     """
-    def __init__(self, tilecache):
+    def __init__(self, tilecache: Any) -> None:
         DynamicTileProvider.__init__(self, tilecache)
 
 
@@ -39,7 +43,7 @@ class MandelTileProvider(DynamicTileProvider):
     tilesize = 256
     aspect_ratio = 1.0
 
-    def _load_dynamic(self, tile_id, outfile):
+    def _load_dynamic(self, tile_id: Tuple[str, int, int, int], outfile: str) -> None:
         media_id, tilelevel, row, col = tile_id
 
         if row < 0 or col < 0 or \
@@ -84,5 +88,5 @@ class MandelTileProvider(DynamicTileProvider):
         try:
             os.unlink(tmpfile)
         except:
-            self.__logger.exception("unable to unlink temporary file "
+            self._logger.exception("unable to unlink temporary file "
                 "'%s'" % tmpfile)

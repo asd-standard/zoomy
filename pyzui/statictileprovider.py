@@ -18,6 +18,7 @@
 
 """Class for loading tiles from the local tilestore."""
 
+from typing import Optional, Tuple, Any
 import os
 
 from PIL import Image
@@ -29,13 +30,16 @@ class StaticTileProvider(TileProvider):
     """StaticTileProvider objects are used for loading tiles from the
     disk-cache into a TileCache.
 
-    Constructor: StaticTileProvider(TileCache)
+    Constructor :
+        StaticTileProvider(tilecache)
+    Parameters :
+        tilecache : TileCache
     """
-    def __init__(self, tilecache):
+    def __init__(self, tilecache: Any) -> None:
         TileProvider.__init__(self, tilecache)
 
 
-    def _load(self, tile_id):
+    def _load(self, tile_id: Tuple[str, int, int, int]) -> Optional[Any]:
         #print('statictileprovider-39', tile_id)
         media_id, tilelevel, row, col = tile_id
         

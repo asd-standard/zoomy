@@ -1,7 +1,7 @@
-pyzui.converter module
-======================
+pyzui.converters.converter module
+==================================
 
-.. automodule:: pyzui.converter
+.. automodule:: pyzui.converters.converter
    :members:
    :show-inheritance:
    :undoc-members:

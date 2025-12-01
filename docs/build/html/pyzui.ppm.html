@@ -14,8 +14,6 @@
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="pyzui.qzui module" href="pyzui.qzui.html" />
-    <link rel="prev" title="pyzui.physicalobject module" href="pyzui.physicalobject.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -43,20 +41,51 @@
 representing the dimensions of the image.</p>
 <p>Raises <cite>IOError</cite> if the header is invalid and/or unsupported (must be ‘P6’
 binary PPM format with maxval=255).</p>
-<p>read_ppm_header(file) -&gt; (long, long)</p>
+<dl class="simple">
+<dt>Parameters :</dt><dd><dl class="simple">
+<dt>f<span class="classifier">Any</span></dt><dd><p>File object to read from</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>read_ppm_header(file) -&gt; Tuple[int, int]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>Any</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tuple</em>[int, int]</p>
+</dd>
+</dl>
 </dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyzui.ppm.enlarge_ppm_file">
-<span class="sig-prename descclassname"><span class="pre">pyzui.ppm.</span></span><span class="sig-name descname"><span class="pre">enlarge_ppm_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PPmFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/ppm.html#enlarge_ppm_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.ppm.enlarge_ppm_file" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pyzui.ppm.PPMTiler">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.ppm.</span></span><span class="sig-name descname"><span class="pre">PPMTiler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">media_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jpg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tilesize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/ppm.html#PPMTiler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.ppm.PPMTiler" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="pyzui.tiler.html#pyzui.tiler.Tiler" title="pyzui.tiler.Tiler"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tiler</span></code></a></p>
 <p>PPMTiler objects are used for tiling PPM images.</p>
-<p>Constructor: PPMTiler(string[, string[, string[, int]]])</p>
+<p>Constructor: PPMTiler(infile, media_id, filext, tilesize)</p>
+<dl class="simple">
+<dt>Parameters :</dt><dd><dl class="simple">
+<dt>infile<span class="classifier">str</span></dt><dd><p>Input PPM file path</p>
+</dd>
+<dt>media_id<span class="classifier">Optional[str]</span></dt><dd><p>Media identifier</p>
+</dd>
+<dt>filext<span class="classifier">str</span></dt><dd><p>File extension for output tiles</p>
+</dd>
+<dt>tilesize<span class="classifier">int</span></dt><dd><p>Size of tiles in pixels</p>
+</dd>
+</dl>
+</dd>
+<dt>Constructor:</dt><dd><p>Tiler(infile, media_id, filext, tilesize)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>infile : str
+media_id : Optional[str]
+filext : str
+tilesize : int</p>
+</dd>
+</dl>
+<p>Tiler(infile, media_id, filext, tilesize) –&gt; None</p>
 <p>Create a new Tiler for tiling the media given by <cite>media_id</cite> with the
 image given by <cite>infile</cite>.</p>
 <p>If <cite>media_id</cite> is omitted, it will be set to <cite>infile</cite>.</p>
@@ -65,7 +94,7 @@ dimensions given by <cite>tilesize</cite>.</p>
 <p>images are tiled with the following procedure:
 the number of tiles to cover a row of the image is calculated, the last tile
 of the row is of the minimum width to finish the image and standard height (256).
-the last row tiles are of the minimum heigh to finish the image and the last tile is of
+the last row tiles are of the minimum height to finish the image and the last tile is of
 the minimum size to cover the bottom right corner of the image.
 The example below will have a self.numtiles_across_total = 2:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-------+</span>
@@ -76,11 +105,31 @@ The example below will have a self.numtiles_across_total = 2:</p>
 <span class="o">+-------+</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>infile</strong> (<em>str</em>)</p></li>
+<li><p><strong>media_id</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>filext</strong> (<em>str</em>)</p></li>
+<li><p><strong>tilesize</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.ppm.PPMTiler._scanchunk">
 <span class="sig-name descname"><span class="pre">_scanchunk</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyzui/ppm.html#PPMTiler._scanchunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.ppm.PPMTiler._scanchunk" title="Link to this definition">¶</a></dt>
 <dd><p>Scan a chunk of ppm image bytes correspondent of a tile row.</p>
+<p>Method: PPMTiler._scanchunk()</p>
+<dl class="simple">
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
 <p>The row length of the tile is given by self._bytes_per_pixel*self._width.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bytes</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -124,25 +173,11 @@ The example below will have a self.numtiles_across_total = 2:</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="contributiongiudelines.html">Contribution guidelines</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="main.html">main module</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyzui</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="pyzui.html">pyzui package</a></li>
-</ul>
-</li>
-</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-  <li><a href="modules.html">pyzui</a><ul>
-  <li><a href="pyzui.html">pyzui package</a><ul>
-      <li>Previous: <a href="pyzui.physicalobject.html" title="previous chapter">pyzui.physicalobject module</a></li>
-      <li>Next: <a href="pyzui.qzui.html" title="next chapter">pyzui.qzui module</a></li>
-  </ul></li>
-  </ul></li>
   </ul></li>
 </ul>
 </div>

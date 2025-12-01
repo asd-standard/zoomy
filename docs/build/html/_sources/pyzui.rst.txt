@@ -12,7 +12,6 @@ Submodules
    pyzui.dynamictileprovider
    pyzui.ferntileprovider
    pyzui.globalmosaictileprovider
-   pyzui.magickconverter
    pyzui.mainwindow
    pyzui.mandeltileprovider
    pyzui.mediaobject

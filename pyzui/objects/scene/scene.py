@@ -22,10 +22,11 @@
 from threading import RLock
 import urllib.request, urllib.parse, urllib.error
 import math
+from typing import Optional, Tuple, List
 
 
 from PySide6 import QtCore
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QPainter
 
 from pyzui.dialogwindows import DialogWindows
 from pyzui.objects.physicalobject import PhysicalObject
@@ -124,12 +125,12 @@ class Scene(PhysicalObject):
         #commented out on 20250314 
         self.__logger = get_logger("Scene")
 
-    def save(self, filename):
+    def save(self, filename: str) -> None:
         """
-        Constructor : 
+        Method :
             Scene.save(filename)
         Parameters :
-            filename['string']
+            filename : str
 
         Scene.save(filename) --> None
 
@@ -185,12 +186,12 @@ class Scene(PhysicalObject):
         self.viewport_size = actual_viewport_size
 
 
-    def add(self, mediaobject):
+    def add(self, mediaobject: 'MediaObject.MediaObject') -> None:
         """
-        Constructor :
+        Method :
             Scene.add(mediaobject)
         Parameters :
-            mediaobject[':doc:`mediaobject <pyzui.mediaobject>`']
+            mediaobject : MediaObject
 
         Scene.add(mediaobject) --> None
 
@@ -208,12 +209,12 @@ class Scene(PhysicalObject):
 
                 self.__objects.append(mediaobject)
 
-    def remove(self, mediaobject):
+    def remove(self, mediaobject: 'MediaObject.MediaObject') -> None:
         """
-        Constructor :
+        Method :
             Scene.remove(mediaobject)
         Parameters :
-            mediaobject[':doc:`mediaobject <pyzui.mediaobject>`']
+            mediaobject : MediaObject
 
         Scene.remove(mediaobject) --> None
 
@@ -228,8 +229,7 @@ class Scene(PhysicalObject):
         elements have the same media_id, if it's not the case the media_id
         gets purged from the TileManager. 
 
-        See: `tilemanager.purge <file:///home/asd/Projects/pyzui/docs/build/
-        html/_modules/pyzui/tilemanager.html#purge>`_
+        See: :meth:`pyzui.tilemanager.purge`
 
         """
 
@@ -250,22 +250,20 @@ class Scene(PhysicalObject):
                     TileManager.purge(media_id)
 
 
-    def __sort_objects(self):
+    def __sort_objects(self) -> None:
         """
-        Contructor :
+        Method :
             `internal method` self.__sort_objects()
         Parameters :
             None
 
         __sort_objects() --> None
 
-        Sort self.__objects from largest to smallest area using 
-        mediaobject.onscreen_area attribute wich return mediaobject
+        Sort self.__objects from largest to smallest area using
+        mediaobject.onscreen_area attribute which returns mediaobject
         current onscreen area.
 
-        See :  `mediaobject.onscreen_area <file:///home/asd/
-        Projects/pyzui/docs/build/html/pyzui.mediaobject.html
-        #module-pyzui.mediaobject>`_ 
+        See :  :attr:`pyzui.objects.mediaobjects.mediaobject.MediaObject.onscreen_area` 
 
         """
         with self.__objects_lock:
@@ -274,26 +272,25 @@ class Scene(PhysicalObject):
             
 
 
-    def get(self, pos):
+    def get(self, pos: Tuple[float, float]) -> Optional['MediaObject.MediaObject']:
         """
-        Contructors :
+        Method :
             Scene.get(pos)
         Parameters :
-            pos[tuple[float,float]]
+            pos : Tuple[float, float]
 
-        Scene.get(pos) --> None
-        
+        Scene.get(pos) --> MediaObject or None
+
         Return the foremost visible `MediaObject` which overlaps the
-        on-screen point `pos`. `pos` is the mouse polition at the last
+        on-screen point `pos`. `pos` is the mouse position at the last
         left or right click mouse event.
 
         Return None if there are no *MediaObjects* overlapping the point.
 
         get(tuple[float,float]) --> MediaObject or None
 
-        Mouse click event is catched by: `qzui.mousePressEvent <file:///home/
-        asd/Projects/pyzui/docs/build/html/_modules/pyzui/qzui.html#QZUI.mouse
-        PressEvent>`_ wich returns mouse position `pos`
+        Mouse click event is caught by: :meth:`pyzui.qzui.QZUI.mousePressEvent`
+        which returns mouse position `pos`
         
         Thread safely cycle through *__objects*. For each mediaobject checks if
         *pos* is within mediaobject area, if it is the mediaobject is returned as
@@ -312,9 +309,12 @@ class Scene(PhysicalObject):
 
         return foremost
 
-    def zoom(self, amount):
+    def zoom(self, amount: float) -> None:
         """Zoom by the given `amount` with the centre maintaining its position
         on the screen.
+
+        Parameters :
+            amount : float
 
         zoom(float) -> None
         """
@@ -336,14 +336,15 @@ class Scene(PhysicalObject):
         self._z += amount
     
 
-    def render(self, painter, draft):
+    def render(self, painter: QPainter, draft: bool) -> List['MediaObject.MediaObject']:
         """
-        Constructor :
+        Method :
             Scene.render(painter, draft)
         Parameters :
-            painter['QtGui.QPainter'], draft['bool']
-        
-        Scene.render(painter, draft) --> errors['MediaObject.LoadError']
+            painter : QPainter
+            draft : bool
+
+        Scene.render(painter, draft) --> List[MediaObject]
 
         Render the scene using the given `painter`.
 
@@ -355,11 +356,10 @@ class Scene(PhysicalObject):
         will be returned. Otherwise the empty list will be returned.
 
         render(QPainter, bool) -> list[tuple[MediaObject,MediaObject.LoadError]]
-        
+
         See source code comments :
 
-            `Source <file:///home/asd/Projects/pyzui/docs/build/html/_modules/
-            pyzui/scene.html#Scene.render>`_ 
+            :meth:`Scene.render` 
 
         """
 
@@ -506,22 +506,20 @@ class Scene(PhysicalObject):
         return errors
 
 
-    def step(self, t):
+    def step(self, t: float) -> None:
         """
-        Constructor : 
+        Method :
             Scene.step(t)
         Parameters :
-            t['float']
-        
+            t : float
+
         Scene.step(t) --> None
 
         Step the scene and all contained `MediaObjects` forward `t` seconds
         in time.
-    
-        Thread safely cycle through `__objects` mediaobjects set and for each of 
-        them call `PhysicalObject.step(t) <file:///home/asd/Projects/
-        pyzui/docs/build/html/_modules/pyzui/physicalobject.html#
-        PhysicalObject.step>`_ inherited method.
+
+        Thread safely cycle through `__objects` mediaobjects set and for each of
+        them call :meth:`pyzui.objects.physicalobject.PhysicalObject.step` inherited method.
         """
         
         with self.__objects_lock:
@@ -531,9 +529,9 @@ class Scene(PhysicalObject):
 
 
     @property
-    def moving(self):
+    def moving(self) -> bool:
         """
-        Constructor : 
+        Property :
             Scene.moving
         Parameters :
             None
@@ -545,13 +543,12 @@ class Scene(PhysicalObject):
 
         Checks if the inherited, vx, vy and vz values from *PhysicalObject*
         are not zero. If it is that means the scene is moving and True is
-        returned, If thats not the case it thread safely cycle trough
+        returned, If that's not the case it thread safely cycles through
         mediaobjects in *__objects* checking if *mediaobject.moving* is
         True. If it is True is returned. *mediaobject.moving* is also
         inherited property of *PhysicalObject* class.
 
-        See : `physicalobject <file:///home/asd/Projects/pyzui/docs/build/html/
-        pyzui.physicalobject.html#module-pyzui.physicalobject>`_ 
+        See : :class:`pyzui.objects.physicalobject.PhysicalObject` 
         """
         if not (self.vx == self.vy == self.vz == 0):
             return True
@@ -563,31 +560,30 @@ class Scene(PhysicalObject):
 
         return False
 
-    def __get_origin(self):
+    def __get_origin(self) -> Tuple[float, float]:
         """
-        Constructor :
+        Method :
             __get_origin
         Parameters :
             None
 
-        __get_origin --> PhysicalObject._x['float'], PhysicalObject._y['float'] 
+        __get_origin --> Tuple[float, float]
 
         Returns the Scene origin by retrieving _x, and _y variables
         inherited by PhysicalObject class
         """
         return (self._x, self._y)
 
-    def __set_origin(self, origin):
+    def __set_origin(self, origin: Tuple[float, float]) -> None:
         """
-        Constructor :
+        Method :
             __set_origin(origin)
         Parameters :
-            origin[__get_origin[PhysicalObject._x['float'], 
-            PhysicalObject._y['float']]]
+            origin : Tuple[float, float]
 
         __set_origin --> None
 
-        Set PhysicalObject._x and PhysicalObject._y parameters to new values 
+        Set PhysicalObject._x and PhysicalObject._y parameters to new values
         given as input parameters.
         """
         self._x, self._y = origin
@@ -596,31 +592,31 @@ class Scene(PhysicalObject):
     """Creating Scene.origin property with __get_origin as getter and 
     __set_origin as setter"""
 
-    def __get_viewport_size(self):
+    def __get_viewport_size(self) -> Tuple[int, int]:
         """
-        Contructor :
+        Method :
             __get_viewport_size
         Parameters :
             None
 
-        __get_viewport_size --> self.__viewport_size 
-        
+        __get_viewport_size --> Tuple[int, int]
+
         Return the current dimensions of the viewport.
         """
         return self.__viewport_size
 
-    def __set_viewport_size(self, viewport_size):
+    def __set_viewport_size(self, viewport_size: Tuple[int, int]) -> None:
         """
-        Constructor :
+        Method :
             __set_viewport_size(viewport_size)
         Parameters :
-            viewport_size['__get_viewport_size']
+            viewport_size : Tuple[int, int]
 
-        __get_viewport_size --> None
-        
-        Happens when mainwindow gets resized or a scene get's loaded having 
-        different viewport_size that the currewn mainwindow size. All necessary
-        adjustement are handled here
+        __set_viewport_size --> None
+
+        Happens when mainwindow gets resized or a scene get's loaded having
+        different viewport_size than the current mainwindow size. All necessary
+        adjustment are handled here
 
         Centers PhysicalObject._x and PhysicalObject._y to the new input 
         parameter viewport_size center, also adjourn PhysicalObject.centre. 
@@ -687,38 +683,37 @@ class Scene(PhysicalObject):
     """Creating Scene.viewport_size property with __get_viewport_size as 
     getter and __set_viewport_size as setter"""
 
-def new():
+def new() -> Scene:
     """
-    Constructor :
-        Scene.new()
+    Function :
+        new()
     Parameters :
         None
 
-    new() --> Scene['PhysicaObject']
+    new() --> Scene
 
     Create and return a new `Scene` object.
     """
     return Scene()
 
 
-def load_scene(filename):
+def load_scene(filename: str) -> Scene:
     """
-    Constructor :
-        Scene.load_scene(filename)
+    Function :
+        load_scene(filename)
     Parameters :
-        filename['string']
+        filename : str
 
-    Scene.load_scene(filename) --> Scene['PhysicalObject']
+    load_scene(filename) --> Scene
 
     Load the scene stored in the file given by `filename`.
 
-    Precondition: `filename` refers to a file in the same format as 
+    Precondition: `filename` refers to a file in the same format as
     produced by `Scene.save`
 
     See source code comments:
 
-        `load_scene source <file:///home/asd/Projects/pyzui/docs/build/html/_modules/pyzui/
-        scene.html#load_scene>`_
+        :func:`load_scene`
     """
 
     #Declares a new Scene() object

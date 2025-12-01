@@ -1,7 +1,7 @@
-pyzui.tilestore module
-======================
+pyzui.tilestore.tilestore module
+=================================
 
-.. automodule:: pyzui.tilestore
+.. automodule:: pyzui.tilestore.tilestore
    :members:
    :show-inheritance:
    :undoc-members:

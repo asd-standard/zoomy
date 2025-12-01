@@ -1,7 +1,7 @@
-pyzui.pdfconverter module
-=========================
+pyzui.converters.pdfconverter module
+=====================================
 
-.. automodule:: pyzui.pdfconverter
+.. automodule:: pyzui.converters.pdfconverter
    :members:
    :show-inheritance:
    :undoc-members:

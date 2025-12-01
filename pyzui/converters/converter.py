@@ -18,15 +18,20 @@
 
 """A threaded media converter (abstract base class)."""
 
+from typing import Optional
 from threading import Thread
-import logging
+from ..logger import get_logger
 
 class Converter(Thread):
     """Converter objects are used for converting media.
 
-    Constructor: Converter(string, string)
+    Constructor:
+        Converter(infile, outfile)
+    Parameters :
+        infile : str
+        outfile : str
     """
-    def __init__(self, infile, outfile):
+    def __init__(self, infile: str, outfile: str) -> None:
         """Create a new Converter for converting media at the location given by
         `infile` to the location given by `outfile`.
 
@@ -40,33 +45,45 @@ class Converter(Thread):
 
         self._progress = 0.0
 
-        self._logger = logging.getLogger(str(self))
+        self._logger = get_logger(f'Converter.{infile}')
 
         self.error = None
 
 
-    def run(self):
-        """Run the conversion. If any errors are encountered then `self.error`
+    def run(self) -> None:
+        """Run the conversion. If any errors are encountered then :attr:`self.error`
         will be set to a string describing the error.
 
-        run() -> None
+        Method:
+            Converter.run()
+        Parameters :
+            None
+
+        Converter.run() -> None
         """
         pass
 
 
     @property
-    def progress(self):
+    def progress(self) -> float:
         """Conversion progress ranging from 0.0 to 1.0. A value of 1.0
         indicates that the converter has completely finished.
+
+        Property :
+            Converter.progress
+        Parameters :
+            None
+
+        Converter.progress -> float
         """
         return self._progress
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "Converter(%s, %s)" % (self._infile, self._outfile)
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Converter(%s, %s)" % (repr(self._infile), repr(self._outfile))
     
     

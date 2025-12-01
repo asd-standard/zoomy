@@ -1,7 +1,7 @@
-pyzui.physicalobject module
-===========================
+pyzui.objects.physicalobject module
+====================================
 
-.. automodule:: pyzui.physicalobject
+.. automodule:: pyzui.objects.physicalobject
    :members:
    :show-inheritance:
    :undoc-members:

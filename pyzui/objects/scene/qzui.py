@@ -18,6 +18,7 @@
 
 """QWidget for displaying the ZUI."""
 
+from typing import Optional, Tuple, List, Any
 from PySide6 import QtCore, QtGui, QtWidgets
 from threading import Thread
 
@@ -41,11 +42,17 @@ class QZUI(QtWidgets.QWidget, Thread) :
     #: link error variable to QtCore.Signal()
     error = QtCore.Signal()
 
-    def __init__(self, parent=None, framerate=10, zoom_sensitivity=20):
-        
+    def __init__(self, parent: Optional[QtWidgets.QWidget] = None,
+                 framerate: int = 10, zoom_sensitivity: int = 20) -> None:
         """
         Create a new QZUI QWidget with the given `parent` widget.
 
+        Constructor :
+            QZUI(parent, framerate, zoom_sensitivity)
+        Parameters :
+            parent : Optional[QtWidgets.QWidget]
+            framerate : int
+            zoom_sensitivity : int
         """
         QtWidgets.QWidget.__init__(self, parent)
 
@@ -70,9 +77,14 @@ class QZUI(QtWidgets.QWidget, Thread) :
         self.setMouseTracking(True)
 
 
-    def __zoom(self, num_steps):
+    def __zoom(self, num_steps: float) -> None:
         """Increase the z velocity of the appropriate object by an amount
         proportional to num_steps.
+
+        Method :
+            __zoom(num_steps)
+        Parameters :
+            num_steps : float
 
         __zoom(float) -> None
         """
@@ -85,9 +97,14 @@ class QZUI(QtWidgets.QWidget, Thread) :
         self.__active_object.vz += scale * num_steps
 
 
-    def __centre(self):
+    def __centre(self) -> None:
         """Aim the appropriate object such that the point under the cursor will
         move to the centre of the screen
+
+        Method :
+            __centre()
+        Parameters :
+            None
 
         __centre() -> None
         """
@@ -96,12 +113,19 @@ class QZUI(QtWidgets.QWidget, Thread) :
         self.__active_object.aim('y', self.height()/2 - self.__mousepos[1])
 
 
-    def paintEvent(self, event):
-        '''
-            method that allows you to perform custom painting on a widget. 
-            It is part of the event handling system, and you typically override it in a subclass of a QWidget 
-            (or any subclass like QLabel, QFrame, etc.) to draw graphics using the QPainter class.
-        '''
+    def paintEvent(self, event: QtGui.QPaintEvent) -> None:
+        """Method that allows you to perform custom painting on a widget.
+
+        It is part of the event handling system, and you typically override it in a subclass of a QWidget
+        (or any subclass like QLabel, QFrame, etc.) to draw graphics using the QPainter class.
+
+        Method :
+            paintEvent(event)
+        Parameters :
+            event : QtGui.QPaintEvent
+
+        paintEvent(event) -> None
+        """
         if self.framerate:
             self.scene.step(1.0 / self.framerate)
 
@@ -127,7 +151,16 @@ class QZUI(QtWidgets.QWidget, Thread) :
             self.__active_object.vx = self.__active_object.vy = 0.0
 
 
-    def timerEvent(self, event):
+    def timerEvent(self, event: QtCore.QTimerEvent) -> None:
+        """Handle timer events to update the scene rendering.
+
+        Method :
+            timerEvent(event)
+        Parameters :
+            event : QtCore.QTimerEvent
+
+        timerEvent(event) -> None
+        """
         if event.timerId() == self.__timer.timerId():
             if self.scene.moving :
                 self.__dropped_frames = 0
@@ -151,14 +184,32 @@ class QZUI(QtWidgets.QWidget, Thread) :
             QtWidgets.QWidget.timerEvent(self, event)
 
 
-    def wheelEvent(self, event):
+    def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
+        """Handle mouse wheel events for zooming.
+
+        Method :
+            wheelEvent(event)
+        Parameters :
+            event : QtGui.QWheelEvent
+
+        wheelEvent(event) -> None
+        """
         num_degrees = event.angleDelta().y() #/ 8
         num_steps = round(num_degrees / self.zoom_sensitivity , 3) #15
         self.__zoom(num_steps)
         self.__mousepos = (int(event.position().x()), int(event.position().y()))
 
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
+        """Handle mouse press events for object selection.
+
+        Method :
+            mousePressEvent(event)
+        Parameters :
+            event : QtGui.QMouseEvent
+
+        mousePressEvent(event) -> None
+        """
         if event.button() == QtCore.Qt.LeftButton:
             self.__mouse_left_down = True
             self.__mousepos = (int(event.position().x()), int(event.position().y()))
@@ -174,7 +225,16 @@ class QZUI(QtWidgets.QWidget, Thread) :
                 self.scene.right_selection = self.scene.get(self.__mousepos)
 
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
+        """Handle mouse move events for dragging objects.
+
+        Method :
+            mouseMoveEvent(event)
+        Parameters :
+            event : QtGui.QMouseEvent
+
+        mouseMoveEvent(event) -> None
+        """
         if (event.buttons()&QtCore.Qt.LeftButton) and self.__mouse_left_down:
             mx = int(event.position().x()) - self.__mousepos[0]
             my = int(event.position().y()) - self.__mousepos[1]
@@ -186,12 +246,30 @@ class QZUI(QtWidgets.QWidget, Thread) :
         self.__mousepos = (int(event.position().x()), int(event.position().y()))
 
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event: QtGui.QMouseEvent) -> None:
+        """Handle mouse release events.
+
+        Method :
+            mouseReleaseEvent(event)
+        Parameters :
+            event : QtGui.QMouseEvent
+
+        mouseReleaseEvent(event) -> None
+        """
         if event.button() == QtCore.Qt.LeftButton and self.__mouse_left_down:
             self.__mouse_left_down = False
 
 
-    def keyPressEvent(self, event):
+    def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
+        """Handle key press events for navigation and control.
+
+        Method :
+            keyPressEvent(event)
+        Parameters :
+            event : QtGui.QKeyEvent
+
+        keyPressEvent(event) -> None
+        """
         if self.__alt_held:
             move_amount = 16
         else:
@@ -226,7 +304,16 @@ class QZUI(QtWidgets.QWidget, Thread) :
             QtWidgets.QWidget.keyPressEvent(self, event)
 
 
-    def keyReleaseEvent(self, event):
+    def keyReleaseEvent(self, event: QtGui.QKeyEvent) -> None:
+        """Handle key release events.
+
+        Method :
+            keyReleaseEvent(event)
+        Parameters :
+            event : QtGui.QKeyEvent
+
+        keyReleaseEvent(event) -> None
+        """
         key = event.key()
         if   key == QtCore.Qt.Key_Shift:
             self.__shift_held = False
@@ -236,37 +323,88 @@ class QZUI(QtWidgets.QWidget, Thread) :
             QtWidgets.QWidget.keyPressEvent(self, event)
 
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
+        """Handle resize events to update the viewport size.
+
+        Method :
+            resizeEvent(event)
+        Parameters :
+            event : QtGui.QResizeEvent
+
+        resizeEvent(event) -> None
+        """
         self.__scene.viewport_size = (self.width(), self.height())
 
 
     @property
-    def __active_object(self):
+    def __active_object(self) -> Any:
+        """Property :
+            __active_object
+        Parameters :
+            None
+
+        __active_object --> Any
+
+        Return the currently active object (either selected object or scene).
+        """
         if self.scene.selection and not self.__shift_held:
             return self.scene.selection
         else:
             return self.scene
 
 
-    def __get_framerate(self):
-        """Rendering framerate."""
+    def __get_framerate(self) -> int:
+        """Rendering framerate.
+
+        Method :
+            __get_framerate()
+        Parameters :
+            None
+
+        __get_framerate() -> int
+        """
         return self.__framerate
 
-    def __set_framerate(self, framerate):
-        self.__framerate = framerate        
+    def __set_framerate(self, framerate: int) -> None:
+        """Set the rendering framerate.
+
+        Method :
+            __set_framerate(framerate)
+        Parameters :
+            framerate : int
+
+        __set_framerate(framerate) -> None
+        """
+        self.__framerate = framerate
         if self.__framerate:
             self.__timer.start(int(1000/self.__framerate), self)
         elif self.__timer.isActive():
             self.__timer.stop()
-    
+
     framerate = property(__get_framerate, __set_framerate)
 
-    def __get_scene(self):
-        """Scene currently being viewed."""
+    def __get_scene(self) -> 'Scene.Scene':
+        """Scene currently being viewed.
+
+        Method :
+            __get_scene()
+        Parameters :
+            None
+
+        __get_scene() -> Scene
+        """
         return self.__scene
 
-    def __set_scene(self, scene):
+    def __set_scene(self, scene: 'Scene.Scene') -> None:
+        """Set the scene to be viewed.
 
+        Method :
+            __set_scene(scene)
+        Parameters :
+            scene : Scene
+
+        __set_scene(scene) -> None
+        """
         self.__scene = Scene.new() ## erase scene
         TileManager.purge()
         self.__scene = scene

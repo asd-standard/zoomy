@@ -1,7 +1,7 @@
-pyzui.mainwindow module
-=======================
+pyzui.objects.scene.mainwindow module
+======================================
 
-.. automodule:: pyzui.mainwindow
+.. automodule:: pyzui.objects.scene.mainwindow
    :members:
    :show-inheritance:
    :undoc-members:

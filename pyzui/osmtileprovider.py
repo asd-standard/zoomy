@@ -18,17 +18,21 @@
 
 """Dynamic tile provider for OpenStreetMap."""
 
+from typing import Optional, Tuple, Any
 import urllib.request, urllib.parse, urllib.error
 
 from .dynamictileprovider import DynamicTileProvider
 
 class OSMTileProvider(DynamicTileProvider):
     """OSMTileProvider objects are used for downloading tiles from
-    OpenStreetMap (<http://openstreetmap.org/>).
+    OpenStreetMap (http://openstreetmap.org/).
 
-    Constructor: OSMTileProvider(TileCache)
+    Constructor :
+        OSMTileProvider(tilecache)
+    Parameters :
+        tilecache : TileCache
     """
-    def __init__(self, tilecache):
+    def __init__(self, tilecache: Any) -> None:
         DynamicTileProvider.__init__(self, tilecache)
 
 
@@ -36,7 +40,7 @@ class OSMTileProvider(DynamicTileProvider):
     tilesize = 256
     aspect_ratio = 1.0
 
-    def _load_dynamic(self, tile_id, outfile):
+    def _load_dynamic(self, tile_id: Tuple[str, int, int, int], outfile: str) -> None:
         media_id, tilelevel, row, col = tile_id
 
         if row < 0 or col < 0 or \
