@@ -39,11 +39,13 @@ class DialogWindows():
     """
 
     def _open_zoom_sensitivity_input_dialog(current_sensitivity: float) -> Tuple[bool, str]:
-        """Method: _open_zoom_sensitivity_input_dialog(current_sensitivity)
+        """
+        Method: 
+            _open_zoom_sensitivity_input_dialog(current_sensitivity)
 
         Parameters :
             current_sensitivity : float
-                Current zoom sensitivity value
+                - Current zoom sensitivity value
 
         Opens a dialog to set zoom sensitivity.
         """

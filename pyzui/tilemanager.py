@@ -30,34 +30,40 @@ from PySide6 import QtCore
 
 from . import tilestore as TileStore
 from .tilecache import TileCache
-from .statictileprovider import StaticTileProvider
-from .osmtileprovider import OSMTileProvider
-from .globalmosaictileprovider import GlobalMosaicTileProvider
-from .mandeltileprovider import MandelTileProvider
-from .ferntileprovider import FernTileProvider
+from .tileproviders import (
+    StaticTileProvider,
+    OSMTileProvider,
+    GlobalMosaicTileProvider,
+    MandelTileProvider,
+    FernTileProvider
+)
 from .logger import get_logger
 
 
-
-#192
 def init(total_cache_size: int = 1024, auto_cleanup: bool = True, cleanup_max_age_days: int = 3) -> None:
     """
     Function :
         init(total_cache_size, auto_cleanup, cleanup_max_age_days)
     Parameters :
         total_cache_size : int
+            - Total cache size for tiles (default: 1024)
         auto_cleanup : bool
+            - Enable automatic cleanup of old tiles (default: True)
         cleanup_max_age_days : int
+            - Maximum age in days for tiles (default: 3)
 
     init(total_cache_size, auto_cleanup, cleanup_max_age_days) --> None
 
     Initialise the TileManager. This **must** be called before any other
     functions are called.
 
-    Args:
-        total_cache_size (int): Total cache size for tiles (default: 1024)
-        auto_cleanup (bool): Enable automatic cleanup of old tiles (default: True)
-        cleanup_max_age_days (int): Maximum age in days for tiles (default: 3)
+    The central coordinator that:
+        - Routes tile requests to appropriate providers
+        - Manages two-tier caching (80% permanent / 20% temporary)
+        - Synthesizes missing tiles from available ones via cut_tile()
+        - Key methods: load_tile(), get_tile(), get_tile_robust()
+
+    
     """
     global __tilecache, __temptilecache, __tp_static, __tp_dynamic, __logger
 

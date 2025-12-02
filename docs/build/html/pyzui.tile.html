@@ -52,7 +52,9 @@
 </ul>
 </dd>
 </dl>
-<p>Create a new tile with the given image.</p>
+<p>Create a new tile with the given image.
+checks if image type is ImageQt of QtGui.QImage if not calls
+ImageQt.ImageQt to try convert given image to ImageQt type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>image</strong> (<em>Any</em>)</p>
@@ -91,7 +93,7 @@ height : int</p>
 </dd>
 </dl>
 <p>Tile.resize(width, height) –&gt; Tile</p>
-<p>Return a resized copy of the tile.</p>
+<p>Return a resized copy of the tile by calling ImageQt.scaled() method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -115,7 +117,8 @@ height : int</p>
 </dd>
 </dl>
 <p>Tile.save(filename) –&gt; None</p>
-<p>Save the tile to the location given by <cite>filename</cite>.</p>
+<p>Save the tile to the location given by <cite>filename</cite> calling ImageQt.save()
+method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>filename</strong> (<em>str</em>)</p>
@@ -138,7 +141,7 @@ y : int</p>
 </dd>
 </dl>
 <p>Tile.draw(painter, x, y) –&gt; None</p>
-<p>Draw the tile on the given <cite>painter</cite> at the given position.</p>
+<p>Draw the tile on the given painter: ‘QtGui.QPainter’ at the given position.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -163,7 +166,8 @@ y : int</p>
 </dd>
 </dl>
 <p>Tile.size –&gt; Tuple[int, int]</p>
-<p>The dimensions of the tile.</p>
+<p>Returns the dimensions of the tile calling ImageQt.width and ImageQt.height
+methods.</p>
 </dd></dl>
 
 </dd></dl>
@@ -179,7 +183,7 @@ height : int</p>
 </dd>
 </dl>
 <p>new(width, height) –&gt; Tile</p>
-<p>Create a new tile with the given dimensions.</p>
+<p>Create a new tile with the given dimensions calling QtGui.QImage() istance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -206,7 +210,7 @@ height : int</p>
 </dl>
 <p>fromstring(string, width, height) –&gt; Tile</p>
 <p>Create a new tile from a <cite>string</cite> of raw pixels, with the given
-dimensions.</p>
+dimensions, calling Image.frombytes() class instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -234,7 +238,9 @@ t4 : Optional[Tile]</p>
 </dd>
 </dl>
 <p>merged(t1, t2, t3, t4) –&gt; Tile</p>
-<p>Merge the given tiles into a single tile.</p>
+<p>Merge the given tiles into a single tile by freating new size ImageQt with
+QtGui.QImage class instance and then drawing merged tiles with QtGui.QPainter()
+class instance.</p>
 <p><cite>t1</cite> must be a Tile, but any or all of <cite>t2</cite>,`t3`,`t4` may be None, in which
 case they will be ignored.</p>
 <dl class="field-list simple">

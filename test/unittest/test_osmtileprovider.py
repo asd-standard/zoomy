@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
-from pyzui.osmtileprovider import OSMTileProvider
+from pyzui.tileproviders import OSMTileProvider
 
 class TestOSMTileProvider:
     """Test suite for the OSMTileProvider class."""
@@ -13,7 +13,7 @@ class TestOSMTileProvider:
 
     def test_inherits_from_dynamictileprovider(self):
         """Test that OSMTileProvider inherits from DynamicTileProvider."""
-        from pyzui.dynamictileprovider import DynamicTileProvider
+        from pyzui.tileproviders import DynamicTileProvider
         tilecache = Mock()
         provider = OSMTileProvider(tilecache)
         assert isinstance(provider, DynamicTileProvider)

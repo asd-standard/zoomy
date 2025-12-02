@@ -34,12 +34,6 @@ from pyzui.logger import get_logger
 from pyzui.ppm import PPMTiler
 
 # The classes that convert various format to ppm images
-try:
-    from pyzui.converters import WebKitConverter
-    WEBKIT_AVAILABLE = True
-except ImportError:
-    WEBKIT_AVAILABLE = False
-    WebKitConverter = None
 from pyzui.converters import PDFConverter, VipsConverter
 
 class TiledMediaObject(MediaObject):
@@ -59,6 +53,11 @@ class TiledMediaObject(MediaObject):
 
     If `autofit` is True, then once the media has loaded it will be fitted to
     the area occupied by the placeholder.
+
+    Supported formats:
+    - PDF files (.pdf) via PDFConverter
+    - PPM files (.ppm) used directly
+    - Image files (JPG, PNG, GIF, TIFF, etc.) via VipsConverter
 
     For any acceptable filetype the adequate converter gets called.
     The converter returns a ppm image file on which we can run the tiler on.
@@ -99,18 +98,7 @@ class TiledMediaObject(MediaObject):
             fd, self.__tmpfile = tempfile.mkstemp('.ppm')
             os.close(fd)
             
-            if self._media_id.startswith('http://') or \
-               self._media_id.lower().endswith('.html') or \
-               self._media_id.lower().endswith('.htm'):
-                if not WEBKIT_AVAILABLE:
-                    self.__logger.error("WebKitConverter not available (QtWebEngineWidgets not installed)")
-                    self.__logger.error("Cannot load HTML files or web URLs without QtWebEngineWidgets")
-                    raise ImportError("QtWebEngineWidgets not available - cannot load HTML content")
-                self.__converter = WebKitConverter(
-                    self._media_id, self.__tmpfile)
-                self.__ppmfile = self.__tmpfile
-                self.__converter.start()
-            elif self._media_id.lower().endswith('.pdf'):
+            if self._media_id.lower().endswith('.pdf'):
                 self.__converter = PDFConverter(
                     self._media_id, self.__tmpfile)
                 self.__ppmfile = self.__tmpfile

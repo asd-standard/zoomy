@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock, MagicMock, patch
 from threading import Thread, Condition
 from collections import deque
-from pyzui.tileprovider import TileProvider
+from pyzui.tileproviders import TileProvider
 from pyzui.tile import Tile
 
 class TestTileProvider:

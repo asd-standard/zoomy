@@ -52,6 +52,10 @@ autofit : bool</p>
 rendered in the ZUI.</p>
 <p>If <cite>autofit</cite> is True, then once the media has loaded it will be fitted to
 the area occupied by the placeholder.</p>
+<p>Supported formats:
+- PDF files (.pdf) via PDFConverter
+- PPM files (.ppm) used directly
+- Image files (JPG, PNG, GIF, TIFF, etc.) via VipsConverter</p>
 <p>For any acceptable filetype the adequate converter gets called.
 The converter returns a ppm image file on which we can run the tiler on.</p>
 <p>Create a new MediaObject from the media identified by <cite>media_id</cite>,

@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
-from pyzui.ferntileprovider import FernTileProvider
+from pyzui.tileproviders import FernTileProvider
 
 class TestFernTileProvider:
     """Test suite for the FernTileProvider class."""
@@ -13,7 +13,7 @@ class TestFernTileProvider:
 
     def test_inherits_from_dynamictileprovider(self):
         """Test that FernTileProvider inherits from DynamicTileProvider."""
-        from pyzui.dynamictileprovider import DynamicTileProvider
+        from pyzui.tileproviders import DynamicTileProvider
         tilecache = Mock()
         provider = FernTileProvider(tilecache)
         assert isinstance(provider, DynamicTileProvider)
@@ -81,7 +81,7 @@ class TestFernTileProvider:
         result = provider._load_dynamic(tile_id, outfile)
         assert result is None
 
-    @patch('pyzui.ferntileprovider.Image.new')
+    @patch('pyzui.tileproviders.ferntileprovider.Image.new')
     def test_load_dynamic_valid_tile(self, mock_image_new):
         """Test _load_dynamic generates valid tile."""
         tilecache = Mock()

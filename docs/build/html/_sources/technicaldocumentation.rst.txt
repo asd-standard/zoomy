@@ -41,7 +41,6 @@ Project structure
             - :doc:`main <main>`
 - :doc:`converter <pyzui.converter>`
     - :doc:`pdfconverter <pyzui.pdfconverter>`
-    - :doc:`webkitconverter <pyzui.webkitconverter>`
 - :doc:`ppm <pyzui.ppm>`
     - :doc:`tiler <pyzui.tiler>`
 - :doc:`tilestore <pyzui.tilestore>`

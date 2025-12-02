@@ -32,19 +32,9 @@ except ImportError:
     VipsConverter = None
     VIPS_AVAILABLE = False
 
-# WebKit converter may not be available (requires QtWebEngineWidgets)
-try:
-    from .webkitconverter import WebKitConverter
-    WEBKIT_AVAILABLE = True
-except ImportError:
-    WebKitConverter = None
-    WEBKIT_AVAILABLE = False
-
 __all__ = [
     'Converter',
     'PDFConverter',
     'VipsConverter',
-    'WebKitConverter',
-    'WEBKIT_AVAILABLE',
     'VIPS_AVAILABLE'
 ]

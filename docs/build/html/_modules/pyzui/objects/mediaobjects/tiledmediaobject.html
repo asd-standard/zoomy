@@ -67,12 +67,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.ppm</span><span class="w"> </span><span class="kn">import</span> <span class="n">PPMTiler</span>
 
 <span class="c1"># The classes that convert various format to ppm images</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">WebKitConverter</span>
-    <span class="n">WEBKIT_AVAILABLE</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="n">WEBKIT_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">WebKitConverter</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDFConverter</span><span class="p">,</span> <span class="n">VipsConverter</span>
 
 <div class="viewcode-block" id="TiledMediaObject">
@@ -94,6 +88,11 @@
 
 <span class="sd">    If `autofit` is True, then once the media has loaded it will be fitted to</span>
 <span class="sd">    the area occupied by the placeholder.</span>
+
+<span class="sd">    Supported formats:</span>
+<span class="sd">    - PDF files (.pdf) via PDFConverter</span>
+<span class="sd">    - PPM files (.ppm) used directly</span>
+<span class="sd">    - Image files (JPG, PNG, GIF, TIFF, etc.) via VipsConverter</span>
 
 <span class="sd">    For any acceptable filetype the adequate converter gets called.</span>
 <span class="sd">    The converter returns a ppm image file on which we can run the tiler on.</span>
@@ -134,18 +133,7 @@
             <span class="n">fd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="s1">&#39;.ppm&#39;</span><span class="p">)</span>
             <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
             
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;http://&#39;</span><span class="p">)</span> <span class="ow">or</span> \
-               <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.html&#39;</span><span class="p">)</span> <span class="ow">or</span> \
-               <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.htm&#39;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">WEBKIT_AVAILABLE</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;WebKitConverter not available (QtWebEngineWidgets not installed)&quot;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot load HTML files or web URLs without QtWebEngineWidgets&quot;</span><span class="p">)</span>
-                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;QtWebEngineWidgets not available - cannot load HTML content&quot;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">WebKitConverter</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.pdf&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.pdf&#39;</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">PDFConverter</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span>

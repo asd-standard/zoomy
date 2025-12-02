@@ -31,7 +31,6 @@ Submodules
    pyzui.tileprovider
    pyzui.tiler
    pyzui.tilestore
-   pyzui.webkitconverter
 
 Module contents
 ---------------

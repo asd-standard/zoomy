@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch
 from PySide6 import QtGui
-from pyzui.dynamictileprovider import DynamicTileProvider
+from pyzui.tileproviders import DynamicTileProvider
 
 class TestDynamicTileProvider:
     """Test suite for the DynamicTileProvider class."""
@@ -14,7 +14,7 @@ class TestDynamicTileProvider:
 
     def test_inherits_from_tileprovider(self):
         """Test that DynamicTileProvider inherits from TileProvider."""
-        from pyzui.tileprovider import TileProvider
+        from pyzui.tileproviders import TileProvider
         tilecache = Mock()
         provider = DynamicTileProvider(tilecache)
         assert isinstance(provider, TileProvider)
@@ -39,9 +39,9 @@ class TestDynamicTileProvider:
         result = provider._load_dynamic(tile_id, '/path/to/file')
         assert result is None
 
-    @patch('pyzui.dynamictileprovider.TileStore.get_tile_path')
+    @patch('pyzui.tileproviders.dynamictileprovider.TileStore.get_tile_path')
     @patch('os.path.exists')
-    @patch('pyzui.dynamictileprovider.QtGui.QImage')
+    @patch('pyzui.tileproviders.dynamictileprovider.QtGui.QImage')
     def test_load_existing_tile(self, mock_qimage_class, mock_exists, mock_path):
         """Test _load method with existing tile."""
         tilecache = Mock()
@@ -59,10 +59,10 @@ class TestDynamicTileProvider:
         assert result == mock_image
         mock_qimage_class.assert_called_once_with('/path/to/tile.png')
 
-    @patch('pyzui.dynamictileprovider.TileStore.get_tile_path')
+    @patch('pyzui.tileproviders.dynamictileprovider.TileStore.get_tile_path')
     @patch('os.path.exists')
     @patch.object(DynamicTileProvider, '_load_dynamic')
-    @patch('pyzui.dynamictileprovider.QtGui.QImage')
+    @patch('pyzui.tileproviders.dynamictileprovider.QtGui.QImage')
     def test_load_nonexistent_tile(self, mock_qimage_class, mock_load_dynamic, mock_exists, mock_path):
         """Test _load method calls _load_dynamic for nonexistent tile."""
         tilecache = Mock()
@@ -79,9 +79,9 @@ class TestDynamicTileProvider:
 
         mock_load_dynamic.assert_called_once_with(tile_id, '/path/to/tile.png')
 
-    @patch('pyzui.dynamictileprovider.TileStore.get_tile_path')
+    @patch('pyzui.tileproviders.dynamictileprovider.TileStore.get_tile_path')
     @patch('os.path.exists')
-    @patch('pyzui.dynamictileprovider.QtGui.QImage', side_effect=Exception("Load error"))
+    @patch('pyzui.tileproviders.dynamictileprovider.QtGui.QImage', side_effect=Exception("Load error"))
     def test_load_handles_exception(self, mock_qimage, mock_exists, mock_path):
         """Test _load method handles exceptions gracefully."""
         tilecache = Mock()
@@ -95,7 +95,7 @@ class TestDynamicTileProvider:
 
         assert result is None
 
-    @patch('pyzui.dynamictileprovider.TileStore.get_tile_path')
+    @patch('pyzui.tileproviders.dynamictileprovider.TileStore.get_tile_path')
     def test_load_creates_path_with_mkdirp(self, mock_path):
         """Test _load method calls get_tile_path with mkdirp=True."""
         tilecache = Mock()
@@ -106,7 +106,7 @@ class TestDynamicTileProvider:
         tile_id = ('media_id', 0, 0, 0)
 
         with patch('os.path.exists', return_value=True):
-            with patch('pyzui.dynamictileprovider.QtGui.QImage'):
+            with patch('pyzui.tileproviders.dynamictileprovider.QtGui.QImage'):
                 provider._load(tile_id)
 
         mock_path.assert_called_once_with(tile_id, True, filext='png')

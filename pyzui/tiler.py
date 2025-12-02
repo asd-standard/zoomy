@@ -19,7 +19,6 @@
 """Threaded image tiler (abstract base class)."""
 
 from typing import Optional, Tuple, List, Any
-import traceback
 from threading import Thread
 #import os
 import math
@@ -278,8 +277,7 @@ class Tiler(Thread):
                 #print('HERE--HERE Tiler222 \n')
                 self.error = str(e)
                 outpath = TileStore.get_media_path(self.__media_id)
-                shutil.rmtree(outpath, ignore_errors=True)
-                traceback.print_stack()    
+                shutil.rmtree(outpath, ignore_errors=True)  
             
         else:
             ## load the requested row by merging sub-tiles from

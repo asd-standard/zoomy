@@ -24,7 +24,7 @@ import os
 from PIL import Image
 
 from .tileprovider import TileProvider
-from . import tilestore as TileStore
+from .. import tilestore as TileStore
 
 class StaticTileProvider(TileProvider):
     """StaticTileProvider objects are used for loading tiles from the

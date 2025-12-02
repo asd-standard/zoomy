@@ -25,7 +25,7 @@ import os
 from PySide6 import QtCore, QtGui
 
 from .tileprovider import TileProvider
-from . import tilestore as TileStore
+from .. import tilestore as TileStore
 
 class DynamicTileProvider(TileProvider):
     """DynamicTileProvider objects are used for either generating tiles or

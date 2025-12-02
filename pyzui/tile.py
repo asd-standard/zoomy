@@ -21,11 +21,8 @@
 from typing import Optional, Tuple, List, Any
 from PIL import Image, ImageQt
 from PySide6 import QtCore, QtGui
-import traceback
 
-#REMOVED object 
-
-class Tile():
+class Tile(object):
     """
     Constructor:
         Tile(image)
@@ -41,7 +38,11 @@ class Tile():
     """
     def __init__(self, image: Any) -> None:
 
-        """Create a new tile with the given image."""
+        """
+        Create a new tile with the given image.
+        checks if image type is ImageQt of QtGui.QImage if not calls
+        ImageQt.ImageQt to try convert given image to ImageQt type.
+        """
         if image.__class__ is ImageQt or type(image) is QtGui.QImage:
             self.__image = image
             
@@ -50,7 +51,7 @@ class Tile():
                 self.__image = ImageQt.ImageQt(image)
             except Exception as e :
                 print('ERROR on tile __init__ \n', e)
-                traceback.print_stack()
+                
 
             
 
@@ -84,7 +85,7 @@ class Tile():
 
         Tile.resize(width, height) --> Tile
 
-        Return a resized copy of the tile.
+        Return a resized copy of the tile by calling ImageQt.scaled() method.
         """
         return Tile(self.__image.scaled(int(width), int(height),
             QtCore.Qt.IgnoreAspectRatio,
@@ -100,7 +101,8 @@ class Tile():
 
         Tile.save(filename) --> None
 
-        Save the tile to the location given by `filename`.
+        Save the tile to the location given by `filename` calling ImageQt.save()
+        method.
         """
         self.__image.save(filename)
 
@@ -116,7 +118,7 @@ class Tile():
 
         Tile.draw(painter, x, y) --> None
 
-        Draw the tile on the given `painter` at the given position.
+        Draw the tile on the given painter: 'QtGui.QPainter' at the given position.
         """
         painter.drawImage(x, y, self.__image)
 
@@ -131,7 +133,8 @@ class Tile():
 
         Tile.size --> Tuple[int, int]
 
-        The dimensions of the tile.
+        Returns the dimensions of the tile calling ImageQt.width and ImageQt.height 
+        methods.
         """
         return (self.__image.width(), self.__image.height())
 
@@ -147,7 +150,7 @@ def new(width: int, height: int) -> Tile:
 
     new(width, height) --> Tile
 
-    Create a new tile with the given dimensions.
+    Create a new tile with the given dimensions calling QtGui.QImage() istance.
     """
     return Tile(QtGui.QImage(width, height, QtGui.QImage.Format_RGB32))
 
@@ -164,28 +167,11 @@ def fromstring(string: str, width: int, height: int) -> Tile:
     fromstring(string, width, height) --> Tile
 
     Create a new tile from a `string` of raw pixels, with the given
-    dimensions.
+    dimensions, calling Image.frombytes() class instance.
     """
-    #print('STRING UNENCODED \n \n \n', string)
-    #print('STRING ENCODED \n ', len(string.encode('latin-1')))   
-    #for i in range(len(string)) :
-    #
       
     return Tile(Image.frombytes('RGB', (width, height), string.encode('latin-1')))
 
-    '''    
-    string = string[1:]    
-    array = []
-    j=0    
-    for i in range(height) :
-        if i==0 :
-            pass
-        array.append(string[j:j+width])
-        j += width
-    
-    print('ARRAY \n', array)
-    return Tile(Image.fromarray(array))
-    '''
 
 def merged(t1: Tile, t2: Optional[Tile], t3: Optional[Tile], t4: Optional[Tile]) -> Tile:
     """
@@ -199,7 +185,9 @@ def merged(t1: Tile, t2: Optional[Tile], t3: Optional[Tile], t4: Optional[Tile])
 
     merged(t1, t2, t3, t4) --> Tile
 
-    Merge the given tiles into a single tile.
+    Merge the given tiles into a single tile by freating new size ImageQt with
+    QtGui.QImage class instance and then drawing merged tiles with QtGui.QPainter()
+    class instance.
 
     `t1` must be a Tile, but any or all of `t2`,`t3`,`t4` may be None, in which
     case they will be ignored.

@@ -54,13 +54,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageQt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
-
-<span class="c1">#REMOVED object </span>
 
 <div class="viewcode-block" id="Tile">
 <a class="viewcode-back" href="../../pyzui.tile.html#pyzui.tile.Tile">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Tile</span><span class="p">():</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Tile</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor:</span>
 <span class="sd">        Tile(image)</span>
@@ -76,7 +73,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new tile with the given image.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new tile with the given image.</span>
+<span class="sd">        checks if image type is ImageQt of QtGui.QImage if not calls</span>
+<span class="sd">        ImageQt.ImageQt to try convert given image to ImageQt type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">image</span><span class="o">.</span><span class="vm">__class__</span> <span class="ow">is</span> <span class="n">ImageQt</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> <span class="ow">is</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="o">=</span> <span class="n">image</span>
             
@@ -85,7 +86,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="o">=</span> <span class="n">ImageQt</span><span class="o">.</span><span class="n">ImageQt</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span> <span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR on tile __init__ </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
-                <span class="n">traceback</span><span class="o">.</span><span class="n">print_stack</span><span class="p">()</span>
+                
 
             
 
@@ -124,7 +125,7 @@
 
 <span class="sd">        Tile.resize(width, height) --&gt; Tile</span>
 
-<span class="sd">        Return a resized copy of the tile.</span>
+<span class="sd">        Return a resized copy of the tile by calling ImageQt.scaled() method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">scaled</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">width</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">height</span><span class="p">),</span>
             <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">IgnoreAspectRatio</span><span class="p">,</span>
@@ -143,7 +144,8 @@
 
 <span class="sd">        Tile.save(filename) --&gt; None</span>
 
-<span class="sd">        Save the tile to the location given by `filename`.</span>
+<span class="sd">        Save the tile to the location given by `filename` calling ImageQt.save()</span>
+<span class="sd">        method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
 
@@ -162,7 +164,7 @@
 
 <span class="sd">        Tile.draw(painter, x, y) --&gt; None</span>
 
-<span class="sd">        Draw the tile on the given `painter` at the given position.</span>
+<span class="sd">        Draw the tile on the given painter: &#39;QtGui.QPainter&#39; at the given position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">painter</span><span class="o">.</span><span class="n">drawImage</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="p">)</span></div>
 
@@ -178,7 +180,8 @@
 
 <span class="sd">        Tile.size --&gt; Tuple[int, int]</span>
 
-<span class="sd">        The dimensions of the tile.</span>
+<span class="sd">        Returns the dimensions of the tile calling ImageQt.width and ImageQt.height </span>
+<span class="sd">        methods.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">height</span><span class="p">())</span></div>
 
@@ -197,7 +200,7 @@
 
 <span class="sd">    new(width, height) --&gt; Tile</span>
 
-<span class="sd">    Create a new tile with the given dimensions.</span>
+<span class="sd">    Create a new tile with the given dimensions calling QtGui.QImage() istance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Tile</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="o">.</span><span class="n">Format_RGB32</span><span class="p">))</span></div>
 
@@ -217,28 +220,11 @@
 <span class="sd">    fromstring(string, width, height) --&gt; Tile</span>
 
 <span class="sd">    Create a new tile from a `string` of raw pixels, with the given</span>
-<span class="sd">    dimensions.</span>
+<span class="sd">    dimensions, calling Image.frombytes() class instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1">#print(&#39;STRING UNENCODED \n \n \n&#39;, string)</span>
-    <span class="c1">#print(&#39;STRING ENCODED \n &#39;, len(string.encode(&#39;latin-1&#39;)))   </span>
-    <span class="c1">#for i in range(len(string)) :</span>
-    <span class="c1">#</span>
       
-    <span class="k">return</span> <span class="n">Tile</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">frombytes</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="n">string</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;latin-1&#39;</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">Tile</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">frombytes</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="n">string</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;latin-1&#39;</span><span class="p">)))</span></div>
 
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;    </span>
-<span class="sd">    string = string[1:]    </span>
-<span class="sd">    array = []</span>
-<span class="sd">    j=0    </span>
-<span class="sd">    for i in range(height) :</span>
-<span class="sd">        if i==0 :</span>
-<span class="sd">            pass</span>
-<span class="sd">        array.append(string[j:j+width])</span>
-<span class="sd">        j += width</span>
-<span class="sd">    </span>
-<span class="sd">    print(&#39;ARRAY \n&#39;, array)</span>
-<span class="sd">    return Tile(Image.fromarray(array))</span>
-<span class="sd">    &#39;&#39;&#39;</span></div>
 
 
 <div class="viewcode-block" id="merged">
@@ -255,7 +241,9 @@
 
 <span class="sd">    merged(t1, t2, t3, t4) --&gt; Tile</span>
 
-<span class="sd">    Merge the given tiles into a single tile.</span>
+<span class="sd">    Merge the given tiles into a single tile by freating new size ImageQt with</span>
+<span class="sd">    QtGui.QImage class instance and then drawing merged tiles with QtGui.QPainter()</span>
+<span class="sd">    class instance.</span>
 
 <span class="sd">    `t1` must be a Tile, but any or all of `t2`,`t3`,`t4` may be None, in which</span>
 <span class="sd">    case they will be ignored.</span>

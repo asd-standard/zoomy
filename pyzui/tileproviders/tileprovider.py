@@ -23,8 +23,8 @@ from typing import Optional, Tuple, Any
 from threading import Thread, Condition
 from collections import deque
 
-from .tile import Tile
-from .logger import get_logger
+from ..tile import Tile
+from ..logger import get_logger
 
 class TileProvider(Thread):
     """TileProvider objects are used for loading tiles into TileCache objects.

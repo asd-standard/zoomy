@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from PIL import Image
-from pyzui.statictileprovider import StaticTileProvider
+from pyzui.tileproviders import StaticTileProvider
 
 class TestStaticTileProvider:
     """Test suite for the StaticTileProvider class."""
@@ -14,14 +14,14 @@ class TestStaticTileProvider:
 
     def test_inherits_from_tileprovider(self):
         """Test that StaticTileProvider inherits from TileProvider."""
-        from pyzui.tileprovider import TileProvider
+        from pyzui.tileproviders import TileProvider
         tilecache = Mock()
         provider = StaticTileProvider(tilecache)
         assert isinstance(provider, TileProvider)
 
-    @patch('pyzui.statictileprovider.TileStore.get_metadata')
-    @patch('pyzui.statictileprovider.TileStore.get_tile_path')
-    @patch('pyzui.statictileprovider.Image.open')
+    @patch('pyzui.tileproviders.statictileprovider.TileStore.get_metadata')
+    @patch('pyzui.tileproviders.statictileprovider.TileStore.get_tile_path')
+    @patch('pyzui.tileproviders.statictileprovider.Image.open')
     def test_load_success(self, mock_open, mock_path, mock_metadata):
         """Test _load method successfully loads a tile."""
         tilecache = Mock()
@@ -38,7 +38,7 @@ class TestStaticTileProvider:
         assert result == mock_image
         mock_image.load.assert_called_once()
 
-    @patch('pyzui.statictileprovider.TileStore.get_metadata')
+    @patch('pyzui.tileproviders.statictileprovider.TileStore.get_metadata')
     def test_load_exceeds_maxtilelevel(self, mock_metadata):
         """Test _load returns None when tilelevel exceeds maxtilelevel."""
         tilecache = Mock()
@@ -50,9 +50,9 @@ class TestStaticTileProvider:
 
         assert result is None
 
-    @patch('pyzui.statictileprovider.TileStore.get_metadata')
-    @patch('pyzui.statictileprovider.TileStore.get_tile_path')
-    @patch('pyzui.statictileprovider.Image.open')
+    @patch('pyzui.tileproviders.statictileprovider.TileStore.get_metadata')
+    @patch('pyzui.tileproviders.statictileprovider.TileStore.get_tile_path')
+    @patch('pyzui.tileproviders.statictileprovider.Image.open')
     def test_load_ioerror(self, mock_open, mock_path, mock_metadata):
         """Test _load returns None on IOError."""
         tilecache = Mock()
@@ -67,9 +67,9 @@ class TestStaticTileProvider:
 
         assert result is None
 
-    @patch('pyzui.statictileprovider.TileStore.get_metadata')
-    @patch('pyzui.statictileprovider.TileStore.get_tile_path')
-    @patch('pyzui.statictileprovider.Image.open')
+    @patch('pyzui.tileproviders.statictileprovider.TileStore.get_metadata')
+    @patch('pyzui.tileproviders.statictileprovider.TileStore.get_tile_path')
+    @patch('pyzui.tileproviders.statictileprovider.Image.open')
     def test_load_valid_tilelevel(self, mock_open, mock_path, mock_metadata):
         """Test _load with valid tilelevel at boundary."""
         tilecache = Mock()
@@ -85,9 +85,9 @@ class TestStaticTileProvider:
 
         assert result == mock_image
 
-    @patch('pyzui.statictileprovider.TileStore.get_metadata')
-    @patch('pyzui.statictileprovider.TileStore.get_tile_path')
-    @patch('pyzui.statictileprovider.Image.open')
+    @patch('pyzui.tileproviders.statictileprovider.TileStore.get_metadata')
+    @patch('pyzui.tileproviders.statictileprovider.TileStore.get_tile_path')
+    @patch('pyzui.tileproviders.statictileprovider.Image.open')
     def test_load_calls_correct_methods(self, mock_open, mock_path, mock_metadata):
         """Test _load calls TileStore methods with correct parameters."""
         tilecache = Mock()

@@ -24,7 +24,7 @@ import subprocess
 import os
 
 from .dynamictileprovider import DynamicTileProvider
-from .converters import VipsConverter
+from ..converters import VipsConverter
 
 class MandelTileProvider(DynamicTileProvider):
     """MandelTileProvider objects are used for generating tiles of the

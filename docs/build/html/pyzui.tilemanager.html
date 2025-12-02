@@ -44,20 +44,40 @@ no tiles of the requested resolution are available.</p>
 <dd><dl class="simple">
 <dt>Function :</dt><dd><p>init(total_cache_size, auto_cleanup, cleanup_max_age_days)</p>
 </dd>
-<dt>Parameters :</dt><dd><p>total_cache_size : int
-auto_cleanup : bool
-cleanup_max_age_days : int</p>
+<dt>Parameters :</dt><dd><dl class="simple">
+<dt>total_cache_size<span class="classifier">int</span></dt><dd><ul class="simple">
+<li><p>Total cache size for tiles (default: 1024)</p></li>
+</ul>
+</dd>
+<dt>auto_cleanup<span class="classifier">bool</span></dt><dd><ul class="simple">
+<li><p>Enable automatic cleanup of old tiles (default: True)</p></li>
+</ul>
+</dd>
+<dt>cleanup_max_age_days<span class="classifier">int</span></dt><dd><ul class="simple">
+<li><p>Maximum age in days for tiles (default: 3)</p></li>
+</ul>
+</dd>
+</dl>
 </dd>
 </dl>
 <p>init(total_cache_size, auto_cleanup, cleanup_max_age_days) –&gt; None</p>
 <p>Initialise the TileManager. This <strong>must</strong> be called before any other
 functions are called.</p>
+<dl class="simple">
+<dt>The central coordinator that:</dt><dd><ul class="simple">
+<li><p>Routes tile requests to appropriate providers</p></li>
+<li><p>Manages two-tier caching (80% permanent / 20% temporary)</p></li>
+<li><p>Synthesizes missing tiles from available ones via cut_tile()</p></li>
+<li><p>Key methods: load_tile(), get_tile(), get_tile_robust()</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>total_cache_size</strong> (<em>int</em>) – Total cache size for tiles (default: 1024)</p></li>
-<li><p><strong>auto_cleanup</strong> (<em>bool</em>) – Enable automatic cleanup of old tiles (default: True)</p></li>
-<li><p><strong>cleanup_max_age_days</strong> (<em>int</em>) – Maximum age in days for tiles (default: 3)</p></li>
+<li><p><strong>total_cache_size</strong> (<em>int</em>)</p></li>
+<li><p><strong>auto_cleanup</strong> (<em>bool</em>)</p></li>
+<li><p><strong>cleanup_max_age_days</strong> (<em>int</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>

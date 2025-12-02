@@ -26,7 +26,7 @@ import os
 from PIL import Image
 
 from .dynamictileprovider import DynamicTileProvider
-from . import tilestore as TileStore
+from .. import tilestore as TileStore
 
 class GlobalMosaicTileProvider(DynamicTileProvider):
     """GlobalMosaicTileProvider objects are used for downloading tiles from the

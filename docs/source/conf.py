@@ -24,7 +24,6 @@ extensions = [
     'sphinx.ext.autosummary',       # create summary tables
     'sphinx.ext.napoleon',          # support for Google/NumPy-style docstrings
     'sphinx.ext.viewcode',          # add links to highlighted source code
-    "sphinx.ext.autodoc.typehints", # To show type hints 
 ] 
 
 templates_path = ['_templates']
@@ -41,7 +40,7 @@ autodoc_default_options = {
     'private-members': True,   # include names starting with _ or __
 }
 autodoc_member_order = 'bysource'
-autodoc_typehints = 'description'
+autodoc_typehints = 'none'  # Don't auto-generate type hint documentation
 autoclass_content = 'both'
 
 
