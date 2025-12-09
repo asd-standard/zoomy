@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pyzui.objects.scene.qzui module &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cc7d0dec" />
+    <script src="../_static/documentation_options.js?v=086c1757"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pyzui.objects.scene.qzui">
+<span id="pyzui-objects-scene-qzui-module"></span><h1>pyzui.objects.scene.qzui module<a class="headerlink" href="#module-pyzui.objects.scene.qzui" title="Link to this heading">¶</a></h1>
+<p>QWidget for displaying the ZUI.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.objects.scene.qzui.</span></span><span class="sig-name descname"><span class="pre">QZUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom_sensitivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/objects/scene/qzui.html#QZUI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QWidget</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
+<dl class="simple">
+<dt>Constructor :</dt><dd><p>QZUI(parent, framerate, zoom_sensitivity)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>parent : Optional[QtWidgets.QWidget]
+framerate : int
+zoom_sensitivity : int</p>
+</dd>
+</dl>
+<p>QZUI(parent, framerate, zoom_sensitivity) –&gt; None</p>
+<p>QZUI widgets that are used for rendering the ZUI.
+This class defines all the methods to retrieve events, Mouse, Keyboard, etc.</p>
+<dl class="simple">
+<dt>Constructor :</dt><dd><p>QZUI(parent, framerate, zoom_sensitivity)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>parent : Optional[QtWidgets.QWidget]
+framerate : int
+zoom_sensitivity : int</p>
+</dd>
+</dl>
+<p>QZUI(parent, framerate, zoom_sensitivity) –&gt; None</p>
+<p>Create a new QZUI QWidget with the given <cite>parent</cite> widget.
+Initializes the widget with specified framerate and zoom sensitivity.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.error">
+<span class="sig-name descname"><span class="pre">error</span></span><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.error" title="Link to this definition">¶</a></dt>
+<dd><p>link error variable to QtCore.Signal()</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.__zoom">
+<span class="sig-name descname"><span class="pre">__zoom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_steps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.__zoom" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>__zoom(num_steps)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>num_steps : float</p>
+</dd>
+</dl>
+<p>__zoom(num_steps) –&gt; None</p>
+<p>Increase the z velocity of the appropriate object by an amount
+proportional to num_steps.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.__centre">
+<span class="sig-name descname"><span class="pre">__centre</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.__centre" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>__centre()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__centre() –&gt; None</p>
+<p>Aim the appropriate object such that the point under the cursor will
+move to the centre of the screen.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.paintEvent">
+<span class="sig-name descname"><span class="pre">paintEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/objects/scene/qzui.html#QZUI.paintEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.paintEvent" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>paintEvent(event)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>event : QtGui.QPaintEvent</p>
+</dd>
+</dl>
+<p>paintEvent(event) –&gt; None</p>
+<p>Method that allows you to perform custom painting on a widget.</p>
+<p>It is part of the event handling system, and you typically override it in a subclass of a QWidget
+(or any subclass like QLabel, QFrame, etc.) to draw graphics using the QPainter class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.timerEvent">
+<span class="sig-name descname"><span class="pre">timerEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/objects/scene/qzui.html#QZUI.timerEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.timerEvent" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>timerEvent(event)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>event : QtCore.QTimerEvent</p>
+</dd>
+</dl>
+<p>timerEvent(event) –&gt; None</p>
+<p>Handle timer events to update the scene rendering.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.wheelEvent">
+<span class="sig-name descname"><span class="pre">wheelEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/objects/scene/qzui.html#QZUI.wheelEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.wheelEvent" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>wheelEvent(event)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>event : QtGui.QWheelEvent</p>
+</dd>
+</dl>
+<p>wheelEvent(event) –&gt; None</p>
+<p>Handle mouse wheel events for zooming.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.mousePressEvent">
+<span class="sig-name descname"><span class="pre">mousePressEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/objects/scene/qzui.html#QZUI.mousePressEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.mousePressEvent" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>mousePressEvent(event)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>event : QtGui.QMouseEvent</p>
+</dd>
+</dl>
+<p>mousePressEvent(event) –&gt; None</p>
+<p>Handle mouse press events for object selection.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.mouseMoveEvent">
+<span class="sig-name descname"><span class="pre">mouseMoveEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/objects/scene/qzui.html#QZUI.mouseMoveEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.mouseMoveEvent" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>mouseMoveEvent(event)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>event : QtGui.QMouseEvent</p>
+</dd>
+</dl>
+<p>mouseMoveEvent(event) –&gt; None</p>
+<p>Handle mouse move events for dragging objects.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.mouseReleaseEvent">
+<span class="sig-name descname"><span class="pre">mouseReleaseEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/objects/scene/qzui.html#QZUI.mouseReleaseEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.mouseReleaseEvent" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>mouseReleaseEvent(event)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>event : QtGui.QMouseEvent</p>
+</dd>
+</dl>
+<p>mouseReleaseEvent(event) –&gt; None</p>
+<p>Handle mouse release events.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.keyPressEvent">
+<span class="sig-name descname"><span class="pre">keyPressEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/objects/scene/qzui.html#QZUI.keyPressEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.keyPressEvent" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>keyPressEvent(event)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>event : QtGui.QKeyEvent</p>
+</dd>
+</dl>
+<p>keyPressEvent(event) –&gt; None</p>
+<p>Handle key press events for navigation and control.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.keyReleaseEvent">
+<span class="sig-name descname"><span class="pre">keyReleaseEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/objects/scene/qzui.html#QZUI.keyReleaseEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.keyReleaseEvent" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>keyReleaseEvent(event)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>event : QtGui.QKeyEvent</p>
+</dd>
+</dl>
+<p>keyReleaseEvent(event) –&gt; None</p>
+<p>Handle key release events.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.resizeEvent">
+<span class="sig-name descname"><span class="pre">resizeEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/objects/scene/qzui.html#QZUI.resizeEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.resizeEvent" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>resizeEvent(event)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>event : QtGui.QResizeEvent</p>
+</dd>
+</dl>
+<p>resizeEvent(event) –&gt; None</p>
+<p>Handle resize events to update the viewport size.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.__active_object">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__active_object</span></span><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.__active_object" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Property:</dt><dd><p>__active_object</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__active_object –&gt; Any</p>
+<p>Return the currently active object (either selected object or scene).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.__get_framerate">
+<span class="sig-name descname"><span class="pre">__get_framerate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.__get_framerate" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>__get_framerate()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__get_framerate() –&gt; int</p>
+<p>Return the rendering framerate.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.__set_framerate">
+<span class="sig-name descname"><span class="pre">__set_framerate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">framerate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.__set_framerate" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>__set_framerate(framerate)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>framerate : int</p>
+</dd>
+</dl>
+<p>__set_framerate(framerate) –&gt; None</p>
+<p>Set the rendering framerate.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.framerate">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">framerate</span></span><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.framerate" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method:</dt><dd><p>__get_framerate()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__get_framerate() –&gt; int</p>
+<p>Return the rendering framerate.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.__get_scene">
+<span class="sig-name descname"><span class="pre">__get_scene</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.__get_scene" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>__get_scene()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__get_scene() –&gt; Scene.Scene</p>
+<p>Return the scene currently being viewed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.__set_scene">
+<span class="sig-name descname"><span class="pre">__set_scene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scene</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.__set_scene" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>__set_scene(scene)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>scene : Scene.Scene</p>
+</dd>
+</dl>
+<p>__set_scene(scene) –&gt; None</p>
+<p>Set the scene to be viewed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.scene">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scene</span></span><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.scene" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method:</dt><dd><p>__get_scene()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__get_scene() –&gt; Scene.Scene</p>
+<p>Return the scene currently being viewed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.objects.scene.qzui.QZUI.staticMetaObject">
+<span class="sig-name descname"><span class="pre">staticMetaObject</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">PySide6.QtCore.QMetaObject(&quot;QZUI&quot;</span> <span class="pre">inherits</span> <span class="pre">&quot;QWidget&quot;:</span> <span class="pre">Methods:</span>&#160;&#160; <span class="pre">#33</span> <span class="pre">type=Signal,</span> <span class="pre">signature=error()</span> <span class="pre">)</span></em><a class="headerlink" href="#pyzui.objects.scene.qzui.QZUI.staticMetaObject" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#generating-documentation">Generating Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programconfiguration.html">Program Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributiongiudelines.html">Contribution guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/pyzui/qzui.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

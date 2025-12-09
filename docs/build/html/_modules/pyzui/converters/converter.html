@@ -56,23 +56,26 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">..logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <div class="viewcode-block" id="Converter">
-<a class="viewcode-back" href="../../../pyzui.converter.html#pyzui.converters.converter.Converter">[docs]</a>
+<a class="viewcode-back" href="../../../pyzui/converter.html#pyzui.converters.converter.Converter">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Converter</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converter objects are used for converting media.</span>
-
-<span class="sd">    Constructor:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructor :</span>
 <span class="sd">        Converter(infile, outfile)</span>
 <span class="sd">    Parameters :</span>
 <span class="sd">        infile : str</span>
 <span class="sd">        outfile : str</span>
+
+<span class="sd">    Converter(infile, outfile) --&gt; None</span>
+
+<span class="sd">    Converter objects are used for converting media.</span>
+
+<span class="sd">    Create a new Converter for converting media at the location given by</span>
+<span class="sd">    `infile` to the location given by `outfile`.</span>
+
+<span class="sd">    Where appropriate, the output format will be determined from the file</span>
+<span class="sd">    extension of `outfile`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new Converter for converting media at the location given by</span>
-<span class="sd">        `infile` to the location given by `outfile`.</span>
-
-<span class="sd">        Where appropriate, the output format will be determined from the file</span>
-<span class="sd">        extension of `outfile`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Thread</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_infile</span> <span class="o">=</span> <span class="n">infile</span>
@@ -86,17 +89,18 @@
 
 
 <div class="viewcode-block" id="Converter.run">
-<a class="viewcode-back" href="../../../pyzui.converter.html#pyzui.converters.converter.Converter.run">[docs]</a>
+<a class="viewcode-back" href="../../../pyzui/converter.html#pyzui.converters.converter.Converter.run">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the conversion. If any errors are encountered then :attr:`self.error`</span>
-<span class="sd">        will be set to a string describing the error.</span>
-
-<span class="sd">        Method:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
 <span class="sd">            Converter.run()</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            None</span>
 
-<span class="sd">        Converter.run() -&gt; None</span>
+<span class="sd">        Converter.run() --&gt; None</span>
+
+<span class="sd">        Run the conversion. If any errors are encountered then :attr:`self.error`</span>
+<span class="sd">        will be set to a string describing the error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
@@ -104,15 +108,16 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">progress</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Conversion progress ranging from 0.0 to 1.0. A value of 1.0</span>
-<span class="sd">        indicates that the converter has completely finished.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Property :</span>
 <span class="sd">            Converter.progress</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            None</span>
 
-<span class="sd">        Converter.progress -&gt; float</span>
+<span class="sd">        Converter.progress --&gt; float</span>
+
+<span class="sd">        Conversion progress ranging from 0.0 to 1.0. A value of 1.0</span>
+<span class="sd">        indicates that the converter has completely finished.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_progress</span>
 
@@ -154,16 +159,20 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">PyZui installation instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html#dependencies">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#generating-documentation">Generating documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#generating-documentation">Generating Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../usageinstructions.html">User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../programconfiguration.html">Program Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../technicaldocumentation.html">Reading Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../technicaldocumentation.html#project-structure">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../logging.html">Logging System</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

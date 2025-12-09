@@ -19,7 +19,7 @@ zoom through the collection.
 
 PyZUI is compatible with the following media formats:
 -----------------------------------------------------
-- All images recognised by ImageMagick
+- All images recognised by VIPS
 - PDF documents
 - Remote webpages
 - SVG (vector graphics)
@@ -41,14 +41,19 @@ PyZUI is compatible with the following media formats:
    :titlesonly:
    :caption: Usage Instructions
 
-   usageinstructions
+   userinterface
+   programconfiguration
 
 .. toctree::
    :maxdepth: 2
    :titlesonly:
-   :caption: Technical Documentation 
+   :caption: Technical Documentation
 
-   technicaldocumentation
+   readingdocumentation
+   projectstructure
+   tiledmediaobject
+   tilingsystem
+   logging
 
 .. toctree::
    :maxdepth: 2

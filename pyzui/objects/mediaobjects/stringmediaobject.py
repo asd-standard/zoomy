@@ -18,8 +18,7 @@
 
 """Strings to be displayed in the ZUI."""
 
-#from threading import Thread
-from typing import Optional, Tuple, List, Any
+from typing import Optional, Tuple, Any
 
 from PySide6 import QtCore, QtGui
 
@@ -44,9 +43,25 @@ class StringMediaObject(MediaObject): #, Thread
     displayed.
     """
     def __init__(self, media_id: str, scene: Any) -> None:
+        """
+        Constructor :
+            StringMediaObject(media_id, scene)
+        Parameters :
+            media_id : str
+            scene : Scene
 
-        """Initialize a new MediaObject from the media identified by `media_id`,
-        and the parent Scene referenced by `scene`."""
+        StringMediaObject(media_id, scene) --> None
+
+        Initialize a new StringMediaObject from the media identified by media_id,
+        and the parent Scene referenced by scene.
+
+        The media_id should be of the form 'string:rrggbb:foobar', where
+        'rrggbb' is a string of three two-digit hexadecimal numbers representing
+        the color of the text, and 'foobar' is the string to be displayed.
+
+        Parses the media_id to extract color and text content, then processes
+        the text to handle multi-line strings by splitting on newline characters.
+        """
         MediaObject.__init__(self, media_id, scene)
 
         #Get color code 'rrggbb' from media_id string and assign it to hexcol variable
@@ -152,11 +167,37 @@ class StringMediaObject(MediaObject): #, Thread
 
     @property
     def __pointsize(self) -> float:
+        """
+        Property :
+            __pointsize
+        Parameters :
+            None
+
+        __pointsize --> float
+
+        Calculate and return the font point size based on the current scale.
+
+        Returns base_pointsize multiplied by the current scale factor.
+        """
         return self.base_pointsize * self.scale
 
 
     @property
     def __font(self) -> Optional[Any]:
+        """
+        Property :
+            __font
+        Parameters :
+            None
+
+        __font --> QFont or None
+
+        Create and return a QFont object with the appropriate point size
+        for the current scale.
+
+        Returns None if the point size is less than 1 (too small to be seen).
+        Otherwise returns a Sans Serif font with the calculated point size.
+        """
         pointsize = self.__pointsize
         if pointsize < 1:
             ## too small to be seen

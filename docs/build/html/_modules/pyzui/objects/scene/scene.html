@@ -61,9 +61,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QPainter</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.dialogwindows</span><span class="w"> </span><span class="kn">import</span> <span class="n">DialogWindows</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.windows.dialogwindows.dialogwindows</span><span class="w"> </span><span class="kn">import</span> <span class="n">DialogWindows</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.objects.physicalobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhysicalObject</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilemanager</span> <span class="k">as</span> <span class="n">TileManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilemanager</span> <span class="k">as</span> <span class="n">TileManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.objects.mediaobjects</span><span class="w"> </span><span class="kn">import</span> <span class="n">mediaobject</span> <span class="k">as</span> <span class="n">MediaObject</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.objects.mediaobjects.tiledmediaobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">TiledMediaObject</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.objects.mediaobjects.stringmediaobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringMediaObject</span>
@@ -71,7 +71,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <div class="viewcode-block" id="Scene">
-<a class="viewcode-back" href="../../../../pyzui.scene.html#pyzui.objects.scene.scene.Scene">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Scene</span><span class="p">(</span><span class="n">PhysicalObject</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor :</span>
@@ -96,7 +96,7 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        New scene is made by initiating a :doc:`physicalobject &lt;pyzui.physicalobject&gt;`, </span>
+<span class="sd">        New scene is made by initiating a :class:`~pyzui.objects.physicalobject.PhysicalObject`, </span>
 
 <span class="sd">        creating an objects list `__objects` and thread safe selection for `__objects`</span>
 <span class="sd">        given by declaring RLock list `__objects_lock`, </span>
@@ -161,7 +161,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;Scene&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Scene.save">
-<a class="viewcode-back" href="../../../../pyzui.scene.html#pyzui.objects.scene.scene.Scene.save">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.save">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -225,7 +225,7 @@
 
 
 <div class="viewcode-block" id="Scene.add">
-<a class="viewcode-back" href="../../../../pyzui.scene.html#pyzui.objects.scene.scene.Scene.add">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.add">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mediaobject</span><span class="p">:</span> <span class="s1">&#39;MediaObject.MediaObject&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -251,7 +251,7 @@
 
 
 <div class="viewcode-block" id="Scene.remove">
-<a class="viewcode-back" href="../../../../pyzui.scene.html#pyzui.objects.scene.scene.Scene.remove">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.remove">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mediaobject</span><span class="p">:</span> <span class="s1">&#39;MediaObject.MediaObject&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -317,7 +317,7 @@
 
 
 <div class="viewcode-block" id="Scene.get">
-<a class="viewcode-back" href="../../../../pyzui.scene.html#pyzui.objects.scene.scene.Scene.get">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.get">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;MediaObject.MediaObject&#39;</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -357,7 +357,7 @@
 
 
 <div class="viewcode-block" id="Scene.zoom">
-<a class="viewcode-back" href="../../../../pyzui.scene.html#pyzui.objects.scene.scene.Scene.zoom">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.zoom">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Zoom by the given `amount` with the centre maintaining its position</span>
 <span class="sd">        on the screen.</span>
@@ -387,7 +387,7 @@
     
 
 <div class="viewcode-block" id="Scene.render">
-<a class="viewcode-back" href="../../../../pyzui.scene.html#pyzui.objects.scene.scene.Scene.render">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.render">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">QPainter</span><span class="p">,</span> <span class="n">draft</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s1">&#39;MediaObject.MediaObject&#39;</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -560,7 +560,7 @@
 
 
 <div class="viewcode-block" id="Scene.step">
-<a class="viewcode-back" href="../../../../pyzui.scene.html#pyzui.objects.scene.scene.Scene.step">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -741,7 +741,7 @@
 
 
 <div class="viewcode-block" id="new">
-<a class="viewcode-back" href="../../../../pyzui.scene.html#pyzui.objects.scene.scene.new">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.new">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">new</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Scene</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function :</span>
@@ -758,7 +758,7 @@
 
 
 <div class="viewcode-block" id="load_scene">
-<a class="viewcode-back" href="../../../../pyzui.scene.html#pyzui.objects.scene.scene.load_scene">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.load_scene">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_scene</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Scene</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function :</span>
@@ -858,16 +858,20 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">PyZui installation instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#dependencies">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../usageinstructions.html">User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../programconfiguration.html">Program Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation.html">Reading Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation.html#project-structure">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../logging.html">Logging System</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

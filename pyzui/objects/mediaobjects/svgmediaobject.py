@@ -18,7 +18,7 @@
 
 """SVG objects to be displayed in the ZUI."""
 
-from typing import Optional, Tuple, List, Any
+from typing import Tuple, Any
 
 from PySide6 import QtCore, QtSvg
 
@@ -38,6 +38,24 @@ class SVGMediaObject(MediaObject):
     rendered in the ZUI.
     """
     def __init__(self, media_id: str, scene: Any) -> None:
+        """
+        Constructor :
+            SVGMediaObject(media_id, scene)
+        Parameters :
+            media_id : str
+            scene : Scene
+
+        SVGMediaObject(media_id, scene) --> None
+
+        Initialize a new SVGMediaObject from the SVG file identified by media_id,
+        and the parent Scene referenced by scene.
+
+        Creates a QSvgRenderer and attempts to load the SVG file.
+        Raises LoadError if the SVG file cannot be parsed.
+
+        Stores the default width and height of the SVG image for rendering
+        calculations.
+        """
         MediaObject.__init__(self, media_id, scene)
 
         self.__renderer = QtSvg.QSvgRenderer()

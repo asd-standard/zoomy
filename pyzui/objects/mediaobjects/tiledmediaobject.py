@@ -21,17 +21,16 @@
 import tempfile
 import os
 import math
-from typing import Optional, Tuple, List, Any
+from typing import Tuple, Any
 
 from PySide6 import QtCore, QtGui
-from PIL import ImageQt
 
 from pyzui.objects.mediaobjects.mediaobject import MediaObject, LoadError, RenderMode
-from pyzui import tilemanager as TileManager
+from pyzui.tilesystem import tilemanager as TileManager
 from pyzui.logger import get_logger
 
-# Subdivide a ppm image into tiles that fit the mediaobject frame 
-from pyzui.ppm import PPMTiler
+# Subdivide a ppm image into tiles that fit the mediaobject frame
+from pyzui.tilesystem.tiler.ppm import PPMTiler
 
 # The classes that convert various format to ppm images
 from pyzui.converters import PDFConverter, VipsConverter
@@ -63,6 +62,25 @@ class TiledMediaObject(MediaObject):
     The converter returns a ppm image file on which we can run the tiler on.
     """
     def __init__(self, media_id: str, scene: Any, autofit: bool = True) -> None:
+        """
+        Constructor :
+            TiledMediaObject(media_id, scene, autofit)
+        Parameters :
+            media_id : str
+            scene : Scene
+            autofit : bool (default=True)
+
+        TiledMediaObject(media_id, scene, autofit) --> None
+
+        Initialize a new TiledMediaObject from the media identified by media_id,
+        the parent Scene referenced by scene, and optionally autofit behavior.
+
+        If autofit is True, once the media has loaded it will be fitted to
+        the area occupied by the placeholder.
+
+        Sets up conversion and tiling infrastructure based on the media file type.
+        Initializes caching variables for tileblocks and rendering optimization.
+        """
         MediaObject.__init__(self, media_id, scene)
 
         self.__autofit = autofit
@@ -127,6 +145,21 @@ class TiledMediaObject(MediaObject):
 
     @property
     def __progress(self) -> float:
+        """
+        Property :
+            __progress
+        Parameters :
+            None
+
+        __progress --> float
+
+        Calculate and return the current loading progress as a float
+        between 0.0 and 1.0.
+
+        If only tiler is active, returns tiler progress.
+        If only converter is active, returns half of converter progress.
+        If both are active, returns average of both progresses.
+        """
         if self.__converter is None and self.__tiler is None:
             return 0.0
         elif self.__converter is None:
@@ -458,7 +491,26 @@ class TiledMediaObject(MediaObject):
 
 
     def render(self, painter: Any, mode: int) -> None:
-        
+        """
+        Method :
+            TiledMediaObject.render(painter, mode)
+        Parameters :
+            painter : QPainter
+            mode : int
+
+        TiledMediaObject.render(painter, mode) --> None
+
+        Render the tiled media using the given painter and rendering mode.
+
+        If the media is loaded, renders the actual media content.
+        Otherwise, renders a placeholder showing loading progress.
+
+        Handles tiler initialization if converter has finished but tiler
+        hasn't started yet.
+
+        Precondition: mode is equal to one of the constants defined in
+        :class:`RenderMode`
+        """
 
         if self.__loaded:
             self.__render_media(painter, mode)
@@ -494,6 +546,21 @@ class TiledMediaObject(MediaObject):
 
     @property
     def onscreen_size(self) -> Tuple[float, float]:
+        """
+        Property :
+            TiledMediaObject.onscreen_size
+        Parameters :
+            None
+
+        TiledMediaObject.onscreen_size --> Tuple[float, float]
+
+        Return the on-screen size of the tiled media.
+
+        Calculates the width and height based on aspect ratio if available,
+        otherwise uses the actual width and height scaled by zoom levels.
+
+        Returns (0,0) if the media dimensions are not yet known.
+        """
         if self.__aspect_ratio:
             if self.__aspect_ratio >= 1.0:
                 ## width >= height

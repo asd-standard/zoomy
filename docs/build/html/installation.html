@@ -14,7 +14,7 @@
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="User interface" href="usageinstructions.html" />
+    <link rel="next" title="User Interface" href="userinterface.html" />
     <link rel="prev" title="Welcome to PyZUI Documentation!" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -45,13 +45,13 @@ with a miniconda enviroment managing all dependencies.</p>
 <h1>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">¶</a></h1>
 <p>PyZui has been developed with the following python version</p>
 <ul class="simple">
-<li><p>python=3.12.9</p></li>
+<li><p>python = 3.12.12</p></li>
 </ul>
 <p>All dependencies have been installed in a miniconda enviroment, for all 3
 platforms tested the procedure has always been to install miniconda, create an
 enviroment:</p>
 <blockquote>
-<div><p>conda create -n “enviroment name” python=3.12.9</p>
+<div><p>conda create -n “enviroment name” python = 3.12.12</p>
 </div></blockquote>
 <p>And activate such enviroment</p>
 <blockquote>
@@ -63,8 +63,9 @@ enviroment:</p>
 </div></blockquote>
 <p>PyZUI depends on the following Python packages:</p>
 <ul class="simple">
-<li><p>pyside6=6.7.2</p></li>
-<li><p>pillow=9.4.0</p></li>
+<li><p>pyside6 = 6.7.2</p></li>
+<li><p>pillow= 11.0.3</p></li>
+<li><p>pyvips = 2.2.3</p></li>
 </ul>
 <p>The following non-Python packages are also required by certain features of the
 application, those are installed trough the Conda-Forge Anaconda channel.
@@ -75,10 +76,6 @@ enviroment:</p>
 <div><p>conda install -c conda-forge “package”=”version number”</p>
 </div></blockquote>
 <ul class="simple">
-<li><p>imagemagick=7.1.1_5
-(highly recommended, but strictly optional if you do not intend
-using images of any format other than PPM; the absence of ImageMagick may
-also break other parts of the application as well);</p></li>
 <li><p>poppler=24.09.0
 pdftoppm from Poppler or Xpdf (optional if you do not intend viewing PDFs);</p></li>
 </ul>
@@ -126,7 +123,7 @@ of the pyzui project and run:</p>
 </section>
 </section>
 <section id="generating-documentation">
-<h1>Generating documentation<a class="headerlink" href="#generating-documentation" title="Link to this heading">¶</a></h1>
+<h1>Generating Documentation<a class="headerlink" href="#generating-documentation" title="Link to this heading">¶</a></h1>
 <ul class="simple">
 <li><p>Install sphinx on the conda enviroment you have created for the PyZui project.</p></li>
 </ul>
@@ -145,7 +142,7 @@ and then:</p></li>
 make html</p>
 </div></blockquote>
 <ul class="simple">
-<li><p>this will generate all’the documentation adding changes to the project docstring
+<li><p>this will generate all the documentation adding changes to the project docstring
 you might have added. You can visualize documentation by opening</p></li>
 </ul>
 <blockquote>
@@ -154,8 +151,8 @@ you might have added. You can visualize documentation by opening</p></li>
 <section id="building-documentation">
 <h2>Building documentation<a class="headerlink" href="#building-documentation" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p>Be aware, building documentation cause all docs project configuration files to
-be wiped, if you just wish to update documentation go to GENERATING
+<li><p>Be aware, building documentation cause certains docs project configuration
+files to be wiped, if you just wish to update documentation go to GENERATING
 DOCUMENTATION</p></li>
 <li><p>Install sphinx on the conda enviroment you have created for the PyZui project.</p></li>
 </ul>
@@ -177,11 +174,17 @@ Author name: your name or org
 Project release: version
 Separate source and build dirs: usually Yes</p>
 </li>
-<li><p>This creates a structure like:</p></li>
-</ul>
-<a class="reference internal image-reference" href="_images/sphinx_docgen_tree.png"><img alt="Sphinx Docgen Tree" class="align-center" src="_images/sphinx_docgen_tree.png" style="width: 300px;" />
-</a>
-<ul>
+<li><p>This creates a structure like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docs</span><span class="o">/</span>
+<span class="o">|</span><span class="n">__</span> <span class="n">build</span><span class="o">/</span>
+<span class="o">|</span><span class="n">__</span> <span class="n">source</span><span class="o">/</span>
+<span class="o">|</span>   <span class="o">|</span><span class="n">__</span> <span class="n">conf</span><span class="o">.</span><span class="n">py</span>
+<span class="o">|</span>   <span class="o">|</span><span class="n">__</span> <span class="n">index</span><span class="o">.</span><span class="n">rst</span>
+<span class="o">|</span>   <span class="o">|</span><span class="n">__</span> <span class="n">_static</span><span class="o">/</span>
+<span class="o">|</span><span class="n">__</span> <span class="n">Makefile</span>
+</pre></div>
+</div>
+</li>
 <li><p>Then navigate to ./docs and run</p>
 <p>sphinx-apidoc -e -o source/ ..
 sphinx-apidoc -e -o source/ ../pyzui</p>
@@ -224,16 +227,20 @@ you might have added. You can visualize documentation by opening ./docs/build/ht
 <li class="toctree-l1 current"><a class="current reference internal" href="#">PyZui installation instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#dependencies">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#generating-documentation">Generating documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#generating-documentation">Generating Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="usageinstructions.html">User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programconfiguration.html">Program Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation.html">Reading Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation.html#project-structure">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging System</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
@@ -245,7 +252,7 @@ you might have added. You can visualize documentation by opening ./docs/build/ht
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="index.html" title="previous chapter">Welcome to PyZUI Documentation!</a></li>
-      <li>Next: <a href="usageinstructions.html" title="next chapter">User interface</a></li>
+      <li>Next: <a href="userinterface.html" title="next chapter">User Interface</a></li>
   </ul></li>
 </ul>
 </div>

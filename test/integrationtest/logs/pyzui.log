@@ -1,0 +1,306 @@
+2025-12-05 13:37:34 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 13:37:34 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-05 13:37:34 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: False
+2025-12-05 13:37:34 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: WARNING
+2025-12-05 13:37:34 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
+2025-12-05 13:37:34 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/integrationtest/logs/pyzui.log
+2025-12-05 13:37:34 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 13:37:36 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 13:37:36 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-05 13:37:36 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: False
+2025-12-05 13:37:36 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: WARNING
+2025-12-05 13:37:36 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
+2025-12-05 13:37:36 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/integrationtest/logs/pyzui.log
+2025-12-05 13:37:36 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 13:38:15 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 13:38:15 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-05 13:38:15 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: False
+2025-12-05 13:38:15 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: WARNING
+2025-12-05 13:38:15 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
+2025-12-05 13:38:15 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/integrationtest/logs/pyzui.log
+2025-12-05 13:38:15 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 13:38:16 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 13:38:16 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-05 13:38:16 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: False
+2025-12-05 13:38:16 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: WARNING
+2025-12-05 13:38:16 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
+2025-12-05 13:38:16 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/integrationtest/logs/pyzui.log
+2025-12-05 13:38:16 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 13:38:39 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 13:38:39 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-05 13:38:39 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: False
+2025-12-05 13:38:39 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: WARNING
+2025-12-05 13:38:39 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
+2025-12-05 13:38:39 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/integrationtest/logs/pyzui.log
+2025-12-05 13:38:39 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 13:38:40 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 13:38:40 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-05 13:38:40 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: False
+2025-12-05 13:38:40 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: WARNING
+2025-12-05 13:38:40 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
+2025-12-05 13:38:40 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/integrationtest/logs/pyzui.log
+2025-12-05 13:38:40 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 14:26:48 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 14:26:48 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-05 14:26:48 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: False
+2025-12-05 14:26:48 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: WARNING
+2025-12-05 14:26:48 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
+2025-12-05 14:26:48 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/integrationtest/logs/pyzui.log
+2025-12-05 14:26:48 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 14:26:48 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           |  20% tiled
+2025-12-05 14:26:48 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           |  40% tiled
+2025-12-05 14:26:48 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           |  60% tiled
+2025-12-05 14:26:48 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           |  80% tiled
+2025-12-05 14:26:48 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           | 100% tiled
+2025-12-05 14:26:48 | [INFO    ] | pyzui.Tiler.test_single_tile | __savetile           | 100% tiled
+2025-12-05 14:26:48 | [INFO    ] | pyzui.Tiler.test_small_image | __savetile           | 100% tiled
+2025-12-05 14:26:48 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           |  20% tiled
+2025-12-05 14:26:48 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           |  40% tiled
+2025-12-05 14:26:48 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           |  60% tiled
+2025-12-05 14:26:48 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           |  80% tiled
+2025-12-05 14:26:48 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           | 100% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |   4% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |   9% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  14% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  19% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  23% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  28% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  33% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  38% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  42% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  47% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  52% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  57% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  61% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  66% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  71% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  76% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  80% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  85% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  90% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  95% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           | 100% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           |  20% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           |  40% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           |  60% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           |  80% tiled
+2025-12-05 14:26:49 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           | 100% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           |  20% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           |  40% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           |  60% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           |  80% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           | 100% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_tiled_check | __savetile           | 100% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |   5% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  11% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  17% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  23% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  29% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  35% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  41% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  47% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  52% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  58% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  64% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  70% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  76% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  82% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  88% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  94% tiled
+2025-12-05 14:26:50 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           | 100% tiled
+2025-12-05 14:26:51 | [INFO    ] | pyzui.Tiler.image_1       | __savetile           | 100% tiled
+2025-12-05 14:26:51 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           |  20% tiled
+2025-12-05 14:26:51 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           |  40% tiled
+2025-12-05 14:26:51 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           |  60% tiled
+2025-12-05 14:26:51 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           |  80% tiled
+2025-12-05 14:26:51 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           | 100% tiled
+2025-12-05 14:26:51 | [INFO    ] | pyzui.Tiler.size_test     | __savetile           | 100% tiled
+2025-12-05 14:26:51 | [INFO    ] | pyzui.Tiler.stats_test_0  | __savetile           | 100% tiled
+2025-12-05 14:26:51 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           |  20% tiled
+2025-12-05 14:26:51 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           |  40% tiled
+2025-12-05 14:26:51 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           |  60% tiled
+2025-12-05 14:26:51 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           |  80% tiled
+2025-12-05 14:26:51 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           | 100% tiled
+2025-12-05 14:26:51 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 14:26:51 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-05 14:26:51 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: False
+2025-12-05 14:26:51 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: WARNING
+2025-12-05 14:26:51 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
+2025-12-05 14:26:51 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/integrationtest/logs/pyzui.log
+2025-12-05 14:26:51 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 18:02:03 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 18:02:03 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-05 18:02:03 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: False
+2025-12-05 18:02:03 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: WARNING
+2025-12-05 18:02:03 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
+2025-12-05 18:02:03 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/integrationtest/logs/pyzui.log
+2025-12-05 18:02:03 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 18:02:09 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           |  20% tiled
+2025-12-05 18:02:09 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           |  40% tiled
+2025-12-05 18:02:09 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           |  60% tiled
+2025-12-05 18:02:09 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           |  80% tiled
+2025-12-05 18:02:09 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           | 100% tiled
+2025-12-05 18:02:10 | [INFO    ] | pyzui.Tiler.test_single_tile | __savetile           | 100% tiled
+2025-12-05 18:02:10 | [INFO    ] | pyzui.Tiler.test_small_image | __savetile           | 100% tiled
+2025-12-05 18:02:10 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           |  20% tiled
+2025-12-05 18:02:10 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           |  40% tiled
+2025-12-05 18:02:10 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           |  60% tiled
+2025-12-05 18:02:10 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           |  80% tiled
+2025-12-05 18:02:10 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           | 100% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |   4% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |   9% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  14% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  19% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  23% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  28% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  33% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  38% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  42% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  47% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  52% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  57% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  61% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  66% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  71% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  76% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  80% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  85% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  90% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  95% tiled
+2025-12-05 18:02:11 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           | 100% tiled
+2025-12-05 18:02:12 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           |  20% tiled
+2025-12-05 18:02:12 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           |  40% tiled
+2025-12-05 18:02:12 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           |  60% tiled
+2025-12-05 18:02:12 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           |  80% tiled
+2025-12-05 18:02:12 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           | 100% tiled
+2025-12-05 18:02:12 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           |  20% tiled
+2025-12-05 18:02:12 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           |  40% tiled
+2025-12-05 18:02:12 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           |  60% tiled
+2025-12-05 18:02:12 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           |  80% tiled
+2025-12-05 18:02:12 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           | 100% tiled
+2025-12-05 18:02:12 | [INFO    ] | pyzui.Tiler.test_tiled_check | __savetile           | 100% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |   5% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  11% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  17% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  23% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  29% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  35% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  41% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  47% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  52% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  58% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  64% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  70% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  76% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  82% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  88% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  94% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           | 100% tiled
+2025-12-05 18:02:13 | [INFO    ] | pyzui.Tiler.image_1       | __savetile           | 100% tiled
+2025-12-05 18:02:14 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           |  20% tiled
+2025-12-05 18:02:14 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           |  40% tiled
+2025-12-05 18:02:14 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           |  60% tiled
+2025-12-05 18:02:14 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           |  80% tiled
+2025-12-05 18:02:14 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           | 100% tiled
+2025-12-05 18:02:14 | [INFO    ] | pyzui.Tiler.size_test     | __savetile           | 100% tiled
+2025-12-05 18:02:14 | [INFO    ] | pyzui.Tiler.stats_test_0  | __savetile           | 100% tiled
+2025-12-05 18:02:14 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           |  20% tiled
+2025-12-05 18:02:14 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           |  40% tiled
+2025-12-05 18:02:14 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           |  60% tiled
+2025-12-05 18:02:14 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           |  80% tiled
+2025-12-05 18:02:14 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           | 100% tiled
+2025-12-05 18:02:14 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 18:02:14 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-05 18:02:14 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: False
+2025-12-05 18:02:14 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: WARNING
+2025-12-05 18:02:14 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
+2025-12-05 18:02:14 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/integrationtest/logs/pyzui.log
+2025-12-05 18:02:14 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 18:02:37 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 18:02:37 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-05 18:02:37 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: False
+2025-12-05 18:02:37 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: WARNING
+2025-12-05 18:02:37 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
+2025-12-05 18:02:37 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/integrationtest/logs/pyzui.log
+2025-12-05 18:02:37 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 18:02:44 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           |  20% tiled
+2025-12-05 18:02:44 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           |  40% tiled
+2025-12-05 18:02:44 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           |  60% tiled
+2025-12-05 18:02:44 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           |  80% tiled
+2025-12-05 18:02:44 | [INFO    ] | pyzui.Tiler.test_512x512  | __savetile           | 100% tiled
+2025-12-05 18:02:45 | [INFO    ] | pyzui.Tiler.test_single_tile | __savetile           | 100% tiled
+2025-12-05 18:02:45 | [INFO    ] | pyzui.Tiler.test_small_image | __savetile           | 100% tiled
+2025-12-05 18:02:45 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           |  20% tiled
+2025-12-05 18:02:45 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           |  40% tiled
+2025-12-05 18:02:45 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           |  60% tiled
+2025-12-05 18:02:45 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           |  80% tiled
+2025-12-05 18:02:45 | [INFO    ] | pyzui.Tiler.test_non_pot  | __savetile           | 100% tiled
+2025-12-05 18:02:46 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |   4% tiled
+2025-12-05 18:02:46 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |   9% tiled
+2025-12-05 18:02:46 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  14% tiled
+2025-12-05 18:02:46 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  19% tiled
+2025-12-05 18:02:47 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  23% tiled
+2025-12-05 18:02:47 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  28% tiled
+2025-12-05 18:02:47 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  33% tiled
+2025-12-05 18:02:47 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  38% tiled
+2025-12-05 18:02:47 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  42% tiled
+2025-12-05 18:02:47 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  47% tiled
+2025-12-05 18:02:48 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  52% tiled
+2025-12-05 18:02:48 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  57% tiled
+2025-12-05 18:02:48 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  61% tiled
+2025-12-05 18:02:48 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  66% tiled
+2025-12-05 18:02:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  71% tiled
+2025-12-05 18:02:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  76% tiled
+2025-12-05 18:02:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  80% tiled
+2025-12-05 18:02:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  85% tiled
+2025-12-05 18:02:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  90% tiled
+2025-12-05 18:02:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           |  95% tiled
+2025-12-05 18:02:49 | [INFO    ] | pyzui.Tiler.test_large    | __savetile           | 100% tiled
+2025-12-05 18:02:49 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           |  20% tiled
+2025-12-05 18:02:49 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           |  40% tiled
+2025-12-05 18:02:50 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           |  60% tiled
+2025-12-05 18:02:50 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           |  80% tiled
+2025-12-05 18:02:50 | [INFO    ] | pyzui.Tiler.test_progress | __savetile           | 100% tiled
+2025-12-05 18:02:50 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           |  20% tiled
+2025-12-05 18:02:50 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           |  40% tiled
+2025-12-05 18:02:51 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           |  60% tiled
+2025-12-05 18:02:51 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           |  80% tiled
+2025-12-05 18:02:51 | [INFO    ] | pyzui.Tiler.test_retrieval | __savetile           | 100% tiled
+2025-12-05 18:02:51 | [INFO    ] | pyzui.Tiler.test_tiled_check | __savetile           | 100% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |   5% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  11% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  17% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  23% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  29% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  35% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  41% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  47% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  52% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  58% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  64% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  70% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  76% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  82% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  88% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           |  94% tiled
+2025-12-05 18:02:52 | [INFO    ] | pyzui.Tiler.test_metadata | __savetile           | 100% tiled
+2025-12-05 18:02:53 | [INFO    ] | pyzui.Tiler.image_1       | __savetile           | 100% tiled
+2025-12-05 18:02:54 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           |  20% tiled
+2025-12-05 18:02:54 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           |  40% tiled
+2025-12-05 18:02:54 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           |  60% tiled
+2025-12-05 18:02:54 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           |  80% tiled
+2025-12-05 18:02:54 | [INFO    ] | pyzui.Tiler.image_2       | __savetile           | 100% tiled
+2025-12-05 18:02:55 | [INFO    ] | pyzui.Tiler.size_test     | __savetile           | 100% tiled
+2025-12-05 18:02:55 | [INFO    ] | pyzui.Tiler.stats_test_0  | __savetile           | 100% tiled
+2025-12-05 18:02:56 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           |  20% tiled
+2025-12-05 18:02:56 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           |  40% tiled
+2025-12-05 18:02:56 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           |  60% tiled
+2025-12-05 18:02:56 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           |  80% tiled
+2025-12-05 18:02:56 | [INFO    ] | pyzui.Tiler.stats_test_1  | __savetile           | 100% tiled
+2025-12-05 18:02:56 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-05 18:02:56 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-05 18:02:56 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: False
+2025-12-05 18:02:56 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: WARNING
+2025-12-05 18:02:56 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
+2025-12-05 18:02:56 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/integrationtest/logs/pyzui.log
+2025-12-05 18:02:56 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================

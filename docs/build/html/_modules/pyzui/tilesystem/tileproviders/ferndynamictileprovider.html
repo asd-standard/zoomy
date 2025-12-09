@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyzui.tilesystem.tileproviders.ferndynamictileprovider &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=cc7d0dec" />
+    <script src="../../../../_static/documentation_options.js?v=086c1757"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pyzui.tilesystem.tileproviders.ferndynamictileprovider</h1><div class="highlight"><pre>
+<span></span><span class="c1">## PyZUI 0.1 - Python Zooming User Interface</span>
+<span class="c1">## Copyright (C) 2009  David Roberts &lt;d@vidr.cc&gt;</span>
+<span class="c1">##</span>
+<span class="c1">## This program is free software; you can redistribute it and/or</span>
+<span class="c1">## modify it under the terms of the GNU General Public License</span>
+<span class="c1">## as published by the Free Software Foundation; either version 2</span>
+<span class="c1">## of the License, or (at your option) any later version.</span>
+<span class="c1">##</span>
+<span class="c1">## This program is distributed in the hope that it will be useful,</span>
+<span class="c1">## but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1">## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1">## GNU General Public License for more details.</span>
+<span class="c1">##</span>
+<span class="c1">## You should have received a copy of the GNU General Public License</span>
+<span class="c1">## along with this program; if not, write to the Free Software</span>
+<span class="c1">## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA</span>
+<span class="c1">## 02110-1301, USA.</span>
+
+<span class="sd">&quot;&quot;&quot;Dynamic tile provider for Barnsley&#39;s fern.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.dynamictileprovider</span><span class="w"> </span><span class="kn">import</span> <span class="n">DynamicTileProvider</span>
+
+<div class="viewcode-block" id="FernTileProvider">
+<a class="viewcode-back" href="../../../../pyzui/ferntileprovider.html#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FernTileProvider</span><span class="p">(</span><span class="n">DynamicTileProvider</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructor :</span>
+<span class="sd">        FernTileProvider(tilecache)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        tilecache : TileCache</span>
+
+<span class="sd">    FernTileProvider(tilecache) --&gt; FernTileProvider</span>
+
+<span class="sd">    FernTileProvider objects are used for generating tiles of Barnsley&#39;s</span>
+<span class="sd">    fern iterated function system.</span>
+
+<span class="sd">    This dynamic tile provider generates fractal images of Barnsley&#39;s fern</span>
+<span class="sd">    using an iterated function system (IFS). The fern is created by randomly</span>
+<span class="sd">    applying one of four affine transformations to points, with each</span>
+<span class="sd">    transformation having a specific probability of being chosen.</span>
+
+<span class="sd">    Implementation Notes:</span>
+<span class="sd">        - Inherits from DynamicTileProvider</span>
+<span class="sd">        - Uses four affine transformations with different probabilities:</span>
+<span class="sd">            * rachis (stem): 1% probability</span>
+<span class="sd">            * left hand first pinna: 7% probability</span>
+<span class="sd">            * right hand first pinna: 7% probability</span>
+<span class="sd">            * body of fern: 85% probability</span>
+<span class="sd">        - Generates up to max_iterations (50000) points</span>
+<span class="sd">        - Stops after max_points (10000) points are drawn on tile</span>
+<span class="sd">        - Tiles are 256x256 pixels saved as PNG</span>
+<span class="sd">        - Color is RGB (100, 170, 0) for a green fern appearance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">DynamicTileProvider</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">)</span>
+
+
+    <span class="n">filext</span> <span class="o">=</span> <span class="s1">&#39;png&#39;</span>
+    <span class="n">tilesize</span> <span class="o">=</span> <span class="mi">256</span>
+    <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="n">max_iterations</span> <span class="o">=</span> <span class="mi">50000</span>
+    <span class="n">max_points</span> <span class="o">=</span> <span class="mi">10000</span>
+    <span class="n">transformations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1">## (probability, (a, b, c, d, e, f))</span>
+        <span class="c1">## x_n+1 = a*x_n + b*y_n + c</span>
+        <span class="c1">## y_n+1 = d*x_n + e*y_n + f</span>
+
+        <span class="c1">## for details about the transformations, see:</span>
+        <span class="c1">## &lt;http://en.wikipedia.org/wiki/Barnsley&#39;s_fern&gt;</span>
+        <span class="c1">## &lt;http://books.google.com/books?id=oh7NoePgmOIC</span>
+        <span class="c1">##  &amp;printsec=frontcover#PPA86,M1&gt;</span>
+        <span class="c1">## &lt;http://mathworld.wolfram.com/BarnsleysFern.html&gt;</span>
+        <span class="c1">## &lt;http://www.home.aone.net.au/~byzantium/ferns/fractal.html&gt;</span>
+
+        <span class="c1">## rachis</span>
+        <span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="p">(</span> <span class="mf">0.00</span><span class="p">,</span>  <span class="mf">0.00</span><span class="p">,</span>  <span class="mf">0.00</span><span class="p">,</span>  <span class="mf">0.00</span><span class="p">,</span>  <span class="mf">0.16</span><span class="p">,</span>  <span class="mf">0.00</span><span class="p">)),</span>
+
+        <span class="c1">## left hand first pinna</span>
+        <span class="p">(</span><span class="mf">0.07</span><span class="p">,</span> <span class="p">(</span> <span class="mf">0.20</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.26</span><span class="p">,</span>  <span class="mf">0.00</span><span class="p">,</span>  <span class="mf">0.23</span><span class="p">,</span>  <span class="mf">0.22</span><span class="p">,</span>  <span class="mf">1.60</span><span class="p">)),</span>
+
+        <span class="c1">## right hand first pinna</span>
+        <span class="p">(</span><span class="mf">0.07</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.15</span><span class="p">,</span>  <span class="mf">0.28</span><span class="p">,</span>  <span class="mf">0.00</span><span class="p">,</span>  <span class="mf">0.26</span><span class="p">,</span>  <span class="mf">0.24</span><span class="p">,</span>  <span class="mf">0.44</span><span class="p">)),</span>
+
+        <span class="c1">## body of fern</span>
+        <span class="p">(</span><span class="mf">0.85</span><span class="p">,</span> <span class="p">(</span> <span class="mf">0.85</span><span class="p">,</span>  <span class="mf">0.04</span><span class="p">,</span>  <span class="mf">0.00</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.04</span><span class="p">,</span>  <span class="mf">0.85</span><span class="p">,</span>  <span class="mf">1.60</span><span class="p">)),</span>
+    <span class="p">]</span>
+    <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">170</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__choose_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            FernTileProvider.__choose_transformation()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        FernTileProvider.__choose_transformation() --&gt; Tuple[float, float, float, float, float, float]</span>
+
+<span class="sd">        Randomly choose a transformation based on the probability of each</span>
+<span class="sd">        transformation being chosen.</span>
+
+<span class="sd">        This method implements probabilistic selection from the four fern</span>
+<span class="sd">        transformations. A random value between 0 and 1 is generated, and</span>
+<span class="sd">        transformations are tested in order until one is selected based on</span>
+<span class="sd">        cumulative probability.</span>
+
+<span class="sd">        Implementation Notes:</span>
+<span class="sd">            - Generates random float in range [0, 1)</span>
+<span class="sd">            - Iterates through transformations in order</span>
+<span class="sd">            - Subtracts each probability from random value</span>
+<span class="sd">            - Returns transformation when random value &lt;= probability</span>
+<span class="sd">            - Returns 6-tuple: (a, b, c, d, e, f) for affine transform</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">probability</span><span class="p">,</span> <span class="n">transformation</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transformations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="n">probability</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">-=</span> <span class="n">probability</span>
+        <span class="k">return</span> <span class="n">transformation</span>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            FernTileProvider.__transform(x, y)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            x : float</span>
+<span class="sd">            y : float</span>
+
+<span class="sd">        FernTileProvider.__transform(x, y) --&gt; Tuple[float, float]</span>
+
+<span class="sd">        Randomly choose a transformation and apply it to x and y, returning</span>
+<span class="sd">        the result as a tuple.</span>
+
+<span class="sd">        This method applies one iteration of the fern&#39;s iterated function system.</span>
+<span class="sd">        It selects a transformation using __choose_transformation() and applies</span>
+<span class="sd">        the affine transformation to the input coordinates.</span>
+
+<span class="sd">        Implementation Notes:</span>
+<span class="sd">            - Calls __choose_transformation() to get transformation coefficients</span>
+<span class="sd">            - Applies affine transformation: x&#39; = a*x + b*y + c</span>
+<span class="sd">            - Applies affine transformation: y&#39; = d*x + e*y + f</span>
+<span class="sd">            - Returns new coordinates as tuple (x&#39;, y&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__choose_transformation</span><span class="p">()</span>
+        <span class="n">x_new</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">y_new</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">x_new</span><span class="p">,</span><span class="n">y_new</span><span class="p">)</span>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__draw_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">tilesize_units</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            FernTileProvider.__draw_point(tile, x, y, tilesize_units)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tile : Image</span>
+<span class="sd">            x : float</span>
+<span class="sd">            y : float</span>
+<span class="sd">            tilesize_units : float</span>
+
+<span class="sd">        FernTileProvider.__draw_point(tile, x, y, tilesize_units) --&gt; None</span>
+
+<span class="sd">        Draw the given point on the given tile.</span>
+
+<span class="sd">        Converts fern coordinate space to pixel coordinates and draws a single</span>
+<span class="sd">        pixel on the tile. The y-coordinate is inverted to match image coordinate</span>
+<span class="sd">        system (origin at top-left).</span>
+
+<span class="sd">        Preconditions:</span>
+<span class="sd">            - 0.0 &lt;= x &lt;= tilesize_units</span>
+<span class="sd">            - 0.0 &lt;= y &lt;= tilesize_units</span>
+
+<span class="sd">        Implementation Notes:</span>
+<span class="sd">            - Scales x from [0, tilesize_units] to [0, tilesize]</span>
+<span class="sd">            - Clamps x to valid pixel range [0, tilesize-1]</span>
+<span class="sd">            - Scales y from [0, tilesize_units] to [0, tilesize]</span>
+<span class="sd">            - Inverts y-coordinate: pixel_y = tilesize - scaled_y</span>
+<span class="sd">            - Clamps y to valid pixel range [0, tilesize-1]</span>
+<span class="sd">            - Sets pixel color using self.color (green)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilesize</span> <span class="o">/</span> <span class="n">tilesize_units</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilesize</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilesize</span> <span class="o">/</span> <span class="n">tilesize_units</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tilesize</span> <span class="o">-</span> <span class="n">y</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilesize</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">tile</span><span class="o">.</span><span class="n">putpixel</span><span class="p">((</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="FernTileProvider._load_dynamic">
+<a class="viewcode-back" href="../../../../pyzui/ferntileprovider.html#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider._load_dynamic">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_dynamic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            FernTileProvider._load_dynamic(tile_id, outfile)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tile_id : Tuple[str, int, int, int]</span>
+<span class="sd">            outfile : str</span>
+
+<span class="sd">        FernTileProvider._load_dynamic(tile_id, outfile) --&gt; None</span>
+
+<span class="sd">        Generate a tile of Barnsley&#39;s fern and save it to outfile.</span>
+
+<span class="sd">        This method generates a fractal fern image for the specified tile by</span>
+<span class="sd">        iterating the fern&#39;s IFS transformations. The tile coordinates (row, col)</span>
+<span class="sd">        and tilelevel determine which portion of the fern to render. Points are</span>
+<span class="sd">        generated starting from (0, 0) and transformed repeatedly, with points</span>
+<span class="sd">        falling within the tile&#39;s boundaries being drawn.</span>
+
+<span class="sd">        Implementation Notes:</span>
+<span class="sd">            - Returns early if row/col are out of range for the tilelevel</span>
+<span class="sd">            - Calculates tile boundaries in fern coordinate space (-5 to 5 for x, 0 to 10 for y)</span>
+<span class="sd">            - Creates a black RGB image of size tilesize x tilesize</span>
+<span class="sd">            - Iterates up to max_iterations times, starting from origin (0, 0)</span>
+<span class="sd">            - Only draws points that fall within the tile boundaries</span>
+<span class="sd">            - Stops after max_points are drawn to the tile</span>
+<span class="sd">            - Saves the resulting tile as PNG to outfile</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">media_id</span><span class="p">,</span> <span class="n">tilelevel</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="n">tile_id</span>
+
+        <span class="k">if</span> <span class="n">row</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">col</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
+           <span class="n">row</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="o">**</span><span class="n">tilelevel</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">col</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="o">**</span><span class="n">tilelevel</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1">## row,col out of range</span>
+            <span class="k">return</span>
+
+        <span class="n">tilesize_units</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**-</span><span class="n">tilelevel</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">col</span> <span class="o">*</span> <span class="n">tilesize_units</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">row</span> <span class="o">*</span> <span class="n">tilesize_units</span>
+
+        <span class="c1">## the corners of the tile are:</span>
+        <span class="c1">## (x1,y2) +----+ (x2,y2)</span>
+        <span class="c1">##         |    |</span>
+        <span class="c1">## (x1,y1) +----+ (x2,y1)</span>
+
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="mf">5.0</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">-</span> <span class="n">y</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">+</span> <span class="n">tilesize_units</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">y2</span> <span class="o">-</span> <span class="n">tilesize_units</span>
+
+        <span class="n">tile</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tilesize</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">tilesize</span><span class="p">))</span>
+
+        <span class="n">num_points</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_iterations</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">x1</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">x2</span> <span class="ow">and</span> <span class="n">y1</span> <span class="o">&lt;=</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="n">y2</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__draw_point</span><span class="p">(</span>
+                    <span class="n">tile</span><span class="p">,</span> <span class="n">x</span><span class="o">-</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">-</span><span class="n">y1</span><span class="p">,</span> <span class="n">tilesize_units</span><span class="p">)</span>
+
+                <span class="n">num_points</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">num_points</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_points</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="n">tile</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../programconfiguration.html">Program Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../logging.html">Logging System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributiongiudelines.html">Contribution guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

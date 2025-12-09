@@ -19,7 +19,7 @@
 """Media to be displayed in the ZUI (abstract base class)."""
 
 import math
-from typing import Optional, Tuple, List, Any
+from typing import Tuple, Any
 
 from pyzui.objects.physicalobject import PhysicalObject        
 
@@ -101,8 +101,21 @@ class MediaObject(PhysicalObject) :
     
     """
     def __init__(self, media_id: str, scene: Any) -> None:
-        """Create a new MediaObject from the media identified by `media_id`,
-        and the parent Scene referenced by `scene`."""
+        """
+        Constructor :
+            MediaObject(media_id, scene)
+        Parameters :
+            media_id : str
+            scene : Scene
+
+        MediaObject(media_id, scene) --> None
+
+        Create a new MediaObject from the media identified by media_id,
+        and the parent Scene referenced by scene.
+
+        Initializes PhysicalObject center, position and velocity attributes,
+        then sets the _media_id and _scene instance variables.
+        """
         #initialize mediobject centre, position and velocity
         PhysicalObject.__init__(self)
 
@@ -270,6 +283,19 @@ class MediaObject(PhysicalObject) :
 
 
     def __cmp__(self, other: 'MediaObject') -> int:
+        """
+        Method :
+            MediaObject.__cmp__(other)
+        Parameters :
+            other : MediaObject
+
+        MediaObject.__cmp__(other) --> int
+
+        Compare two MediaObject instances based on their onscreen area.
+
+        Returns 0 if self is other, -1 if self has smaller onscreen area,
+        and 1 if self has larger onscreen area.
+        """
         if self is other:
             return 0
         elif self.onscreen_area < other.onscreen_area:
@@ -415,6 +441,22 @@ class MediaObject(PhysicalObject) :
     getter and __set_pos as setter"""
 
     def __get_centre(self) -> Tuple[float, float]:
+        """
+        Method :
+            __get_centre
+        Parameters :
+            None
+
+        __get_centre --> Tuple[float, float]
+
+        Get the on-screen position of the MediaObject center.
+
+        Converts image-coordinate C_i to screen-coordinate P through
+        scene-coordinate C_s using the formulas::
+
+            P = scene.origin + C_s * 2**zoomlevel_s
+            C_s = self.pos + C_i * 2**zoomlevel_i
+        """
         ## we need to convert image-coordinate C_i to
         ## screen-coordinate P (through scene-coordinate C_s):
         ##   P = scene.origin + C_s * 2**zoomlevel_s
@@ -430,6 +472,22 @@ class MediaObject(PhysicalObject) :
                 self._scene.origin[1] + C_s[1] * 2**self._scene.zoomlevel)
 
     def __set_centre(self, centre: Tuple[float, float]) -> None:
+        """
+        Method :
+            __set_centre(centre)
+        Parameters :
+            centre : Tuple[float, float]
+
+        __set_centre --> None
+
+        Set the on-screen position of the MediaObject center.
+
+        Converts screen-coordinate P to image-coordinate C_i through
+        scene-coordinate C_s using the formulas::
+
+            P = scene.origin + C_s * 2**zoomlevel_s
+            C_s = self.pos + C_i * 2**zoomlevel_i
+        """
         ## we need to convert screen-coordinate P to
         ## image-coordinate C_i (through scene-coordinate C_s):
         ##   P = scene.origin + C_s * 2**zoomlevel_s
@@ -442,23 +500,69 @@ class MediaObject(PhysicalObject) :
                         (C_s[1] - self._y) * 2**-self._z)
 
     centre = property(__get_centre, __set_centre)
+    """Creating MediaObject.centre property with __get_centre as
+    getter and __set_centre as setter"""
 
     def __str__(self) -> str:
+        """
+        Method :
+            MediaObject.__str__()
+        Parameters :
+            None
+
+        MediaObject.__str__() --> str
+
+        Return a string representation of the MediaObject.
+
+        Format: ClassName(media_id)
+        """
         return "%s(%s)" % (type(self).__name__, self._media_id)
 
 
     def __repr__(self) -> str:
+        """
+        Method :
+            MediaObject.__repr__()
+        Parameters :
+            None
+
+        MediaObject.__repr__() --> str
+
+        Return a detailed string representation of the MediaObject.
+
+        Format: ClassName(repr(media_id))
+        """
         return "%s(%s)" % (type(self).__name__, repr(self._media_id))
 
 
 class LoadError(Exception):
-    
-    """Exception for if there is an error loading the media."""
+    """
+    Exception :
+        LoadError
+
+    LoadError exception is raised when there is an error loading
+    or processing media content. This can occur during file loading,
+    format conversion, or media initialization.
+    """
     pass
 
 
 class RenderMode:
-    """Namespace for constants used to indicate the render mode."""
+    """
+    Class :
+        RenderMode
+
+    RenderMode is a namespace class that defines constants used to
+    indicate the rendering mode for MediaObjects.
+
+    Constants:
+        Invisible : int = 0
+            MediaObject should not be rendered at all
+        Draft : int = 1
+            MediaObject should be rendered in draft/fast mode
+        HighQuality : int = 2
+            MediaObject should be rendered in high quality mode
+    """
     Invisible = 0
     Draft = 1
     HighQuality = 2

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pyzui.tilesystem.tilestore.tilecache module &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cc7d0dec" />
+    <script src="../_static/documentation_options.js?v=086c1757"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pyzui.tilesystem.tilestore.tilecache">
+<span id="pyzui-tilesystem-tilestore-tilecache-module"></span><h1>pyzui.tilesystem.tilestore.tilecache module<a class="headerlink" href="#module-pyzui.tilesystem.tilestore.tilecache" title="Link to this heading">¶</a></h1>
+<p>Thread-safe Least Recently Used (LRU) cache for storing tiles.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tilestore.tilecache.TileCache">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.tilesystem.tilestore.tilecache.</span></span><span class="sig-name descname"><span class="pre">TileCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tilestore/tilecache.html#TileCache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tilestore.tilecache.TileCache" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="simple">
+<dt>Constructor:</dt><dd><p>TileCache(maxsize, maxage)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>maxsize : int
+maxage : int</p>
+</dd>
+</dl>
+<p>TileCache(maxsize, maxage) –&gt; None</p>
+<p>TileCache objects are used for caching tiles in memory.</p>
+<p>Tiles can be accessed in much the same way as <cite>dict</cite> objects:
+<cite>tilecache[tile_id]</cite> holds the tile identified by the given <cite>tile_id</cite>.</p>
+<dl class="simple">
+<dt>Constructor:</dt><dd><p>TileCache(maxsize, maxage)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>maxsize : int
+maxage : int</p>
+</dd>
+</dl>
+<p>TileCache(maxsize, maxage) –&gt; None</p>
+<p>Create a new TileCache object.</p>
+<p>The maximum number of tiles to store is set by <cite>maxsize</cite>. There will be
+no limit if <cite>maxsize</cite> &lt;= 0.</p>
+<p>The maximum age of the tiles (in seconds) allowed before they are
+discarded is set by <cite>maxage</cite>. There will be no limit if <cite>maxage</cite> &lt;= 0.</p>
+<p>None tiles and (0,0,0) tiles do not count towards the number of stored
+tiles and will therefore not be automatically discarded.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tilestore.tilecache.TileCache.insert">
+<span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxaccesses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tilestore/tilecache.html#TileCache.insert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tilestore.tilecache.TileCache.insert" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>TileCache.insert(tile_id, tile, maxaccesses)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]
+tile : Any
+maxaccesses : int</p>
+</dd>
+</dl>
+<p>TileCache.insert(tile_id, tile, maxaccesses) –&gt; None</p>
+<p>Insert the <cite>tile</cite> with the given <cite>tile_id</cite> into the cache.</p>
+<p>If <cite>maxaccesses</cite> &lt;= 0, then the behaviour is the same as
+<cite>tilecache[tile_id]=tile</cite>. Otherwise the tile is set to expire after it
+has been accessed <cite>maxaccesses</cite> times.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tilestore.tilecache.TileCache.__mortal">
+<span class="sig-name descname"><span class="pre">__mortal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tile</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tilesystem.tilestore.tilecache.TileCache.__mortal" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>__mortal(tile_id, tile)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]
+tile : Any</p>
+</dd>
+</dl>
+<p>__mortal(tile_id, tile) –&gt; bool</p>
+<p>Returns a bool indicating whether the given tile is mortal.</p>
+<p>The tile will never be removed from the cache if it is immortal.</p>
+<p>None tiles and (0,0,0) tiles are the only ones considered immortal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tilestore.tilecache.TileCache.__periodic_clean">
+<span class="sig-name descname"><span class="pre">__periodic_clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tilesystem.tilestore.tilecache.TileCache.__periodic_clean" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>__periodic_clean()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__periodic_clean() –&gt; infinite loop</p>
+<p>Periodically remove old tiles based on maxage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tilestore.tilecache.TileCache.__clean">
+<span class="sig-name descname"><span class="pre">__clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tilesystem.tilestore.tilecache.TileCache.__clean" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>__clean()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__clean() –&gt; None</p>
+<p>Remove the least recently used tiles based on maxsize.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tilestore.tilecache.TileCache.purge">
+<span class="sig-name descname"><span class="pre">purge</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tilestore/tilecache.html#TileCache.purge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tilestore.tilecache.TileCache.purge" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>TileCache.purge()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>TileCache.purge() –&gt; None</p>
+<p>Purge all tiles from the cache.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#generating-documentation">Generating Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programconfiguration.html">Program Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributiongiudelines.html">Contribution guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/pyzui/tilecache.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

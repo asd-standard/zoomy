@@ -57,7 +57,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.objects.physicalobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhysicalObject</span>        
 
 <div class="viewcode-block" id="MediaObject">
-<a class="viewcode-back" href="../../../../pyzui.mediaobject.html#pyzui.objects.mediaobjects.mediaobject.MediaObject">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/mediaobject.html#pyzui.objects.mediaobjects.mediaobject.MediaObject">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MediaObject</span><span class="p">(</span><span class="n">PhysicalObject</span><span class="p">)</span> <span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor : </span>
@@ -136,8 +136,21 @@
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scene</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new MediaObject from the media identified by `media_id`,</span>
-<span class="sd">        and the parent Scene referenced by `scene`.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor :</span>
+<span class="sd">            MediaObject(media_id, scene)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            media_id : str</span>
+<span class="sd">            scene : Scene</span>
+
+<span class="sd">        MediaObject(media_id, scene) --&gt; None</span>
+
+<span class="sd">        Create a new MediaObject from the media identified by media_id,</span>
+<span class="sd">        and the parent Scene referenced by scene.</span>
+
+<span class="sd">        Initializes PhysicalObject center, position and velocity attributes,</span>
+<span class="sd">        then sets the _media_id and _scene instance variables.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#initialize mediobject centre, position and velocity</span>
         <span class="n">PhysicalObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
@@ -146,7 +159,7 @@
 
 
 <div class="viewcode-block" id="MediaObject.render">
-<a class="viewcode-back" href="../../../../pyzui.mediaobject.html#pyzui.objects.mediaobjects.mediaobject.MediaObject.render">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/mediaobject.html#pyzui.objects.mediaobjects.mediaobject.MediaObject.render">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -167,7 +180,7 @@
 
 
 <div class="viewcode-block" id="MediaObject.move">
-<a class="viewcode-back" href="../../../../pyzui.mediaobject.html#pyzui.objects.mediaobjects.mediaobject.MediaObject.move">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/mediaobject.html#pyzui.objects.mediaobjects.mediaobject.MediaObject.move">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dy</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -190,7 +203,7 @@
 
 
 <div class="viewcode-block" id="MediaObject.zoom">
-<a class="viewcode-back" href="../../../../pyzui.mediaobject.html#pyzui.objects.mediaobjects.mediaobject.MediaObject.zoom">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/mediaobject.html#pyzui.objects.mediaobjects.mediaobject.MediaObject.zoom">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -233,7 +246,7 @@
 
 
 <div class="viewcode-block" id="MediaObject.hides">
-<a class="viewcode-back" href="../../../../pyzui.mediaobject.html#pyzui.objects.mediaobjects.mediaobject.MediaObject.hides">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/mediaobject.html#pyzui.objects.mediaobjects.mediaobject.MediaObject.hides">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">hides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">&#39;MediaObject&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -274,7 +287,7 @@
 
 
 <div class="viewcode-block" id="MediaObject.fit">
-<a class="viewcode-back" href="../../../../pyzui.mediaobject.html#pyzui.objects.mediaobjects.mediaobject.MediaObject.fit">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/mediaobject.html#pyzui.objects.mediaobjects.mediaobject.MediaObject.fit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -320,6 +333,19 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">&#39;MediaObject&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            MediaObject.__cmp__(other)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            other : MediaObject</span>
+
+<span class="sd">        MediaObject.__cmp__(other) --&gt; int</span>
+
+<span class="sd">        Compare two MediaObject instances based on their onscreen area.</span>
+
+<span class="sd">        Returns 0 if self is other, -1 if self has smaller onscreen area,</span>
+<span class="sd">        and 1 if self has larger onscreen area.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span> <span class="ow">is</span> <span class="n">other</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">0</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">onscreen_area</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">onscreen_area</span><span class="p">:</span>
@@ -465,6 +491,22 @@
 <span class="sd">    getter and __set_pos as setter&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__get_centre</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __get_centre</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        __get_centre --&gt; Tuple[float, float]</span>
+
+<span class="sd">        Get the on-screen position of the MediaObject center.</span>
+
+<span class="sd">        Converts image-coordinate C_i to screen-coordinate P through</span>
+<span class="sd">        scene-coordinate C_s using the formulas::</span>
+
+<span class="sd">            P = scene.origin + C_s * 2**zoomlevel_s</span>
+<span class="sd">            C_s = self.pos + C_i * 2**zoomlevel_i</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">## we need to convert image-coordinate C_i to</span>
         <span class="c1">## screen-coordinate P (through scene-coordinate C_s):</span>
         <span class="c1">##   P = scene.origin + C_s * 2**zoomlevel_s</span>
@@ -480,6 +522,22 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">origin</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">C_s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">zoomlevel</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__set_centre</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">centre</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __set_centre(centre)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            centre : Tuple[float, float]</span>
+
+<span class="sd">        __set_centre --&gt; None</span>
+
+<span class="sd">        Set the on-screen position of the MediaObject center.</span>
+
+<span class="sd">        Converts screen-coordinate P to image-coordinate C_i through</span>
+<span class="sd">        scene-coordinate C_s using the formulas::</span>
+
+<span class="sd">            P = scene.origin + C_s * 2**zoomlevel_s</span>
+<span class="sd">            C_s = self.pos + C_i * 2**zoomlevel_i</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">## we need to convert screen-coordinate P to</span>
         <span class="c1">## image-coordinate C_i (through scene-coordinate C_s):</span>
         <span class="c1">##   P = scene.origin + C_s * 2**zoomlevel_s</span>
@@ -492,29 +550,75 @@
                         <span class="p">(</span><span class="n">C_s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**-</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">)</span>
 
     <span class="n">centre</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_centre</span><span class="p">,</span> <span class="n">__set_centre</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creating MediaObject.centre property with __get_centre as</span>
+<span class="sd">    getter and __set_centre as setter&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            MediaObject.__str__()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        MediaObject.__str__() --&gt; str</span>
+
+<span class="sd">        Return a string representation of the MediaObject.</span>
+
+<span class="sd">        Format: ClassName(media_id)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">)</span>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            MediaObject.__repr__()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        MediaObject.__repr__() --&gt; str</span>
+
+<span class="sd">        Return a detailed string representation of the MediaObject.</span>
+
+<span class="sd">        Format: ClassName(repr(media_id))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">))</span></div>
 
 
 
 <div class="viewcode-block" id="LoadError">
-<a class="viewcode-back" href="../../../../pyzui.mediaobject.html#pyzui.objects.mediaobjects.mediaobject.LoadError">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/mediaobject.html#pyzui.objects.mediaobjects.mediaobject.LoadError">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">LoadError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception for if there is an error loading the media.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exception :</span>
+<span class="sd">        LoadError</span>
+
+<span class="sd">    LoadError exception is raised when there is an error loading</span>
+<span class="sd">    or processing media content. This can occur during file loading,</span>
+<span class="sd">    format conversion, or media initialization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span></div>
 
 
 
 <div class="viewcode-block" id="RenderMode">
-<a class="viewcode-back" href="../../../../pyzui.mediaobject.html#pyzui.objects.mediaobjects.mediaobject.RenderMode">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/mediaobject.html#pyzui.objects.mediaobjects.mediaobject.RenderMode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RenderMode</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Namespace for constants used to indicate the render mode.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class :</span>
+<span class="sd">        RenderMode</span>
+
+<span class="sd">    RenderMode is a namespace class that defines constants used to</span>
+<span class="sd">    indicate the rendering mode for MediaObjects.</span>
+
+<span class="sd">    Constants:</span>
+<span class="sd">        Invisible : int = 0</span>
+<span class="sd">            MediaObject should not be rendered at all</span>
+<span class="sd">        Draft : int = 1</span>
+<span class="sd">            MediaObject should be rendered in draft/fast mode</span>
+<span class="sd">        HighQuality : int = 2</span>
+<span class="sd">            MediaObject should be rendered in high quality mode</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Invisible</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">Draft</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">HighQuality</span> <span class="o">=</span> <span class="mi">2</span></div>
@@ -548,16 +652,20 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">PyZui installation instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#dependencies">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../usageinstructions.html">User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../programconfiguration.html">Program Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation.html">Reading Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation.html#project-structure">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../logging.html">Logging System</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

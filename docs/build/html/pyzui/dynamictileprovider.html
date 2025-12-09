@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pyzui.tilesystem.tileproviders.dynamictileprovider module &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cc7d0dec" />
+    <script src="../_static/documentation_options.js?v=086c1757"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pyzui.tilesystem.tileproviders.dynamictileprovider">
+<span id="pyzui-tilesystem-tileproviders-dynamictileprovider-module"></span><h1>pyzui.tilesystem.tileproviders.dynamictileprovider module<a class="headerlink" href="#module-pyzui.tilesystem.tileproviders.dynamictileprovider" title="Link to this heading">¶</a></h1>
+<p>Class for loading tiles into memory from somewhere other than the local
+filesystem (abstract base class).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.tilesystem.tileproviders.dynamictileprovider.</span></span><span class="sig-name descname"><span class="pre">DynamicTileProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tilecache</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tileproviders/dynamictileprovider.html#DynamicTileProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="tileprovider.html#pyzui.tilesystem.tileproviders.tileprovider.TileProvider" title="pyzui.tilesystem.tileproviders.tileprovider.TileProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">TileProvider</span></code></a></p>
+<dl class="simple">
+<dt>Constructor :</dt><dd><p>DynamicTileProvider(tilecache)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tilecache : TileCache</p>
+</dd>
+</dl>
+<p>DynamicTileProvider(tilecache) –&gt; DynamicTileProvider</p>
+<p>DynamicTileProvider objects are used for either generating tiles or
+loading them from a remote host, and then loading them into a TileCache.</p>
+<p>This is an abstract base class for tile providers that create tiles
+dynamically (either by generation or remote retrieval) rather than
+loading pre-existing tiles from disk. Derived classes must implement
+the _load_dynamic() method.</p>
+<dl class="simple">
+<dt>Implementation Notes:</dt><dd><ul class="simple">
+<li><p>Inherits from TileProvider base class</p></li>
+<li><p>Provides default values for filext, tilesize, and aspect_ratio</p></li>
+<li><p>_load() checks if tile exists locally before calling _load_dynamic()</p></li>
+<li><p>Uses QImage for loading tiles after they are created</p></li>
+<li><p>Derived classes should override _load_dynamic() to implement
+specific tile generation or retrieval logic</p></li>
+</ul>
+</dd>
+<dt>Method :</dt><dd><p>TileProvider.__init__(tilecache)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tilecache : TileCache</p>
+</dd>
+</dl>
+<p>TileProvider.__init__(tilecache) –&gt; None</p>
+<p>Create a new TileProvider for loading tiles into the given <cite>tilecache</cite>.</p>
+<p>Initializes the thread infrastructure, task queue, and logger for this
+tile provider instance.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider.filext">
+<span class="sig-name descname"><span class="pre">filext</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'png'</span></em><a class="headerlink" href="#pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider.filext" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider.tilesize">
+<span class="sig-name descname"><span class="pre">tilesize</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">256</span></em><a class="headerlink" href="#pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider.tilesize" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider.aspect_ratio">
+<span class="sig-name descname"><span class="pre">aspect_ratio</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.0</span></em><a class="headerlink" href="#pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider.aspect_ratio" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider._load_dynamic">
+<span class="sig-name descname"><span class="pre">_load_dynamic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tileproviders/dynamictileprovider.html#DynamicTileProvider._load_dynamic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider._load_dynamic" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>DynamicTileProvider._load_dynamic(tile_id, outfile)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]
+outfile : str</p>
+</dd>
+</dl>
+<p>DynamicTileProvider._load_dynamic(tile_id, outfile) –&gt; None</p>
+<p>Perform whatever actions necessary to load the tile identified by
+the given tile_id into the location given by outfile.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider._load">
+<span class="sig-name descname"><span class="pre">_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tileproviders/dynamictileprovider.html#DynamicTileProvider._load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider._load" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>DynamicTileProvider._load(tile_id)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]</p>
+</dd>
+</dl>
+<p>DynamicTileProvider._load(tile_id) –&gt; QImage or None</p>
+<p>Load a tile, generating it dynamically if it doesn’t exist locally.</p>
+<p>The tile_id tuple contains (media_id, tilelevel, row, col). This method
+first checks if the tile exists in the local tilestore. If not, it calls
+_load_dynamic() to generate or retrieve the tile. Finally, it loads the
+tile as a QImage and returns it.</p>
+<dl class="simple">
+<dt>Implementation Notes:</dt><dd><ul class="simple">
+<li><p>Gets tile path from TileStore with create=True flag</p></li>
+<li><p>Only calls _load_dynamic() if tile file doesn’t exist</p></li>
+<li><p>Uses QImage to load the tile after creation</p></li>
+<li><p>Returns None if tile loading fails (logs exception)</p></li>
+<li><p>Assumes tile is unavailable if any exception occurs</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#generating-documentation">Generating Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programconfiguration.html">Program Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributiongiudelines.html">Contribution guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/pyzui/dynamictileprovider.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

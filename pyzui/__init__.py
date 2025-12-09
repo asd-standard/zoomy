@@ -71,5 +71,5 @@ __all__ = [
             'osmtileprovider',
                 'globalmosaictileprovider',
                 'mandeltileprovider',
-                'ferntileprovider',
+                'ferndynamictileprovider',
 ]

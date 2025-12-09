@@ -13,13 +13,13 @@ Dependencies
 
 PyZui has been developed with the following python version
 
-- python=3.12.9
+- python = 3.12.12
 
 All dependencies have been installed in a miniconda enviroment, for all 3 
 platforms tested the procedure has always been to install miniconda, create an 
 enviroment:
 
-  conda create -n "enviroment name" python=3.12.9
+  conda create -n "enviroment name" python = 3.12.12
   
 And activate such enviroment
 
@@ -31,8 +31,9 @@ with all the core dependencies installed trough the default Anaconda channel:
 
 PyZUI depends on the following Python packages:
 
-- pyside6=6.7.2 
-- pillow=9.4.0
+- pyside6 = 6.7.2 
+- pillow= 11.0.3
+- pyvips = 2.2.3
 
 The following non-Python packages are also required by certain features of the
 application, those are installed trough the Conda-Forge Anaconda channel. 
@@ -41,11 +42,6 @@ and may work, it's nevertheless highly reccomended to install them in the conda
 enviroment:
 
   conda install -c conda-forge "package"="version number"
-
-- imagemagick=7.1.1_5 
-  (highly recommended, but strictly optional if you do not intend
-  using images of any format other than PPM; the absence of ImageMagick may
-  also break other parts of the application as well);
 
 - poppler=24.09.0
   pdftoppm from Poppler or Xpdf (optional if you do not intend viewing PDFs);
@@ -92,7 +88,7 @@ Running PyZui (Windows)
 
   python main.py 
 
-Generating documentation
+Generating Documentation
 ========================
 
 - Install sphinx on the conda enviroment you have created for the PyZui project.
@@ -110,7 +106,7 @@ Generating documentation
  make clean
  make html
 
-- this will generate all'the documentation adding changes to the project docstring
+- this will generate all the documentation adding changes to the project docstring
   you might have added. You can visualize documentation by opening 
 
  ./docs/build/html/index.html with any web browser 
@@ -119,8 +115,8 @@ Generating documentation
 Building documentation
 ----------------------
 
-- Be aware, building documentation cause all docs project configuration files to 
-  be wiped, if you just wish to update documentation go to GENERATING 
+- Be aware, building documentation cause certains docs project configuration 
+  files to be wiped, if you just wish to update documentation go to GENERATING 
   DOCUMENTATION  
 - Install sphinx on the conda enviroment you have created for the PyZui project.
 
@@ -139,12 +135,15 @@ Building documentation
   Project release: version
   Separate source and build dirs: usually Yes
 
-- This creates a structure like:
+- This creates a structure like::
 
-.. image:: _static/sphinx_docgen_tree.png
-   :align: center
-   :width: 300px
-   :alt: Sphinx Docgen Tree 
+    docs/
+    |__ build/
+    |__ source/
+    |   |__ conf.py
+    |   |__ index.rst
+    |   |__ _static/
+    |__ Makefile
 
 - Then navigate to ./docs and run
 

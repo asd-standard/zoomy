@@ -56,7 +56,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <div class="viewcode-block" id="PhysicalObject">
-<a class="viewcode-back" href="../../../pyzui.physicalobject.html#pyzui.objects.physicalobject.PhysicalObject">[docs]</a>
+<a class="viewcode-back" href="../../../pyzui/physicalobject.html#pyzui.objects.physicalobject.PhysicalObject">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PhysicalObject</span><span class="p">():</span> <span class="c1">#removed object from class argument and Thread</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor : </span>
@@ -76,7 +76,22 @@
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new PhysicalObject at the origin with zero velocity.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor :</span>
+<span class="sd">            PhysicalObject()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        PhysicalObject() --&gt; None</span>
+
+<span class="sd">        Create a new PhysicalObject at the origin with zero velocity.</span>
+
+<span class="sd">        Initializes position coordinates (_x, _y, _z) to 0.0, where</span>
+<span class="sd">        z represents zoomlevel. Initializes velocity components (vx, vy, vz)</span>
+<span class="sd">        to 0.0. Sets the center offset (_centre) to (0,0).</span>
+
+<span class="sd">        This initialization is used by both Scene and MediaObject classes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -94,13 +109,24 @@
     <span class="n">damping_factor</span> <span class="o">=</span> <span class="mi">512</span> <span class="c1">#256</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__damp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">velocity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Damp the given velocity.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __damp(velocity, t)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            velocity : float</span>
 <span class="sd">            t : float</span>
 
-<span class="sd">        __damp(float, float) -&gt; float</span>
+<span class="sd">        __damp(velocity, t) --&gt; float</span>
+
+<span class="sd">        Damp the given velocity over time t.</span>
+
+<span class="sd">        Applies exponential damping using the formula:</span>
+<span class="sd">            v = u * damping_factor**-t</span>
+
+<span class="sd">        If the absolute value of the velocity falls below 0.1,</span>
+<span class="sd">        it is set to 0.0 to prevent infinitesimal movements.</span>
+
+<span class="sd">        Returns the damped velocity value.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">velocity</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">damping_factor</span> <span class="o">**</span> <span class="o">-</span><span class="n">t</span>
         <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">velocity</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span>
@@ -109,13 +135,26 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">u</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the displacement at time t given initial velocity u.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __displacement(t, u)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            t : float</span>
 <span class="sd">            u : float</span>
 
-<span class="sd">        __displacement(float, float) -&gt; float</span>
+<span class="sd">        __displacement(t, u) --&gt; float</span>
+
+<span class="sd">        Calculate the displacement at time t given initial velocity u.</span>
+
+<span class="sd">        Uses the formula derived from integrating the damped velocity::</span>
+
+<span class="sd">            s(t) = (u / log(d)) * (1 - d**-t)</span>
+
+<span class="sd">        where d is the damping_factor.</span>
+
+<span class="sd">        This accounts for the exponential decay of velocity over time.</span>
+
+<span class="sd">        Returns the calculated displacement.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">## Let d = damping_factor</span>
@@ -136,28 +175,42 @@
 
 
 <div class="viewcode-block" id="PhysicalObject.move">
-<a class="viewcode-back" href="../../../pyzui.physicalobject.html#pyzui.objects.physicalobject.PhysicalObject.move">[docs]</a>
+<a class="viewcode-back" href="../../../pyzui/physicalobject.html#pyzui.objects.physicalobject.PhysicalObject.move">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dy</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move the object by (`dx`,`dy`).</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            PhysicalObject.move(dx, dy)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            dx : float</span>
 <span class="sd">            dy : float</span>
 
-<span class="sd">        move(float, float) -&gt; None</span>
+<span class="sd">        PhysicalObject.move(dx, dy) --&gt; None</span>
+
+<span class="sd">        Move the object by the displacement (dx, dy).</span>
+
+<span class="sd">        Increments the object&#39;s x position by dx and y position by dy.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">+=</span> <span class="n">dx</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">+=</span> <span class="n">dy</span></div>
 
 
-    
+
 <div class="viewcode-block" id="PhysicalObject.zoom">
-<a class="viewcode-back" href="../../../pyzui.physicalobject.html#pyzui.objects.physicalobject.PhysicalObject.zoom">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Zoom by the given `amount` with the centre maintaining its position</span>
+<a class="viewcode-back" href="../../../pyzui/physicalobject.html#pyzui.objects.physicalobject.PhysicalObject.zoom">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            PhysicalObject.zoom(amount)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            amount : float</span>
+
+<span class="sd">        PhysicalObject.zoom(amount) --&gt; None</span>
+
+<span class="sd">        Zoom by the given amount with the center maintaining its position</span>
 <span class="sd">        on the screen.</span>
 
-<span class="sd">        zoom(float) -&gt; None</span>
+<span class="sd">        Adjusts the position and zoom level such that the center point</span>
+<span class="sd">        remains at the same screen coordinates after the zoom operation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">## P is the onscreen objec position of the centre</span>
@@ -179,7 +232,7 @@
     
 
 <div class="viewcode-block" id="PhysicalObject.aim">
-<a class="viewcode-back" href="../../../pyzui.physicalobject.html#pyzui.objects.physicalobject.PhysicalObject.aim">[docs]</a>
+<a class="viewcode-back" href="../../../pyzui/physicalobject.html#pyzui.objects.physicalobject.PhysicalObject.aim">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">aim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the initial velocity such that at time `t` the relative</span>
 <span class="sd">        displacement of the object will be `s`, and increase the velocity</span>
@@ -218,14 +271,26 @@
 
 
 <div class="viewcode-block" id="PhysicalObject.step">
-<a class="viewcode-back" href="../../../pyzui.physicalobject.html#pyzui.objects.physicalobject.PhysicalObject.step">[docs]</a>
+<a class="viewcode-back" href="../../../pyzui/physicalobject.html#pyzui.objects.physicalobject.PhysicalObject.step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Step forward `t` seconds in time.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            PhysicalObject.step(t)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            t : float</span>
 
-<span class="sd">        step(float) -&gt; None</span>
+<span class="sd">        PhysicalObject.step(t) --&gt; None</span>
+
+<span class="sd">        Step forward t seconds in time.</span>
+
+<span class="sd">        Updates the object&#39;s position based on velocity and damping.</span>
+<span class="sd">        Calculates displacement for x and y using the velocity and time,</span>
+<span class="sd">        then damps the velocities.</span>
+
+<span class="sd">        If there is z velocity (zoom), applies zoom displacement and</span>
+<span class="sd">        damps the z velocity.</span>
+
+<span class="sd">        This method is called every frame to update physics simulation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vx</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">vy</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">move</span><span class="p">(</span>
@@ -242,23 +307,79 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">moving</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Boolean value indicating whether the object has a non-zero</span>
-<span class="sd">        velocity.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property :</span>
+<span class="sd">            PhysicalObject.moving</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        PhysicalObject.moving --&gt; bool</span>
+
+<span class="sd">        Boolean value indicating whether the object has a non-zero velocity.</span>
+
+<span class="sd">        Returns True if any of vx, vy, or vz are non-zero.</span>
+<span class="sd">        Returns False if all velocity components are zero.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vx</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">vy</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">vz</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__get_zoomlevel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The zoomlevel of the object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __get_zoomlevel</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        __get_zoomlevel --&gt; float</span>
+
+<span class="sd">        Get the zoomlevel of the object.</span>
+
+<span class="sd">        Returns the z-coordinate which represents the zoom level.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">__set_zoomlevel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zoomlevel</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __set_zoomlevel(zoomlevel)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            zoomlevel : float</span>
+
+<span class="sd">        __set_zoomlevel --&gt; None</span>
+
+<span class="sd">        Set the zoomlevel of the object.</span>
+
+<span class="sd">        Assigns the given zoomlevel value to the z-coordinate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">=</span> <span class="n">zoomlevel</span>
+
     <span class="n">zoomlevel</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_zoomlevel</span><span class="p">,</span> <span class="n">__set_zoomlevel</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creating PhysicalObject.zoomlevel property with __get_zoomlevel as</span>
+<span class="sd">    getter and __set_zoomlevel as setter&quot;&quot;&quot;</span>
 
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    TN (take note) this center setter getter definition applies to Scenes</span>
 <span class="sd">    objects, MediaObjects have their own centre definition.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__get_centre</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __get_centre</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        __get_centre --&gt; Tuple[float, float]</span>
+
+<span class="sd">        Get the on-screen position of the object&#39;s center.</span>
+
+<span class="sd">        Converts object-coordinate C to screen-coordinate P using:</span>
+<span class="sd">            P = pos + C * 2**zoomlevel</span>
+
+<span class="sd">        Note: This definition applies to Scene objects. MediaObjects</span>
+<span class="sd">        have their own center definition.</span>
+
+<span class="sd">        Returns the screen coordinates of the center.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">## we need to convert object-coordinate C to</span>
         <span class="c1">## screen-coordinate P:</span>
         <span class="c1">## P = pos + C * 2**zoomlevel</span>
@@ -266,6 +387,22 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__set_centre</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">centre</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __set_centre(centre)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            centre : Tuple[float, float]</span>
+
+<span class="sd">        __set_centre --&gt; None</span>
+
+<span class="sd">        Set the on-screen position of the object&#39;s center.</span>
+
+<span class="sd">        Converts screen-coordinate P to object-coordinate C using:</span>
+<span class="sd">            C = (P - pos) * 2**-zoomlevel</span>
+
+<span class="sd">        Note: This definition applies to Scene objects. MediaObjects</span>
+<span class="sd">        have their own center definition.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">## we need to convert screen-coordinate P to</span>
         <span class="c1">## object-coordinate C:</span>
         <span class="c1">## P = pos + C * 2**zoomlevel</span>
@@ -274,7 +411,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span> <span class="o">=</span> <span class="p">((</span><span class="n">centre</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**-</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">,</span>
                         <span class="p">(</span><span class="n">centre</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**-</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">)</span>
 
-    <span class="n">centre</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_centre</span><span class="p">,</span> <span class="n">__set_centre</span><span class="p">)</span></div>
+    <span class="n">centre</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_centre</span><span class="p">,</span> <span class="n">__set_centre</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creating PhysicalObject.centre property with __get_centre as</span>
+<span class="sd">    getter and __set_centre as setter&quot;&quot;&quot;</span></div>
 
 
 
@@ -304,16 +443,20 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">PyZui installation instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html#dependencies">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#generating-documentation">Generating documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#generating-documentation">Generating Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../usageinstructions.html">User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../programconfiguration.html">Program Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../technicaldocumentation.html">Reading Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../technicaldocumentation.html#project-structure">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../logging.html">Logging System</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

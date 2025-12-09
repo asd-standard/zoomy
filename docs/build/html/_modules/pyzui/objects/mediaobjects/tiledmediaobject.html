@@ -60,17 +60,17 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">ImageQt</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.objects.mediaobjects.mediaobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">MediaObject</span><span class="p">,</span> <span class="n">LoadError</span><span class="p">,</span> <span class="n">RenderMode</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilemanager</span> <span class="k">as</span> <span class="n">TileManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilemanager</span> <span class="k">as</span> <span class="n">TileManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
-<span class="c1"># Subdivide a ppm image into tiles that fit the mediaobject frame </span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.ppm</span><span class="w"> </span><span class="kn">import</span> <span class="n">PPMTiler</span>
+<span class="c1"># Subdivide a ppm image into tiles that fit the mediaobject frame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem.tiler.ppm</span><span class="w"> </span><span class="kn">import</span> <span class="n">PPMTiler</span>
 
 <span class="c1"># The classes that convert various format to ppm images</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDFConverter</span><span class="p">,</span> <span class="n">VipsConverter</span>
 
 <div class="viewcode-block" id="TiledMediaObject">
-<a class="viewcode-back" href="../../../../pyzui.tiledmediaobject.html#pyzui.objects.mediaobjects.tiledmediaobject.TiledMediaObject">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/tiledmediaobject.html#pyzui.objects.mediaobjects.tiledmediaobject.TiledMediaObject">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TiledMediaObject</span><span class="p">(</span><span class="n">MediaObject</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor :</span>
@@ -98,6 +98,25 @@
 <span class="sd">    The converter returns a ppm image file on which we can run the tiler on.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scene</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">autofit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor :</span>
+<span class="sd">            TiledMediaObject(media_id, scene, autofit)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            media_id : str</span>
+<span class="sd">            scene : Scene</span>
+<span class="sd">            autofit : bool (default=True)</span>
+
+<span class="sd">        TiledMediaObject(media_id, scene, autofit) --&gt; None</span>
+
+<span class="sd">        Initialize a new TiledMediaObject from the media identified by media_id,</span>
+<span class="sd">        the parent Scene referenced by scene, and optionally autofit behavior.</span>
+
+<span class="sd">        If autofit is True, once the media has loaded it will be fitted to</span>
+<span class="sd">        the area occupied by the placeholder.</span>
+
+<span class="sd">        Sets up conversion and tiling infrastructure based on the media file type.</span>
+<span class="sd">        Initializes caching variables for tileblocks and rendering optimization.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">MediaObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__autofit</span> <span class="o">=</span> <span class="n">autofit</span>
@@ -162,6 +181,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__progress</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property :</span>
+<span class="sd">            __progress</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        __progress --&gt; float</span>
+
+<span class="sd">        Calculate and return the current loading progress as a float</span>
+<span class="sd">        between 0.0 and 1.0.</span>
+
+<span class="sd">        If only tiler is active, returns tiler progress.</span>
+<span class="sd">        If only converter is active, returns half of converter progress.</span>
+<span class="sd">        If both are active, returns average of both progresses.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="mf">0.0</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -493,9 +527,28 @@
 
 
 <div class="viewcode-block" id="TiledMediaObject.render">
-<a class="viewcode-back" href="../../../../pyzui.tiledmediaobject.html#pyzui.objects.mediaobjects.tiledmediaobject.TiledMediaObject.render">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/tiledmediaobject.html#pyzui.objects.mediaobjects.tiledmediaobject.TiledMediaObject.render">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            TiledMediaObject.render(painter, mode)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            painter : QPainter</span>
+<span class="sd">            mode : int</span>
+
+<span class="sd">        TiledMediaObject.render(painter, mode) --&gt; None</span>
+
+<span class="sd">        Render the tiled media using the given painter and rendering mode.</span>
+
+<span class="sd">        If the media is loaded, renders the actual media content.</span>
+<span class="sd">        Otherwise, renders a placeholder showing loading progress.</span>
+
+<span class="sd">        Handles tiler initialization if converter has finished but tiler</span>
+<span class="sd">        hasn&#39;t started yet.</span>
+
+<span class="sd">        Precondition: mode is equal to one of the constants defined in</span>
+<span class="sd">        :class:`RenderMode`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__loaded</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__render_media</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
@@ -532,6 +585,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">onscreen_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property :</span>
+<span class="sd">            TiledMediaObject.onscreen_size</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        TiledMediaObject.onscreen_size --&gt; Tuple[float, float]</span>
+
+<span class="sd">        Return the on-screen size of the tiled media.</span>
+
+<span class="sd">        Calculates the width and height based on aspect ratio if available,</span>
+<span class="sd">        otherwise uses the actual width and height scaled by zoom levels.</span>
+
+<span class="sd">        Returns (0,0) if the media dimensions are not yet known.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__aspect_ratio</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__aspect_ratio</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
                 <span class="c1">## width &gt;= height</span>
@@ -574,16 +642,20 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">PyZui installation instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#dependencies">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../usageinstructions.html">User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../programconfiguration.html">Program Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation.html">Reading Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation.html#project-structure">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../logging.html">Logging System</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

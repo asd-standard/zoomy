@@ -41,7 +41,22 @@ class PhysicalObject(): #removed object from class argument and Thread
     
     """
     def __init__(self) -> None:
-        """Create a new PhysicalObject at the origin with zero velocity."""
+        """
+        Constructor :
+            PhysicalObject()
+        Parameters :
+            None
+
+        PhysicalObject() --> None
+
+        Create a new PhysicalObject at the origin with zero velocity.
+
+        Initializes position coordinates (_x, _y, _z) to 0.0, where
+        z represents zoomlevel. Initializes velocity components (vx, vy, vz)
+        to 0.0. Sets the center offset (_centre) to (0,0).
+
+        This initialization is used by both Scene and MediaObject classes.
+        """
 
         self._x = 0.0
         self._y = 0.0
@@ -59,13 +74,24 @@ class PhysicalObject(): #removed object from class argument and Thread
     damping_factor = 512 #256
 
     def __damp(self, velocity: float, t: float) -> float:
-        """Damp the given velocity.
-
+        """
+        Method :
+            __damp(velocity, t)
         Parameters :
             velocity : float
             t : float
 
-        __damp(float, float) -> float
+        __damp(velocity, t) --> float
+
+        Damp the given velocity over time t.
+
+        Applies exponential damping using the formula:
+            v = u * damping_factor**-t
+
+        If the absolute value of the velocity falls below 0.1,
+        it is set to 0.0 to prevent infinitesimal movements.
+
+        Returns the damped velocity value.
         """
         velocity *= self.damping_factor ** -t
         if abs(velocity) < 0.1:
@@ -74,13 +100,26 @@ class PhysicalObject(): #removed object from class argument and Thread
 
 
     def __displacement(self, t: float, u: float) -> float:
-        """Calculate the displacement at time t given initial velocity u.
-
+        """
+        Method :
+            __displacement(t, u)
         Parameters :
             t : float
             u : float
 
-        __displacement(float, float) -> float
+        __displacement(t, u) --> float
+
+        Calculate the displacement at time t given initial velocity u.
+
+        Uses the formula derived from integrating the damped velocity::
+
+            s(t) = (u / log(d)) * (1 - d**-t)
+
+        where d is the damping_factor.
+
+        This accounts for the exponential decay of velocity over time.
+
+        Returns the calculated displacement.
         """
 
         ## Let d = damping_factor
@@ -101,23 +140,37 @@ class PhysicalObject(): #removed object from class argument and Thread
 
 
     def move(self, dx: float, dy: float) -> None:
-        """Move the object by (`dx`,`dy`).
-
+        """
+        Method :
+            PhysicalObject.move(dx, dy)
         Parameters :
             dx : float
             dy : float
 
-        move(float, float) -> None
+        PhysicalObject.move(dx, dy) --> None
+
+        Move the object by the displacement (dx, dy).
+
+        Increments the object's x position by dx and y position by dy.
         """
         self._x += dx
         self._y += dy
 
-    
-    def zoom(self, amount):
-        """Zoom by the given `amount` with the centre maintaining its position
+
+    def zoom(self, amount: float) -> None:
+        """
+        Method :
+            PhysicalObject.zoom(amount)
+        Parameters :
+            amount : float
+
+        PhysicalObject.zoom(amount) --> None
+
+        Zoom by the given amount with the center maintaining its position
         on the screen.
 
-        zoom(float) -> None
+        Adjusts the position and zoom level such that the center point
+        remains at the same screen coordinates after the zoom operation.
         """
 
         ## P is the onscreen objec position of the centre
@@ -174,12 +227,24 @@ class PhysicalObject(): #removed object from class argument and Thread
 
 
     def step(self, t: float) -> None:
-        """Step forward `t` seconds in time.
-
+        """
+        Method :
+            PhysicalObject.step(t)
         Parameters :
             t : float
 
-        step(float) -> None
+        PhysicalObject.step(t) --> None
+
+        Step forward t seconds in time.
+
+        Updates the object's position based on velocity and damping.
+        Calculates displacement for x and y using the velocity and time,
+        then damps the velocities.
+
+        If there is z velocity (zoom), applies zoom displacement and
+        damps the z velocity.
+
+        This method is called every frame to update physics simulation.
         """
         if self.vx or self.vy:
             self.move(
@@ -195,23 +260,79 @@ class PhysicalObject(): #removed object from class argument and Thread
 
     @property
     def moving(self) -> bool:
-        """Boolean value indicating whether the object has a non-zero
-        velocity."""
+        """
+        Property :
+            PhysicalObject.moving
+        Parameters :
+            None
+
+        PhysicalObject.moving --> bool
+
+        Boolean value indicating whether the object has a non-zero velocity.
+
+        Returns True if any of vx, vy, or vz are non-zero.
+        Returns False if all velocity components are zero.
+        """
         return not (self.vx == self.vy == self.vz == 0)
 
 
     def __get_zoomlevel(self) -> float:
-        """The zoomlevel of the object."""
+        """
+        Method :
+            __get_zoomlevel
+        Parameters :
+            None
+
+        __get_zoomlevel --> float
+
+        Get the zoomlevel of the object.
+
+        Returns the z-coordinate which represents the zoom level.
+        """
         return self._z
+
     def __set_zoomlevel(self, zoomlevel: float) -> None:
+        """
+        Method :
+            __set_zoomlevel(zoomlevel)
+        Parameters :
+            zoomlevel : float
+
+        __set_zoomlevel --> None
+
+        Set the zoomlevel of the object.
+
+        Assigns the given zoomlevel value to the z-coordinate.
+        """
         self._z = zoomlevel
+
     zoomlevel = property(__get_zoomlevel, __set_zoomlevel)
+    """Creating PhysicalObject.zoomlevel property with __get_zoomlevel as
+    getter and __set_zoomlevel as setter"""
 
     '''
     TN (take note) this center setter getter definition applies to Scenes
     objects, MediaObjects have their own centre definition.
     '''
     def __get_centre(self) -> Tuple[float, float]:
+        """
+        Method :
+            __get_centre
+        Parameters :
+            None
+
+        __get_centre --> Tuple[float, float]
+
+        Get the on-screen position of the object's center.
+
+        Converts object-coordinate C to screen-coordinate P using:
+            P = pos + C * 2**zoomlevel
+
+        Note: This definition applies to Scene objects. MediaObjects
+        have their own center definition.
+
+        Returns the screen coordinates of the center.
+        """
         ## we need to convert object-coordinate C to
         ## screen-coordinate P:
         ## P = pos + C * 2**zoomlevel
@@ -219,6 +340,22 @@ class PhysicalObject(): #removed object from class argument and Thread
                 self._y + self._centre[1] * 2**self._z)
 
     def __set_centre(self, centre: Tuple[float, float]) -> None:
+        """
+        Method :
+            __set_centre(centre)
+        Parameters :
+            centre : Tuple[float, float]
+
+        __set_centre --> None
+
+        Set the on-screen position of the object's center.
+
+        Converts screen-coordinate P to object-coordinate C using:
+            C = (P - pos) * 2**-zoomlevel
+
+        Note: This definition applies to Scene objects. MediaObjects
+        have their own center definition.
+        """
         ## we need to convert screen-coordinate P to
         ## object-coordinate C:
         ## P = pos + C * 2**zoomlevel
@@ -228,6 +365,8 @@ class PhysicalObject(): #removed object from class argument and Thread
                         (centre[1] - self._y) * 2**-self._z)
 
     centre = property(__get_centre, __set_centre)
+    """Creating PhysicalObject.centre property with __get_centre as
+    getter and __set_centre as setter"""
 
 
 

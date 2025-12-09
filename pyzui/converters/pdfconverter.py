@@ -18,29 +18,30 @@
 
 """PDF rasterizer based upon either Xpdf or Poppler."""
 
-from typing import Optional, Tuple, List, Any
-import inspect
 import subprocess
 import tempfile
 import os
 import shutil
 
 from .converter import Converter
-from ..ppm import read_ppm_header
-from .. import tilestore as TileStore
+from pyzui.tilesystem.tiler.ppm import read_ppm_header
+from pyzui.tilesystem import tilestore as TileStore
 
 class PDFConverter(Converter):
-    """PDFConverter objects are used for rasterizing PDFs.
-
-    The output format will always be PPM irrespective of the file extension of
-    the output file. If another output format is required then :class:`PDFConverter`
-    should be used in conjunction with :class:`VipsConverter`.
-
-    Constructor:
+    """
+    Constructor :
         PDFConverter(infile, outfile)
     Parameters :
         infile : str
         outfile : str
+
+    PDFConverter(infile, outfile) --> None
+
+    PDFConverter objects are used for rasterizing PDFs.
+
+    The output format will always be PPM irrespective of the file extension of
+    the output file. If another output format is required then :class:`PDFConverter`
+    should be used in conjunction with :class:`VipsConverter`.
     """
     def __init__(self, infile: str, outfile: str) -> None:
         Converter.__init__(self, infile, outfile)
@@ -49,14 +50,19 @@ class PDFConverter(Converter):
 
 
     def __merge(self, tmpdir: str) -> None:
-        """Merge the PPM pages located in tmpdir.
-
-        Method:
+        """
+        Method :
             PDFConverter.__merge(tmpdir)
         Parameters :
             tmpdir : str
 
-        PDFConverter.__merge(tmpdir) -> None
+        PDFConverter.__merge(tmpdir) --> None
+
+        Merge the PPM pages located in tmpdir into a single PPM file.
+
+        Reads all PPM page files in the temporary directory, extracts their
+        headers to determine dimensions, and concatenates them vertically
+        into a single output PPM file.
         """
         self._logger.info("merging pages")
         self._progress = 0.5
@@ -104,6 +110,21 @@ class PDFConverter(Converter):
 
     #'-scale-to',str(1000),
     def run(self) -> None:
+        """
+        Method :
+            PDFConverter.run()
+        Parameters :
+            None
+
+        PDFConverter.run() --> None
+
+        Run the PDF conversion using pdftoppm. Creates a temporary directory,
+        calls pdftoppm to rasterize the PDF into individual PPM pages, then
+        merges the pages into a single PPM file.
+
+        If any errors are encountered then :attr:`self.error` will be set to a
+        string describing the error.
+        """
 
         with TileStore.disk_lock:
             tmpdir = tempfile.mkdtemp()

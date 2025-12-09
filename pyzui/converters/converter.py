@@ -18,26 +18,28 @@
 
 """A threaded media converter (abstract base class)."""
 
-from typing import Optional
 from threading import Thread
 from ..logger import get_logger
 
 class Converter(Thread):
-    """Converter objects are used for converting media.
-
-    Constructor:
+    """
+    Constructor :
         Converter(infile, outfile)
     Parameters :
         infile : str
         outfile : str
+
+    Converter(infile, outfile) --> None
+
+    Converter objects are used for converting media.
+
+    Create a new Converter for converting media at the location given by
+    `infile` to the location given by `outfile`.
+
+    Where appropriate, the output format will be determined from the file
+    extension of `outfile`.
     """
     def __init__(self, infile: str, outfile: str) -> None:
-        """Create a new Converter for converting media at the location given by
-        `infile` to the location given by `outfile`.
-
-        Where appropriate, the output format will be determined from the file
-        extension of `outfile`.
-        """
         Thread.__init__(self)
 
         self._infile = infile
@@ -51,30 +53,32 @@ class Converter(Thread):
 
 
     def run(self) -> None:
-        """Run the conversion. If any errors are encountered then :attr:`self.error`
-        will be set to a string describing the error.
-
-        Method:
+        """
+        Method :
             Converter.run()
         Parameters :
             None
 
-        Converter.run() -> None
+        Converter.run() --> None
+
+        Run the conversion. If any errors are encountered then :attr:`self.error`
+        will be set to a string describing the error.
         """
         pass
 
 
     @property
     def progress(self) -> float:
-        """Conversion progress ranging from 0.0 to 1.0. A value of 1.0
-        indicates that the converter has completely finished.
-
+        """
         Property :
             Converter.progress
         Parameters :
             None
 
-        Converter.progress -> float
+        Converter.progress --> float
+
+        Conversion progress ranging from 0.0 to 1.0. A value of 1.0
+        indicates that the converter has completely finished.
         """
         return self._progress
 

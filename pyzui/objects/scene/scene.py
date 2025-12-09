@@ -28,9 +28,9 @@ from typing import Optional, Tuple, List
 from PySide6 import QtCore
 from PySide6.QtGui import QColor, QPainter
 
-from pyzui.dialogwindows import DialogWindows
+from pyzui.windows.dialogwindows.dialogwindows import DialogWindows
 from pyzui.objects.physicalobject import PhysicalObject
-from pyzui import tilemanager as TileManager
+from pyzui.tilesystem import tilemanager as TileManager
 from pyzui.objects.mediaobjects import mediaobject as MediaObject
 from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject
 from pyzui.objects.mediaobjects.stringmediaobject import StringMediaObject
@@ -61,7 +61,7 @@ class Scene(PhysicalObject):
     def __init__(self):
 
         """
-        New scene is made by initiating a :doc:`physicalobject <pyzui.physicalobject>`, 
+        New scene is made by initiating a :class:`~pyzui.objects.physicalobject.PhysicalObject`, 
 
         creating an objects list `__objects` and thread safe selection for `__objects`
         given by declaring RLock list `__objects_lock`, 
@@ -470,9 +470,9 @@ class Scene(PhysicalObject):
                         dialog = DialogWindows.modify_string_input_dialog(\
                             self.__objects[i]._media_id)
                         try :
-                            ok, media_id, string_color, edited_text = dialog._run_dialog() 
+                            ok, media_id, string_color, edited_text = dialog._run_dialog()
 
-                        except Exception as e :   
+                        except Exception:
                             ok = False
                             media_id = False      
                         if ok and media_id: 

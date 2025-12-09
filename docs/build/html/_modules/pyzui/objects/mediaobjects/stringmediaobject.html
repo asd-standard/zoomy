@@ -59,7 +59,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.mediaobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">MediaObject</span><span class="p">,</span> <span class="n">LoadError</span><span class="p">,</span> <span class="n">RenderMode</span>
 
 <div class="viewcode-block" id="StringMediaObject">
-<a class="viewcode-back" href="../../../../pyzui.stringmediaobject.html#pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/stringmediaobject.html#pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StringMediaObject</span><span class="p">(</span><span class="n">MediaObject</span><span class="p">):</span> <span class="c1">#, Thread</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor :</span>
@@ -79,9 +79,25 @@
 <span class="sd">    displayed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scene</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor :</span>
+<span class="sd">            StringMediaObject(media_id, scene)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            media_id : str</span>
+<span class="sd">            scene : Scene</span>
 
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a new MediaObject from the media identified by `media_id`,</span>
-<span class="sd">        and the parent Scene referenced by `scene`.&quot;&quot;&quot;</span>
+<span class="sd">        StringMediaObject(media_id, scene) --&gt; None</span>
+
+<span class="sd">        Initialize a new StringMediaObject from the media identified by media_id,</span>
+<span class="sd">        and the parent Scene referenced by scene.</span>
+
+<span class="sd">        The media_id should be of the form &#39;string:rrggbb:foobar&#39;, where</span>
+<span class="sd">        &#39;rrggbb&#39; is a string of three two-digit hexadecimal numbers representing</span>
+<span class="sd">        the color of the text, and &#39;foobar&#39; is the string to be displayed.</span>
+
+<span class="sd">        Parses the media_id to extract color and text content, then processes</span>
+<span class="sd">        the text to handle multi-line strings by splitting on newline characters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">MediaObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
 
         <span class="c1">#Get color code &#39;rrggbb&#39; from media_id string and assign it to hexcol variable</span>
@@ -122,7 +138,7 @@
     <span class="n">base_pointsize</span> <span class="o">=</span> <span class="mf">24.0</span>
 
 <div class="viewcode-block" id="StringMediaObject.render">
-<a class="viewcode-back" href="../../../../pyzui.stringmediaobject.html#pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.render">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/stringmediaobject.html#pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.render">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -190,11 +206,37 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__pointsize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property :</span>
+<span class="sd">            __pointsize</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        __pointsize --&gt; float</span>
+
+<span class="sd">        Calculate and return the font point size based on the current scale.</span>
+
+<span class="sd">        Returns base_pointsize multiplied by the current scale factor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_pointsize</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__font</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property :</span>
+<span class="sd">            __font</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        __font --&gt; QFont or None</span>
+
+<span class="sd">        Create and return a QFont object with the appropriate point size</span>
+<span class="sd">        for the current scale.</span>
+
+<span class="sd">        Returns None if the point size is less than 1 (too small to be seen).</span>
+<span class="sd">        Otherwise returns a Sans Serif font with the calculated point size.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">pointsize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pointsize</span>
         <span class="k">if</span> <span class="n">pointsize</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1">## too small to be seen</span>
@@ -263,16 +305,20 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">PyZui installation instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#dependencies">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../usageinstructions.html">User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../programconfiguration.html">Program Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation.html">Reading Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation.html#project-structure">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../logging.html">Logging System</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

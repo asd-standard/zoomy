@@ -35,10 +35,10 @@ sys.path.append(os.path.abspath(
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import pyzui.tilemanager as TileManager
-import pyzui.tilestore as TileStore
+import pyzui.tilesystem.tilemanager as TileManager
+import pyzui.tilesystem.tilestore as TileStore
 from pyzui.converters.vipsconverter import VipsConverter
-from pyzui.ppm import PPMTiler, read_ppm_header
+from pyzui.tilesystem.ppm import PPMTiler, read_ppm_header
 from pyzui.objects.scene.qzui import QZUI
 import pyzui.objects.scene.scene as Scene
 from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject

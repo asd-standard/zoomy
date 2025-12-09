@@ -58,7 +58,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.mediaobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">MediaObject</span><span class="p">,</span> <span class="n">LoadError</span><span class="p">,</span> <span class="n">RenderMode</span>
 
 <div class="viewcode-block" id="SVGMediaObject">
-<a class="viewcode-back" href="../../../../pyzui.svgmediaobject.html#pyzui.objects.mediaobjects.svgmediaobject.SVGMediaObject">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/svgmediaobject.html#pyzui.objects.mediaobjects.svgmediaobject.SVGMediaObject">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SVGMediaObject</span><span class="p">(</span><span class="n">MediaObject</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor :</span>
@@ -73,6 +73,24 @@
 <span class="sd">    rendered in the ZUI.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scene</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor :</span>
+<span class="sd">            SVGMediaObject(media_id, scene)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            media_id : str</span>
+<span class="sd">            scene : Scene</span>
+
+<span class="sd">        SVGMediaObject(media_id, scene) --&gt; None</span>
+
+<span class="sd">        Initialize a new SVGMediaObject from the SVG file identified by media_id,</span>
+<span class="sd">        and the parent Scene referenced by scene.</span>
+
+<span class="sd">        Creates a QSvgRenderer and attempts to load the SVG file.</span>
+<span class="sd">        Raises LoadError if the SVG file cannot be parsed.</span>
+
+<span class="sd">        Stores the default width and height of the SVG image for rendering</span>
+<span class="sd">        calculations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">MediaObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__renderer</span> <span class="o">=</span> <span class="n">QtSvg</span><span class="o">.</span><span class="n">QSvgRenderer</span><span class="p">()</span>
@@ -87,7 +105,7 @@
     <span class="n">transparent</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="SVGMediaObject.render">
-<a class="viewcode-back" href="../../../../pyzui.svgmediaobject.html#pyzui.objects.mediaobjects.svgmediaobject.SVGMediaObject.render">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/svgmediaobject.html#pyzui.objects.mediaobjects.svgmediaobject.SVGMediaObject.render">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -149,16 +167,20 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">PyZui installation instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#dependencies">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../usageinstructions.html">User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../programconfiguration.html">Program Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation.html">Reading Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation.html#project-structure">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../logging.html">Logging System</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

@@ -18,25 +18,26 @@
 
 """Image converter based upon libvips (via pyvips)."""
 
-from typing import Optional, Tuple, List, Any
 import pyvips
 import os
-#import sys
 
 from .converter import Converter
-from .. import tilestore as TileStore
+from pyzui.tilesystem import tilestore as TileStore
 
 class VipsConverter(Converter):
-    """VipsConverter objects are used for converting media with libvips.
-    libvips is a fast image processing library that can handle very large images
-    with low memory usage. For a list of supported image formats see
-    https://www.libvips.org/API/current/file-format.html
-
-    Constructor:
+    """
+    Constructor :
         VipsConverter(infile, outfile)
     Parameters :
         infile : str
         outfile : str
+
+    VipsConverter(infile, outfile) --> None
+
+    VipsConverter objects are used for converting media with libvips.
+    libvips is a fast image processing library that can handle very large images
+    with low memory usage. For a list of supported image formats see
+    https://www.libvips.org/API/current/file-format.html
     """
     def __init__(self, infile: str, outfile: str) -> None:
         
@@ -47,6 +48,21 @@ class VipsConverter(Converter):
 
 
     def run(self) -> None:
+        """
+        Method :
+            VipsConverter.run()
+        Parameters :
+            None
+
+        VipsConverter.run() --> None
+
+        Run the conversion using libvips. Loads the image from the input file,
+        converts it to the appropriate format (8-bit RGB or grayscale), and writes
+        it to the output file in PPM format.
+
+        If any errors are encountered then :attr:`self.error` will be set to a
+        string describing the error.
+        """
         try:
             with TileStore.disk_lock:
                 self._logger.debug("loading image with libvips")

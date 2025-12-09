@@ -56,22 +56,24 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Thread</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.objects.scene</span><span class="w"> </span><span class="kn">import</span> <span class="n">scene</span> <span class="k">as</span> <span class="n">Scene</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilemanager</span> <span class="k">as</span> <span class="n">TileManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilemanager</span> <span class="k">as</span> <span class="n">TileManager</span>
 
 <div class="viewcode-block" id="QZUI">
-<a class="viewcode-back" href="../../../../pyzui.qzui.html#pyzui.objects.scene.qzui.QZUI">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">QZUI</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Thread</span><span class="p">)</span> <span class="p">:</span> 
+<a class="viewcode-back" href="../../../../pyzui/qzui.html#pyzui.objects.scene.qzui.QZUI">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">QZUI</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Thread</span><span class="p">)</span> <span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor :</span>
-<span class="sd">        QZUI()</span>
+<span class="sd">        QZUI(parent, framerate, zoom_sensitivity)</span>
 <span class="sd">    Parameters :</span>
-<span class="sd">        parent[&#39;QWidget&#39;], framerate[&#39;int&#39;], zoom_sensitivity[&#39;int&#39;]</span>
+<span class="sd">        parent : Optional[QtWidgets.QWidget]</span>
+<span class="sd">        framerate : int</span>
+<span class="sd">        zoom_sensitivity : int</span>
 
-<span class="sd">    QZUI(parent, framerate, zoom_sensitivity) --&gt; QtWidgets.QWidget, Thread</span>
+<span class="sd">    QZUI(parent, framerate, zoom_sensitivity) --&gt; None</span>
 
 <span class="sd">    QZUI widgets that are used for rendering the ZUI.</span>
-<span class="sd">    This class defines all the methods to retieve events, Mouse, Keyboard, ecc</span>
-<span class="sd">    </span>
+<span class="sd">    This class defines all the methods to retrieve events, Mouse, Keyboard, etc.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">#: link error variable to QtCore.Signal()</span>
@@ -80,14 +82,17 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">framerate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">zoom_sensitivity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a new QZUI QWidget with the given `parent` widget.</span>
-
 <span class="sd">        Constructor :</span>
 <span class="sd">            QZUI(parent, framerate, zoom_sensitivity)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            parent : Optional[QtWidgets.QWidget]</span>
 <span class="sd">            framerate : int</span>
 <span class="sd">            zoom_sensitivity : int</span>
+
+<span class="sd">        QZUI(parent, framerate, zoom_sensitivity) --&gt; None</span>
+
+<span class="sd">        Create a new QZUI QWidget with the given `parent` widget.</span>
+<span class="sd">        Initializes the widget with specified framerate and zoom sensitivity.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
 
@@ -113,15 +118,16 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Increase the z velocity of the appropriate object by an amount</span>
-<span class="sd">        proportional to num_steps.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            __zoom(num_steps)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            num_steps : float</span>
 
-<span class="sd">        __zoom(float) -&gt; None</span>
+<span class="sd">        __zoom(num_steps) --&gt; None</span>
+
+<span class="sd">        Increase the z velocity of the appropriate object by an amount</span>
+<span class="sd">        proportional to num_steps.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__alt_held</span><span class="p">:</span>
             <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="mi">16</span>
@@ -133,35 +139,39 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__centre</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Aim the appropriate object such that the point under the cursor will</span>
-<span class="sd">        move to the centre of the screen</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            __centre()</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            None</span>
 
-<span class="sd">        __centre() -&gt; None</span>
+<span class="sd">        __centre() --&gt; None</span>
+
+<span class="sd">        Aim the appropriate object such that the point under the cursor will</span>
+<span class="sd">        move to the centre of the screen.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">vx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">vy</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">aim</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span>  <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">aim</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
 
 <div class="viewcode-block" id="QZUI.paintEvent">
-<a class="viewcode-back" href="../../../../pyzui.qzui.html#pyzui.objects.scene.qzui.QZUI.paintEvent">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/qzui.html#pyzui.objects.scene.qzui.QZUI.paintEvent">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">paintEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPaintEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method that allows you to perform custom painting on a widget.</span>
-
-<span class="sd">        It is part of the event handling system, and you typically override it in a subclass of a QWidget</span>
-<span class="sd">        (or any subclass like QLabel, QFrame, etc.) to draw graphics using the QPainter class.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            paintEvent(event)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            event : QtGui.QPaintEvent</span>
 
-<span class="sd">        paintEvent(event) -&gt; None</span>
+<span class="sd">        paintEvent(event) --&gt; None</span>
+
+<span class="sd">        Method that allows you to perform custom painting on a widget.</span>
+
+<span class="sd">        It is part of the event handling system, and you typically override it in a subclass of a QWidget</span>
+<span class="sd">        (or any subclass like QLabel, QFrame, etc.) to draw graphics using the QPainter class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">framerate</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">framerate</span><span class="p">)</span>
@@ -190,16 +200,17 @@
 
 
 <div class="viewcode-block" id="QZUI.timerEvent">
-<a class="viewcode-back" href="../../../../pyzui.qzui.html#pyzui.objects.scene.qzui.QZUI.timerEvent">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/qzui.html#pyzui.objects.scene.qzui.QZUI.timerEvent">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">timerEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimerEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle timer events to update the scene rendering.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            timerEvent(event)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            event : QtCore.QTimerEvent</span>
 
-<span class="sd">        timerEvent(event) -&gt; None</span>
+<span class="sd">        timerEvent(event) --&gt; None</span>
+
+<span class="sd">        Handle timer events to update the scene rendering.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">timerId</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__timer</span><span class="o">.</span><span class="n">timerId</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">moving</span> <span class="p">:</span>
@@ -226,35 +237,37 @@
 
 
 <div class="viewcode-block" id="QZUI.wheelEvent">
-<a class="viewcode-back" href="../../../../pyzui.qzui.html#pyzui.objects.scene.qzui.QZUI.wheelEvent">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/qzui.html#pyzui.objects.scene.qzui.QZUI.wheelEvent">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">wheelEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWheelEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle mouse wheel events for zooming.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            wheelEvent(event)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            event : QtGui.QWheelEvent</span>
 
-<span class="sd">        wheelEvent(event) -&gt; None</span>
+<span class="sd">        wheelEvent(event) --&gt; None</span>
+
+<span class="sd">        Handle mouse wheel events for zooming.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">num_degrees</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">angleDelta</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="c1">#/ 8</span>
         <span class="n">num_steps</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">num_degrees</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom_sensitivity</span> <span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="c1">#15</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__zoom</span><span class="p">(</span><span class="n">num_steps</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()),</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()))</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()),</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__zoom</span><span class="p">(</span><span class="n">num_steps</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="QZUI.mousePressEvent">
-<a class="viewcode-back" href="../../../../pyzui.qzui.html#pyzui.objects.scene.qzui.QZUI.mousePressEvent">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/qzui.html#pyzui.objects.scene.qzui.QZUI.mousePressEvent">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle mouse press events for object selection.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            mousePressEvent(event)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            event : QtGui.QMouseEvent</span>
 
-<span class="sd">        mousePressEvent(event) -&gt; None</span>
+<span class="sd">        mousePressEvent(event) --&gt; None</span>
+
+<span class="sd">        Handle mouse press events for object selection.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__mouse_left_down</span> <span class="o">=</span> <span class="kc">True</span>
@@ -273,16 +286,17 @@
 
 
 <div class="viewcode-block" id="QZUI.mouseMoveEvent">
-<a class="viewcode-back" href="../../../../pyzui.qzui.html#pyzui.objects.scene.qzui.QZUI.mouseMoveEvent">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/qzui.html#pyzui.objects.scene.qzui.QZUI.mouseMoveEvent">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle mouse move events for dragging objects.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            mouseMoveEvent(event)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            event : QtGui.QMouseEvent</span>
 
-<span class="sd">        mouseMoveEvent(event) -&gt; None</span>
+<span class="sd">        mouseMoveEvent(event) --&gt; None</span>
+
+<span class="sd">        Handle mouse move events for dragging objects.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">buttons</span><span class="p">()</span><span class="o">&amp;</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mouse_left_down</span><span class="p">:</span>
             <span class="n">mx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">())</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -297,16 +311,17 @@
 
 
 <div class="viewcode-block" id="QZUI.mouseReleaseEvent">
-<a class="viewcode-back" href="../../../../pyzui.qzui.html#pyzui.objects.scene.qzui.QZUI.mouseReleaseEvent">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/qzui.html#pyzui.objects.scene.qzui.QZUI.mouseReleaseEvent">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle mouse release events.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            mouseReleaseEvent(event)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            event : QtGui.QMouseEvent</span>
 
-<span class="sd">        mouseReleaseEvent(event) -&gt; None</span>
+<span class="sd">        mouseReleaseEvent(event) --&gt; None</span>
+
+<span class="sd">        Handle mouse release events.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mouse_left_down</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__mouse_left_down</span> <span class="o">=</span> <span class="kc">False</span></div>
@@ -314,16 +329,17 @@
 
 
 <div class="viewcode-block" id="QZUI.keyPressEvent">
-<a class="viewcode-back" href="../../../../pyzui.qzui.html#pyzui.objects.scene.qzui.QZUI.keyPressEvent">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/qzui.html#pyzui.objects.scene.qzui.QZUI.keyPressEvent">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QKeyEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle key press events for navigation and control.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            keyPressEvent(event)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            event : QtGui.QKeyEvent</span>
 
-<span class="sd">        keyPressEvent(event) -&gt; None</span>
+<span class="sd">        keyPressEvent(event) --&gt; None</span>
+
+<span class="sd">        Handle key press events for navigation and control.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__alt_held</span><span class="p">:</span>
             <span class="n">move_amount</span> <span class="o">=</span> <span class="mi">16</span>
@@ -361,16 +377,17 @@
 
 
 <div class="viewcode-block" id="QZUI.keyReleaseEvent">
-<a class="viewcode-back" href="../../../../pyzui.qzui.html#pyzui.objects.scene.qzui.QZUI.keyReleaseEvent">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/qzui.html#pyzui.objects.scene.qzui.QZUI.keyReleaseEvent">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">keyReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QKeyEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle key release events.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            keyReleaseEvent(event)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            event : QtGui.QKeyEvent</span>
 
-<span class="sd">        keyReleaseEvent(event) -&gt; None</span>
+<span class="sd">        keyReleaseEvent(event) --&gt; None</span>
+
+<span class="sd">        Handle key release events.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">()</span>
         <span class="k">if</span>   <span class="n">key</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Shift</span><span class="p">:</span>
@@ -383,16 +400,17 @@
 
 
 <div class="viewcode-block" id="QZUI.resizeEvent">
-<a class="viewcode-back" href="../../../../pyzui.qzui.html#pyzui.objects.scene.qzui.QZUI.resizeEvent">[docs]</a>
+<a class="viewcode-back" href="../../../../pyzui/qzui.html#pyzui.objects.scene.qzui.QZUI.resizeEvent">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QResizeEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle resize events to update the viewport size.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            resizeEvent(event)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            event : QtGui.QResizeEvent</span>
 
-<span class="sd">        resizeEvent(event) -&gt; None</span>
+<span class="sd">        resizeEvent(event) --&gt; None</span>
+
+<span class="sd">        Handle resize events to update the viewport size.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__scene</span><span class="o">.</span><span class="n">viewport_size</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">())</span></div>
 
@@ -400,7 +418,8 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__active_object</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Property :</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property :</span>
 <span class="sd">            __active_object</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            None</span>
@@ -416,26 +435,28 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__get_framerate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Rendering framerate.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            __get_framerate()</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            None</span>
 
-<span class="sd">        __get_framerate() -&gt; int</span>
+<span class="sd">        __get_framerate() --&gt; int</span>
+
+<span class="sd">        Return the rendering framerate.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__framerate</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__set_framerate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">framerate</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the rendering framerate.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            __set_framerate(framerate)</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            framerate : int</span>
 
-<span class="sd">        __set_framerate(framerate) -&gt; None</span>
+<span class="sd">        __set_framerate(framerate) --&gt; None</span>
+
+<span class="sd">        Set the rendering framerate.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__framerate</span> <span class="o">=</span> <span class="n">framerate</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__framerate</span><span class="p">:</span>
@@ -446,26 +467,28 @@
     <span class="n">framerate</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_framerate</span><span class="p">,</span> <span class="n">__set_framerate</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__get_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Scene.Scene&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Scene currently being viewed.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            __get_scene()</span>
 <span class="sd">        Parameters :</span>
 <span class="sd">            None</span>
 
-<span class="sd">        __get_scene() -&gt; Scene</span>
+<span class="sd">        __get_scene() --&gt; Scene.Scene</span>
+
+<span class="sd">        Return the scene currently being viewed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scene</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__set_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="p">:</span> <span class="s1">&#39;Scene.Scene&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the scene to be viewed.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
 <span class="sd">            __set_scene(scene)</span>
 <span class="sd">        Parameters :</span>
-<span class="sd">            scene : Scene</span>
+<span class="sd">            scene : Scene.Scene</span>
 
-<span class="sd">        __set_scene(scene) -&gt; None</span>
+<span class="sd">        __set_scene(scene) --&gt; None</span>
+
+<span class="sd">        Set the scene to be viewed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__scene</span> <span class="o">=</span> <span class="n">Scene</span><span class="o">.</span><span class="n">new</span><span class="p">()</span> <span class="c1">## erase scene</span>
         <span class="n">TileManager</span><span class="o">.</span><span class="n">purge</span><span class="p">()</span>
@@ -507,16 +530,20 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">PyZui installation instructions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#dependencies">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../usageinstructions.html">User interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../programconfiguration.html">Program Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation.html">Reading Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation.html#project-structure">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../logging.html">Logging System</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>

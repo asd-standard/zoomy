@@ -19,14 +19,21 @@
 """Centralized logging configuration for PyZUI."""
 
 import logging
-import os
 import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 
 class LoggerConfig:
-    """Centralized logger configuration for PyZUI.
+    """
+    Constructor :
+        LoggerConfig()
+    Parameters :
+        None
+
+    LoggerConfig() --> None
+
+    Centralized logger configuration for PyZUI.
 
     Provides consistent logging across all modules with support for:
     - Multiple log levels (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -56,7 +63,20 @@ class LoggerConfig:
     @classmethod
     def initialize(cls, debug=False, log_to_file=True, log_to_console=True,
                    log_dir=None, colored_output=True, verbose=False):
-        """Initialize the logging system.
+        """
+        Method :
+            LoggerConfig.initialize(debug, log_to_file, log_to_console, log_dir, colored_output, verbose)
+        Parameters :
+            debug : bool
+            log_to_file : bool
+            log_to_console : bool
+            log_dir : str
+            colored_output : bool
+            verbose : bool
+
+        LoggerConfig.initialize(debug, log_to_file, log_to_console, log_dir, colored_output, verbose) --> None
+
+        Initialize the logging system.
 
         Args:
             debug (bool): Enable debug mode (sets console level to DEBUG)
@@ -95,7 +115,9 @@ class LoggerConfig:
         root_logger.setLevel(logging.DEBUG)  # Capture everything, handlers will filter
 
         # Remove existing handlers
-        root_logger.handlers.clear()
+        for handler in root_logger.handlers[:]:
+            handler.close()
+            root_logger.removeHandler(handler)
 
         # Create formatters
         if colored_output and log_to_console:
@@ -145,7 +167,15 @@ class LoggerConfig:
 
     @classmethod
     def get_logger(cls, name):
-        """Get a logger instance for the specified module.
+        """
+        Method :
+            LoggerConfig.get_logger(name)
+        Parameters :
+            name : str
+
+        LoggerConfig.get_logger(name) --> logging.Logger
+
+        Get a logger instance for the specified module.
 
         Args:
             name (str): Name of the module/class requesting the logger
@@ -165,7 +195,16 @@ class LoggerConfig:
 
     @classmethod
     def set_level(cls, level, module=None):
-        """Change the logging level at runtime.
+        """
+        Method :
+            LoggerConfig.set_level(level, module)
+        Parameters :
+            level : int
+            module : str
+
+        LoggerConfig.set_level(level, module) --> None
+
+        Change the logging level at runtime.
 
         Args:
             level (int): Logging level (e.g., logging.DEBUG, logging.INFO)
@@ -184,21 +223,47 @@ class LoggerConfig:
 
     @classmethod
     def enable_debug(cls):
-        """Enable debug mode at runtime."""
+        """
+        Method :
+            LoggerConfig.enable_debug()
+        Parameters :
+            None
+
+        LoggerConfig.enable_debug() --> None
+
+        Enable debug mode at runtime.
+        """
         cls.set_level(logging.DEBUG)
         logger = cls.get_logger('LoggerConfig')
         logger.info('Debug mode enabled')
 
     @classmethod
     def disable_debug(cls):
-        """Disable debug mode at runtime."""
+        """
+        Method :
+            LoggerConfig.disable_debug()
+        Parameters :
+            None
+
+        LoggerConfig.disable_debug() --> None
+
+        Disable debug mode at runtime.
+        """
         cls.set_level(logging.INFO)
         logger = cls.get_logger('LoggerConfig')
         logger.info('Debug mode disabled')
 
     @classmethod
     def get_log_file_path(cls):
-        """Get the path to the current log file.
+        """
+        Method :
+            LoggerConfig.get_log_file_path()
+        Parameters :
+            None
+
+        LoggerConfig.get_log_file_path() --> Path
+
+        Get the path to the current log file.
 
         Returns:
             Path: Path to log file, or None if file logging is disabled
@@ -207,9 +272,30 @@ class LoggerConfig:
 
 
 class ColoredFormatter(logging.Formatter):
-    """Custom formatter that adds color to console output."""
+    """
+    Constructor :
+        ColoredFormatter()
+    Parameters :
+        None
+
+    ColoredFormatter() --> None
+
+    Custom formatter that adds color to console output.
+    """
 
     def format(self, record):
+        """
+        Method :
+            ColoredFormatter.format(record)
+        Parameters :
+            record : logging.LogRecord
+
+        ColoredFormatter.format(record) --> str
+
+        Format the log record with color codes.
+
+        Add color codes to the record based on log level.
+        """
         # Add color codes to the record
         levelname = record.levelname
         if levelname in LoggerConfig.COLORS:
@@ -223,7 +309,15 @@ class ColoredFormatter(logging.Formatter):
 
 
 def get_logger(name):
-    """Convenience function to get a logger.
+    """
+    Function :
+        get_logger(name)
+    Parameters :
+        name : str
+
+    get_logger(name) --> logging.Logger
+
+    Convenience function to get a logger.
 
     Args:
         name (str): Name of the module/class requesting the logger
