@@ -32,7 +32,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from PIL import Image
 
 from pyzui.tilesystem.tile import Tile
-from pyzui.tilesystem.tilecache import TileCache
+from pyzui.tilesystem.tilestore import TileCache
 from pyzui.tilesystem import tilestore
 from pyzui.tilesystem import tilemanager
 from pyzui.tilesystem.tilemanager import (

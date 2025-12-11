@@ -52,7 +52,6 @@
 <span class="sd">&quot;&quot;&quot;Class for loading tiles from the local tilestore.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
 
@@ -82,7 +81,49 @@
 <span class="sd">        - Uses PIL Image.open() to load tiles from disk</span>
 <span class="sd">        - Validates tilelevel against maxtilelevel metadata</span>
 <span class="sd">        - Returns None for invalid or missing tiles</span>
-<span class="sd">    </span>
+
+<span class="sd">    Static Tile Provider Flow::</span>
+
+<span class="sd">        ┌─────────────────────────┐               |       ┌──────────┐ ┌────────────┐</span>
+<span class="sd">        │ StaticTileProvider      │               |       │ Load     │ │ Try to     │</span>
+<span class="sd">        │ task queue receives     │               |       │ existing │ │ synthesize │</span>
+<span class="sd">        │ tile request            │               |       │ tile     │ │ from lower │</span>
+<span class="sd">        └────────────┬────────────┘               |       │ image    │ │ zoom tiles │</span>
+<span class="sd">                     │                            |       └────┬─────┘ └─────┬──────┘</span>
+<span class="sd">                     ▼                            |            │             │</span>
+<span class="sd">        ┌─────────────────────────┐               |            │             ▼</span>
+<span class="sd">        │ Pop request from queue  │               |            │       ┌────────────┐</span>
+<span class="sd">        │ (LIFO - newest first)   │               |            │       │ If synth   │</span>
+<span class="sd">        └────────────┬────────────┘               |            │       │ fails,     │</span>
+<span class="sd">                     │                            |            │       │ load       │</span>
+<span class="sd">                     ▼                            |            │       │ source     │</span>
+<span class="sd">        ┌─────────────────────────┐               |            │       │ image      │</span>
+<span class="sd">        │ Check TileStore         │               |            │       └─────┬──────┘</span>
+<span class="sd">        │ get_tile_path()         │               |            └─────┬───────┘</span>
+<span class="sd">        └────────────┬────────────┘               |                  │</span>
+<span class="sd">                     │                            |                  ▼</span>
+<span class="sd">                ┌────┴────┐                       |    ┌─────────────────────────┐</span>
+<span class="sd">                │         │                       |    │ Create Tile object      │</span>
+<span class="sd">            EXISTS    DOESN&#39;T EXIST               |    │ (PIL Image wrapper)     │</span>
+<span class="sd">                │         │                       |    └────────────┬────────────┘</span>
+<span class="sd">                ▼         ▼                       |                 │</span>
+<span class="sd">                                                  |                 ▼</span>
+<span class="sd">                                                  |    ┌─────────────────────────┐</span>
+<span class="sd">                                                  |    │ Store in TileCache      │</span>
+<span class="sd">                                                  |    └────────────┬────────────┘</span>
+<span class="sd">                                                  |                 │</span>
+<span class="sd">                                                  |                 ▼</span>
+<span class="sd">                                                  |    ┌─────────────────────────┐</span>
+<span class="sd">                                                  |    │ Save to TileStore       │</span>
+<span class="sd">                                                  |    │ (if not already there)  │</span>
+<span class="sd">                                                  |    └────────────┬────────────┘</span>
+<span class="sd">                                                  |                 │</span>
+<span class="sd">                                                  |                 ▼</span>
+<span class="sd">                                                  |    ┌─────────────────────────┐</span>
+<span class="sd">                                                  |    │ Notify completion       │</span>
+<span class="sd">                                                  |    │ (tile now available)    │</span>
+<span class="sd">                                                  |    └─────────────────────────┘</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">TileProvider</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">)</span>
@@ -150,27 +191,40 @@
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">PyZui installation instructions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#dependencies">Dependencies</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#generating-documentation">Generating Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../gettingstarted/installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../gettingstarted/installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../gettingstarted/installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../gettingstarted/installation.html#generating-documentation">Generating Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../userinterface.html">User Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../programconfiguration.html">Program Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usageinstructions/userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usageinstructions/programconfiguration.html">Program Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../readingdocumentation.html">Reading Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../projectstructure.html">Project structure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tiledmediaobject.html">Tiled media object</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tilingsystem.html">Tiling System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../logging.html">Logging System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/objectsystem.html">Object System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/convertersystem.html">Converter System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/windowsystem.html">Window System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/logging.html">Logging System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../testingdocumentation/unittest.html">Unit Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../testingdocumentation/integrationtest.html">Integration Testing Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Benchmarks Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarksdocumentation/qzuibenchmark.html">QZUI Benchmark Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarksdocumentation/converterbenchmark.html">Converter Benchmark Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../contributiongiudelines.html">Contribution guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
 </ul>
 
 <div class="relations">

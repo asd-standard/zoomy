@@ -31,7 +31,7 @@ from threading import Event
 from PIL import Image
 
 from pyzui.tilesystem.tile import Tile
-from pyzui.tilesystem.tilecache import TileCache
+from pyzui.tilesystem.tilestore import TileCache
 from pyzui.tilesystem.tileproviders.tileprovider import TileProvider
 from pyzui.tilesystem.tileproviders.statictileprovider import StaticTileProvider
 from pyzui.tilesystem.tileproviders.dynamictileprovider import DynamicTileProvider

@@ -26,7 +26,7 @@ from pyzui.tilesystem.tiler import Tiler
 from pyzui.tilesystem.tile import Tile
 from pyzui.tilesystem import tilestore
 from pyzui.tilesystem import tilemanager
-from pyzui.tilesystem.tilecache import TileCache
+from pyzui.tilesystem.tilestore import TileCache
 from pyzui.tilesystem.tileproviders.statictileprovider import StaticTileProvider
 
 

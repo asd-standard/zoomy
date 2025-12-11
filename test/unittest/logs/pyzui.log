@@ -434,3 +434,99 @@ ValueError: Simulated load error
 2025-12-05 09:15:57 | [INFO    ] | pyzui.TileStore           | auto_cleanup         | Running automatic tilestore cleanup
 2025-12-05 09:15:57 | [INFO    ] | pyzui.TileStore           | auto_cleanup         | Tilestore before cleanup: 0 media directories, 0 files, 0.00 MB
 2025-12-05 09:15:57 | [INFO    ] | pyzui.TileStore           | auto_cleanup         | Tilestore after cleanup: 0 media directories, 0 files, 0.00 MB
+2025-12-10 21:06:07 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-10 21:06:07 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-10 21:06:07 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: False
+2025-12-10 21:06:07 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: WARNING
+2025-12-10 21:06:07 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
+2025-12-10 21:06:07 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/unittest/logs/pyzui.log
+2025-12-10 21:06:07 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-10 21:06:07 | [INFO    ] | pyzui.Converter.input.pdf | run                  | calling pdftoppm
+2025-12-10 21:06:07 | [INFO    ] | pyzui.Converter.input.pdf | run                  | calling pdftoppm
+2025-12-10 21:06:07 | [ERROR   ] | pyzui.Converter.input.pdf | run                  | conversion failed with return code 1:
+b'Error'
+2025-12-10 21:06:07 | [INFO    ] | pyzui.Converter.input.pdf | run                  | calling pdftoppm
+2025-12-10 21:06:07 | [INFO    ] | pyzui.Converter.input.pdf | run                  | calling pdftoppm
+2025-12-10 21:06:07 | [ERROR   ] | pyzui.Converter.input.pdf | run                  | conversion failed with return code 1:
+b''
+2025-12-10 21:06:07 | [INFO    ] | pyzui.Converter.input.pdf | __merge              | merging pages
+2025-12-10 21:06:07 | [INFO    ] | pyzui.Converter.input.pdf | __merge              | merging pages
+2025-12-10 21:06:07 | [INFO    ] | pyzui.Converter.input.pdf | __merge              | merging pages
+2025-12-10 21:06:07 | [INFO    ] | pyzui.Converter.input.pdf | run                  | calling pdftoppm
+2025-12-10 21:06:07 | [ERROR   ] | pyzui.Converter.input.pdf | run                  | Error in PDFConverter.__merge() 
+Merge failed
+2025-12-10 21:06:07 | [INFO    ] | pyzui.Converter.input.pdf | run                  | calling pdftoppm
+2025-12-10 21:06:07 | [ERROR   ] | pyzui.Converter.input.pdf | run                  | Error in PDFConverter.__merge() 
+Merge failed
+2025-12-10 21:06:07 | [INFO    ] | pyzui.Converter.input.pdf | __merge              | merging pages
+2025-12-10 21:06:07 | [ERROR   ] | pyzui.Converter.invalid.jpg | run                  | conversion failed: Failed to load image
+2025-12-10 21:06:07 | [INFO    ] | pyzui.TiledMediaObject.test.jpg | __init__             | need to tile media
+2025-12-10 21:06:07 | [ERROR   ] | pyzui.Converter.test.jpg  | run                  | conversion failed: unable to load from file b'test.jpg'
+  VipsForeignLoad: file "test.jpg" does not exist
+
+2025-12-10 21:06:07 | [INFO    ] | pyzui.TileManager         | init                 | Running tilestore cleanup on startup
+2025-12-10 21:06:07 | [ERROR   ] | pyzui.DynamicTileProvider | _load                | error loading tile, assuming it is unavailable
+Traceback (most recent call last):
+  File "/home/asd/Projects/pyzui/pyzui/tilesystem/tileproviders/dynamictileprovider.py", line 145, in _load
+    return QtGui.QImage(filename)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/asd/miniconda3/envs/PyZui-wayland/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/asd/miniconda3/envs/PyZui-wayland/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/asd/miniconda3/envs/PyZui-wayland/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+Exception: Load error
+2025-12-10 21:06:08 | [ERROR   ] | pyzui.TileProvider        | run                  | error loading tile
+Traceback (most recent call last):
+  File "/home/asd/Projects/pyzui/pyzui/tilesystem/tileproviders/tileprovider.py", line 130, in run
+    tile = self._load(tile_id)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/asd/miniconda3/envs/PyZui-wayland/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/asd/miniconda3/envs/PyZui-wayland/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/asd/miniconda3/envs/PyZui-wayland/lib/python3.12/unittest/mock.py", line 1204, in _execute_mock_call
+    result = effect(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/asd/Projects/pyzui/test/unittest/tilesystem/tileproviders/test_tileprovider.py", line 286, in mock_load
+    raise ValueError("Simulated load error")
+ValueError: Simulated load error
+2025-12-10 21:06:09 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-10 21:06:09 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-10 21:06:09 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: False
+2025-12-10 21:06:09 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: WARNING
+2025-12-10 21:06:09 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
+2025-12-10 21:06:09 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/unittest/logs/pyzui.log
+2025-12-10 21:06:09 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-10 21:06:09 | [WARNING ] | pyzui.TileStore           | get_directory_size   | Error calculating directory size for /test/path: Access denied
+2025-12-10 21:06:09 | [ERROR   ] | pyzui.TileStore           | get_tilestore_stats  | Error getting tilestore stats: Access denied
+2025-12-10 21:06:09 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | Tilestore directory does not exist, nothing to clean
+1970-01-11 01:00:00 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | Starting tilestore cleanup (max_age: 3 days, dry_run: False)
+1970-01-11 01:00:00 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | Found 1 media directories to check
+1970-01-11 01:00:00 | [WARNING ] | pyzui.TileStore           | get_directory_size   | Error calculating directory size for /home/asd/.pyzui/tilestore/old_media_hash: unsupported operand type(s) for +=: 'int' and 'Mock'
+1970-01-11 01:00:00 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | Deleting old media: old_media_hash (age: 5.0 days, size: 0.00 MB)
+1970-01-11 01:00:00 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | Cleanup complete: Deleted 1 media directories, freed 0.00 MB. 0 directories kept.
+1970-01-11 01:00:00 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | Starting tilestore cleanup (max_age: 3 days, dry_run: False)
+1970-01-11 01:00:00 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | Found 1 media directories to check
+1970-01-11 01:00:00 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | Cleanup complete: Deleted 0 media directories, freed 0.00 MB. 1 directories kept.
+1970-01-11 01:00:00 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | Starting tilestore cleanup (max_age: 3 days, dry_run: True)
+1970-01-11 01:00:00 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | Found 1 media directories to check
+1970-01-11 01:00:00 | [WARNING ] | pyzui.TileStore           | get_directory_size   | Error calculating directory size for /home/asd/.pyzui/tilestore/old_media_hash: unsupported operand type(s) for +=: 'int' and 'Mock'
+1970-01-11 01:00:00 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | [DRY RUN] Would delete: old_media_hash (age: 5.0 days, size: 0.00 MB)
+1970-01-11 01:00:00 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | [DRY RUN] Cleanup would delete 1 media directories, freeing 0.00 MB. 0 directories would be kept.
+2025-12-10 21:06:09 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | Starting tilestore cleanup (max_age: 3 days, dry_run: False)
+2025-12-10 21:06:09 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | Found 1 media directories to check
+2025-12-10 21:06:09 | [ERROR   ] | pyzui.TileStore           | cleanup_old_tiles    | Error processing media_hash: Access denied
+2025-12-10 21:06:09 | [INFO    ] | pyzui.TileStore           | cleanup_old_tiles    | Cleanup complete: Deleted 0 media directories, freed 0.00 MB. 0 directories kept.
+2025-12-10 21:06:09 | [WARNING ] | pyzui.TileStore           | cleanup_old_tiles    | Cleanup completed with 1 errors
+2025-12-10 21:06:09 | [INFO    ] | pyzui.TileStore           | auto_cleanup         | Running automatic tilestore cleanup
+2025-12-10 21:06:09 | [INFO    ] | pyzui.TileStore           | auto_cleanup         | Tilestore before cleanup: 5 media directories, 100 files, 50.00 MB
+2025-12-10 21:06:09 | [INFO    ] | pyzui.TileStore           | auto_cleanup         | Tilestore after cleanup: 5 media directories, 100 files, 50.00 MB
+2025-12-10 21:06:09 | [INFO    ] | pyzui.TileStore           | auto_cleanup         | Running automatic tilestore cleanup
+2025-12-10 21:06:09 | [INFO    ] | pyzui.TileStore           | auto_cleanup         | Tilestore before cleanup: 0 media directories, 0 files, 0.00 MB
+2025-12-10 21:06:09 | [INFO    ] | pyzui.TileStore           | auto_cleanup         | Tilestore after cleanup: 0 media directories, 0 files, 0.00 MB

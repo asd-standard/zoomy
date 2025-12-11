@@ -14,7 +14,7 @@
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="PyZui installation instructions" href="installation.html" />
+    <link rel="next" title="PyZui installation instructions" href="gettingstarted/installation.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -34,55 +34,79 @@
             
   <section id="welcome-to-pyzui-documentation">
 <h1>Welcome to PyZUI Documentation!<a class="headerlink" href="#welcome-to-pyzui-documentation" title="Link to this heading">¶</a></h1>
-<a class="reference internal image-reference" href="_images/home_scene.png"><img alt="PyZUI logo" class="align-right" src="_images/home_scene.png" style="width: 300px;" />
+<a class="reference internal image-reference" href="_images/home.png"><img alt="PyZUI logo" class="align-right" src="_images/home.png" style="width: 540px;" />
 </a>
 <p>—</p>
 <p>PyZUI is an implementation of a Zooming User Interface (ZUI) for Python.
-Media is laid out upon an infnite virtual desktop, with the user able to pan and
-zoom through the collection.</p>
+Media is laid out upon an infnite virtual desktop, with the user able to
+pan and zoom through the collection.</p>
+<p>—</p>
+<p>This project is a fork of <a class="reference external" href="https://github.com/davidar/pyzui">github.com/davidar/pyzui</a>,
+original work from which it derives its initial architecture and features.</p>
 <section id="pyzui-is-compatible-with-the-following-media-formats">
 <h2>PyZUI is compatible with the following media formats:<a class="headerlink" href="#pyzui-is-compatible-with-the-following-media-formats" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>All images recognised by VIPS</p></li>
 <li><p>PDF documents</p></li>
-<li><p>Remote webpages</p></li>
 <li><p>SVG (vector graphics)</p></li>
 </ul>
+<p>—</p>
+<p>This project is covered under the GNU General Public License v3.0, a copy must
+be under LICENCE on project root, otherwise visit <a class="reference external" href="https://www.gnu.org/licenses/gpl-3.0.html">gnu.org</a></p>
+<p>—</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This documentation covers setup, usage, and technical/development documentation for PyZUI.</p>
+<p>This documentation covers setup, usage, technical/development documentation,
+testing/benchmarking documentation and contribution guidelines for PyZUI.</p>
 </div>
 <p>—</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">PyZui installation instructions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html#dependencies">Dependencies</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html#generating-documentation">Generating Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted/installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted/installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted/installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted/installation.html#generating-documentation">Generating Documentation</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="userinterface.html">User Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="programconfiguration.html">Program Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usageinstructions/userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usageinstructions/programconfiguration.html">Program Configuration</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="readingdocumentation.html">Reading Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="projectstructure.html">Project structure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tiledmediaobject.html">Tiled media object</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tilingsystem.html">Tiling System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/objectsystem.html">Object System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/convertersystem.html">Converter System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/windowsystem.html">Window System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/logging.html">Logging System</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Testing Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="testingdocumentation/unittest.html">Unit Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testingdocumentation/integrationtest.html">Integration Testing Guide</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Benchmarks Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="benchmarksdocumentation/qzuibenchmark.html">QZUI Benchmark Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarksdocumentation/converterbenchmark.html">Converter Benchmark Documentation</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="contributiongiudelines.html">Contribution guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
 </ul>
 </div>
 </section>
@@ -107,34 +131,47 @@ zoom through the collection.</p>
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">PyZui installation instructions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html#dependencies">Dependencies</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html#generating-documentation">Generating Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted/installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted/installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted/installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted/installation.html#generating-documentation">Generating Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="userinterface.html">User Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="programconfiguration.html">Program Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usageinstructions/userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usageinstructions/programconfiguration.html">Program Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="readingdocumentation.html">Reading Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="projectstructure.html">Project structure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tiledmediaobject.html">Tiled media object</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tilingsystem.html">Tiling System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/objectsystem.html">Object System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/convertersystem.html">Converter System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/windowsystem.html">Window System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technicaldocumentation/logging.html">Logging System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="testingdocumentation/unittest.html">Unit Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testingdocumentation/integrationtest.html">Integration Testing Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Benchmarks Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="benchmarksdocumentation/qzuibenchmark.html">QZUI Benchmark Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarksdocumentation/converterbenchmark.html">Converter Benchmark Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="contributiongiudelines.html">Contribution guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="installation.html" title="next chapter">PyZui installation instructions</a></li>
+      <li>Next: <a href="gettingstarted/installation.html" title="next chapter">PyZui installation instructions</a></li>
   </ul></li>
 </ul>
 </div>

@@ -31,8 +31,31 @@
 
           <div class="body" role="main">
             
-  <section id="pyzui-objects-physicalobject-module">
-<h1>pyzui.objects.physicalobject module<a class="headerlink" href="#pyzui-objects-physicalobject-module" title="Link to this heading">¶</a></h1>
+  <section id="module-pyzui.objects.physicalobject">
+<span id="pyzui-objects-physicalobject-module"></span><h1>pyzui.objects.physicalobject module<a class="headerlink" href="#module-pyzui.objects.physicalobject" title="Link to this heading">¶</a></h1>
+<p>An object that obeys the laws of physics.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyzui.objects.physicalobject.PhysicalObject">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.objects.physicalobject.</span></span><span class="sig-name descname"><span class="pre">PhysicalObject</span></span><a class="reference internal" href="../_modules/pyzui/objects/physicalobject.html#PhysicalObject"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.physicalobject.PhysicalObject" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="simple">
+<dt>Constructor :</dt><dd><p>PhysicalObject()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>PhysicalObject() –&gt; None</p>
+<p>Physicalobject objects are sets of declarations and methods that are used
+to represent anything that has a 3-dimensional position and velocity,
+where the z-dimension represents a zoomlevel.</p>
+<p>PhysicalObject gets declared on MediaObject and Scene initializations,
+giving them the necessary attributes, (position, zoomlevel, damp factor
+zoomlevel, eccetera).</p>
+<p>Create a new PhysicalObject at the origin with zero velocity.</p>
+<p>Initializes position coordinates (_x, _y, _z) to 0.0, where
+z represents zoomlevel. Initializes velocity components (vx, vy, vz)
+to 0.0. Sets the center offset (_centre) to (0,0).</p>
+<p>This initialization is used by both Scene and MediaObject classes.</p>
 <p>Class Inheritance Hierarchy:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>PhysicalObject (Abstract Base)
 │   • _x, _y, _z (position &amp; zoom)
@@ -59,42 +82,12 @@
 │           • Scalable rendering
 │
 └── Scene
-        • Container for MediaObjects
-        • Viewport management
-        • Scene persistence
-        • Thread-safe operations
+       • Container for MediaObjects
+       • Viewport management
+       • Scene persistence
+       • Thread-safe operations
 </pre></div>
 </div>
-<p id="module-pyzui.objects.physicalobject">An object that obeys the laws of physics.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="pyzui.objects.physicalobject.PhysicalObject">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.objects.physicalobject.</span></span><span class="sig-name descname"><span class="pre">PhysicalObject</span></span><a class="reference internal" href="../_modules/pyzui/objects/physicalobject.html#PhysicalObject"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.physicalobject.PhysicalObject" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="simple">
-<dt>Constructor :</dt><dd><p>PhysicalObject()</p>
-</dd>
-<dt>Parameters :</dt><dd><p>None</p>
-</dd>
-</dl>
-<p>PhysicalObject() –&gt; None</p>
-<p>Physicalobject objects are sets of declarations and methods that are used
-to represent anything that has a 3-dimensional position and velocity,
-where the z-dimension represents a zoomlevel.</p>
-<p>PhysicalObject gets declared on MediaObject and Scene initializations,
-giving them the necessary attributes, (position, zoomlevel, damp factor
-zoomlevel, eccetera).</p>
-<dl class="simple">
-<dt>Constructor :</dt><dd><p>PhysicalObject()</p>
-</dd>
-<dt>Parameters :</dt><dd><p>None</p>
-</dd>
-</dl>
-<p>PhysicalObject() –&gt; None</p>
-<p>Create a new PhysicalObject at the origin with zero velocity.</p>
-<p>Initializes position coordinates (_x, _y, _z) to 0.0, where
-z represents zoomlevel. Initializes velocity components (vx, vy, vz)
-to 0.0. Sets the center offset (_centre) to (0,0).</p>
-<p>This initialization is used by both Scene and MediaObject classes.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyzui.objects.physicalobject.PhysicalObject.damping_factor">
 <span class="sig-name descname"><span class="pre">damping_factor</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">512</span></em><a class="headerlink" href="#pyzui.objects.physicalobject.PhysicalObject.damping_factor" title="Link to this definition">¶</a></dt>
@@ -331,27 +324,40 @@ getter and __set_centre as setter</p>
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../installation.html">PyZui installation instructions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../installation.html#dependencies">Dependencies</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../installation.html#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../installation.html#generating-documentation">Generating Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#generating-documentation">Generating Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../userinterface.html">User Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../programconfiguration.html">Program Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usageinstructions/userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usageinstructions/programconfiguration.html">Program Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../readingdocumentation.html">Reading Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../projectstructure.html">Project structure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tiledmediaobject.html">Tiled media object</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tilingsystem.html">Tiling System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/objectsystem.html">Object System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/convertersystem.html">Converter System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/windowsystem.html">Window System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/logging.html">Logging System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testingdocumentation/unittest.html">Unit Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testingdocumentation/integrationtest.html">Integration Testing Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Benchmarks Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarksdocumentation/qzuibenchmark.html">QZUI Benchmark Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarksdocumentation/converterbenchmark.html">Converter Benchmark Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../contributiongiudelines.html">Contribution guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
 </ul>
 
 <div class="relations">

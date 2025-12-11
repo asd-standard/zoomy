@@ -304,3 +304,85 @@
 2025-12-05 18:02:56 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: INFO
 2025-12-05 18:02:56 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: /home/asd/Projects/pyzui/test/integrationtest/logs/pyzui.log
 2025-12-05 18:02:56 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-09 21:28:30 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-09 21:28:30 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-09 21:28:30 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: True
+2025-12-09 21:28:30 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: DEBUG
+2025-12-09 21:28:30 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: DEBUG
+2025-12-09 21:28:30 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: logs/pyzui.log
+2025-12-09 21:28:30 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-09 21:28:30 | [DEBUG   ] | pyzui.TileManager         | init                 | Tilestore auto cleanup disabled
+2025-12-09 21:28:40 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | 
+2025-12-09 21:28:40 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | ######################################################################
+2025-12-09 21:28:40 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | # FILE MENU - NEW SCENE
+2025-12-09 21:28:40 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | ######################################################################
+2025-12-09 21:28:40 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | 
+2025-12-09 21:28:40 | [INFO    ] | pyzui.GUIIntegrationTest  | action               | ============================================================
+2025-12-09 21:28:40 | [INFO    ] | pyzui.GUIIntegrationTest  | action               | STEP 1: Creating new blank scene (Ctrl+N)
+2025-12-09 21:28:40 | [INFO    ] | pyzui.GUIIntegrationTest  | action               | ============================================================
+2025-12-09 21:28:40 | [DEBUG   ] | pyzui.GUIIntegrationTest  | wait                 |   [WAIT] Waiting 800ms - Before creating new scene
+2025-12-09 21:28:41 | [DEBUG   ] | pyzui.GUIIntegrationTest  | detail               |   -> Triggering action: new_scene
+2025-12-09 21:28:41 | [DEBUG   ] | pyzui.StaticTileProvider  | purge                | purging all
+2025-12-09 21:28:41 | [DEBUG   ] | pyzui.FernTileProvider    | purge                | purging all
+2025-12-09 21:28:41 | [DEBUG   ] | pyzui.GUIIntegrationTest  | wait                 |   [WAIT] Waiting 1500ms - Observing new blank scene
+2025-12-09 21:28:42 | [INFO    ] | pyzui.GUIIntegrationTest  | success              |   [OK] New scene created successfully
+2025-12-09 21:28:42 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-09 21:28:42 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-09 21:28:42 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: True
+2025-12-09 21:28:42 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: DEBUG
+2025-12-09 21:28:42 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: DEBUG
+2025-12-09 21:28:42 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: logs/pyzui.log
+2025-12-09 21:28:42 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-09 21:28:42 | [DEBUG   ] | pyzui.TileManager         | init                 | Tilestore auto cleanup disabled
+2025-12-09 21:28:57 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | 
+2025-12-09 21:28:57 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | ######################################################################
+2025-12-09 21:28:57 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | # FILE MENU - OPEN HOME SCENE
+2025-12-09 21:28:57 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | ######################################################################
+2025-12-09 21:28:57 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | 
+2025-12-09 21:28:57 | [INFO    ] | pyzui.GUIIntegrationTest  | action               | ============================================================
+2025-12-09 21:28:57 | [INFO    ] | pyzui.GUIIntegrationTest  | action               | STEP 1: Opening home scene (Ctrl+Home)
+2025-12-09 21:28:57 | [INFO    ] | pyzui.GUIIntegrationTest  | action               | ============================================================
+2025-12-09 21:28:57 | [DEBUG   ] | pyzui.GUIIntegrationTest  | wait                 |   [WAIT] Waiting 800ms - Before opening home scene
+2025-12-09 21:28:58 | [DEBUG   ] | pyzui.GUIIntegrationTest  | detail               |   -> Triggering action: open_scene_home
+2025-12-09 21:29:01 | [DEBUG   ] | pyzui.GUIIntegrationTest  | wait                 |   [WAIT] Waiting 3000ms - Observing home scene with PyZUI logo
+2025-12-09 21:30:09 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-09 21:30:09 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-09 21:30:09 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: True
+2025-12-09 21:30:09 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: DEBUG
+2025-12-09 21:30:09 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: DEBUG
+2025-12-09 21:30:09 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: logs/pyzui.log
+2025-12-09 21:30:09 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-09 21:30:09 | [DEBUG   ] | pyzui.TileManager         | init                 | Tilestore auto cleanup disabled
+2025-12-09 21:30:19 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | 
+2025-12-09 21:30:19 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | ######################################################################
+2025-12-09 21:30:19 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | # FILE MENU - NEW SCENE
+2025-12-09 21:30:19 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | ######################################################################
+2025-12-09 21:30:19 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | 
+2025-12-09 21:30:19 | [INFO    ] | pyzui.GUIIntegrationTest  | action               | ============================================================
+2025-12-09 21:30:19 | [INFO    ] | pyzui.GUIIntegrationTest  | action               | STEP 1: Creating new blank scene (Ctrl+N)
+2025-12-09 21:30:19 | [INFO    ] | pyzui.GUIIntegrationTest  | action               | ============================================================
+2025-12-09 21:30:19 | [DEBUG   ] | pyzui.GUIIntegrationTest  | wait                 |   [WAIT] Waiting 800ms - Before creating new scene
+2025-12-09 21:30:20 | [DEBUG   ] | pyzui.GUIIntegrationTest  | detail               |   -> Triggering action: new_scene
+2025-12-09 21:30:20 | [DEBUG   ] | pyzui.StaticTileProvider  | purge                | purging all
+2025-12-09 21:30:20 | [DEBUG   ] | pyzui.FernTileProvider    | purge                | purging all
+2025-12-09 21:30:20 | [DEBUG   ] | pyzui.GUIIntegrationTest  | wait                 |   [WAIT] Waiting 1500ms - Observing new blank scene
+2025-12-09 21:30:21 | [INFO    ] | pyzui.GUIIntegrationTest  | success              |   [OK] New scene created successfully
+2025-12-09 21:30:21 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-09 21:30:21 | [INFO    ] | pyzui.LoggerConfig        | initialize           | PyZUI Logging System Initialized
+2025-12-09 21:30:21 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Debug Mode: True
+2025-12-09 21:30:21 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Console Level: DEBUG
+2025-12-09 21:30:21 | [INFO    ] | pyzui.LoggerConfig        | initialize           | File Level: DEBUG
+2025-12-09 21:30:21 | [INFO    ] | pyzui.LoggerConfig        | initialize           | Log File: logs/pyzui.log
+2025-12-09 21:30:21 | [INFO    ] | pyzui.LoggerConfig        | initialize           | ============================================================
+2025-12-09 21:30:21 | [DEBUG   ] | pyzui.TileManager         | init                 | Tilestore auto cleanup disabled
+2025-12-09 21:30:24 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | 
+2025-12-09 21:30:24 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | ######################################################################
+2025-12-09 21:30:24 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | # FILE MENU - OPEN HOME SCENE
+2025-12-09 21:30:24 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | ######################################################################
+2025-12-09 21:30:24 | [INFO    ] | pyzui.GUIIntegrationTest  | section              | 
+2025-12-09 21:30:24 | [INFO    ] | pyzui.GUIIntegrationTest  | action               | ============================================================
+2025-12-09 21:30:24 | [INFO    ] | pyzui.GUIIntegrationTest  | action               | STEP 1: Opening home scene (Ctrl+Home)
+2025-12-09 21:30:24 | [INFO    ] | pyzui.GUIIntegrationTest  | action               | ============================================================
+2025-12-09 21:30:24 | [DEBUG   ] | pyzui.GUIIntegrationTest  | wait                 |   [WAIT] Waiting 800ms - Before opening home scene
+2025-12-09 21:30:25 | [DEBUG   ] | pyzui.GUIIntegrationTest  | detail               |   -> Triggering action: open_scene_home
+2025-12-09 21:30:28 | [DEBUG   ] | pyzui.GUIIntegrationTest  | wait                 |   [WAIT] Waiting 3000ms - Observing home scene with PyZUI logo

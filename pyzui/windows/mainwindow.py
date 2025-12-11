@@ -345,55 +345,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if ok and uri:
             self.__open_media(uri)
 
-
-    def __action_open_osm(self) -> None:
-        """
-        Method :
-            MainWindow.__action_open_osm()
-        Parameters :
-            None
-
-        MainWindow.__action_open_osm() --> None
-
-        Open OpenStreetMap of Northern Italy using RegionalOSMTileProvider.
-
-        Uses a regional tile provider that only serves Northern Italy tiles.
-        The entire region fits in the viewport without needing complex positioning.
-        """
-        try:
-            self.__logger.info("Opening OpenStreetMap")
-            media_id = 'dynamic:osm'
-
-            if not TileManager.tiled(media_id):
-                raise RuntimeError("OSM provider not available")
-
-            # Create the media object - it represents ONLY Northern Italy
-            self.__logger.debug(f"Creating TiledMediaObject for '{media_id}'")
-            mediaobject = TiledMediaObject(media_id, self.zui.scene, False)
-
-            # Get window dimensions
-            w = self.zui.width()
-            h = self.zui.height()
-            self.__logger.debug(f"Window size: {w}x{h}")
-
-            # Simple fit to screen - like opening any other media
-            # Tile (0,0,0) is the entire Northern Italy region
-            bbox = (w/4, h/4, w*3/4, h*3/4)
-            mediaobject.fit(bbox)
-            mediaobject.centre = (w/2, h/2)
-
-            self.__logger.debug("Fitted Northern Italy to screen center")
-
-            # Add to scene
-            self.zui.scene.add(mediaobject)
-            self.__logger.info("Northern Italy map loaded successfully")
-            self.__logger.info("Region: 44°N-47°N, 7°E-11°E (Milan, Turin, Venice)")
-            self.__logger.info("Zoom IN to see streets, OUT to see the whole region")
-
-        except Exception as e:
-            self.__logger.exception("Failed to open OpenStreetMap")
-            self.__show_error("Unable to open Northern Italy map", e)
-
     def __action_open_media_dir(self) -> None:
         """
         Method :
@@ -623,8 +574,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__action_open_media_string, "Ctrl+U")
         self.__create_action('open_media_dir', "Open Media &Directory",
             self.__action_open_media_dir, "Ctrl+D")
-        self.__create_action('open_osm', "Open &OpenStreetMap",
-            self.__action_open_osm, "Ctrl+M")
         self.__create_action('quit', "&Quit",
             self.__action_confirm_quit, "Ctrl+Q")
         self.__create_action('set_zoom_sensitivity', "Adjust &Sensitivity",
@@ -670,7 +619,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__menu['file'].addAction(self.__action['open_media_local'])
         self.__menu['file'].addAction(self.__action['open_media_string'])
         self.__menu['file'].addAction(self.__action['open_media_dir'])
-        self.__menu['file'].addAction(self.__action['open_osm'])
         self.__menu['file'].addAction(self.__action['quit'])
 
         self.__menu['view'] = self.menuBar().addMenu("&View")

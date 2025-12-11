@@ -42,13 +42,6 @@ class PhysicalObject(): #removed object from class argument and Thread
     """
     def __init__(self) -> None:
         """
-        Constructor :
-            PhysicalObject()
-        Parameters :
-            None
-
-        PhysicalObject() --> None
-
         Create a new PhysicalObject at the origin with zero velocity.
 
         Initializes position coordinates (_x, _y, _z) to 0.0, where
@@ -56,6 +49,38 @@ class PhysicalObject(): #removed object from class argument and Thread
         to 0.0. Sets the center offset (_centre) to (0,0).
 
         This initialization is used by both Scene and MediaObject classes.
+
+        Class Inheritance Hierarchy::
+
+            PhysicalObject (Abstract Base)
+            │   • _x, _y, _z (position & zoom)
+            │   • vx, vy, vz (velocity)
+            │   • damping factor
+            │   • _centre (center point)
+            │
+            ├── MediaObject (Abstract)
+            │   │   • Coordinate transforms
+            │   │   • Scaling management
+            │   │   • Reference frames
+            │   │
+            │   ├── TiledMediaObject
+            │   │       • Large image support
+            │   │       • Tile grid management
+            │   │       • Efficient for huge images
+            │   │
+            │   ├── StringMediaObject
+            │   │       • Text rendering
+            │   │       • Font support
+            │   │
+            │   └── SVGMediaObject
+            │           • Vector graphics
+            │           • Scalable rendering
+            │
+            └── Scene
+                   • Container for MediaObjects
+                   • Viewport management
+                   • Scene persistence
+                   • Thread-safe operations
         """
 
         self._x = 0.0

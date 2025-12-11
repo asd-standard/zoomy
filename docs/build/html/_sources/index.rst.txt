@@ -6,26 +6,38 @@
 Welcome to PyZUI Documentation!
 ===============================
 
-.. image:: _static/home_scene.png
+.. image:: ../../data/home.png
    :align: right
-   :width: 300px
+   :width: 540px
    :alt: PyZUI logo
 
 ---
 
 PyZUI is an implementation of a Zooming User Interface (ZUI) for Python.
-Media is laid out upon an infnite virtual desktop, with the user able to pan and
-zoom through the collection.
+Media is laid out upon an infnite virtual desktop, with the user able to 
+pan and zoom through the collection.
+
+---
+
+This project is a fork of `github.com/davidar/pyzui <https://github.com/davidar/pyzui>`_, 
+original work from which it derives its initial architecture and features.
 
 PyZUI is compatible with the following media formats:
 -----------------------------------------------------
 - All images recognised by VIPS
 - PDF documents
-- Remote webpages
 - SVG (vector graphics)
 
+---
+
+This project is covered under the GNU General Public License v3.0, a copy must
+be under LICENCE on project root, otherwise visit `gnu.org <https://www.gnu.org/licenses/gpl-3.0.html>`_
+
+---
+
 .. note::
-   This documentation covers setup, usage, and technical/development documentation for PyZUI.
+   This documentation covers setup, usage, technical/development documentation,
+   testing/benchmarking documentation and contribution guidelines for PyZUI.
 
 ---
 
@@ -34,33 +46,52 @@ PyZUI is compatible with the following media formats:
    :titlesonly:
    :caption: Getting Started
 
-   installation
+   gettingstarted/installation
 
 .. toctree::
    :maxdepth: 2
    :titlesonly:
    :caption: Usage Instructions
 
-   userinterface
-   programconfiguration
+   usageinstructions/userinterface
+   usageinstructions/programconfiguration
 
 .. toctree::
    :maxdepth: 2
    :titlesonly:
    :caption: Technical Documentation
 
-   readingdocumentation
-   projectstructure
-   tiledmediaobject
-   tilingsystem
-   logging
+   technicaldocumentation/readingdocumentation
+   technicaldocumentation/projectstructure
+   technicaldocumentation/objectsystem
+   technicaldocumentation/convertersystem
+   technicaldocumentation/tiledmediaobject
+   technicaldocumentation/tilingsystem
+   technicaldocumentation/windowsystem
+   technicaldocumentation/logging
 
+.. toctree::
+   :maxdepth: 2
+   :titlesonly:
+   :caption: Testing Documentation
+
+   testingdocumentation/unittest
+   testingdocumentation/integrationtest
+
+.. toctree::
+   :maxdepth: 2
+   :titlesonly:
+   :caption: Benchmarks Documentation
+
+   benchmarksdocumentation/qzuibenchmark
+   benchmarksdocumentation/converterbenchmark
+   
 .. toctree::
    :maxdepth: 2
    :titlesonly:
    :caption: Contribution Guidelines
 
-   contributiongiudelines
+   contributionguidelines/contributiongiudelines
 
 
 

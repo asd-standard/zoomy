@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Converter System &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cc7d0dec" />
+    <script src="../_static/documentation_options.js?v=086c1757"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tiled media object" href="tiledmediaobject.html" />
+    <link rel="prev" title="Object System" href="objectsystem.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="converter-system">
+<h1>Converter System<a class="headerlink" href="#converter-system" title="Link to this heading">¶</a></h1>
+<p>This document provides a comprehensive overview of the converter system architecture in PyZUI,
+explaining how various media formats (PDF, images) are converted to PPM format for tiling and
+display in the Zooming User Interface. The converter system is a crucial preprocessing step
+that normalizes different input formats into a common format suitable for tile generation.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>The converter system is responsible for:</p>
+<ol class="arabic simple">
+<li><p>Converting various media formats to PPM (Portable Pixmap) format</p></li>
+<li><p>Running conversions in background threads to avoid blocking the UI</p></li>
+<li><p>Tracking conversion progress for user feedback</p></li>
+<li><p>Handling errors gracefully during conversion</p></li>
+<li><p>Managing temporary files and disk access synchronization</p></li>
+</ol>
+<p>The system uses a <strong>threaded architecture</strong> where each converter runs as a separate thread,
+allowing multiple conversions to proceed concurrently without blocking the main application.
+All converters output to PPM format, which is then processed by the tiling system.</p>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading">¶</a></h2>
+<p>The converter system consists of the following class hierarchy:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Converter (Abstract Base, extends Thread)
+│   • Thread-based execution
+│   • Progress tracking (0.0 to 1.0)
+│   • Error handling
+│   • Logger integration
+│   • Abstract run() method
+│
+├── PDFConverter
+│       • PDF to PPM conversion
+│       • Uses pdftoppm (Poppler/Xpdf)
+│       • Multi-page support
+│       • Configurable resolution (default: 300 DPI)
+│       • Page merging into single PPM
+│
+└── VipsConverter
+        • Multi-format image conversion
+        • Uses libvips (via pyvips)
+        • Supports: JPG, PNG, GIF, TIFF, WebP, etc.
+        • Automatic format detection
+        • Bit-depth conversion (8-bit)
+        • RGBA to RGB flattening
+</pre></div>
+</div>
+<p><strong>Conversion Pipeline:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────────────────────────────────────────────────┐
+│                    TiledMediaObject                         │
+│              (Detects format, selects converter)            │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+              ┌────────────────┐
+              │ Format Check   │
+              └────────┬───────┘
+                       │
+       ┌───────────────┼───────────────┬──────────────┐
+       │               │               │              │
+       ▼               ▼               ▼              ▼
+┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+│   .pdf   │   │   .jpg   │   │   .png   │   │   .ppm   │
+│          │   │   .tiff  │   │   .gif   │   │ (direct) │
+└────┬─────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘
+     │              │              │              │
+     ▼              ▼              │              │
+┌──────────┐   ┌──────────┐       │              │
+│   PDF    │   │  Vips    │       │              │
+│Converter │   │Converter │◀──────┘              │
+└────┬─────┘   └────┬─────┘                      │
+     │              │                             │
+     │     Creates  │                             │
+     │   temp file  │                             │
+     ▼              ▼                             │
+┌─────────────────────────────────────────────────┘
+│
+▼
+┌──────────────────────────────────────────────────────────┐
+│                    PPM File                              │
+│           (Portable Pixmap Format)                       │
+└────────────────────────┬─────────────────────────────────┘
+                         │
+                         ▼
+┌──────────────────────────────────────────────────────────┐
+│                    PPMTiler                              │
+│           (Creates tile pyramid)                         │
+└──────────────────────────────────────────────────────────┘
+</pre></div>
+</div>
+<section id="why-ppm-format">
+<h3>Why PPM Format?<a class="headerlink" href="#why-ppm-format" title="Link to this heading">¶</a></h3>
+<p>PPM (Portable Pixmap) is chosen as the intermediate format because:</p>
+<ol class="arabic simple">
+<li><p><strong>Simplicity</strong>: Extremely simple format - just header + raw pixel data</p></li>
+<li><p><strong>Uncompressed</strong>: No decompression overhead during tiling</p></li>
+<li><p><strong>Sequential Access</strong>: Can be read and processed line-by-line</p></li>
+<li><p><strong>No Dependencies</strong>: Can be parsed without external libraries</p></li>
+<li><p><strong>Lossless</strong>: No quality degradation from conversion</p></li>
+<li><p><strong>Universal Support</strong>: All image libraries support PPM output</p></li>
+</ol>
+</section>
+</section>
+<section id="core-components">
+<h2>Core Components<a class="headerlink" href="#core-components" title="Link to this heading">¶</a></h2>
+<section id="converter-abstract-base-class">
+<h3>Converter (Abstract Base Class)<a class="headerlink" href="#converter-abstract-base-class" title="Link to this heading">¶</a></h3>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code> class provides the foundation for all converters, implementing
+the threading mechanism and progress tracking.</p>
+<p><strong>Class Definition:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Converter</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Thread</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_infile</span> <span class="o">=</span> <span class="n">infile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_outfile</span> <span class="o">=</span> <span class="n">outfile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_progress</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Converter.</span><span class="si">{</span><span class="n">infile</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<p><strong>Key Attributes:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_infile</span></code>: Path to input file to be converted</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_outfile</span></code>: Path to output file (PPM format)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_progress</span></code>: Conversion progress (0.0 to 1.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_logger</span></code>: Logger instance for debugging and error reporting</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">error</span></code>: Error message string if conversion fails (None on success)</p></li>
+</ul>
+<p><strong>Key Methods:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">run()</span></code>: Abstract method implemented by subclasses to perform conversion</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">progress</span></code>: Property returning current conversion progress (0.0 to 1.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">start()</span></code>: Inherited from Thread - starts conversion in background</p></li>
+</ul>
+<p><strong>Threading Model:</strong></p>
+<p>Converters inherit from <code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Thread</span></code>, which means:</p>
+<ol class="arabic simple">
+<li><p>Conversion happens in a separate thread</p></li>
+<li><p>Main thread continues executing (non-blocking)</p></li>
+<li><p>Progress can be monitored via the <code class="docutils literal notranslate"><span class="pre">progress</span></code> property</p></li>
+<li><p>Errors are stored in the <code class="docutils literal notranslate"><span class="pre">error</span></code> attribute</p></li>
+</ol>
+<p><strong>Usage Pattern:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create converter</span>
+<span class="n">converter</span> <span class="o">=</span> <span class="n">SomeConverter</span><span class="p">(</span><span class="s1">&#39;input.pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;output.ppm&#39;</span><span class="p">)</span>
+
+<span class="c1"># Start conversion in background thread</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<span class="c1"># Check progress (in main thread or render loop)</span>
+<span class="k">while</span> <span class="n">converter</span><span class="o">.</span><span class="n">progress</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Progress: </span><span class="si">{</span><span class="n">converter</span><span class="o">.</span><span class="n">progress</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="c1"># Check for errors</span>
+<span class="k">if</span> <span class="n">converter</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Conversion failed: </span><span class="si">{</span><span class="n">converter</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="pdfconverter">
+<h3>PDFConverter<a class="headerlink" href="#pdfconverter" title="Link to this heading">¶</a></h3>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">PDFConverter</span></code> class converts PDF documents to PPM format using the
+<code class="docutils literal notranslate"><span class="pre">pdftoppm</span></code> command-line tool from Poppler or Xpdf.</p>
+<p><strong>Class Definition:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PDFConverter</span><span class="p">(</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Converter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="mi">300</span>
+</pre></div>
+</div>
+<p><strong>Key Attributes:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">resolution</span></code>: DPI resolution for rasterization (default: 300)</p></li>
+</ul>
+<p><strong>Conversion Process:</strong></p>
+<p>The PDF conversion follows these steps:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>1. Create temporary directory
+   ├─ Used to store individual page PPM files
+   └─ Cleaned up after conversion
+
+2. Call pdftoppm
+   ├─ Command: pdftoppm -r &lt;resolution&gt; &lt;infile&gt; &lt;tmpdir&gt;/page
+   ├─ Generates: page-0001.ppm, page-0002.ppm, ...
+   └─ Each file contains one page of the PDF
+
+3. Read page headers
+   ├─ Parse PPM header from each page file
+   ├─ Extract width and height
+   └─ Calculate total height (sum of all pages)
+
+4. Merge pages
+   ├─ Create output PPM header (width, total_height)
+   ├─ Concatenate pixel data from all pages vertically
+   └─ Result: Single PPM with all pages stacked
+
+5. Clean up
+   ├─ Close all file handles
+   ├─ Delete temporary directory
+   └─ Set progress to 1.0
+</pre></div>
+</div>
+<p><strong>Multi-Page Handling:</strong></p>
+<p>PDF documents can have multiple pages. PDFConverter handles this by:</p>
+<ol class="arabic simple">
+<li><p>Rasterizing each page separately with <code class="docutils literal notranslate"><span class="pre">pdftoppm</span></code></p></li>
+<li><p>Determining page order from filenames (e.g., <code class="docutils literal notranslate"><span class="pre">page-0001.ppm</span></code>)</p></li>
+<li><p>Reading each page’s dimensions from PPM headers</p></li>
+<li><p>Creating a single tall PPM by vertically concatenating all pages</p></li>
+<li><p>Preserving page order in the output</p></li>
+</ol>
+<p><strong>PPM Page Merging Algorithm:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simplified merge logic</span>
+<span class="n">total_height</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">page_heights</span><span class="p">)</span>
+
+<span class="c1"># Write combined header</span>
+<span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;P6</span><span class="se">\n</span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">total_height</span><span class="si">}</span><span class="se">\n</span><span class="s2">255</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Concatenate pixel data</span>
+<span class="k">for</span> <span class="n">page_file</span> <span class="ow">in</span> <span class="n">page_files_in_order</span><span class="p">:</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copyfileobj</span><span class="p">(</span><span class="n">page_file</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Progress Tracking:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0.0</span></code>: Conversion not started</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">0.5</span></code>: <code class="docutils literal notranslate"><span class="pre">pdftoppm</span></code> finished, starting page merge</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code>: Conversion complete</p></li>
+</ul>
+<p><strong>Error Handling:</strong></p>
+<p>Errors can occur at several stages:</p>
+<ul class="simple">
+<li><p><strong>pdftoppm failure</strong>: Invalid PDF, missing tool, insufficient memory</p></li>
+<li><p><strong>Page header parsing</strong>: Corrupted PPM output</p></li>
+<li><p><strong>File I/O errors</strong>: Disk full, permission denied</p></li>
+</ul>
+<p>When errors occur:</p>
+<ol class="arabic simple">
+<li><p>Error message stored in <code class="docutils literal notranslate"><span class="pre">self.error</span></code></p></li>
+<li><p>Logged via <code class="docutils literal notranslate"><span class="pre">self._logger.error()</span></code></p></li>
+<li><p>Temporary files cleaned up</p></li>
+<li><p>Output file deleted (if partially written)</p></li>
+<li><p>Progress set to 1.0 (indicates completion, check error)</p></li>
+</ol>
+<p><strong>Dependencies:</strong></p>
+<p>Requires <code class="docutils literal notranslate"><span class="pre">pdftoppm</span></code> command-line tool:</p>
+<ul class="simple">
+<li><p><strong>Linux</strong>: Install <code class="docutils literal notranslate"><span class="pre">poppler-utils</span></code> package</p></li>
+<li><p><strong>macOS</strong>: Install via Homebrew: <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">poppler</span></code></p></li>
+<li><p><strong>Windows</strong>: Download Poppler for Windows</p></li>
+</ul>
+<p><strong>Example PDF Conversion:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">converter</span> <span class="o">=</span> <span class="n">PDFConverter</span><span class="p">(</span><span class="s1">&#39;document.pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;output.ppm&#39;</span><span class="p">)</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="mi">150</span>  <span class="c1"># Lower resolution for faster conversion</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<span class="c1"># Wait for completion</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">converter</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Conversion failed: </span><span class="si">{</span><span class="n">converter</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Converted PDF to PPM: </span><span class="si">{</span><span class="n">converter</span><span class="o">.</span><span class="n">_outfile</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="vipsconverter">
+<h3>VipsConverter<a class="headerlink" href="#vipsconverter" title="Link to this heading">¶</a></h3>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">VipsConverter</span></code> class converts various image formats to PPM using
+libvips, a fast image processing library.</p>
+<p><strong>Class Definition:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">VipsConverter</span><span class="p">(</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Converter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bitdepth</span> <span class="o">=</span> <span class="mi">8</span>
+</pre></div>
+</div>
+<p><strong>Key Attributes:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">bitdepth</span></code>: Output bit depth (default: 8-bit, required for PPMTiler)</p></li>
+</ul>
+<p><strong>Supported Formats:</strong></p>
+<p>VipsConverter supports a wide range of image formats:</p>
+<ul class="simple">
+<li><p><strong>Common</strong>: JPEG, PNG, GIF, BMP, TIFF</p></li>
+<li><p><strong>Advanced</strong>: WebP, HEIF/HEIC, FITS, OpenEXR</p></li>
+<li><p><strong>Scientific</strong>: Analyze, NIfTI, DICOM (with plugins)</p></li>
+<li><p><strong>Raw</strong>: Various camera RAW formats</p></li>
+</ul>
+<p>For a complete list, see: <a class="reference external" href="https://www.libvips.org/API/current/file-format.html">https://www.libvips.org/API/current/file-format.html</a></p>
+<p><strong>Conversion Process:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>1. Load image
+   ├─ Use pyvips.Image.new_from_file()
+   ├─ Automatic format detection
+   └─ Sequential access for memory efficiency
+
+2. Bit-depth conversion (if needed)
+   ├─ Check current format
+   ├─ If not 8-bit unsigned char (uchar)
+   └─ Cast to 8-bit: image.cast(&#39;uchar&#39;)
+
+3. Color space handling
+   ├─ RGBA (4 bands) → RGB via flatten()
+   │   └─ Composites alpha channel with white background
+   ├─ Multi-band (&gt;3 bands, not grayscale) → RGB
+   │   └─ Extract first 3 bands
+   └─ RGB and grayscale → pass through unchanged
+
+4. Write to PPM
+   ├─ Use image.write_to_file()
+   ├─ Format automatically determined from extension
+   └─ libvips handles PPM format generation
+
+5. Error handling
+   ├─ Catch exceptions
+   ├─ Store error message
+   ├─ Clean up partial output
+   └─ Set progress to 1.0
+</pre></div>
+</div>
+<p><strong>Why libvips?</strong></p>
+<p>libvips offers several advantages:</p>
+<ol class="arabic simple">
+<li><p><strong>Performance</strong>: Much faster than PIL/Pillow for large images</p></li>
+<li><p><strong>Memory Efficiency</strong>: Processes images in chunks (streaming)</p></li>
+<li><p><strong>Format Support</strong>: Extensive format support via plugins</p></li>
+<li><p><strong>Large Images</strong>: Can handle images larger than RAM</p></li>
+<li><p><strong>Quality</strong>: High-quality image processing algorithms</p></li>
+</ol>
+<p><strong>Format-Specific Handling:</strong></p>
+<p><strong>RGBA Images:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># RGBA has 4 bands (Red, Green, Blue, Alpha)</span>
+<span class="k">if</span> <span class="n">image</span><span class="o">.</span><span class="n">bands</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+    <span class="c1"># Flatten alpha channel (composite over white background)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="c1"># Result: 3-band RGB image</span>
+</pre></div>
+</div>
+<p><strong>Multi-band Images:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Some formats (e.g., satellite imagery) have &gt;3 bands</span>
+<span class="k">if</span> <span class="n">image</span><span class="o">.</span><span class="n">bands</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">image</span><span class="o">.</span><span class="n">bands</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="c1"># Extract first 3 bands as RGB</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">extract_band</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>16-bit Images:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check bit depth</span>
+<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bitdepth</span> <span class="o">==</span> <span class="mi">8</span> <span class="ow">and</span> <span class="n">image</span><span class="o">.</span><span class="n">format</span> <span class="o">!=</span> <span class="s1">&#39;uchar&#39;</span><span class="p">:</span>
+    <span class="c1"># Scale from 16-bit to 8-bit range</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;uchar&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Progress Tracking:</strong></p>
+<p>Unlike PDFConverter, VipsConverter doesn’t track intermediate progress:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0.0</span></code>: Conversion not started</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code>: Conversion complete (success or failure)</p></li>
+</ul>
+<p>This is because libvips processing is typically fast and difficult to
+monitor incrementally.</p>
+<p><strong>Error Handling:</strong></p>
+<p>Common errors include:</p>
+<ul class="simple">
+<li><p><strong>Unsupported format</strong>: File format not supported by libvips</p></li>
+<li><p><strong>Corrupted file</strong>: Invalid or corrupted image data</p></li>
+<li><p><strong>Memory errors</strong>: Insufficient memory for very large images</p></li>
+<li><p><strong>Dependency errors</strong>: Missing libvips plugins for specific formats</p></li>
+</ul>
+<p><strong>Dependencies:</strong></p>
+<p>Requires both:</p>
+<ol class="arabic simple">
+<li><p><strong>libvips</strong>: C library (system package)</p>
+<ul class="simple">
+<li><p><strong>Linux</strong>: <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">install</span> <span class="pre">libvips-dev</span></code> or <code class="docutils literal notranslate"><span class="pre">yum</span> <span class="pre">install</span> <span class="pre">vips-devel</span></code></p></li>
+<li><p><strong>macOS</strong>: <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">vips</span></code></p></li>
+<li><p><strong>Windows</strong>: Download from libvips website</p></li>
+</ul>
+</li>
+<li><p><strong>pyvips</strong>: Python bindings</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pyvips</span></code></p></li>
+</ul>
+</li>
+</ol>
+<p><strong>Example Image Conversion:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">converter</span> <span class="o">=</span> <span class="n">VipsConverter</span><span class="p">(</span><span class="s1">&#39;photo.jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;output.ppm&#39;</span><span class="p">)</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">bitdepth</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># Ensure 8-bit output</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<span class="c1"># Wait for completion</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">converter</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Conversion failed: </span><span class="si">{</span><span class="n">converter</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Converted image to PPM: </span><span class="si">{</span><span class="n">converter</span><span class="o">.</span><span class="n">_outfile</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="integration-with-tiledmediaobject">
+<h2>Integration with TiledMediaObject<a class="headerlink" href="#integration-with-tiledmediaobject" title="Link to this heading">¶</a></h2>
+<p>The converter system is tightly integrated with <code class="xref py py-class docutils literal notranslate"><span class="pre">TiledMediaObject</span></code>,
+which automatically selects and uses the appropriate converter.</p>
+<section id="format-detection-and-converter-selection">
+<h3>Format Detection and Converter Selection<a class="headerlink" href="#format-detection-and-converter-selection" title="Link to this heading">¶</a></h3>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">TiledMediaObject</span></code> selects converters based on file extension:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># In TiledMediaObject.__init__()</span>
+
+<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.pdf&#39;</span><span class="p">):</span>
+    <span class="c1"># Use PDFConverter for PDF files</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">PDFConverter</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.ppm&#39;</span><span class="p">):</span>
+    <span class="c1"># PPM files need no conversion</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;assuming media is a local PPM file&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span>
+
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Use VipsConverter for all other image formats</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">VipsConverter</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="conversion-workflow">
+<h3>Conversion Workflow<a class="headerlink" href="#conversion-workflow" title="Link to this heading">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TiledMediaObject Creation
+        │
+        ▼
+┌─────────────────┐
+│  Check if       │
+│  already tiled  │
+└────────┬────────┘
+         │
+    ┌────┴────┐
+    │         │
+  YES        NO
+    │         │
+    │         ▼
+    │  ┌────────────────┐
+    │  │ Create temp    │
+    │  │ file for PPM   │
+    │  └────────┬───────┘
+    │           │
+    │           ▼
+    │  ┌────────────────┐
+    │  │ Select and     │
+    │  │ start converter│
+    │  └────────┬───────┘
+    │           │
+    │           ▼
+    │  ┌────────────────┐
+    │  │ Converter runs │
+    │  │ in background  │
+    │  └────────┬───────┘
+    │           │
+    │           ▼
+    │  ┌────────────────┐
+    │  │ Show loading   │
+    │  │ placeholder    │
+    │  └────────┬───────┘
+    │           │
+    │           ▼
+    │  ┌────────────────┐
+    │  │ Converter      │
+    │  │ completes      │
+    │  └────────┬───────┘
+    │           │
+    │           ▼
+    │  ┌────────────────┐
+    │  │ Start PPMTiler │
+    │  └────────┬───────┘
+    │           │
+    └───────────┘
+            │
+            ▼
+┌─────────────────────┐
+│ Load and display    │
+│ tiles               │
+└─────────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="progress-reporting">
+<h3>Progress Reporting<a class="headerlink" href="#progress-reporting" title="Link to this heading">¶</a></h3>
+<p>TiledMediaObject combines converter and tiler progress for user feedback:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">__progress</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Only tiling remaining</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span><span class="o">.</span><span class="n">progress</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Only conversion (weighted as 50% of total)</span>
+        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span><span class="o">.</span><span class="n">progress</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Both conversion and tiling active</span>
+        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__converter</span><span class="o">.</span><span class="n">progress</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span><span class="o">.</span><span class="n">progress</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This creates smooth progress indication:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0.0</span> <span class="pre">-</span> <span class="pre">0.5</span></code>: Conversion phase</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">0.5</span> <span class="pre">-</span> <span class="pre">1.0</span></code>: Tiling phase</p></li>
+</ul>
+</section>
+<section id="temporary-file-management">
+<h3>Temporary File Management<a class="headerlink" href="#temporary-file-management" title="Link to this heading">¶</a></h3>
+<p>Converters create temporary PPM files that are cleaned up after tiling:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create temporary file</span>
+<span class="n">fd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="s1">&#39;.ppm&#39;</span><span class="p">)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+
+<span class="c1"># Use as converter output</span>
+<span class="n">converter</span> <span class="o">=</span> <span class="n">PDFConverter</span><span class="p">(</span><span class="n">media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<span class="c1"># After tiling completes, clean up</span>
+<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;unable to unlink temporary file &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="thread-safety-and-disk-access">
+<h2>Thread Safety and Disk Access<a class="headerlink" href="#thread-safety-and-disk-access" title="Link to this heading">¶</a></h2>
+<section id="synchronization">
+<h3>Synchronization<a class="headerlink" href="#synchronization" title="Link to this heading">¶</a></h3>
+<p>Converters use <code class="docutils literal notranslate"><span class="pre">TileStore.disk_lock</span></code> to synchronize disk access:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilestore</span> <span class="k">as</span> <span class="n">TileStore</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">TileStore</span><span class="o">.</span><span class="n">disk_lock</span><span class="p">:</span>
+        <span class="c1"># Perform conversion with exclusive disk access</span>
+        <span class="c1"># This prevents conflicts with concurrent tiling operations</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+<p>This ensures:</p>
+<ol class="arabic simple">
+<li><p>No conflicts between multiple converters</p></li>
+<li><p>No conflicts between converters and tilers</p></li>
+<li><p>Proper serialization of disk I/O operations</p></li>
+<li><p>Prevention of corrupted output files</p></li>
+</ol>
+<p><strong>Why Disk Lock?</strong></p>
+<p>The disk lock is necessary because:</p>
+<ul class="simple">
+<li><p>Multiple TiledMediaObjects may load simultaneously</p></li>
+<li><p>Each may spawn a converter and tiler</p></li>
+<li><p>Without synchronization, concurrent disk writes could corrupt data</p></li>
+<li><p>The lock ensures only one converter/tiler writes at a time</p></li>
+</ul>
+</section>
+</section>
+<section id="logging-and-debugging">
+<h2>Logging and Debugging<a class="headerlink" href="#logging-and-debugging" title="Link to this heading">¶</a></h2>
+<p>All converters integrate with PyZUI’s logging system:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Logger is created per-converter with unique name</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Converter.</span><span class="si">{</span><span class="n">infile</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="c1"># Usage throughout conversion</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;loading image with libvips&quot;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;calling pdftoppm&quot;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Log Levels:</strong></p>
+<ul class="simple">
+<li><p><strong>DEBUG</strong>: Detailed conversion steps, dimensions, format info</p></li>
+<li><p><strong>INFO</strong>: Major milestones (starting conversion, merging pages)</p></li>
+<li><p><strong>ERROR</strong>: Conversion failures, with full error details</p></li>
+</ul>
+<p><strong>Example Log Output:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>INFO: Converter.image.jpg - loading image with libvips
+DEBUG: Converter.image.jpg - loaded 4096x3072 image with 3 bands
+DEBUG: Converter.image.jpg - writing to /tmp/tmp1234.ppm
+INFO: Converter.document.pdf - calling pdftoppm
+INFO: Converter.document.pdf - merging pages
+</pre></div>
+</div>
+</section>
+<section id="error-handling-best-practices">
+<h2>Error Handling Best Practices<a class="headerlink" href="#error-handling-best-practices" title="Link to this heading">¶</a></h2>
+<section id="checking-for-errors">
+<h3>Checking for Errors<a class="headerlink" href="#checking-for-errors" title="Link to this heading">¶</a></h3>
+<p>Always check the <code class="docutils literal notranslate"><span class="pre">error</span></code> attribute after conversion:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">converter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>  <span class="c1"># Wait for completion</span>
+
+<span class="k">if</span> <span class="n">converter</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+    <span class="c1"># Handle error</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Conversion failed: </span><span class="si">{</span><span class="n">converter</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Don&#39;t proceed to tiling</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Success - proceed to tiling</span>
+    <span class="n">run_tiler</span><span class="p">(</span><span class="n">converter</span><span class="o">.</span><span class="n">_outfile</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="error-recovery">
+<h3>Error Recovery<a class="headerlink" href="#error-recovery" title="Link to this heading">¶</a></h3>
+<p>When converters fail, they:</p>
+<ol class="arabic simple">
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">self.error</span></code> to a descriptive message</p></li>
+<li><p>Log the error for debugging</p></li>
+<li><p>Clean up partial output files</p></li>
+<li><p>Set progress to 1.0 (indicates completion)</p></li>
+</ol>
+<p><strong>TiledMediaObject Error Handling:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">LoadError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__converter</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This propagates errors up to the Scene, which removes problematic objects.</p>
+</section>
+<section id="common-error-scenarios">
+<h3>Common Error Scenarios<a class="headerlink" href="#common-error-scenarios" title="Link to this heading">¶</a></h3>
+<p><strong>Missing Dependencies:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># PDFConverter</span>
+<span class="s2">&quot;conversion failed with return code 127&quot;</span>
+<span class="c1"># Solution: Install poppler-utils</span>
+
+<span class="c1"># VipsConverter</span>
+<span class="s2">&quot;conversion failed: libvips library not found&quot;</span>
+<span class="c1"># Solution: Install libvips and pyvips</span>
+</pre></div>
+</div>
+<p><strong>Unsupported Format:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;unable to parse SVG file&quot;</span>
+<span class="c1"># Wrong converter selected - use SVGMediaObject instead</span>
+</pre></div>
+</div>
+<p><strong>Corrupted Input:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;conversion failed: VipsJpeg: Corrupt JPEG data&quot;</span>
+<span class="c1"># Input file is corrupted or incomplete</span>
+</pre></div>
+</div>
+<p><strong>Insufficient Memory:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;unable to allocate memory&quot;</span>
+<span class="c1"># Image too large for available RAM</span>
+<span class="c1"># Solution: Use libvips (VipsConverter) which streams</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="performance-considerations">
+<h2>Performance Considerations<a class="headerlink" href="#performance-considerations" title="Link to this heading">¶</a></h2>
+<section id="conversion-speed">
+<h3>Conversion Speed<a class="headerlink" href="#conversion-speed" title="Link to this heading">¶</a></h3>
+<p>Typical conversion times vary by format and file size:</p>
+<p><strong>PDFConverter:</strong></p>
+<ul class="simple">
+<li><p><strong>Factor</strong>: Pages, resolution, complexity</p></li>
+<li><p><strong>Speed</strong>: ~1-5 seconds per page at 300 DPI</p></li>
+<li><p><strong>Bottleneck</strong>: CPU (rasterization)</p></li>
+</ul>
+<p><strong>VipsConverter:</strong></p>
+<ul class="simple">
+<li><p><strong>Factor</strong>: Format, size, compression</p></li>
+<li><p><strong>Speed</strong>: 0.1-2 seconds for most images</p></li>
+<li><p><strong>Bottleneck</strong>: Disk I/O (reading/writing)</p></li>
+</ul>
+</section>
+<section id="memory-usage">
+<h3>Memory Usage<a class="headerlink" href="#memory-usage" title="Link to this heading">¶</a></h3>
+<p><strong>PDFConverter:</strong></p>
+<ul class="simple">
+<li><p>Memory usage scales with resolution and page dimensions</p></li>
+<li><p>Each page loaded entirely into memory</p></li>
+<li><p>Peak usage during page merging</p></li>
+</ul>
+<p><strong>VipsConverter:</strong></p>
+<ul class="simple">
+<li><p>Memory usage relatively constant (streaming)</p></li>
+<li><p>Can process images larger than RAM</p></li>
+<li><p>Minimal peak memory usage</p></li>
+</ul>
+</section>
+<section id="optimization-strategies">
+<h3>Optimization Strategies<a class="headerlink" href="#optimization-strategies" title="Link to this heading">¶</a></h3>
+<p><strong>For PDFs:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Lower resolution for faster conversion (if acceptable)</span>
+<span class="n">converter</span> <span class="o">=</span> <span class="n">PDFConverter</span><span class="p">(</span><span class="s1">&#39;large.pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;output.ppm&#39;</span><span class="p">)</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="mi">150</span>  <span class="c1"># Instead of default 300</span>
+</pre></div>
+</div>
+<p><strong>For Images:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># VipsConverter is already optimized</span>
+<span class="c1"># Ensure libvips is installed (faster than PIL/Pillow)</span>
+<span class="n">converter</span> <span class="o">=</span> <span class="n">VipsConverter</span><span class="p">(</span><span class="s1">&#39;huge.tiff&#39;</span><span class="p">,</span> <span class="s1">&#39;output.ppm&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Concurrent Conversions:</strong></p>
+<p>Since converters are threaded, multiple can run simultaneously:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start multiple conversions</span>
+<span class="n">conv1</span> <span class="o">=</span> <span class="n">PDFConverter</span><span class="p">(</span><span class="s1">&#39;doc1.pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;out1.ppm&#39;</span><span class="p">)</span>
+<span class="n">conv2</span> <span class="o">=</span> <span class="n">VipsConverter</span><span class="p">(</span><span class="s1">&#39;img1.jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;out2.ppm&#39;</span><span class="p">)</span>
+<span class="n">conv3</span> <span class="o">=</span> <span class="n">VipsConverter</span><span class="p">(</span><span class="s1">&#39;img2.png&#39;</span><span class="p">,</span> <span class="s1">&#39;out3.ppm&#39;</span><span class="p">)</span>
+
+<span class="n">conv1</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">conv2</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">conv3</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<span class="c1"># All run concurrently</span>
+</pre></div>
+</div>
+<p>However, disk lock serializes disk access, so actual speedup depends on
+CPU vs I/O balance.</p>
+</section>
+</section>
+<section id="usage-examples">
+<h2>Usage Examples<a class="headerlink" href="#usage-examples" title="Link to this heading">¶</a></h2>
+<section id="basic-conversion">
+<h3>Basic Conversion<a class="headerlink" href="#basic-conversion" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">PDFConverter</span><span class="p">,</span> <span class="n">VipsConverter</span>
+
+<span class="c1"># Convert PDF</span>
+<span class="n">pdf_conv</span> <span class="o">=</span> <span class="n">PDFConverter</span><span class="p">(</span><span class="s1">&#39;document.pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;output_pdf.ppm&#39;</span><span class="p">)</span>
+<span class="n">pdf_conv</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">pdf_conv</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">pdf_conv</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PDF converted successfully!&quot;</span><span class="p">)</span>
+
+<span class="c1"># Convert image</span>
+<span class="n">img_conv</span> <span class="o">=</span> <span class="n">VipsConverter</span><span class="p">(</span><span class="s1">&#39;photo.jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;output_img.ppm&#39;</span><span class="p">)</span>
+<span class="n">img_conv</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">img_conv</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">img_conv</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Image converted successfully!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="progress-monitoring">
+<h3>Progress Monitoring<a class="headerlink" href="#progress-monitoring" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="n">converter</span> <span class="o">=</span> <span class="n">PDFConverter</span><span class="p">(</span><span class="s1">&#39;large_document.pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;output.ppm&#39;</span><span class="p">)</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<span class="c1"># Monitor progress</span>
+<span class="k">while</span> <span class="n">converter</span><span class="o">.</span><span class="n">progress</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">Progress: </span><span class="si">{</span><span class="n">converter</span><span class="o">.</span><span class="n">progress</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">()</span>  <span class="c1"># New line</span>
+
+<span class="k">if</span> <span class="n">converter</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">converter</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Conversion complete!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-resolution-pdf-conversion">
+<h3>Custom Resolution PDF Conversion<a class="headerlink" href="#custom-resolution-pdf-conversion" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># High-resolution conversion for printing</span>
+<span class="n">converter</span> <span class="o">=</span> <span class="n">PDFConverter</span><span class="p">(</span><span class="s1">&#39;document.pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;high_res.ppm&#39;</span><span class="p">)</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="mi">600</span>  <span class="c1"># 600 DPI</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+<span class="c1"># Low-resolution conversion for preview</span>
+<span class="n">converter</span> <span class="o">=</span> <span class="n">PDFConverter</span><span class="p">(</span><span class="s1">&#39;document.pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;low_res.ppm&#39;</span><span class="p">)</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="mi">72</span>  <span class="c1"># 72 DPI (screen resolution)</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="handling-multiple-formats">
+<h3>Handling Multiple Formats<a class="headerlink" href="#handling-multiple-formats" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_to_ppm</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">output_file</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert any supported format to PPM.&quot;&quot;&quot;</span>
+
+    <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">input_file</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.pdf&#39;</span><span class="p">:</span>
+        <span class="n">converter</span> <span class="o">=</span> <span class="n">PDFConverter</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.ppm&#39;</span><span class="p">:</span>
+        <span class="c1"># Already PPM, just copy</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Try VipsConverter for everything else</span>
+        <span class="n">converter</span> <span class="o">=</span> <span class="n">VipsConverter</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span>
+
+    <span class="n">converter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">converter</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">converter</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Conversion failed: </span><span class="si">{</span><span class="n">converter</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="kc">True</span>
+
+<span class="c1"># Usage</span>
+<span class="n">success</span> <span class="o">=</span> <span class="n">convert_to_ppm</span><span class="p">(</span><span class="s1">&#39;document.pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;output1.ppm&#39;</span><span class="p">)</span>
+<span class="n">success</span> <span class="o">=</span> <span class="n">convert_to_ppm</span><span class="p">(</span><span class="s1">&#39;photo.jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;output2.ppm&#39;</span><span class="p">)</span>
+<span class="n">success</span> <span class="o">=</span> <span class="n">convert_to_ppm</span><span class="p">(</span><span class="s1">&#39;diagram.png&#39;</span><span class="p">,</span> <span class="s1">&#39;output3.ppm&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="api-reference">
+<h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h2>
+<section id="converter-abstract-base">
+<h3>Converter (Abstract Base)<a class="headerlink" href="#converter-abstract-base" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Converter</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>  <span class="c1"># Abstract</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">progress</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span>  <span class="c1"># 0.0 to 1.0</span>
+
+    <span class="c1"># Attributes</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_infile</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_outfile</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_progress</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="p">:</span> <span class="n">Logger</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h3>PDFConverter<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PDFConverter</span><span class="p">(</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+
+    <span class="c1"># Attributes</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># DPI (default: 300)</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h3>VipsConverter<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">VipsConverter</span><span class="p">(</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+
+    <span class="c1"># Attributes</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">bitdepth</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># Bit depth (default: 8)</span>
+</pre></div>
+</div>
+</section>
+<section id="key-classes">
+<h3>Key Classes<a class="headerlink" href="#key-classes" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="../pyzui/converter.html#pyzui.converters.converter.Converter" title="pyzui.converters.converter.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyzui.converters.converter.Converter</span></code></a> - Abstract base class</p></li>
+<li><p><a class="reference internal" href="../pyzui/pdfconverter.html#pyzui.converters.pdfconverter.PDFConverter" title="pyzui.converters.pdfconverter.PDFConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyzui.converters.pdfconverter.PDFConverter</span></code></a> - PDF converter</p></li>
+<li><p><a class="reference internal" href="../pyzui/vipsconverter.html#pyzui.converters.vipsconverter.VipsConverter" title="pyzui.converters.vipsconverter.VipsConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyzui.converters.vipsconverter.VipsConverter</span></code></a> - Image converter</p></li>
+</ul>
+</section>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="tilingsystem.html"><span class="doc">Tiling System</span></a> - Tile generation from PPM files</p></li>
+<li><p><a class="reference internal" href="tiledmediaobject.html"><span class="doc">Tiled media object</span></a> - Integration with TiledMediaObject</p></li>
+<li><p><a class="reference internal" href="objectsystem.html"><span class="doc">Object System</span></a> - Overall object system architecture</p></li>
+<li><p><a class="reference internal" href="projectstructure.html"><span class="doc">Project structure</span></a> - Project organization</p></li>
+</ul>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#generating-documentation">Generating Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usageinstructions/userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usageinstructions/programconfiguration.html">Program Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objectsystem.html">Object System</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Converter System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="windowsystem.html">Window System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testingdocumentation/unittest.html">Unit Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testingdocumentation/integrationtest.html">Integration Testing Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Benchmarks Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarksdocumentation/qzuibenchmark.html">QZUI Benchmark Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarksdocumentation/converterbenchmark.html">Converter Benchmark Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="objectsystem.html" title="previous chapter">Object System</a></li>
+      <li>Next: <a href="tiledmediaobject.html" title="next chapter">Tiled media object</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/technicaldocumentation/convertersystem.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

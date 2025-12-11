@@ -1,7 +1,7 @@
 import pytest
 import time
 from unittest.mock import Mock, patch
-from pyzui.tilesystem.tilecache import TileCache
+from pyzui.tilesystem.tilestore.tilecache import TileCache
 
 class TestTileCache:
     """

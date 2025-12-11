@@ -51,6 +51,40 @@ class DynamicTileProvider(TileProvider):
         - Uses QImage for loading tiles after they are created
         - Derived classes should override _load_dynamic() to implement
           specific tile generation or retrieval logic
+
+    Dynamic Tile Provider Flow (Fern Example)::
+
+        ┌─────────────────────────┐               |       ┌──────────┐ ┌────────────────────┐
+        │ FernDynamicTileProvider │               |       │ Load     │ │ Generate tile      │
+        │ receives request        │               |       │ cached   │ │ algorithmically    │
+        └────────────┬────────────┘               |       │ tile     │ │ • Calculate fern   │
+                     │                            |       └────┬─────┘ │   parameters       │
+                     ▼                            |            │       │ • Draw fractal     │
+        ┌─────────────────────────┐               |            │       │ • Create image     │
+        │ Parse tile ID           │               |            │       └─────┬──────────────┘
+        │ • Zoom level            │               |            │             │
+        │ • Tile coordinates      │               |            └─────┬───────┘
+        └────────────┬────────────┘               |                  │
+                     │                            |                  ▼
+                     ▼                            |    ┌─────────────────────────┐
+        ┌─────────────────────────┐               |    │ Wrap in Tile object     │
+        │ Check TileStore         │               |    └────────────┬────────────┘
+        │ (may have been          │               |                 │
+        │  generated before)      │               |                 ▼
+        └────────────┬────────────┘               |    ┌─────────────────────────┐
+                     │                            |    │ Store in TileCache      │
+                ┌────┴────┐                       |    └────────────┬────────────┘
+                │         │                       |                 │
+            EXISTS    NEW TILE                    |                 ▼
+                │         │                       |    ┌─────────────────────────┐
+                ▼         ▼                       |    │ Save to TileStore       │
+                                                  |    └────────────┬────────────┘
+                                                  |                 │
+                                                  |                 ▼
+                                                  |    ┌─────────────────────────┐
+                                                  |    │ Return to TileManager   │
+                                                  |    └─────────────────────────┘
+
     """
     def __init__(self, tilecache: Any) -> None:
         TileProvider.__init__(self, tilecache)

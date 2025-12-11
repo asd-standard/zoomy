@@ -77,13 +77,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Constructor :</span>
-<span class="sd">            PhysicalObject()</span>
-<span class="sd">        Parameters :</span>
-<span class="sd">            None</span>
-
-<span class="sd">        PhysicalObject() --&gt; None</span>
-
 <span class="sd">        Create a new PhysicalObject at the origin with zero velocity.</span>
 
 <span class="sd">        Initializes position coordinates (_x, _y, _z) to 0.0, where</span>
@@ -91,6 +84,38 @@
 <span class="sd">        to 0.0. Sets the center offset (_centre) to (0,0).</span>
 
 <span class="sd">        This initialization is used by both Scene and MediaObject classes.</span>
+
+<span class="sd">        Class Inheritance Hierarchy::</span>
+
+<span class="sd">            PhysicalObject (Abstract Base)</span>
+<span class="sd">            │   • _x, _y, _z (position &amp; zoom)</span>
+<span class="sd">            │   • vx, vy, vz (velocity)</span>
+<span class="sd">            │   • damping factor</span>
+<span class="sd">            │   • _centre (center point)</span>
+<span class="sd">            │</span>
+<span class="sd">            ├── MediaObject (Abstract)</span>
+<span class="sd">            │   │   • Coordinate transforms</span>
+<span class="sd">            │   │   • Scaling management</span>
+<span class="sd">            │   │   • Reference frames</span>
+<span class="sd">            │   │</span>
+<span class="sd">            │   ├── TiledMediaObject</span>
+<span class="sd">            │   │       • Large image support</span>
+<span class="sd">            │   │       • Tile grid management</span>
+<span class="sd">            │   │       • Efficient for huge images</span>
+<span class="sd">            │   │</span>
+<span class="sd">            │   ├── StringMediaObject</span>
+<span class="sd">            │   │       • Text rendering</span>
+<span class="sd">            │   │       • Font support</span>
+<span class="sd">            │   │</span>
+<span class="sd">            │   └── SVGMediaObject</span>
+<span class="sd">            │           • Vector graphics</span>
+<span class="sd">            │           • Scalable rendering</span>
+<span class="sd">            │</span>
+<span class="sd">            └── Scene</span>
+<span class="sd">                   • Container for MediaObjects</span>
+<span class="sd">                   • Viewport management</span>
+<span class="sd">                   • Scene persistence</span>
+<span class="sd">                   • Thread-safe operations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -440,27 +465,40 @@
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">PyZui installation instructions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#dependencies">Dependencies</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#running-pyzui">Running PyZUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#generating-documentation">Generating Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/installation.html#generating-documentation">Generating Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../userinterface.html">User Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../programconfiguration.html">Program Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usageinstructions/userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usageinstructions/programconfiguration.html">Program Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../readingdocumentation.html">Reading Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../projectstructure.html">Project structure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tiledmediaobject.html">Tiled media object</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tilingsystem.html">Tiling System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../logging.html">Logging System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../technicaldocumentation/readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../technicaldocumentation/projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../technicaldocumentation/objectsystem.html">Object System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../technicaldocumentation/convertersystem.html">Converter System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../technicaldocumentation/tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../technicaldocumentation/tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../technicaldocumentation/windowsystem.html">Window System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../technicaldocumentation/logging.html">Logging System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../testingdocumentation/unittest.html">Unit Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../testingdocumentation/integrationtest.html">Integration Testing Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Benchmarks Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmarksdocumentation/qzuibenchmark.html">QZUI Benchmark Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmarksdocumentation/converterbenchmark.html">Converter Benchmark Documentation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../contributiongiudelines.html">Contribution guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
 </ul>
 
 <div class="relations">

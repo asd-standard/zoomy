@@ -46,7 +46,49 @@ class StaticTileProvider(TileProvider):
         - Uses PIL Image.open() to load tiles from disk
         - Validates tilelevel against maxtilelevel metadata
         - Returns None for invalid or missing tiles
-    
+
+    Static Tile Provider Flow::
+
+        ┌─────────────────────────┐               |       ┌──────────┐ ┌────────────┐
+        │ StaticTileProvider      │               |       │ Load     │ │ Try to     │
+        │ task queue receives     │               |       │ existing │ │ synthesize │
+        │ tile request            │               |       │ tile     │ │ from lower │
+        └────────────┬────────────┘               |       │ image    │ │ zoom tiles │
+                     │                            |       └────┬─────┘ └─────┬──────┘
+                     ▼                            |            │             │
+        ┌─────────────────────────┐               |            │             ▼
+        │ Pop request from queue  │               |            │       ┌────────────┐
+        │ (LIFO - newest first)   │               |            │       │ If synth   │
+        └────────────┬────────────┘               |            │       │ fails,     │
+                     │                            |            │       │ load       │
+                     ▼                            |            │       │ source     │
+        ┌─────────────────────────┐               |            │       │ image      │
+        │ Check TileStore         │               |            │       └─────┬──────┘
+        │ get_tile_path()         │               |            └─────┬───────┘
+        └────────────┬────────────┘               |                  │
+                     │                            |                  ▼
+                ┌────┴────┐                       |    ┌─────────────────────────┐
+                │         │                       |    │ Create Tile object      │
+            EXISTS    DOESN'T EXIST               |    │ (PIL Image wrapper)     │
+                │         │                       |    └────────────┬────────────┘
+                ▼         ▼                       |                 │
+                                                  |                 ▼
+                                                  |    ┌─────────────────────────┐
+                                                  |    │ Store in TileCache      │
+                                                  |    └────────────┬────────────┘
+                                                  |                 │
+                                                  |                 ▼
+                                                  |    ┌─────────────────────────┐
+                                                  |    │ Save to TileStore       │
+                                                  |    │ (if not already there)  │
+                                                  |    └────────────┬────────────┘
+                                                  |                 │
+                                                  |                 ▼
+                                                  |    ┌─────────────────────────┐
+                                                  |    │ Notify completion       │
+                                                  |    │ (tile now available)    │
+                                                  |    └─────────────────────────┘
+
     """
     def __init__(self, tilecache: Any) -> None:
         TileProvider.__init__(self, tilecache)

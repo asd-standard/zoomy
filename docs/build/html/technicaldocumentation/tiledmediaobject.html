@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Tiled media object &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cc7d0dec" />
+    <script src="../_static/documentation_options.js?v=086c1757"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tiling System" href="tilingsystem.html" />
+    <link rel="prev" title="Converter System" href="convertersystem.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="tiled-media-object">
+<h1>Tiled media object<a class="headerlink" href="#tiled-media-object" title="Link to this heading">¶</a></h1>
+<p>Tiled media objects are the objects that need to be tiled in order to be
+efficently zoomed in the Zui. These objects media gets first converted into
+ppm file format and then given to the Tiler/PPMTiler system, the first class
+handles the tile pyramid as folder structure and tile sizes. Tile sizes are
+then passed to PPMTiler wich handle the actual tile image creation form the
+initial ppm file.</p>
+<p>Here we have the whole application flow for a TiledMediaObj call:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>┌─────────────────────────────────────────────────────────────────┐
+│ 1. USER ACTION: Add media to scene                              │
+│    scene.add(TiledMediaObject(&quot;image.jpg&quot;, scene))              │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────────┐
+│ 2. TiledMediaObject.__init__(media_id, scene, autofit=True)     │
+│                                                                 │
+│    • Check if already tiled: TileManager.tiled(media_id)        │
+│    • If NOT tiled, determine file type and converter:           │
+│                                                                 │
+│      ┌──────────────────────────────────────────────┐           │
+│      │ File Type Detection:                         │           │
+│      │  • .pdf     → PDFConverter                   │           │
+│      │  • .ppm     → No conversion (direct use)     │           │
+│      │  • others   → VipsConverter                  │           │
+│      │    (.jpg, .png, .gif, .tiff, etc.)           │           │
+│      └──────────────────────────────────────────────┘           │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────────┐
+│ 3. CONVERTER PHASE (if needed)                                  │
+│    converter = PDFConverter/VipsConverter(infile, tmpfile.ppm)  │
+│    converter.start()  # Runs in separate thread                 │
+│                                                                 │
+│    • Converts source file to PPM format                         │
+│    • Saves to temporary file: /tmp/tmpXXXXXX.ppm                │
+│    • Sets converter.progress (0.0 → 1.0)                        │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────────┐
+│ 4. RENDER LOOP (TiledMediaObject.render() called by scene)      │
+│                                                                 │
+│    • If converter.progress == 1.0 and tiler is None:            │
+│      → Start tiling process                                     │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────────┐
+│ 5. TILER INITIALIZATION                                         │
+│    __run_tiler():                                               │
+│      • Determine tile format (jpg if source is jpg, else png)   │
+│      • Create PPMTiler(ppmfile, media_id, filext)               │
+│      • tiler.start()  # Runs in separate thread                 │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────────┐
+│ 6. PPMTiler.__init__(infile, media_id, filext, tilesize=256)    │
+│    Inherits from Tiler                                          │
+│                                                                 │
+│    • Opens PPM file                                             │
+│    • Reads PPM header: read_ppm_header(f)                       │
+│    • Gets image dimensions (width, height)                      │
+│    • Sets __outpath = TileStore.get_media_path(media_id)        │
+│      → ~/.pyzui/tilestore/&lt;media_id_hash&gt;/                      │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────────┐
+│ 7. Tiler.run() - THE TILING PROCESS                             │
+│                                                                 │
+│    Step 7a: Calculate tile pyramid                              │
+│    ┌──────────────────────────────────────────────────┐         │
+│    │ • maxtilelevel = calculate_maxtilelevel()        │         │
+│    │   (How many zoom levels needed)                  │         │
+│    │ • numtiles = calculate_numtiles()                │         │
+│    │   (Total tiles across all levels)                │         │
+│    │ • Calculate grid: numtiles_across × numtiles_down│         │
+│    └──────────────────────────────────────────────────┘         │
+│                                                                 │
+│    Step 7b: Lock disk access                                    │
+│    ┌─────────────────────────────────────────────────┐          │
+│    │ with TileStore.disk_lock:                       │          │
+│    │   __tiles(tilelevel=0, row=0)  # Recursive!     │          │
+│    └─────────────────────────────────────────────────┘          │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────────┐
+│ 8. __tiles() - RECURSIVE TILE GENERATION                        │
+│    (Called for each zoom level, starting from highest detail)   │
+│                                                                 │
+│    For tilelevel=0 (original resolution):                       │
+│    ┌─────────────────────────────────────────────────┐          │
+│    │ a) __load_row_from_file(row)                    │          │
+│    │    • Read scanlines from PPM using _scanchunk() │          │
+│    │    • Create Tile objects from raw pixel data    │          │
+│    │    • Build complete row of tiles                │          │
+│    │                                                 │          │
+│    │ b) __savetile(tile, tilelevel, row, col)        │          │
+│    │    • tile_id = (media_id, level, row, col)      │          │
+│    │    • filename = TileStore.get_tile_path(...)    │          │
+│    │    • tile.save(filename) → Saves to disk!       │          │
+│    └─────────────────────────────────────────────────┘          │
+│                                                                 │
+│    For tilelevel &gt; 0 (lower resolutions):                       │
+│    ┌─────────────────────────────────────────────────┐          │
+│    │ a) Get previous level tiles via recursion       │          │
+│    │ b) __mergerows(row_a, row_b)                    │          │
+│    │    • Combine 4 tiles (2×2) into 1 tile          │          │
+│    │    • Tile.merged(t1, t2, t3, t4)                │          │
+│    │ c) __savetile(...) each merged tile             │          │
+│    └─────────────────────────────────────────────────┘          │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────────┐
+│ 9. TILE STORAGE: TileStore.get_tile_path()                      │
+│                                                                 │
+│    Directory structure created:                                 │
+│    ~/.pyzui/tilestore/                                          │
+│    └── &lt;media_id_hash&gt;/                                         │
+│        ├── metadata.json  (width, height, tilesize, etc.)       │
+│        ├── 0/             (Level 0: full resolution)            │
+│        │   ├── 0/                                               │
+│        │   │   ├── 0.jpg   (tile at row=0, col=0)               │
+│        │   │   ├── 1.jpg   (tile at row=0, col=1)               │
+│        │   │   └── ...                                          │
+│        │   ├── 1/                                               │
+│        │   │   ├── 0.jpg   (tile at row=1, col=0)               │
+│        │   │   └── ...                                          │
+│        ├── 1/             (Level 1: 50% scale)                  │
+│        │   └── 0/0.jpg                                          │
+│        ├── 2/             (Level 2: 25% scale)                  │
+│        └── ...            (More levels as needed)               │
+│                                                                 │
+│    File naming: &lt;tilelevel&gt;/&lt;row&gt;/&lt;col&gt;.&lt;filext&gt;                │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────────┐
+│ 10. METADATA STORAGE                                            │
+│     TileStore.write_metadata(media_id, ...)                     │
+│                                                                 │
+│     Saves to: ~/.pyzui/tilestore/&lt;hash&gt;/metadata.json           │
+│     Content:                                                    │
+│     {                                                           │
+│       &quot;filext&quot;: &quot;jpg&quot;,                                          │
+│       &quot;tilesize&quot;: 256,                                          │
+│       &quot;width&quot;: 4096,                                            │
+│       &quot;height&quot;: 3072,                                           │
+│       &quot;maxtilelevel&quot;: 4,                                        │
+│       &quot;aspect_ratio&quot;: 1.333,                                    │
+│       &quot;tiled&quot;: true                                             │
+│     }                                                           │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────────┐
+│ 11. RENDERING: TiledMediaObject.render()                        │
+│                                                                 │
+│     • TileManager.get_tile(tile_id) loads tiles from disk       │
+│     • Tiles are cached in TileCache (LRU cache)                 │
+│     • __render_tileblock() combines visible tiles               │
+│     • Scales tileblock to screen resolution                     │
+│     • Draws to painter (displayed on screen)                    │
+└─────────────────────────────────────────────────────────────────┘
+</pre></div>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#generating-documentation">Generating Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usageinstructions/userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usageinstructions/programconfiguration.html">Program Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objectsystem.html">Object System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="convertersystem.html">Converter System</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="windowsystem.html">Window System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testingdocumentation/unittest.html">Unit Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testingdocumentation/integrationtest.html">Integration Testing Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Benchmarks Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarksdocumentation/qzuibenchmark.html">QZUI Benchmark Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarksdocumentation/converterbenchmark.html">Converter Benchmark Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="convertersystem.html" title="previous chapter">Converter System</a></li>
+      <li>Next: <a href="tilingsystem.html" title="next chapter">Tiling System</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/technicaldocumentation/tiledmediaobject.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
