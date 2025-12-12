@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Integration Testing Guide &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cc7d0dec" />
+    <script src="../_static/documentation_options.js?v=086c1757"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="QZUI Benchmark Documentation" href="../benchmarksdocumentation/qzuibenchmark.html" />
+    <link rel="prev" title="Unit Testing Guide" href="unittest.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="integration-testing-guide">
+<h1>Integration Testing Guide<a class="headerlink" href="#integration-testing-guide" title="Link to this heading">¶</a></h1>
+<p>This document provides a comprehensive guide to integration testing PyZUI during development,
+covering end-to-end pipeline testing, thread safety validation, component interaction testing,
+and full GUI integration verification. Integration tests validate that components work correctly
+together as a complete system.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>The PyZUI integration test suite is designed to:</p>
+<ol class="arabic simple">
+<li><p>Validate complete workflows from input to output</p></li>
+<li><p>Test component interactions and interfaces</p></li>
+<li><p>Verify thread safety and concurrent access patterns</p></li>
+<li><p>Ensure cache-provider coordination works correctly</p></li>
+<li><p>Test the full application with real user interactions</p></li>
+<li><p>Catch integration bugs that unit tests might miss</p></li>
+</ol>
+<p><strong>Test Framework</strong>: pytest with custom fixtures</p>
+<p><strong>Test Types</strong>:
+- <strong>Pipeline Tests</strong>: End-to-end tiling workflows
+- <strong>Concurrency Tests</strong>: Thread safety and race conditions
+- <strong>Integration Tests</strong>: Component interaction validation
+- <strong>GUI Tests</strong>: Full application visual verification</p>
+<p><strong>Key Difference from Unit Tests</strong>:
+Integration tests use <strong>real dependencies</strong> (actual images, real disk I/O, threading)
+rather than mocks, validating the complete system behavior.</p>
+</section>
+<section id="test-suite-structure">
+<h2>Test Suite Structure<a class="headerlink" href="#test-suite-structure" title="Link to this heading">¶</a></h2>
+<section id="directory-organization">
+<h3>Directory Organization<a class="headerlink" href="#directory-organization" title="Link to this heading">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>test/integrationtest/
+├── test_tiling_pipeline.py          # End-to-end tiling tests
+├── test_concurrent_access.py        # Thread safety tests
+├── test_cache_provider_integration.py  # Cache-provider interaction
+├── test_tilemanager_integration.py  # TileManager coordination
+├── gui_integration.py               # Visual GUI testing (manual)
+├── GUI_INTEGRATION.md               # GUI test documentation
+└── logs/                            # Test execution logs
+    └── pyzui.log
+</pre></div>
+</div>
+</section>
+<section id="test-categories">
+<h3>Test Categories<a class="headerlink" href="#test-categories" title="Link to this heading">¶</a></h3>
+<p><strong>1. Tiling Pipeline Tests</strong> (<code class="docutils literal notranslate"><span class="pre">test_tiling_pipeline.py</span></code>)</p>
+<ul class="simple">
+<li><p>Complete image-to-tiles workflow</p></li>
+<li><p>Pyramid structure verification</p></li>
+<li><p>Tile retrieval and caching</p></li>
+<li><p>Multiple image handling</p></li>
+<li><p>Error handling in pipeline</p></li>
+</ul>
+<p><strong>2. Concurrent Access Tests</strong> (<code class="docutils literal notranslate"><span class="pre">test_concurrent_access.py</span></code>)</p>
+<ul class="simple">
+<li><p>Thread-safe tile requests</p></li>
+<li><p>Concurrent tiling operations</p></li>
+<li><p>Cache thread safety</p></li>
+<li><p>Provider queue concurrency</p></li>
+<li><p>Race condition prevention</p></li>
+</ul>
+<p><strong>3. Cache-Provider Integration</strong> (<code class="docutils literal notranslate"><span class="pre">test_cache_provider_integration.py</span></code>)</p>
+<ul class="simple">
+<li><p>Provider-cache interaction</p></li>
+<li><p>Cache hit prevention of redundant loads</p></li>
+<li><p>Eviction and reload behavior</p></li>
+<li><p>Multi-provider cache sharing</p></li>
+<li><p>Request queue processing</p></li>
+</ul>
+<p><strong>4. TileManager Coordination</strong> (<code class="docutils literal notranslate"><span class="pre">test_tilemanager_integration.py</span></code>)</p>
+<ul class="simple">
+<li><p>Request routing (static vs dynamic)</p></li>
+<li><p>Tile synthesis and fallback</p></li>
+<li><p>Metadata access coordination</p></li>
+<li><p>Negative tile level handling</p></li>
+<li><p>Dual-cache management</p></li>
+</ul>
+<p><strong>5. GUI Integration</strong> (<code class="docutils literal notranslate"><span class="pre">gui_integration.py</span></code>)</p>
+<ul class="simple">
+<li><p>Full application workflow</p></li>
+<li><p>All user interactions</p></li>
+<li><p>Visual verification by human</p></li>
+<li><p>Menu operations</p></li>
+<li><p>Mouse and keyboard input</p></li>
+</ul>
+</section>
+</section>
+<section id="running-integration-tests">
+<h2>Running Integration Tests<a class="headerlink" href="#running-integration-tests" title="Link to this heading">¶</a></h2>
+<section id="basic-usage">
+<h3>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h3>
+<p><strong>Run all integration tests:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>test/integrationtest
+pytest
+</pre></div>
+</div>
+<p><strong>Run specific test file:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>test_tiling_pipeline.py
+</pre></div>
+</div>
+<p><strong>Run with verbose output:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>-v
+</pre></div>
+</div>
+<p><strong>Run specific test class:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>test_tiling_pipeline.py::TestTilingPipelineEndToEnd
+</pre></div>
+</div>
+<p><strong>Run specific test:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>test_tiling_pipeline.py::TestTilingPipelineEndToEnd::test_tile_image_creates_pyramid_structure
+</pre></div>
+</div>
+</section>
+<section id="integration-test-options">
+<h3>Integration Test Options<a class="headerlink" href="#integration-test-options" title="Link to this heading">¶</a></h3>
+<p><strong>Show detailed output:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>-v<span class="w"> </span>-s
+</pre></div>
+</div>
+<p><strong>Stop on first failure:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>-x
+</pre></div>
+</div>
+<p><strong>Run with coverage:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>--cov<span class="o">=</span>pyzui<span class="w"> </span>--cov-report<span class="o">=</span>term
+</pre></div>
+</div>
+<p><strong>Parallel execution (use with caution):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Integration tests may have shared state</span>
+<span class="c1"># Only use if tests are truly independent</span>
+pytest<span class="w"> </span>-n<span class="w"> </span>auto
+</pre></div>
+</div>
+<p><strong>Logging:</strong></p>
+<p>Integration tests produce detailed logs. View them with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tail<span class="w"> </span>-f<span class="w"> </span>logs/pyzui.log
+</pre></div>
+</div>
+</section>
+<section id="gui-integration-tests">
+<h3>GUI Integration Tests<a class="headerlink" href="#gui-integration-tests" title="Link to this heading">¶</a></h3>
+<p>GUI tests run separately and require visual verification:</p>
+<p><strong>Run all GUI tests:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>gui_integration.py
+</pre></div>
+</div>
+<p><strong>Start from specific step:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>gui_integration.py<span class="w"> </span>--start-step<span class="w"> </span><span class="m">30</span>
+</pre></div>
+</div>
+<p><strong>List available test steps:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>gui_integration.py<span class="w"> </span>--list-steps
+</pre></div>
+</div>
+</section>
+</section>
+<section id="common-fixtures">
+<h2>Common Fixtures<a class="headerlink" href="#common-fixtures" title="Link to this heading">¶</a></h2>
+<p>Test fixtures provide isolated environments and test resources.</p>
+<section id="temp-tilestore-fixture">
+<h3>temp_tilestore Fixture<a class="headerlink" href="#temp-tilestore-fixture" title="Link to this heading">¶</a></h3>
+<p>Provides isolated temporary tile storage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">temp_tilestore</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fixture: Isolated Tile Storage</span>
+
+<span class="sd">    Provides a temporary directory for tile storage,</span>
+<span class="sd">    ensuring test isolation.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        str: Path to temporary tilestore directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem.tilestore</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilestore</span> <span class="k">as</span> <span class="n">ts_module</span>
+
+    <span class="n">original_tile_dir</span> <span class="o">=</span> <span class="n">ts_module</span><span class="o">.</span><span class="n">tile_dir</span>
+    <span class="n">temp_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;tilestore&quot;</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Patch tilestore directory</span>
+    <span class="n">ts_module</span><span class="o">.</span><span class="n">tile_dir</span> <span class="o">=</span> <span class="n">temp_dir</span>
+    <span class="n">tilestore</span><span class="o">.</span><span class="n">tile_dir</span> <span class="o">=</span> <span class="n">temp_dir</span>
+
+    <span class="k">yield</span> <span class="n">temp_dir</span>
+
+    <span class="c1"># Restore and cleanup</span>
+    <span class="n">ts_module</span><span class="o">.</span><span class="n">tile_dir</span> <span class="o">=</span> <span class="n">original_tile_dir</span>
+    <span class="n">tilestore</span><span class="o">.</span><span class="n">tile_dir</span> <span class="o">=</span> <span class="n">original_tile_dir</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">):</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Why This Matters:</strong></p>
+<ul class="simple">
+<li><p>Prevents tests from polluting system tilestore</p></li>
+<li><p>Ensures each test starts with clean slate</p></li>
+<li><p>Allows parallel test execution</p></li>
+<li><p>Automatic cleanup after tests</p></li>
+</ul>
+</section>
+<section id="sample-images-fixture">
+<h3>sample_images Fixture<a class="headerlink" href="#sample-images-fixture" title="Link to this heading">¶</a></h3>
+<p>Creates test images of various sizes:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sample_images</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fixture: Sample Test Images</span>
+
+<span class="sd">    Creates test images of various sizes for testing</span>
+<span class="sd">    different tiling scenarios.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        dict: Mapping of (width, height) to file path.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">images</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">test_cases</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">),</span>     <span class="c1"># Single tile</span>
+        <span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">),</span>   <span class="c1"># 2x2 grid</span>
+        <span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">),</span>    <span class="c1"># Non-power-of-two</span>
+        <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">),</span>  <span class="c1"># Smaller than tile size</span>
+        <span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="s1">&#39;purple&#39;</span><span class="p">),</span> <span class="c1"># Larger pyramid</span>
+    <span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">test_cases</span><span class="p">:</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+        <span class="c1"># Add gradient pattern for visual verification</span>
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">height</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="p">)):</span>
+                <span class="n">img</span><span class="o">.</span><span class="n">putpixel</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mi">25</span><span class="p">,</span> <span class="n">y</span> <span class="o">%</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">128</span><span class="p">))</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;test_</span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">height</span><span class="si">}</span><span class="s2">.png&quot;</span>
+        <span class="n">img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">images</span><span class="p">[(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">yield</span> <span class="n">images</span>
+
+    <span class="c1"># Cleanup</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">images</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Test Images Provided:</strong></p>
+<ul class="simple">
+<li><p><strong>256x256</strong>: Exactly one tile (boundary test)</p></li>
+<li><p><strong>512x512</strong>: 2x2 tile grid (standard pyramid)</p></li>
+<li><p><strong>500x300</strong>: Non-power-of-two dimensions</p></li>
+<li><p><strong>100x100</strong>: Smaller than tile size</p></li>
+<li><p><strong>1024x1024</strong>: Multi-level pyramid (3 levels)</p></li>
+</ul>
+</section>
+<section id="initialized-tilemanager-fixture">
+<h3>initialized_tilemanager Fixture<a class="headerlink" href="#initialized-tilemanager-fixture" title="Link to this heading">¶</a></h3>
+<p>Initializes TileManager with test settings:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialized_tilemanager</span><span class="p">(</span><span class="n">temp_tilestore</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fixture: Initialized TileManager</span>
+
+<span class="sd">    Sets up TileManager with test-appropriate settings</span>
+<span class="sd">    and ensures cleanup after test.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        None (TileManager is module with global state)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tilemanager</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">total_cache_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">auto_cleanup</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">yield</span>
+    <span class="n">tilemanager</span><span class="o">.</span><span class="n">purge</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Configuration:</strong></p>
+<ul class="simple">
+<li><p>Cache size: 100 tiles (small for testing)</p></li>
+<li><p>Auto-cleanup: Disabled (manual control)</p></li>
+<li><p>Providers: Static and all registered dynamic providers</p></li>
+</ul>
+</section>
+<section id="cache-fixture">
+<h3>cache Fixture<a class="headerlink" href="#cache-fixture" title="Link to this heading">¶</a></h3>
+<p>Provides fresh TileCache instance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cache</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fixture: Fresh TileCache</span>
+
+<span class="sd">    Provides isolated TileCache with reasonable defaults.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        TileCache: A fresh cache instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">TileCache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">maxage</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="tiling-pipeline-tests">
+<h2>Tiling Pipeline Tests<a class="headerlink" href="#tiling-pipeline-tests" title="Link to this heading">¶</a></h2>
+<section id="end-to-end-workflow-testing">
+<h3>End-to-End Workflow Testing<a class="headerlink" href="#end-to-end-workflow-testing" title="Link to this heading">¶</a></h3>
+<p>These tests validate the complete tiling pipeline from image input to tile retrieval.</p>
+<p><strong>Test Pattern:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestTilingPipelineEndToEnd</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Feature: Complete Tiling Pipeline</span>
+
+<span class="sd">    The tiling system converts large images into pyramidal</span>
+<span class="sd">    tile structures for efficient zooming and panning.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_tile_image_creates_pyramid_structure</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">,</span> <span class="n">sample_images</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Tiling creates complete tile pyramid</span>
+
+<span class="sd">        Given a 512x512 pixel image</span>
+<span class="sd">        When the Tiler processes the image</span>
+<span class="sd">        Then tiles are created at multiple pyramid levels</span>
+<span class="sd">        And all tiles are stored in TileStore</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">image_path</span> <span class="o">=</span> <span class="n">sample_images</span><span class="p">[(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">)]</span>
+        <span class="n">media_id</span> <span class="o">=</span> <span class="s2">&quot;test_512x512&quot;</span>
+
+        <span class="c1"># When: Process the image</span>
+        <span class="n">tiler</span> <span class="o">=</span> <span class="n">ConcreteTiler</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">media_id</span><span class="o">=</span><span class="n">media_id</span><span class="p">)</span>
+        <span class="n">tiler</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+        <span class="c1"># Then: Verify completion</span>
+        <span class="k">assert</span> <span class="n">tiler</span><span class="o">.</span><span class="n">error</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">tiler</span><span class="o">.</span><span class="n">progress</span> <span class="o">==</span> <span class="mf">1.0</span>
+
+        <span class="c1"># And: Verify pyramid structure</span>
+        <span class="c1"># Level 0: 1 tile (overview)</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span>
+            <span class="n">tilestore</span><span class="o">.</span><span class="n">get_tile_path</span><span class="p">((</span><span class="n">media_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">filext</span><span class="o">=</span><span class="s1">&#39;jpg&#39;</span><span class="p">))</span>
+
+        <span class="c1"># Level 1: 2x2 = 4 tiles (full resolution)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+                <span class="n">tile_path</span> <span class="o">=</span> <span class="n">tilestore</span><span class="o">.</span><span class="n">get_tile_path</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">media_id</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">),</span> <span class="n">filext</span><span class="o">=</span><span class="s1">&#39;jpg&#39;</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">tile_path</span><span class="p">)</span>
+
+        <span class="c1"># And: Verify metadata</span>
+        <span class="k">assert</span> <span class="n">tilestore</span><span class="o">.</span><span class="n">tiled</span><span class="p">(</span><span class="n">media_id</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">tilestore</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="n">media_id</span><span class="p">,</span> <span class="s1">&#39;width&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">512</span>
+        <span class="k">assert</span> <span class="n">tilestore</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="n">media_id</span><span class="p">,</span> <span class="s1">&#39;maxtilelevel&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p><strong>Key Validation Points:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>Tiler Completion</strong>: Error-free with 100% progress</p></li>
+<li><p><strong>Pyramid Structure</strong>: Correct number of tiles at each level</p></li>
+<li><p><strong>File Creation</strong>: All tile files exist on disk</p></li>
+<li><p><strong>Metadata Storage</strong>: Width, height, tilesize, maxtilelevel recorded</p></li>
+</ol>
+</section>
+<section id="tile-retrieval-integration">
+<h3>Tile Retrieval Integration<a class="headerlink" href="#tile-retrieval-integration" title="Link to this heading">¶</a></h3>
+<p>Validate tile retrieval after tiling:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestTileRetrievalIntegration</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_retrieve_tiles_after_tiling</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">,</span> <span class="n">sample_images</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Retrieve tiles from TileStore after tiling</span>
+
+<span class="sd">        Given an image that has been tiled</span>
+<span class="sd">        When tiles are requested from TileStore</span>
+<span class="sd">        Then tile files can be read as valid images</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Given: Tile the image</span>
+        <span class="n">tiler</span> <span class="o">=</span> <span class="n">ConcreteTiler</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">media_id</span><span class="o">=</span><span class="n">media_id</span><span class="p">)</span>
+        <span class="n">tiler</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+        <span class="c1"># When: Retrieve tile path</span>
+        <span class="n">tile_path</span> <span class="o">=</span> <span class="n">tilestore</span><span class="o">.</span><span class="n">get_tile_path</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">media_id</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">filext</span><span class="o">=</span><span class="s1">&#39;jpg&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Then: Tile is readable</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">tile_path</span><span class="p">)</span>
+
+        <span class="n">tile_image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">tile_path</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">tile_image</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">256</span>
+        <span class="k">assert</span> <span class="n">tile_image</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">256</span>
+</pre></div>
+</div>
+<p><strong>Verifies:</strong></p>
+<ul class="simple">
+<li><p>Tile files are valid image format</p></li>
+<li><p>Tiles have correct dimensions</p></li>
+<li><p>TileStore paths are accurate</p></li>
+</ul>
+</section>
+<section id="cache-integration-testing">
+<h3>Cache Integration Testing<a class="headerlink" href="#cache-integration-testing" title="Link to this heading">¶</a></h3>
+<p>Validate tile caching behavior:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestTileCacheIntegration</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_cache_stores_and_retrieves_tiles</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">,</span> <span class="n">sample_images</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Cache stores and retrieves tiles</span>
+
+<span class="sd">        Given a TileCache instance</span>
+<span class="sd">        When a tile is added</span>
+<span class="sd">        Then the same tile can be retrieved by ID</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cache</span> <span class="o">=</span> <span class="n">TileCache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+        <span class="c1"># Create test tile</span>
+        <span class="n">test_image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="n">tile</span> <span class="o">=</span> <span class="n">Tile</span><span class="p">(</span><span class="n">test_image</span><span class="p">)</span>
+        <span class="n">tile_id</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;test_media&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Store in cache</span>
+        <span class="n">cache</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">tile</span>
+
+        <span class="c1"># Retrieve from cache</span>
+        <span class="n">retrieved</span> <span class="o">=</span> <span class="n">cache</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">retrieved</span> <span class="ow">is</span> <span class="n">tile</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_cache_lru_eviction</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">,</span> <span class="n">sample_images</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: LRU eviction removes least recently used</span>
+
+<span class="sd">        Given cache with limited size</span>
+<span class="sd">        When cache exceeds capacity</span>
+<span class="sd">        Then LRU tiles are evicted</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cache</span> <span class="o">=</span> <span class="n">TileCache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Add 3 tiles (using level=1 for mortal tiles)</span>
+        <span class="n">cache</span><span class="p">[(</span><span class="s1">&#39;m1&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">Tile</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">)))</span>
+        <span class="n">cache</span><span class="p">[(</span><span class="s1">&#39;m2&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">Tile</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">)))</span>
+        <span class="n">cache</span><span class="p">[(</span><span class="s1">&#39;m3&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">Tile</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">)))</span>
+
+        <span class="c1"># First tile should be evicted</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="s1">&#39;m1&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cache</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="s1">&#39;m2&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cache</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="s1">&#39;m3&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cache</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="concurrent-access-tests">
+<h2>Concurrent Access Tests<a class="headerlink" href="#concurrent-access-tests" title="Link to this heading">¶</a></h2>
+<section id="thread-safety-validation">
+<h3>Thread Safety Validation<a class="headerlink" href="#thread-safety-validation" title="Link to this heading">¶</a></h3>
+<p>Concurrent tests validate thread-safe operations:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestConcurrentTileRequests</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Feature: Concurrent Tile Request Handling</span>
+
+<span class="sd">    Multiple threads may request tiles simultaneously.</span>
+<span class="sd">    System must handle without race conditions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_same_tile_requested_by_multiple_threads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Same tile requested simultaneously</span>
+
+<span class="sd">        Given multiple threads requesting same tile</span>
+<span class="sd">        When requests arrive concurrently</span>
+<span class="sd">        Then tile is loaded only once</span>
+<span class="sd">        And all threads receive the same tile</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">provider</span> <span class="o">=</span> <span class="n">MockTileProvider</span><span class="p">(</span><span class="n">cache</span><span class="p">,</span> <span class="n">load_delay</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="n">provider</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="n">tile_id</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;media&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">num_threads</span> <span class="o">=</span> <span class="mi">10</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">request_tile</span><span class="p">():</span>
+            <span class="n">provider</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tile_id</span> <span class="ow">in</span> <span class="n">cache</span><span class="p">:</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cache</span><span class="p">[</span><span class="n">tile_id</span><span class="p">])</span>
+
+        <span class="n">threads</span> <span class="o">=</span> <span class="p">[</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">request_tile</span><span class="p">)</span>
+                  <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_threads</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+        <span class="c1"># Tile loaded only once (or very few times due to race)</span>
+        <span class="k">assert</span> <span class="n">provider</span><span class="o">.</span><span class="n">load_call_count</span> <span class="o">&lt;=</span> <span class="mi">2</span>
+        <span class="k">assert</span> <span class="n">tile_id</span> <span class="ow">in</span> <span class="n">cache</span>
+</pre></div>
+</div>
+<p><strong>Validates:</strong></p>
+<ul class="simple">
+<li><p>No duplicate tile loads</p></li>
+<li><p>All threads eventually succeed</p></li>
+<li><p>Cache consistency under concurrent access</p></li>
+</ul>
+</section>
+<section id="concurrent-tiling-operations">
+<h3>Concurrent Tiling Operations<a class="headerlink" href="#concurrent-tiling-operations" title="Link to this heading">¶</a></h3>
+<p>Test concurrent image tiling:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestConcurrentTilingOperations</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_concurrent_tiling_different_images</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">,</span> <span class="n">sample_images</span><span class="p">,</span> <span class="n">initialized_tilemanager</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Multiple images tiled concurrently</span>
+
+<span class="sd">        Given several images to tile</span>
+<span class="sd">        When tiling operations run in parallel</span>
+<span class="sd">        Then each image is tiled correctly</span>
+<span class="sd">        And no cross-contamination occurs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">tile_image</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+            <span class="n">media_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;concurrent_media_</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">tiler</span> <span class="o">=</span> <span class="n">ConcreteTiler</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">media_id</span><span class="o">=</span><span class="n">media_id</span><span class="p">)</span>
+            <span class="n">tiler</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">media_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="n">tiler</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
+                <span class="s1">&#39;progress&#39;</span><span class="p">:</span> <span class="n">tiler</span><span class="o">.</span><span class="n">progress</span>
+            <span class="p">}</span>
+
+        <span class="n">threads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sample_images</span><span class="p">[:</span><span class="mi">3</span><span class="p">]):</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">tile_image</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+            <span class="n">threads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+        <span class="c1"># All should complete successfully</span>
+        <span class="k">for</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">assert</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="k">assert</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;progress&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mf">1.0</span>
+            <span class="k">assert</span> <span class="n">tilestore</span><span class="o">.</span><span class="n">tiled</span><span class="p">(</span><span class="n">media_id</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="cache-thread-safety">
+<h3>Cache Thread Safety<a class="headerlink" href="#cache-thread-safety" title="Link to this heading">¶</a></h3>
+<p>Test cache operations under concurrent load:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestCacheThreadSafety</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_concurrent_read_write_mix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Concurrent reads and writes</span>
+
+<span class="sd">        Given ongoing read and write operations</span>
+<span class="sd">        When executed concurrently</span>
+<span class="sd">        Then no corruption or crashes occur</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">stop_flag</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">writer</span><span class="p">():</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">stop_flag</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+                <span class="n">tile_id</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;media&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">50</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">cache</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Tile</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">)))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;write&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">reader</span><span class="p">():</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">stop_flag</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">50</span><span class="p">):</span>
+                    <span class="n">tile_id</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;media&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">tile_id</span> <span class="ow">in</span> <span class="n">cache</span><span class="p">:</span>
+                            <span class="n">_</span> <span class="o">=</span> <span class="n">cache</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                        <span class="k">pass</span>  <span class="c1"># Expected - evicted</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;read&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span>
+
+        <span class="n">writers</span> <span class="o">=</span> <span class="p">[</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">writer</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+        <span class="n">readers</span> <span class="o">=</span> <span class="p">[</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">reader</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">writers</span> <span class="o">+</span> <span class="n">readers</span><span class="p">:</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Run for 1 second</span>
+        <span class="n">stop_flag</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">writers</span> <span class="o">+</span> <span class="n">readers</span><span class="p">:</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p><strong>Stress Test Patterns:</strong></p>
+<ul class="simple">
+<li><p>High concurrency (many threads)</p></li>
+<li><p>Mixed operations (reads and writes)</p></li>
+<li><p>Long running (seconds of continuous operation)</p></li>
+<li><p>Verification of no errors/crashes</p></li>
+</ul>
+</section>
+</section>
+<section id="provider-cache-integration">
+<h2>Provider-Cache Integration<a class="headerlink" href="#provider-cache-integration" title="Link to this heading">¶</a></h2>
+<section id="provider-cache-interaction">
+<h3>Provider-Cache Interaction<a class="headerlink" href="#provider-cache-interaction" title="Link to this heading">¶</a></h3>
+<p>Test how providers and cache work together:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestProviderCacheBasicInteraction</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_provider_stores_loaded_tile_in_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Provider stores tile in cache</span>
+
+<span class="sd">        Given a TileProvider with empty cache</span>
+<span class="sd">        When provider loads a tile</span>
+<span class="sd">        Then tile is stored in cache</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">provider</span> <span class="o">=</span> <span class="n">MockTileProvider</span><span class="p">(</span><span class="n">cache</span><span class="p">)</span>
+        <span class="n">provider</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">tile_id</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;test_media&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Configure specific image</span>
+        <span class="n">expected_image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="n">provider</span><span class="o">.</span><span class="n">set_image</span><span class="p">(</span><span class="n">tile_id</span><span class="p">,</span> <span class="n">expected_image</span><span class="p">)</span>
+
+        <span class="c1"># Request tile</span>
+        <span class="n">provider</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+        <span class="c1"># Verify caching</span>
+        <span class="k">assert</span> <span class="n">tile_id</span> <span class="ow">in</span> <span class="n">cache</span>
+        <span class="k">assert</span> <span class="n">provider</span><span class="o">.</span><span class="n">load_call_count</span> <span class="o">==</span> <span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_cache_hit_prevents_provider_reload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Cache hit prevents reload</span>
+
+<span class="sd">        Given tile already in cache</span>
+<span class="sd">        When same tile requested again</span>
+<span class="sd">        Then provider is not called</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">provider</span> <span class="o">=</span> <span class="n">MockTileProvider</span><span class="p">(</span><span class="n">cache</span><span class="p">)</span>
+        <span class="n">provider</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">tile_id</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;test_media&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Pre-populate cache</span>
+        <span class="n">cache</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Tile</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">))</span>
+
+        <span class="c1"># Request tile</span>
+        <span class="n">provider</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="c1"># Provider not called</span>
+        <span class="k">assert</span> <span class="n">provider</span><span class="o">.</span><span class="n">load_call_count</span> <span class="o">==</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="dynamic-provider-testing">
+<h3>Dynamic Provider Testing<a class="headerlink" href="#dynamic-provider-testing" title="Link to this heading">¶</a></h3>
+<p>Test dynamically generated tiles:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestDynamicProviderCacheInteraction</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_dynamic_provider_caches_generated_tiles</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">cache</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Dynamic provider caches generated tiles</span>
+
+<span class="sd">        Given DynamicTileProvider with empty cache</span>
+<span class="sd">        When tile is requested for generation</span>
+<span class="sd">        Then tile is generated and cached</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">provider</span> <span class="o">=</span> <span class="n">MockDynamicProvider</span><span class="p">(</span><span class="n">cache</span><span class="p">)</span>
+        <span class="n">provider</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">tile_id</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;mock:dynamic&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+        <span class="c1"># Request generation</span>
+        <span class="n">provider</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+        <span class="c1"># Verify generation and caching</span>
+        <span class="k">assert</span> <span class="n">provider</span><span class="o">.</span><span class="n">generate_call_count</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="k">assert</span> <span class="n">tile_id</span> <span class="ow">in</span> <span class="n">cache</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_dynamic_provider_skips_cached_tiles</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">cache</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Dynamic provider doesn&#39;t regenerate cached</span>
+
+<span class="sd">        Given generated tile already in cache</span>
+<span class="sd">        When same coordinates requested</span>
+<span class="sd">        Then generation is skipped</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">provider</span> <span class="o">=</span> <span class="n">MockDynamicProvider</span><span class="p">(</span><span class="n">cache</span><span class="p">)</span>
+        <span class="n">provider</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">tile_id</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;mock:dynamic&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+        <span class="c1"># Pre-cache</span>
+        <span class="n">cache</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Tile</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">))</span>
+
+        <span class="c1"># Request same tile</span>
+        <span class="n">provider</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="c1"># No generation</span>
+        <span class="k">assert</span> <span class="n">provider</span><span class="o">.</span><span class="n">generate_call_count</span> <span class="o">==</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="cache-eviction-behavior">
+<h3>Cache Eviction Behavior<a class="headerlink" href="#cache-eviction-behavior" title="Link to this heading">¶</a></h3>
+<p>Test provider behavior during cache eviction:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestCacheEvictionProviderBehavior</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_evicted_tile_triggers_provider_reload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">small_cache</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Evicted tile is reloaded on next request</span>
+
+<span class="sd">        Given cache with limited capacity</span>
+<span class="sd">        And tile that was loaded then evicted</span>
+<span class="sd">        When evicted tile requested again</span>
+<span class="sd">        Then provider reloads the tile</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">provider</span> <span class="o">=</span> <span class="n">MockTileProvider</span><span class="p">(</span><span class="n">small_cache</span><span class="p">)</span>
+        <span class="n">provider</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c1"># Fill cache (using level &gt; 0 for mortal tiles)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+            <span class="n">provider</span><span class="o">.</span><span class="n">request</span><span class="p">((</span><span class="s1">&#39;media&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+
+        <span class="c1"># Add more to trigger eviction</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+            <span class="n">provider</span><span class="o">.</span><span class="n">request</span><span class="p">((</span><span class="s1">&#39;media&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+
+        <span class="c1"># First tile may be evicted</span>
+        <span class="n">first_tile_id</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;media&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Clear tracking</span>
+        <span class="n">provider</span><span class="o">.</span><span class="n">load_call_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Re-request</span>
+        <span class="n">provider</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">first_tile_id</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+        <span class="c1"># Should be in cache (reloaded or never evicted)</span>
+        <span class="k">assert</span> <span class="n">first_tile_id</span> <span class="ow">in</span> <span class="n">small_cache</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="tilemanager-integration">
+<h2>TileManager Integration<a class="headerlink" href="#tilemanager-integration" title="Link to this heading">¶</a></h2>
+<section id="request-routing">
+<h3>Request Routing<a class="headerlink" href="#request-routing" title="Link to this heading">¶</a></h3>
+<p>Test TileManager’s routing logic:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestTileRequestRouting</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_static_media_routed_to_static_provider</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">,</span> <span class="n">tiled_media</span><span class="p">,</span> <span class="n">initialized_tilemanager</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Static media goes to static provider</span>
+
+<span class="sd">        Given tiled static media</span>
+<span class="sd">        When tile requested via load_tile</span>
+<span class="sd">        Then request routed to StaticTileProvider</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tile_id</span> <span class="o">=</span> <span class="p">(</span><span class="n">tiled_media</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Request tile</span>
+        <span class="n">tilemanager</span><span class="o">.</span><span class="n">load_tile</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+
+        <span class="c1"># Should be loadable</span>
+        <span class="n">tile</span> <span class="o">=</span> <span class="n">tilemanager</span><span class="o">.</span><span class="n">get_tile</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">tile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tile</span><span class="p">,</span> <span class="n">Tile</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_dynamic_media_routed_to_dynamic_provider</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">,</span> <span class="n">initialized_tilemanager</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Dynamic media goes to dynamic provider</span>
+
+<span class="sd">        Given initialized TileManager</span>
+<span class="sd">        When tile requested for dynamic media</span>
+<span class="sd">        Then request routed to DynamicTileProvider</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tile_id</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;dynamic:fern&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Request tile</span>
+        <span class="n">tilemanager</span><span class="o">.</span><span class="n">load_tile</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+        <span class="c1"># Should be generated</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tile</span> <span class="o">=</span> <span class="n">tilemanager</span><span class="o">.</span><span class="n">get_tile</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">tile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="n">TileNotLoaded</span><span class="p">:</span>
+            <span class="k">pass</span>  <span class="c1"># Still loading - OK</span>
+</pre></div>
+</div>
+</section>
+<section id="get-tile-behavior">
+<h3>Get Tile Behavior<a class="headerlink" href="#get-tile-behavior" title="Link to this heading">¶</a></h3>
+<p>Test get_tile and get_tile_robust:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestGetTileBehavior</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_get_tile_raises_media_not_tiled</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">,</span> <span class="n">initialized_tilemanager</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: get_tile raises MediaNotTiled</span>
+
+<span class="sd">        Given media not tiled</span>
+<span class="sd">        When get_tile called</span>
+<span class="sd">        Then MediaNotTiled raised</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tile_id</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;never_tiled.jpg&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="n">MediaNotTiled</span><span class="p">):</span>
+            <span class="n">tilemanager</span><span class="o">.</span><span class="n">get_tile</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_get_tile_raises_tile_not_loaded</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">,</span> <span class="n">tiled_media</span><span class="p">,</span> <span class="n">initialized_tilemanager</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: get_tile raises TileNotLoaded</span>
+
+<span class="sd">        Given tiled media with uncached tile</span>
+<span class="sd">        When get_tile called</span>
+<span class="sd">        Then TileNotLoaded raised</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tile_id</span> <span class="o">=</span> <span class="p">(</span><span class="n">tiled_media</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="n">TileNotLoaded</span><span class="p">):</span>
+            <span class="n">tilemanager</span><span class="o">.</span><span class="n">get_tile</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestGetTileRobust</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_get_tile_robust_synthesizes_missing_tile</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">,</span> <span class="n">tiled_media</span><span class="p">,</span> <span class="n">initialized_tilemanager</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: get_tile_robust synthesizes from parent</span>
+
+<span class="sd">        Given tile not cached</span>
+<span class="sd">        And parent tiles available</span>
+<span class="sd">        When get_tile_robust called</span>
+<span class="sd">        Then tile synthesized via cut_tile</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Ensure level 0 cached</span>
+        <span class="n">tilemanager</span><span class="o">.</span><span class="n">load_tile</span><span class="p">((</span><span class="n">tiled_media</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+
+        <span class="c1"># Request higher level</span>
+        <span class="n">tile</span> <span class="o">=</span> <span class="n">tilemanager</span><span class="o">.</span><span class="n">get_tile_robust</span><span class="p">((</span><span class="n">tiled_media</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">tile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</pre></div>
+</div>
+</section>
+<section id="negative-tile-levels">
+<h3>Negative Tile Levels<a class="headerlink" href="#negative-tile-levels" title="Link to this heading">¶</a></h3>
+<p>Test zoomed-out view handling:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestNegativeTileLevels</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_negative_level_produces_smaller_tile</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">,</span> <span class="n">tiled_media</span><span class="p">,</span> <span class="n">initialized_tilemanager</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Negative levels produce smaller tiles</span>
+
+<span class="sd">        Given base tile at level 0</span>
+<span class="sd">        When negative levels requested</span>
+<span class="sd">        Then each level is half the size</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Cache level 0</span>
+        <span class="n">tilemanager</span><span class="o">.</span><span class="n">load_tile</span><span class="p">((</span><span class="n">tiled_media</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+
+        <span class="n">base_tile</span> <span class="o">=</span> <span class="n">tilemanager</span><span class="o">.</span><span class="n">get_tile</span><span class="p">((</span><span class="n">tiled_media</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">base_size</span> <span class="o">=</span> <span class="n">base_tile</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="c1"># Level -1: 50%</span>
+        <span class="n">tile_neg1</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tilemanager</span><span class="o">.</span><span class="n">cut_tile</span><span class="p">((</span><span class="n">tiled_media</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">tile_neg1</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">base_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="k">assert</span> <span class="n">tile_neg1</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">base_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+
+        <span class="c1"># Level -2: 25%</span>
+        <span class="n">tile_neg2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tilemanager</span><span class="o">.</span><span class="n">cut_tile</span><span class="p">((</span><span class="n">tiled_media</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">tile_neg2</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">base_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">4</span>
+        <span class="k">assert</span> <span class="n">tile_neg2</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">base_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">4</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="gui-integration-testing">
+<h2>GUI Integration Testing<a class="headerlink" href="#gui-integration-testing" title="Link to this heading">¶</a></h2>
+<section id="visual-verification-testing">
+<h3>Visual Verification Testing<a class="headerlink" href="#visual-verification-testing" title="Link to this heading">¶</a></h3>
+<p>GUI tests validate the complete application through visual verification:</p>
+<p><strong>Running GUI Tests:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run all tests (with visual observation)</span>
+python<span class="w"> </span>test/integrationtest/gui_integration.py
+
+<span class="c1"># Start from specific step</span>
+python<span class="w"> </span>gui_integration.py<span class="w"> </span>--start-step<span class="w"> </span><span class="m">30</span>
+
+<span class="c1"># List available steps</span>
+python<span class="w"> </span>gui_integration.py<span class="w"> </span>--list-steps
+</pre></div>
+</div>
+<p><strong>Test Steps Covered:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Setup:
+  1. Load Test Scene (Media Dir + String)
+
+File Menu:
+  2. New Scene
+  3. Open Home Scene
+  4. Reload Test Scene
+  5. Save Screenshot
+  6. Save Scene
+  7. Open Saved Scene
+
+View Menu:
+  10. Set Framerate
+  11. Adjust Sensitivity
+  12. Fullscreen Toggle
+
+Help Menu:
+  20. About Dialog
+  21. About Qt Dialog
+
+Mouse Interactions:
+  30. Left Click Select
+  31. Click and Drag
+  32. Scroll Wheel Zoom
+
+Keyboard Interactions:
+  40. Escape Deselect
+  41. Page Up/Down Zoom
+  42. Arrow Keys Move
+  43. Space Center
+  44. Delete Media
+
+Complete Workflow:
+  90. Full Application Workflow
+</pre></div>
+</div>
+<p><strong>Test Resources:</strong></p>
+<p>The GUI test creates temporary resources:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/tmp/pytest-of-{user}/pytest-{n}/pyzui_gui_test0/
+├── media_directory/
+│   ├── 01_red_stripes.png
+│   ├── 02_green_gradient.png
+│   ├── 03_blue_checkerboard.png
+│   ├── 04_yellow_solid.png
+│   ├── 05_purple_diagonal.png
+│   └── 06_cyan_circles.png
+└── save_output/
+    ├── test_screenshot.png
+    ├── test_scene.pzs
+    └── workflow_complete.pzs
+</pre></div>
+</div>
+<p><strong>Timing Configuration:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configurable timing constants (milliseconds)</span>
+<span class="n">SHORT_DELAY_MS</span> <span class="o">=</span> <span class="mi">2000</span>      <span class="c1"># 2 seconds</span>
+<span class="n">DEFAULT_DELAY_MS</span> <span class="o">=</span> <span class="mi">3500</span>    <span class="c1"># 3.5 seconds</span>
+<span class="n">LONG_DELAY_MS</span> <span class="o">=</span> <span class="mi">5000</span>       <span class="c1"># 5 seconds</span>
+<span class="n">IMAGE_LOAD_DELAY_MS</span> <span class="o">=</span> <span class="mi">10000</span>  <span class="c1"># 10 seconds</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="writing-new-integration-tests">
+<h2>Writing New Integration Tests<a class="headerlink" href="#writing-new-integration-tests" title="Link to this heading">¶</a></h2>
+<section id="test-structure-guidelines">
+<h3>Test Structure Guidelines<a class="headerlink" href="#test-structure-guidelines" title="Link to this heading">¶</a></h3>
+<p><strong>1. Use Appropriate Fixtures</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestNewIntegration</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">,</span> <span class="n">sample_images</span><span class="p">,</span>
+                    <span class="n">initialized_tilemanager</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Use fixtures to isolate test environment.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p><strong>2. Test Complete Workflows</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_complete_workflow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Scenario: Complete user workflow</span>
+
+<span class="sd">    Given initial state</span>
+<span class="sd">    When user performs sequence of actions</span>
+<span class="sd">    Then final state is correct</span>
+<span class="sd">    And all intermediate states were valid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Setup</span>
+    <span class="n">initial_state</span> <span class="o">=</span> <span class="n">create_initial_state</span><span class="p">()</span>
+
+    <span class="c1"># Workflow step 1</span>
+    <span class="n">perform_action_1</span><span class="p">()</span>
+    <span class="n">verify_state_1</span><span class="p">()</span>
+
+    <span class="c1"># Workflow step 2</span>
+    <span class="n">perform_action_2</span><span class="p">()</span>
+    <span class="n">verify_state_2</span><span class="p">()</span>
+
+    <span class="c1"># Final verification</span>
+    <span class="n">verify_final_state</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>3. Use Real Dependencies</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Good - uses real image and real tiler</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_real_tiling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_images</span><span class="p">):</span>
+    <span class="n">image_path</span> <span class="o">=</span> <span class="n">sample_images</span><span class="p">[(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">)]</span>
+    <span class="n">tiler</span> <span class="o">=</span> <span class="n">ConcreteTiler</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">media_id</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+    <span class="n">tiler</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">tiler</span><span class="o">.</span><span class="n">error</span> <span class="ow">is</span> <span class="kc">None</span>
+
+<span class="c1"># Avoid - mocking defeats integration testing purpose</span>
+<span class="nd">@patch</span><span class="p">(</span><span class="s1">&#39;pyzui.tilesystem.tiler.Tiler&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_with_mock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mock_tiler</span><span class="p">):</span>
+    <span class="c1"># This is a unit test, not integration test</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>4. Verify File System State</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_tiles_created_on_disk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Verify actual files created.&quot;&quot;&quot;</span>
+    <span class="c1"># Perform operation</span>
+    <span class="n">tiler</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="c1"># Check files exist</span>
+    <span class="n">tile_path</span> <span class="o">=</span> <span class="n">tilestore</span><span class="o">.</span><span class="n">get_tile_path</span><span class="p">(</span><span class="n">tile_id</span><span class="p">,</span> <span class="n">filext</span><span class="o">=</span><span class="s1">&#39;jpg&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">tile_path</span><span class="p">)</span>
+
+    <span class="c1"># Verify file contents</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">tile_path</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">img</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>5. Test Thread Safety</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_concurrent_operation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test thread safety with real threads.&quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">worker</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">perform_operation</span><span class="p">()</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="n">threads</span> <span class="o">=</span> <span class="p">[</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">worker</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">==</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p><strong>6. Allow Appropriate Timing</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_async_operation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Allow time for async operations.&quot;&quot;&quot;</span>
+    <span class="c1"># Trigger async operation</span>
+    <span class="n">provider</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
+
+    <span class="c1"># Wait for completion</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+
+    <span class="c1"># Verify result</span>
+    <span class="k">assert</span> <span class="n">tile_id</span> <span class="ow">in</span> <span class="n">cache</span>
+</pre></div>
+</div>
+<p><strong>7. Cleanup Properly</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_with_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure resources cleaned up.&quot;&quot;&quot;</span>
+    <span class="n">temp_file</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;test.dat&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Test operations</span>
+        <span class="n">create_file</span><span class="p">(</span><span class="n">temp_file</span><span class="p">)</span>
+        <span class="n">process_file</span><span class="p">(</span><span class="n">temp_file</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c1"># Cleanup (fixtures handle most cleanup)</span>
+        <span class="k">if</span> <span class="n">temp_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">temp_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading">¶</a></h2>
+<section id="test-design">
+<h3>Test Design<a class="headerlink" href="#test-design" title="Link to this heading">¶</a></h3>
+<p><strong>Do:</strong></p>
+<ul class="simple">
+<li><p>Test complete workflows end-to-end</p></li>
+<li><p>Use real dependencies (images, files, threads)</p></li>
+<li><p>Verify file system state</p></li>
+<li><p>Test concurrent scenarios</p></li>
+<li><p>Allow appropriate timing for async operations</p></li>
+<li><p>Isolate tests with fixtures</p></li>
+<li><p>Verify both success and failure paths</p></li>
+</ul>
+<p><strong>Don’t:</strong></p>
+<ul class="simple">
+<li><p>Mock core components (defeats integration testing)</p></li>
+<li><p>Assume instant operations (use time.sleep appropriately)</p></li>
+<li><p>Share state between tests (use fixtures)</p></li>
+<li><p>Skip cleanup (use try/finally or fixtures)</p></li>
+<li><p>Test trivial integrations (use unit tests)</p></li>
+</ul>
+</section>
+<section id="timing-considerations">
+<h3>Timing Considerations<a class="headerlink" href="#timing-considerations" title="Link to this heading">¶</a></h3>
+<p><strong>Async Operations:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Provider operations are async</span>
+<span class="n">provider</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>  <span class="c1"># Allow processing</span>
+
+<span class="c1"># Tiling operations take time</span>
+<span class="n">tiler</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># Blocks until complete</span>
+<span class="k">assert</span> <span class="n">tiler</span><span class="o">.</span><span class="n">progress</span> <span class="o">==</span> <span class="mf">1.0</span>
+</pre></div>
+</div>
+<p><strong>Thread Operations:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start threads</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<span class="c1"># Wait for completion</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>  <span class="c1"># Blocks until thread finishes</span>
+
+<span class="c1"># Or use timeout</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">t</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="resource-management">
+<h3>Resource Management<a class="headerlink" href="#resource-management" title="Link to this heading">¶</a></h3>
+<p><strong>Temporary Directories:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fixtures handle most cleanup</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_with_temp_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+    <span class="c1"># temp_tilestore: Isolated tilestore</span>
+    <span class="c1"># tmp_path: Pytest temporary directory</span>
+    <span class="c1"># Both auto-cleaned after test</span>
+</pre></div>
+</div>
+<p><strong>File Handles:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use context managers</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+<span class="c1"># Or ensure cleanup</span>
+<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Thread Safety:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use thread-safe data structures</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+<span class="n">errors</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">worker</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">do_work</span><span class="p">())</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">errors</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="common-patterns">
+<h2>Common Patterns<a class="headerlink" href="#common-patterns" title="Link to this heading">¶</a></h2>
+<section id="testing-pipelines">
+<h3>Testing Pipelines<a class="headerlink" href="#testing-pipelines" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_complete_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fixtures</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test end-to-end pipeline.&quot;&quot;&quot;</span>
+    <span class="c1"># Stage 1: Input</span>
+    <span class="n">input_data</span> <span class="o">=</span> <span class="n">create_input</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">validate_input</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+
+    <span class="c1"># Stage 2: Processing</span>
+    <span class="n">processed</span> <span class="o">=</span> <span class="n">process</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">validate_processed</span><span class="p">(</span><span class="n">processed</span><span class="p">)</span>
+
+    <span class="c1"># Stage 3: Storage</span>
+    <span class="n">store</span><span class="p">(</span><span class="n">processed</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">exists_in_store</span><span class="p">(</span><span class="n">processed</span><span class="p">)</span>
+
+    <span class="c1"># Stage 4: Retrieval</span>
+    <span class="n">retrieved</span> <span class="o">=</span> <span class="n">retrieve</span><span class="p">(</span><span class="n">processed</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">retrieved</span> <span class="o">==</span> <span class="n">processed</span>
+</pre></div>
+</div>
+</section>
+<section id="testing-concurrency">
+<h3>Testing Concurrency<a class="headerlink" href="#testing-concurrency" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_thread_safety</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test concurrent access.&quot;&quot;&quot;</span>
+    <span class="n">shared_state</span> <span class="o">=</span> <span class="n">SharedState</span><span class="p">()</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">concurrent_operation</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+                <span class="n">shared_state</span><span class="o">.</span><span class="n">operation</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="n">threads</span> <span class="o">=</span> <span class="p">[</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">concurrent_operation</span><span class="p">)</span>
+              <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">shared_state</span><span class="o">.</span><span class="n">is_consistent</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="testing-caching">
+<h3>Testing Caching<a class="headerlink" href="#testing-caching" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_cache_behavior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test caching with real operations.&quot;&quot;&quot;</span>
+    <span class="c1"># Miss - initial load</span>
+    <span class="k">assert</span> <span class="n">tile_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cache</span>
+    <span class="n">tile</span> <span class="o">=</span> <span class="n">load_tile</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span>
+    <span class="n">cache</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">tile</span>
+
+    <span class="c1"># Hit - from cache</span>
+    <span class="k">assert</span> <span class="n">tile_id</span> <span class="ow">in</span> <span class="n">cache</span>
+    <span class="n">cached_tile</span> <span class="o">=</span> <span class="n">cache</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">cached_tile</span> <span class="ow">is</span> <span class="n">tile</span>
+
+    <span class="c1"># Eviction - LRU</span>
+    <span class="n">fill_cache_to_capacity</span><span class="p">(</span><span class="n">cache</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">tile_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cache</span>  <span class="c1"># Evicted</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h2>
+<section id="common-issues">
+<h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading">¶</a></h3>
+<p><strong>Tests Fail Intermittently:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Increase timing allowances</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># Instead of 0.1</span>
+
+<span class="c1"># Or add retries</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">operation</span><span class="p">()</span>
+        <span class="k">break</span>
+    <span class="k">except</span> <span class="n">TileNotLoaded</span><span class="p">:</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Resource Leaks:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use fixtures for cleanup</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">resource</span><span class="p">():</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">create_resource</span><span class="p">()</span>
+    <span class="k">yield</span> <span class="n">r</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>File System Issues:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ensure temp directory writable</span>
+ls<span class="w"> </span>-la<span class="w"> </span>/tmp
+
+<span class="c1"># Check disk space</span>
+df<span class="w"> </span>-h
+</pre></div>
+</div>
+<p><strong>Threading Issues:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add thread debugging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Active threads: </span><span class="si">{</span><span class="n">threading</span><span class="o">.</span><span class="n">active_count</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Thread list: </span><span class="si">{</span><span class="n">threading</span><span class="o">.</span><span class="n">enumerate</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="performance-tips">
+<h3>Performance Tips<a class="headerlink" href="#performance-tips" title="Link to this heading">¶</a></h3>
+<p><strong>Parallel Test Execution:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Only if tests are independent</span>
+pytest<span class="w"> </span>-n<span class="w"> </span>auto
+</pre></div>
+</div>
+<p><strong>Selective Test Running:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run specific category</span>
+pytest<span class="w"> </span>test_tiling_pipeline.py
+
+<span class="c1"># Skip slow tests</span>
+pytest<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;not slow&quot;</span>
+</pre></div>
+</div>
+<p><strong>Reduce Resource Usage:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use smaller test images</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">))</span>  <span class="c1"># Not (4096, 4096)</span>
+
+<span class="c1"># Limit cache size</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="n">TileCache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># Not 1000</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="quick-reference">
+<h2>Quick Reference<a class="headerlink" href="#quick-reference" title="Link to this heading">¶</a></h2>
+<section id="running-tests">
+<h3>Running Tests<a class="headerlink" href="#running-tests" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># All integration tests</span>
+pytest<span class="w"> </span>test/integrationtest
+
+<span class="c1"># Specific file</span>
+pytest<span class="w"> </span>test_tiling_pipeline.py
+
+<span class="c1"># Verbose</span>
+pytest<span class="w"> </span>-v<span class="w"> </span>-s
+
+<span class="c1"># With coverage</span>
+pytest<span class="w"> </span>--cov<span class="o">=</span>pyzui
+
+<span class="c1"># GUI tests (manual)</span>
+python<span class="w"> </span>gui_integration.py
+</pre></div>
+</div>
+</section>
+<section id="essential-patterns">
+<h3>Essential Patterns<a class="headerlink" href="#essential-patterns" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pipeline test</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fixtures</span><span class="p">):</span>
+    <span class="nb">input</span> <span class="o">-&gt;</span> <span class="n">process</span> <span class="o">-&gt;</span> <span class="n">verify</span> <span class="o">-&gt;</span> <span class="n">store</span> <span class="o">-&gt;</span> <span class="n">retrieve</span>
+
+<span class="c1"># Concurrency test</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_concurrent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">spawn</span> <span class="n">threads</span> <span class="o">-&gt;</span> <span class="n">run</span> <span class="n">operations</span> <span class="o">-&gt;</span> <span class="n">join</span> <span class="o">-&gt;</span> <span class="n">verify</span>
+
+<span class="c1"># Cache test</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+    <span class="n">miss</span> <span class="o">-&gt;</span> <span class="n">load</span> <span class="o">-&gt;</span> <span class="n">hit</span> <span class="o">-&gt;</span> <span class="n">evict</span> <span class="o">-&gt;</span> <span class="n">verify</span>
+
+<span class="c1"># File system test</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">):</span>
+    <span class="n">create</span> <span class="o">-&gt;</span> <span class="n">verify</span> <span class="n">exists</span> <span class="o">-&gt;</span> <span class="n">read</span> <span class="o">-&gt;</span> <span class="n">verify</span> <span class="n">content</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="resources">
+<h2>Resources<a class="headerlink" href="#resources" title="Link to this heading">¶</a></h2>
+<section id="documentation">
+<h3>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Pytest</strong>: <a class="reference external" href="https://docs.pytest.org/">https://docs.pytest.org/</a></p></li>
+<li><p><strong>Threading</strong>: <a class="reference external" href="https://docs.python.org/3/library/threading.html">https://docs.python.org/3/library/threading.html</a></p></li>
+<li><p><strong>PIL/Pillow</strong>: <a class="reference external" href="https://pillow.readthedocs.io/">https://pillow.readthedocs.io/</a></p></li>
+</ul>
+</section>
+<section id="pyzui-specific">
+<h3>PyZUI-Specific<a class="headerlink" href="#pyzui-specific" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="unittest.html"><span class="doc">Unit Testing Guide</span></a> - Unit testing guide</p></li>
+<li><p><a class="reference internal" href="../technicaldocumentation/tilingsystem.html"><span class="doc">Tiling System</span></a> - Understanding tile system</p></li>
+<li><p><a class="reference internal" href="../technicaldocumentation/objectsystem.html"><span class="doc">Object System</span></a> - Understanding object architecture</p></li>
+<li><p><a class="reference internal" href="../technicaldocumentation/windowsystem.html"><span class="doc">Window System</span></a> - Understanding UI components</p></li>
+</ul>
+</section>
+<section id="example-test-files">
+<h3>Example Test Files<a class="headerlink" href="#example-test-files" title="Link to this heading">¶</a></h3>
+<p>Reference these for patterns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">test/integrationtest/test_tiling_pipeline.py</span></code> - Complete pipeline testing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test/integrationtest/test_concurrent_access.py</span></code> - Thread safety patterns</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test/integrationtest/test_cache_provider_integration.py</span></code> - Component interaction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test/integrationtest/test_tilemanager_integration.py</span></code> - Coordination testing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test/integrationtest/gui_integration.py</span></code> - Visual verification</p></li>
+</ul>
+</section>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading">¶</a></h2>
+<p>Integration tests validate that PyZUI components work correctly together as a complete system.
+When adding new features:</p>
+<ol class="arabic simple">
+<li><p>Write integration tests for complete workflows</p></li>
+<li><p>Test with real dependencies (images, files, threads)</p></li>
+<li><p>Verify file system state</p></li>
+<li><p>Test concurrent scenarios</p></li>
+<li><p>Use appropriate fixtures for isolation</p></li>
+<li><p>Allow proper timing for async operations</p></li>
+<li><p>Verify both success and failure paths</p></li>
+<li><p>Clean up resources properly</p></li>
+</ol>
+<p>Well-designed integration tests catch bugs that unit tests miss, validate system behavior,
+and ensure components interact correctly.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#generating-documentation">Generating Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usageinstructions/userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usageinstructions/programconfiguration.html">Program Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/objectsystem.html">Object System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/convertersystem.html">Converter System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/windowsystem.html">Window System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/logging.html">Logging System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="unittest.html">Unit Testing Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Integration Testing Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Benchmarks Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarksdocumentation/qzuibenchmark.html">QZUI Benchmark Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarksdocumentation/converterbenchmark.html">Converter Benchmark Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="unittest.html" title="previous chapter">Unit Testing Guide</a></li>
+      <li>Next: <a href="../benchmarksdocumentation/qzuibenchmark.html" title="next chapter">QZUI Benchmark Documentation</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/testingdocumentation/integrationtest.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

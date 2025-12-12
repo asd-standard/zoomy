@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>QZUI Benchmark Documentation &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cc7d0dec" />
+    <script src="../_static/documentation_options.js?v=086c1757"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Converter Benchmark Documentation" href="converterbenchmark.html" />
+    <link rel="prev" title="Integration Testing Guide" href="../testingdocumentation/integrationtest.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="qzui-benchmark-documentation">
+<h1>QZUI Benchmark Documentation<a class="headerlink" href="#qzui-benchmark-documentation" title="Link to this heading">¶</a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>The QZUI Benchmark is a comprehensive performance testing tool for
+PyZUI that measures rendering performance and memory consumption under
+load. It continuously populates a scene with media objects while
+monitoring frame timing and resource usage.</p>
+<p>The benchmark includes <strong>cyclical zoom and pan operations</strong> that
+simulate user interaction and stress-test the tile caching system
+by continuously changing which tiles are visible.</p>
+</section>
+<section id="table-of-contents">
+<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#quick-start"><span class="std std-ref">Quick Start</span></a></p></li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="#usage-documentation"><span class="std std-ref">Usage Documentation</span></a></dt><dd><ul>
+<li><p><a class="reference internal" href="#basic-usage"><span class="std std-ref">Basic Usage</span></a></p></li>
+<li><p><a class="reference internal" href="#command-line-options"><span class="std std-ref">Command Line Options</span></a></p></li>
+<li><p><a class="reference internal" href="#examples"><span class="std std-ref">Examples</span></a></p></li>
+<li><p><a class="reference internal" href="#output-interpretation"><span class="std std-ref">Output Interpretation</span></a></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="#technical-documentation"><span class="std std-ref">Technical Documentation</span></a></dt><dd><ul>
+<li><p><a class="reference internal" href="#architecture"><span class="std std-ref">Architecture</span></a></p></li>
+<li><p><a class="reference internal" href="#data-classes"><span class="std std-ref">Data Classes</span></a></p></li>
+<li><p><a class="reference internal" href="#benchmark-phases"><span class="std std-ref">Benchmark Phases</span></a></p></li>
+<li><p><a class="reference internal" href="#cyclical-movement-system"><span class="std std-ref">Cyclical Movement System</span></a></p></li>
+<li><p><a class="reference internal" href="#metrics-collection"><span class="std std-ref">Metrics Collection</span></a></p></li>
+<li><p><a class="reference internal" href="#memory-monitoring"><span class="std std-ref">Memory Monitoring</span></a></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><a class="reference internal" href="#configuration-reference"><span class="std std-ref">Configuration Reference</span></a></p></li>
+<li><p><a class="reference internal" href="#troubleshooting"><span class="std std-ref">Troubleshooting</span></a></p></li>
+</ul>
+<hr class="docutils" />
+</section>
+<section id="quick-start">
+<span id="id1"></span><h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading">¶</a></h2>
+<p>Run a basic 30-second benchmark with zoom/pan movement:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/path/to/pyzui
+python<span class="w"> </span>test/benchmarks/stress_benchmark.py
+</pre></div>
+</div>
+<p>Run with custom settings:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>test/benchmarks/stress_benchmark.py<span class="w"> </span>--duration<span class="w"> </span><span class="m">60</span><span class="w"> </span>--fps<span class="w"> </span><span class="m">30</span><span class="w"> </span>--objects-rate<span class="w"> </span><span class="m">10</span>
+</pre></div>
+</div>
+<p>Run a static benchmark (no zoom/pan):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>test/benchmarks/stress_benchmark.py<span class="w"> </span>--no-movement
+</pre></div>
+</div>
+<hr class="docutils" />
+</section>
+<section id="usage-documentation">
+<span id="id2"></span><h2>Usage Documentation<a class="headerlink" href="#usage-documentation" title="Link to this heading">¶</a></h2>
+<section id="basic-usage">
+<span id="id3"></span><h3>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h3>
+<p>The QZUI Benchmark can be run from the command line with default or
+custom settings:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># From the pyzui project root directory</span>
+python<span class="w"> </span>test/benchmarks/stress_benchmark.py
+</pre></div>
+</div>
+<p>This will:</p>
+<ol class="arabic simple">
+<li><p>Launch a PyZUI window (1280x720 by default)</p></li>
+<li><p>Add 10 initial objects to the scene</p></li>
+<li><p>Run for 30 seconds, adding 5 objects per second</p></li>
+<li><p>Apply continuous zoom oscillation (10s cycle) and pan movement (8s cycle)</p></li>
+<li><p>Display performance results when complete</p></li>
+</ol>
+</section>
+<section id="command-line-options">
+<span id="id4"></span><h3>Command-Line Options<a class="headerlink" href="#command-line-options" title="Link to this heading">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 19.6%" />
+<col style="width: 13.0%" />
+<col style="width: 13.0%" />
+<col style="width: 54.3%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--duration</span></code></p></td>
+<td><p>float</p></td>
+<td><p>30.0</p></td>
+<td><p>Benchmark duration in seconds</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--fps</span></code></p></td>
+<td><p>int</p></td>
+<td><p>30</p></td>
+<td><p>Target framerate for dropped frame detection</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--objects-rate</span></code></p></td>
+<td><p>int</p></td>
+<td><p>5</p></td>
+<td><p>Number of objects to add per second</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--initial</span></code></p></td>
+<td><p>int</p></td>
+<td><p>10</p></td>
+<td><p>Initial object count before timing starts</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--width</span></code></p></td>
+<td><p>int</p></td>
+<td><p>1280</p></td>
+<td><p>Viewport width in pixels</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--height</span></code></p></td>
+<td><p>int</p></td>
+<td><p>720</p></td>
+<td><p>Viewport height in pixels</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--output</span></code></p></td>
+<td><p>str</p></td>
+<td><p>None</p></td>
+<td><p>Output file path for CSV results</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--data-dir</span></code></p></td>
+<td><p>str</p></td>
+<td><p>./data</p></td>
+<td><p>Directory containing test images</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--zoom-cycle</span></code></p></td>
+<td><p>float</p></td>
+<td><p>10.0</p></td>
+<td><p>Zoom oscillation period in seconds</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--pan-cycle</span></code></p></td>
+<td><p>float</p></td>
+<td><p>8.0</p></td>
+<td><p>Pan oscillation period in seconds</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--zoom-amplitude</span></code></p></td>
+<td><p>float</p></td>
+<td><p>2.0</p></td>
+<td><p>Zoom oscillation amplitude</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--pan-amplitude</span></code></p></td>
+<td><p>float</p></td>
+<td><p>0.3</p></td>
+<td><p>Pan amplitude as fraction of viewport</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--no-movement</span></code></p></td>
+<td><p>flag</p></td>
+<td><p>False</p></td>
+<td><p>Disable zoom and pan (static benchmark)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="examples">
+<span id="id5"></span><h3>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h3>
+<p>Basic benchmark with defaults (includes zoom/pan):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>test/benchmarks/stress_benchmark.py
+</pre></div>
+</div>
+<p>Extended benchmark with high object rate:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>test/benchmarks/stress_benchmark.py<span class="w"> </span>--duration<span class="w"> </span><span class="m">120</span><span class="w"> </span>--objects-rate<span class="w"> </span><span class="m">20</span>
+</pre></div>
+</div>
+<p>Export results to CSV:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>test/benchmarks/stress_benchmark.py<span class="w"> </span>--output<span class="w"> </span>benchmark_results.csv
+</pre></div>
+</div>
+<p>Custom viewport size:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>test/benchmarks/stress_benchmark.py<span class="w"> </span>--width<span class="w"> </span><span class="m">1920</span><span class="w"> </span>--height<span class="w"> </span><span class="m">1080</span>
+</pre></div>
+</div>
+<p>Use custom image directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>test/benchmarks/stress_benchmark.py<span class="w"> </span>--data-dir<span class="w"> </span>/path/to/test/images
+</pre></div>
+</div>
+<p>Fast zoom/pan cycles:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>test/benchmarks/stress_benchmark.py<span class="w"> </span>--zoom-cycle<span class="w"> </span><span class="m">3</span><span class="w"> </span>--pan-cycle<span class="w"> </span><span class="m">2</span><span class="w"> </span>--zoom-amplitude<span class="w"> </span><span class="m">3</span>.0
+</pre></div>
+</div>
+<p>Static benchmark:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>test/benchmarks/stress_benchmark.py<span class="w"> </span>--no-movement
+</pre></div>
+</div>
+<p>Gentle movement test:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>test/benchmarks/stress_benchmark.py<span class="w"> </span>--duration<span class="w"> </span><span class="m">300</span><span class="w"> </span>--zoom-cycle<span class="w"> </span><span class="m">30</span><span class="w"> </span>--pan-cycle<span class="w"> </span><span class="m">20</span><span class="w"> </span>--zoom-amplitude<span class="w"> </span><span class="m">1</span>.0
+</pre></div>
+</div>
+<p>Full customization:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>test/benchmarks/stress_benchmark.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--duration<span class="w"> </span><span class="m">60</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--fps<span class="w"> </span><span class="m">60</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--objects-rate<span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--initial<span class="w"> </span><span class="m">50</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--width<span class="w"> </span><span class="m">1920</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--height<span class="w"> </span><span class="m">1080</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output<span class="w"> </span>results.csv<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--data-dir<span class="w"> </span>./data
+</pre></div>
+</div>
+</section>
+<section id="output-interpretation">
+<span id="id6"></span><h3>Output Interpretation<a class="headerlink" href="#output-interpretation" title="Link to this heading">¶</a></h3>
+<p>The benchmark produces output in three stages.</p>
+<p><strong>1. Configuration Summary</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>PyZUI QZUI Benchmark
+============================================================
+Configuration:
+  Target FPS:        30
+  Viewport:          1280x720
+  Duration:          30.0s
+  Objects/second:    5
+  Initial objects:   10
+  Test images:       3 found
+============================================================
+</pre></div>
+</div>
+<p><strong>2. Progress Updates</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Adding 10 initial objects...
+Warming up...
+Running benchmark for 30.0s at 30 FPS target...
+Adding 5 objects/second...
+  Frame 100: 15 objects, 31.2 FPS, 125.3 MB RSS
+  Frame 200: 20 objects, 30.8 FPS, 132.1 MB RSS
+</pre></div>
+</div>
+<p><strong>3. Final Results</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>============================================================
+BENCHMARK RESULTS
+============================================================
+Total frames:        912
+Total time:          30.02s
+Mean FPS:            30.38
+Min FPS:             28.45
+Max FPS:             32.12
+Dropped frames:      23 (2.5%)
+Mean render time:    12.45ms
+Max render time:     45.23ms
+Peak memory (RSS):   256.7MB
+Peak memory (VMS):   512.3MB
+Final object count:  160
+============================================================
+</pre></div>
+</div>
+</section>
+<section id="metric-explanations">
+<h3>Metric Explanations<a class="headerlink" href="#metric-explanations" title="Link to this heading">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22.2%" />
+<col style="width: 55.6%" />
+<col style="width: 22.2%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Metric</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Healthy Range</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Mean FPS</p></td>
+<td><p>Average frames per second</p></td>
+<td><p>Close to target FPS</p></td>
+</tr>
+<tr class="row-odd"><td><p>Min FPS</p></td>
+<td><p>Lowest instantaneous FPS</p></td>
+<td><p>&gt;50% of target</p></td>
+</tr>
+<tr class="row-even"><td><p>Max FPS</p></td>
+<td><p>Highest instantaneous FPS</p></td>
+<td><p>Should not exceed target significantly</p></td>
+</tr>
+<tr class="row-odd"><td><p>Dropped frames</p></td>
+<td><p>Frames that exceed target interval</p></td>
+<td><p>&lt;5%</p></td>
+</tr>
+<tr class="row-even"><td><p>Mean render time</p></td>
+<td><p>Average frame render time</p></td>
+<td><p>&lt;1000/target_fps ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>Max render time</p></td>
+<td><p>Worst-case latency</p></td>
+<td><p>Watch for spikes</p></td>
+</tr>
+<tr class="row-even"><td><p>Peak memory (RSS)</p></td>
+<td><p>Max physical memory</p></td>
+<td><p>Content-dependent</p></td>
+</tr>
+<tr class="row-odd"><td><p>Peak memory (VMS)</p></td>
+<td><p>Max virtual memory</p></td>
+<td><p>Content-dependent</p></td>
+</tr>
+</tbody>
+</table>
+<hr class="docutils" />
+</section>
+</section>
+<section id="technical-documentation">
+<span id="id7"></span><h2>Technical Documentation<a class="headerlink" href="#technical-documentation" title="Link to this heading">¶</a></h2>
+<section id="architecture">
+<span id="id8"></span><h3>Architecture<a class="headerlink" href="#architecture" title="Link to this heading">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>StressBenchmark
+├── BenchmarkConfig
+├── FrameMetrics
+├── BenchmarkResults
+└── Utility Functions
+</pre></div>
+</div>
+</section>
+<section id="class-hierarchy">
+<h3>Class Hierarchy<a class="headerlink" href="#class-hierarchy" title="Link to this heading">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>┌─────────────────────────────────────────────────────────────┐
+│                     StressBenchmark                         │
+├─────────────────────────────────────────────────────────────┤
+│ - __config: BenchmarkConfig                                 │
+│ - __frame_metrics: List[FrameMetrics]                       │
+│ - __temp_dir: Optional[str]                                 │
+│ - __base_zoom: float                                        │
+│ - __base_origin: Tuple[float, float]                        │
+├─────────────────────────────────────────────────────────────┤
+│ + run() -&gt; BenchmarkResults                                 │
+│ + print_results(results)                                    │
+│ + frame_metrics (property)                                  │
+│ - __apply_cyclical_movement(scene, elapsed)                 │
+│ - __generate_random_string_media_id()                       │
+│ - __add_random_object(scene, allow_images)                  │
+│ - __render_timed_frame(qzui, frame_num, obj_count)          │
+│ - __calculate_results()                                     │
+│ - __export_csv(filepath)                                    │
+└─────────────────────────────────────────────────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="data-classes">
+<span id="id9"></span><h3>Data Classes<a class="headerlink" href="#data-classes" title="Link to this heading">¶</a></h3>
+<section id="framemetrics">
+<h4>FrameMetrics<a class="headerlink" href="#framemetrics" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FrameMetrics</span><span class="p">:</span>
+    <span class="n">frame_number</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">render_time_ms</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">memory_rss_mb</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">memory_vms_mb</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">object_count</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">dropped</span><span class="p">:</span> <span class="nb">bool</span>
+</pre></div>
+</div>
+</section>
+<section id="benchmarkresults">
+<h4>BenchmarkResults<a class="headerlink" href="#benchmarkresults" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BenchmarkResults</span><span class="p">:</span>
+    <span class="n">total_frames</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">total_time_sec</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">mean_fps</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">min_fps</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">max_fps</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">dropped_frame_count</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">dropped_frame_pct</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">mean_render_time_ms</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">max_render_time_ms</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">peak_memory_rss_mb</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">peak_memory_vms_mb</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">final_object_count</span><span class="p">:</span> <span class="nb">int</span>
+</pre></div>
+</div>
+</section>
+<section id="benchmarkconfig">
+<h4>BenchmarkConfig<a class="headerlink" href="#benchmarkconfig" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BenchmarkConfig</span><span class="p">:</span>
+    <span class="n">target_framerate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">viewport_size</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1280</span><span class="p">,</span> <span class="mi">720</span><span class="p">)</span>
+    <span class="n">duration_sec</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">30.0</span>
+    <span class="n">objects_per_second</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">initial_objects</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">test_images</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">output_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">zoom_cycle_sec</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span>
+    <span class="n">pan_cycle_sec</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">8.0</span>
+    <span class="n">zoom_amplitude</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span>
+    <span class="n">pan_amplitude</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span>
+    <span class="n">enable_movement</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="benchmark-phases">
+<span id="id10"></span><h3>Benchmark Phases<a class="headerlink" href="#benchmark-phases" title="Link to this heading">¶</a></h3>
+<p><strong>Phase 1: Initialization</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">Initialize</span> <span class="n">TileManager</span>
+<span class="mf">2.</span> <span class="n">Create</span> <span class="n">temporary</span> <span class="n">tile</span> <span class="n">storage</span>
+<span class="mf">3.</span> <span class="n">Create</span> <span class="n">Qt</span> <span class="n">application</span> <span class="n">instance</span>
+<span class="mf">4.</span> <span class="n">Create</span> <span class="n">QZUI</span> <span class="n">widget</span> <span class="k">with</span> <span class="n">framerate</span><span class="o">=</span><span class="kc">None</span>
+<span class="mf">5.</span> <span class="n">Create</span> <span class="n">new</span> <span class="n">Scene</span>
+</pre></div>
+</div>
+<p><strong>Phase 2: Setup</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">Add</span> <span class="n">initial</span> <span class="n">objects</span>
+<span class="mf">2.</span> <span class="n">Warm</span><span class="o">-</span><span class="n">up</span> <span class="n">render</span> <span class="n">cycles</span>
+<span class="mf">3.</span> <span class="n">Capture</span> <span class="n">base</span> <span class="n">zoom</span><span class="o">/</span><span class="n">origin</span>
+<span class="mf">4.</span> <span class="n">Initialize</span> <span class="n">timing</span> <span class="n">variables</span>
+</pre></div>
+</div>
+<p><strong>Phase 3: Measurement Loop</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="n">elapsed</span> <span class="o">&lt;</span> <span class="n">duration</span><span class="p">:</span>
+    <span class="mf">1.</span> <span class="n">Apply</span> <span class="n">movement</span> <span class="p">(</span><span class="k">if</span> <span class="n">enabled</span><span class="p">)</span>
+    <span class="mf">2.</span> <span class="n">Add</span> <span class="nb">object</span> <span class="n">based</span> <span class="n">on</span> <span class="n">rate</span>
+    <span class="mf">3.</span> <span class="n">Render</span> <span class="n">timed</span> <span class="n">frame</span>
+    <span class="mf">4.</span> <span class="n">Process</span> <span class="n">events</span>
+    <span class="mf">5.</span> <span class="n">Record</span> <span class="n">FrameMetrics</span>
+    <span class="mf">6.</span> <span class="n">Sleep</span> <span class="n">to</span> <span class="n">maintain</span> <span class="n">FPS</span>
+    <span class="mf">7.</span> <span class="n">Progress</span> <span class="nb">print</span> <span class="n">every</span> <span class="mi">100</span> <span class="n">frames</span>
+</pre></div>
+</div>
+<p><strong>Phase 4: Cleanup</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">Compute</span> <span class="n">BenchmarkResults</span>
+<span class="mf">2.</span> <span class="n">Export</span> <span class="n">CSV</span> <span class="k">if</span> <span class="n">needed</span>
+<span class="mf">3.</span> <span class="n">Wait</span> <span class="k">for</span> <span class="n">background</span> <span class="n">threads</span>
+<span class="mf">4.</span> <span class="n">Close</span> <span class="n">UI</span> <span class="ow">and</span> <span class="n">purge</span> <span class="n">TileManager</span>
+<span class="mf">5.</span> <span class="n">Remove</span> <span class="n">temp</span> <span class="nb">dir</span>
+<span class="mf">6.</span> <span class="n">Return</span> <span class="n">results</span>
+</pre></div>
+</div>
+</section>
+<section id="cyclical-movement-system">
+<span id="id11"></span><h3>Cyclical Movement System<a class="headerlink" href="#cyclical-movement-system" title="Link to this heading">¶</a></h3>
+<section id="movement-equations">
+<h4>Movement Equations<a class="headerlink" href="#movement-equations" title="Link to this heading">¶</a></h4>
+<p>Zoom:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zoom</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">=</span> <span class="n">base_zoom</span> <span class="o">+</span> <span class="n">amplitude</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="n">π</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="n">period</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Pan:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pan_x</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">=</span> <span class="n">amplitude</span> <span class="o">*</span> <span class="n">width</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="n">π</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="n">period_x</span><span class="p">)</span>
+<span class="n">pan_y</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">=</span> <span class="n">amplitude</span> <span class="o">*</span> <span class="n">height</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="n">π</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="n">period_y</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="movement-parameters">
+<h4>Movement Parameters<a class="headerlink" href="#movement-parameters" title="Link to this heading">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 12.5%" />
+<col style="width: 62.5%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Effect</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>zoom_cycle_sec</p></td>
+<td><p>10.0</p></td>
+<td><p>Zoom oscillation period</p></td>
+</tr>
+<tr class="row-odd"><td><p>pan_cycle_sec</p></td>
+<td><p>8.0</p></td>
+<td><p>Pan oscillation period</p></td>
+</tr>
+<tr class="row-even"><td><p>zoom_amplitude</p></td>
+<td><p>2.0</p></td>
+<td><p>Zoom range</p></td>
+</tr>
+<tr class="row-odd"><td><p>pan_amplitude</p></td>
+<td><p>0.3</p></td>
+<td><p>Movement as fraction of viewport</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="metrics-collection">
+<span id="id12"></span><h3>Metrics Collection<a class="headerlink" href="#metrics-collection" title="Link to this heading">¶</a></h3>
+<p>Frame timing:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="n">qzui</span><span class="o">.</span><span class="n">repaint</span><span class="p">()</span>
+<span class="n">QApplication</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+<span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Dropped frame detection:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dropped</span> <span class="o">=</span> <span class="n">render_time_ms</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">/</span> <span class="n">target_framerate</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="memory-monitoring">
+<span id="id13"></span><h3>Memory Monitoring<a class="headerlink" href="#memory-monitoring" title="Link to this heading">¶</a></h3>
+<p>Primary (<cite>psutil</cite>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mem</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span><span class="o">.</span><span class="n">memory_info</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Fallback (<cite>/proc/self/status</cite>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;/proc/self/status&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span> <span class="o">...</span>
+</pre></div>
+</div>
+<hr class="docutils" />
+</section>
+</section>
+<section id="configuration-reference">
+<span id="id14"></span><h2>Configuration Reference<a class="headerlink" href="#configuration-reference" title="Link to this heading">¶</a></h2>
+<section id="object-distribution">
+<h3>Object Distribution<a class="headerlink" href="#object-distribution" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>70% StringMediaObjects</p></li>
+<li><p>30% TiledMediaObjects (if images available)</p></li>
+<li><p>100% strings if no images found</p></li>
+</ul>
+</section>
+<section id="stringmediaobject-generation">
+<h3>StringMediaObject Generation<a class="headerlink" href="#stringmediaobject-generation" title="Link to this heading">¶</a></h3>
+<p>Random strings contain:</p>
+<ul class="simple">
+<li><p>Random hex color</p></li>
+<li><p>5–50 chars</p></li>
+<li><p>30% multiline probability</p></li>
+</ul>
+</section>
+<section id="position-and-zoom">
+<h3>Position and Zoom<a class="headerlink" href="#position-and-zoom" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Random X/Y within viewport</p></li>
+<li><p>Random zoom in [-2.0, 2.0]</p></li>
+</ul>
+</section>
+<section id="test-images">
+<h3>Test Images<a class="headerlink" href="#test-images" title="Link to this heading">¶</a></h3>
+<p>Extensions searched:</p>
+<ul class="simple">
+<li><p>.jpg, .jpeg</p></li>
+<li><p>.png</p></li>
+<li><p>.ppm</p></li>
+<li><p>.gif</p></li>
+<li><p>.tiff</p></li>
+</ul>
+<p>Default directory: <code class="docutils literal notranslate"><span class="pre">./data</span></code></p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="troubleshooting">
+<span id="id15"></span><h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h2>
+<section id="common-issues">
+<h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading">¶</a></h3>
+<p>No display:</p>
+<ul class="simple">
+<li><p>Use X11/Wayland</p></li>
+<li><p>Or run:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>xvfb-run<span class="w"> </span>python<span class="w"> </span>stress_benchmark.py
+</pre></div>
+</div>
+<p>Low FPS:</p>
+<ul class="simple">
+<li><p>Reduce <code class="docutils literal notranslate"><span class="pre">--objects-rate</span></code></p></li>
+<li><p>Lower <code class="docutils literal notranslate"><span class="pre">--fps</span></code></p></li>
+<li><p>Use smaller viewport</p></li>
+</ul>
+<p>Memory growth:</p>
+<ul class="simple">
+<li><p>Export CSV for analysis</p></li>
+<li><p>Inspect memory columns</p></li>
+</ul>
+</section>
+<section id="performance-tips">
+<h3>Performance Tips<a class="headerlink" href="#performance-tips" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Baseline test with zero objects</p></li>
+<li><p>Increase load gradually</p></li>
+<li><p>Use CSV for profiling</p></li>
+<li><p>Compare multiple runs</p></li>
+</ol>
+</section>
+<section id="csv-analysis">
+<h3>CSV Analysis<a class="headerlink" href="#csv-analysis" title="Link to this heading">¶</a></h3>
+<p>Example CSV structure:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>frame_number,timestamp,render_time_ms,memory_rss_mb,...
+</pre></div>
+</div>
+<p>Example Python analysis:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;fps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;render_time_ms&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading">¶</a></h2>
+<p>This benchmark is part of PyZUI and licensed under GNU GPLv2.</p>
+<p>Copyright (C) 2009
+David Roberts &lt;<a class="reference external" href="mailto:d&#37;&#52;&#48;vidr&#46;cc">d<span>&#64;</span>vidr<span>&#46;</span>cc</a>&gt;</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#generating-documentation">Generating Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usageinstructions/userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usageinstructions/programconfiguration.html">Program Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/objectsystem.html">Object System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/convertersystem.html">Converter System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/windowsystem.html">Window System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/logging.html">Logging System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testingdocumentation/unittest.html">Unit Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testingdocumentation/integrationtest.html">Integration Testing Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Benchmarks Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">QZUI Benchmark Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converterbenchmark.html">Converter Benchmark Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../testingdocumentation/integrationtest.html" title="previous chapter">Integration Testing Guide</a></li>
+      <li>Next: <a href="converterbenchmark.html" title="next chapter">Converter Benchmark Documentation</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/benchmarksdocumentation/qzuibenchmark.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

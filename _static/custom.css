@@ -1,0 +1,22 @@
+/* Make the source code and main body wider */
+div.body {
+    max-width: 80%;  /* or 100%, or a fixed pixel width like 1400px */
+}
+
+/* Viewcode specific: widen and allow horizontal scrolling */
+div.viewcode-block {
+    max-width: 85%;
+    overflow-x: auto;
+    white-space: pre; /* preserve code spacing */
+}
+
+/* Also ensure that the container stretches */
+div.document {
+    width: 85%;
+    max-width: 85%;
+}
+
+/* Optional: reduce padding for a cleaner look */
+div.bodywrapper {
+    padding-right: 2em;
+}

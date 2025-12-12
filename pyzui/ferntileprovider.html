@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pyzui.tilesystem.tileproviders.ferndynamictileprovider module &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cc7d0dec" />
+    <script src="../_static/documentation_options.js?v=086c1757"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pyzui.tilesystem.tileproviders.ferndynamictileprovider">
+<span id="pyzui-tilesystem-tileproviders-ferndynamictileprovider-module"></span><h1>pyzui.tilesystem.tileproviders.ferndynamictileprovider module<a class="headerlink" href="#module-pyzui.tilesystem.tileproviders.ferndynamictileprovider" title="Link to this heading">¶</a></h1>
+<p>Dynamic tile provider for Barnsley’s fern.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.tilesystem.tileproviders.ferndynamictileprovider.</span></span><span class="sig-name descname"><span class="pre">FernTileProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tilecache</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tileproviders/ferndynamictileprovider.html#FernTileProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dynamictileprovider.html#pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider" title="pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicTileProvider</span></code></a></p>
+<dl class="simple">
+<dt>Constructor :</dt><dd><p>FernTileProvider(tilecache)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tilecache : TileCache</p>
+</dd>
+</dl>
+<p>FernTileProvider(tilecache) –&gt; FernTileProvider</p>
+<p>FernTileProvider objects are used for generating tiles of Barnsley’s
+fern iterated function system.</p>
+<p>This dynamic tile provider generates fractal images of Barnsley’s fern
+using an iterated function system (IFS). The fern is created by randomly
+applying one of four affine transformations to points, with each
+transformation having a specific probability of being chosen.</p>
+<dl class="simple">
+<dt>Implementation Notes:</dt><dd><ul class="simple">
+<li><p>Inherits from DynamicTileProvider</p></li>
+<li><dl class="simple">
+<dt>Uses four affine transformations with different probabilities:</dt><dd><ul>
+<li><p>rachis (stem): 1% probability</p></li>
+<li><p>left hand first pinna: 7% probability</p></li>
+<li><p>right hand first pinna: 7% probability</p></li>
+<li><p>body of fern: 85% probability</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Generates up to max_iterations (50000) points</p></li>
+<li><p>Stops after max_points (10000) points are drawn on tile</p></li>
+<li><p>Tiles are 256x256 pixels saved as PNG</p></li>
+<li><p>Color is RGB (100, 170, 0) for a green fern appearance</p></li>
+</ul>
+</dd>
+<dt>Method :</dt><dd><p>TileProvider.__init__(tilecache)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tilecache : TileCache</p>
+</dd>
+</dl>
+<p>TileProvider.__init__(tilecache) –&gt; None</p>
+<p>Create a new TileProvider for loading tiles into the given <cite>tilecache</cite>.</p>
+<p>Initializes the thread infrastructure, task queue, and logger for this
+tile provider instance.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.filext">
+<span class="sig-name descname"><span class="pre">filext</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'png'</span></em><a class="headerlink" href="#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.filext" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.tilesize">
+<span class="sig-name descname"><span class="pre">tilesize</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">256</span></em><a class="headerlink" href="#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.tilesize" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.aspect_ratio">
+<span class="sig-name descname"><span class="pre">aspect_ratio</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.0</span></em><a class="headerlink" href="#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.aspect_ratio" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.max_iterations">
+<span class="sig-name descname"><span class="pre">max_iterations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">50000</span></em><a class="headerlink" href="#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.max_iterations" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.max_points">
+<span class="sig-name descname"><span class="pre">max_points</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10000</span></em><a class="headerlink" href="#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.max_points" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.transformations">
+<span class="sig-name descname"><span class="pre">transformations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[(0.01,</span> <span class="pre">(0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.16,</span> <span class="pre">0.0)),</span> <span class="pre">(0.07,</span> <span class="pre">(0.2,</span> <span class="pre">-0.26,</span> <span class="pre">0.0,</span> <span class="pre">0.23,</span> <span class="pre">0.22,</span> <span class="pre">1.6)),</span> <span class="pre">(0.07,</span> <span class="pre">(-0.15,</span> <span class="pre">0.28,</span> <span class="pre">0.0,</span> <span class="pre">0.26,</span> <span class="pre">0.24,</span> <span class="pre">0.44)),</span> <span class="pre">(0.85,</span> <span class="pre">(0.85,</span> <span class="pre">0.04,</span> <span class="pre">0.0,</span> <span class="pre">-0.04,</span> <span class="pre">0.85,</span> <span class="pre">1.6))]</span></em><a class="headerlink" href="#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.transformations" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.color">
+<span class="sig-name descname"><span class="pre">color</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(100,</span> <span class="pre">170,</span> <span class="pre">0)</span></em><a class="headerlink" href="#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.color" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.__choose_transformation">
+<span class="sig-name descname"><span class="pre">__choose_transformation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.__choose_transformation" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>FernTileProvider.__choose_transformation()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>FernTileProvider.__choose_transformation() –&gt; Tuple[float, float, float, float, float, float]</p>
+<p>Randomly choose a transformation based on the probability of each
+transformation being chosen.</p>
+<p>This method implements probabilistic selection from the four fern
+transformations. A random value between 0 and 1 is generated, and
+transformations are tested in order until one is selected based on
+cumulative probability.</p>
+<dl class="simple">
+<dt>Implementation Notes:</dt><dd><ul class="simple">
+<li><p>Generates random float in range [0, 1)</p></li>
+<li><p>Iterates through transformations in order</p></li>
+<li><p>Subtracts each probability from random value</p></li>
+<li><p>Returns transformation when random value &lt;= probability</p></li>
+<li><p>Returns 6-tuple: (a, b, c, d, e, f) for affine transform</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.__transform">
+<span class="sig-name descname"><span class="pre">__transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.__transform" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>FernTileProvider.__transform(x, y)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>x : float
+y : float</p>
+</dd>
+</dl>
+<p>FernTileProvider.__transform(x, y) –&gt; Tuple[float, float]</p>
+<p>Randomly choose a transformation and apply it to x and y, returning
+the result as a tuple.</p>
+<p>This method applies one iteration of the fern’s iterated function system.
+It selects a transformation using __choose_transformation() and applies
+the affine transformation to the input coordinates.</p>
+<dl class="simple">
+<dt>Implementation Notes:</dt><dd><ul class="simple">
+<li><p>Calls __choose_transformation() to get transformation coefficients</p></li>
+<li><p>Applies affine transformation: x’ = a*x + b*y + c</p></li>
+<li><p>Applies affine transformation: y’ = d*x + e*y + f</p></li>
+<li><p>Returns new coordinates as tuple (x’, y’)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.__draw_point">
+<span class="sig-name descname"><span class="pre">__draw_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tilesize_units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider.__draw_point" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>FernTileProvider.__draw_point(tile, x, y, tilesize_units)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile : Image
+x : float
+y : float
+tilesize_units : float</p>
+</dd>
+</dl>
+<p>FernTileProvider.__draw_point(tile, x, y, tilesize_units) –&gt; None</p>
+<p>Draw the given point on the given tile.</p>
+<p>Converts fern coordinate space to pixel coordinates and draws a single
+pixel on the tile. The y-coordinate is inverted to match image coordinate
+system (origin at top-left).</p>
+<dl class="simple">
+<dt>Preconditions:</dt><dd><ul class="simple">
+<li><p>0.0 &lt;= x &lt;= tilesize_units</p></li>
+<li><p>0.0 &lt;= y &lt;= tilesize_units</p></li>
+</ul>
+</dd>
+<dt>Implementation Notes:</dt><dd><ul class="simple">
+<li><p>Scales x from [0, tilesize_units] to [0, tilesize]</p></li>
+<li><p>Clamps x to valid pixel range [0, tilesize-1]</p></li>
+<li><p>Scales y from [0, tilesize_units] to [0, tilesize]</p></li>
+<li><p>Inverts y-coordinate: pixel_y = tilesize - scaled_y</p></li>
+<li><p>Clamps y to valid pixel range [0, tilesize-1]</p></li>
+<li><p>Sets pixel color using self.color (green)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider._load_dynamic">
+<span class="sig-name descname"><span class="pre">_load_dynamic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tileproviders/ferndynamictileprovider.html#FernTileProvider._load_dynamic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider._load_dynamic" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>FernTileProvider._load_dynamic(tile_id, outfile)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>tile_id : Tuple[str, int, int, int]
+outfile : str</p>
+</dd>
+</dl>
+<p>FernTileProvider._load_dynamic(tile_id, outfile) –&gt; None</p>
+<p>Generate a tile of Barnsley’s fern and save it to outfile.</p>
+<p>This method generates a fractal fern image for the specified tile by
+iterating the fern’s IFS transformations. The tile coordinates (row, col)
+and tilelevel determine which portion of the fern to render. Points are
+generated starting from (0, 0) and transformed repeatedly, with points
+falling within the tile’s boundaries being drawn.</p>
+<dl class="simple">
+<dt>Implementation Notes:</dt><dd><ul class="simple">
+<li><p>Returns early if row/col are out of range for the tilelevel</p></li>
+<li><p>Calculates tile boundaries in fern coordinate space (-5 to 5 for x, 0 to 10 for y)</p></li>
+<li><p>Creates a black RGB image of size tilesize x tilesize</p></li>
+<li><p>Iterates up to max_iterations times, starting from origin (0, 0)</p></li>
+<li><p>Only draws points that fall within the tile boundaries</p></li>
+<li><p>Stops after max_points are drawn to the tile</p></li>
+<li><p>Saves the resulting tile as PNG to outfile</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html#generating-documentation">Generating Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usageinstructions/userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usageinstructions/programconfiguration.html">Program Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/objectsystem.html">Object System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/convertersystem.html">Converter System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/windowsystem.html">Window System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technicaldocumentation/logging.html">Logging System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../testingdocumentation/unittest.html">Unit Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testingdocumentation/integrationtest.html">Integration Testing Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Benchmarks Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarksdocumentation/qzuibenchmark.html">QZUI Benchmark Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarksdocumentation/converterbenchmark.html">Converter Benchmark Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/pyzui/ferntileprovider.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

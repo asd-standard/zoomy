@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyzui.objects.scene.scene &#8212; PyZui 0.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=cc7d0dec" />
+    <script src="../../../../_static/documentation_options.js?v=086c1757"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pyzui.objects.scene.scene</h1><div class="highlight"><pre>
+<span></span><span class="c1">## PyZUI - Python Zooming User Interface</span>
+<span class="c1">## Copyright (C) 2009 David Roberts &lt;d@vidr.cc&gt;</span>
+<span class="c1">##</span>
+<span class="c1">## This program is free software; you can redistribute it and/or</span>
+<span class="c1">## modify it under the terms of the GNU General Public License</span>
+<span class="c1">## as published by the Free Software Foundation; either version 3</span>
+<span class="c1">## of the License, or (at your option) any later version.</span>
+<span class="c1">##</span>
+<span class="c1">## This program is distributed in the hope that it will be useful,</span>
+<span class="c1">## but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1">## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1">## GNU General Public License for more details.</span>
+<span class="c1">##</span>
+<span class="c1">## You should have received a copy of the GNU General Public License</span>
+<span class="c1">## along with this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">&quot;&quot;&quot;A collection of media objects.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">RLock</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span><span class="o">,</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="o">,</span><span class="w"> </span><span class="nn">urllib.error</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QPainter</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.windows.dialogwindows.dialogwindows</span><span class="w"> </span><span class="kn">import</span> <span class="n">DialogWindows</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.objects.physicalobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhysicalObject</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilemanager</span> <span class="k">as</span> <span class="n">TileManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.objects.mediaobjects</span><span class="w"> </span><span class="kn">import</span> <span class="n">mediaobject</span> <span class="k">as</span> <span class="n">MediaObject</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.objects.mediaobjects.tiledmediaobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">TiledMediaObject</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.objects.mediaobjects.stringmediaobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringMediaObject</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.objects.mediaobjects.svgmediaobject</span><span class="w"> </span><span class="kn">import</span> <span class="n">SVGMediaObject</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+
+<div class="viewcode-block" id="Scene">
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Scene</span><span class="p">(</span><span class="n">PhysicalObject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructor :</span>
+<span class="sd">        Scene()</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Scene() --&gt; None</span>
+
+<span class="sd">    `Scene` objects are used to hold a collection of `MediaObjects`.</span>
+<span class="sd">    This class manages all the objects that can be rendered in the interface,</span>
+<span class="sd">    Their positioning (_x, _y) on the scene and their zoom (_z) and the acces </span>
+<span class="sd">    to them.</span>
+
+<span class="sd">    Scene objects can also be saved to files, and loaded from files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: an arbitrary size that is common to all scenes upon creation `scene size`</span>
+    <span class="n">standard_viewport_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1280</span><span class="p">,</span><span class="mi">720</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        New scene is made by initiating a :class:`~pyzui.objects.physicalobject.PhysicalObject`, </span>
+<span class="sd">        creating an objects list *__objects* and thread safe selection for *__objects* given by </span>
+<span class="sd">        declaring RLock list *__objects_lock*, seting up *__viewport_size*, setting up mouse </span>
+<span class="sd">        selection variables *selection* and *right_selection* and logger setup *__logger*. </span>
+<span class="sd">        </span>
+<span class="sd">        For better explaining of this scheme look at :  :class:`pyzui.objects.mediaobjects.mediaobject` </span>
+
+<span class="sd">        World::</span>
+
+<span class="sd">             ---------------------------------------&gt;</span>
+<span class="sd">            |   Scene</span>
+<span class="sd">            |  @ ------------------------------+---&gt;</span>
+<span class="sd">            |  |  ViewPort        MediaObj     |                 </span>
+<span class="sd">            |  |  (Screen View)   *-------+--&gt; |       </span>
+<span class="sd">            |  |                  |   &amp;   |    |   </span>
+<span class="sd">            |  |               %  +-------&quot;    |      </span>
+<span class="sd">            |  |                  |            |</span>
+<span class="sd">            |  |                  ∨            |</span>
+<span class="sd">            |  |                               | </span>
+<span class="sd">            |  +-------------------------------#</span>
+<span class="sd">            |  |</span>
+<span class="sd">            |  ∨</span>
+<span class="sd">            ∨  </span>
+
+<span class="sd">        Legend::</span>
+<span class="sd">        </span>
+<span class="sd">            (All MediaObject attributes are relative to screen view)</span>
+<span class="sd">            * -&gt; MediaObject.topleft()</span>
+<span class="sd">            &quot; -&gt; MediaObject.bottomright()</span>
+<span class="sd">            &amp; -&gt; MediaObject.center() </span>
+<span class="sd">            # -&gt; Scene.viewport_size()</span>
+<span class="sd">            % -&gt; Scene.center()</span>
+<span class="sd">            @ -&gt; Scene.origin() </span>
+
+<span class="sd">        We have a center relative to the scene, &#39;center&#39; and a center relative</span>
+<span class="sd">        to the absolute frame of reference _center</span>
+<span class="sd">        </span>
+<span class="sd">        @ origin position of the scene it&#39;s relative to an absolute frame of </span>
+<span class="sd">        reference, with 0,0 as it&#39;s origin.</span>
+
+<span class="sd">        % Scene center it&#39;s given by::</span>
+
+<span class="sd">            scene.centre[0] = scene.origin + (Scene.viewport_size[0]/2)*2**(zoomlevel)</span>
+<span class="sd">            scene.centre[1] = scene.origin + (Scene.viewport_size[1]/2)*2**(zoomlevel)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">#initialize mediobject centre, position and velocity    </span>
+        <span class="n">PhysicalObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__objects_lock</span> <span class="o">=</span> <span class="n">RLock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__viewport_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_viewport_size</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">selection</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;Scene&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Scene.save">
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.save">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            Scene.save(filename)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            filename : str</span>
+
+<span class="sd">        Scene.save(filename) --&gt; None</span>
+
+<span class="sd">        Save the scene to the location given by `filename`.</span>
+
+<span class="sd">        It is recommended (but not compulsory) that the file extension of</span>
+<span class="sd">        filename be &#39;.pzs&#39;.</span>
+<span class="sd">        </span>
+<span class="sd">        open a file `filename`, writes on the first line zoom level (z) and </span>
+<span class="sd">        position (x, y) of the scene origin defined by Scene.__set_origin()</span>
+<span class="sd">        then thread safely, once sorted `__objects`, cicles through them, </span>
+<span class="sd">        writing for each of them a line on `fielname` with::  </span>
+<span class="sd">            </span>
+<span class="sd">            object type: `type(mediaobject).__name__`</span>
+<span class="sd">            </span>
+<span class="sd">            media id: mediaobject.media_id (replacing &#39;%3A&#39; with :) </span>
+<span class="sd">            </span>
+<span class="sd">            zoomlevel: mediaobject.zoomlevel </span>
+<span class="sd">            </span>
+<span class="sd">            x position: mediaobject.pos[0]</span>
+<span class="sd">            </span>
+<span class="sd">            y position: mediaobject.pos[1]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;viewport_size it&#39;s saved in a temporary variable `actual_viewport_size`</span>
+<span class="sd">        so that saving of the scene can be done in a standard size.</span>
+<span class="sd">        By doing this once the scene it&#39;s loaded it can be then scaled to fit</span>
+<span class="sd">        whatever viewport the user currently has, independent of the viewport </span>
+<span class="sd">        the scene was having when it was saved.&quot;&quot;&quot;</span>
+
+        <span class="n">actual_viewport_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span>
+        <span class="c1"># setting `viewport_size` to standard size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_viewport_size</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\t</span><span class="si">%s</span><span class="se">\t</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> \
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zoomlevel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sort_objects</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\t</span><span class="si">%s</span><span class="se">\t</span><span class="si">%s</span><span class="se">\t</span><span class="si">%s</span><span class="se">\t</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> \
+                    <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">mediaobject</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                    <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">mediaobject</span><span class="o">.</span><span class="n">media_id</span><span class="p">)</span> \
+                        <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%3A&#39;</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">),</span>
+                    <span class="n">mediaobject</span><span class="o">.</span><span class="n">zoomlevel</span><span class="p">,</span>
+                    <span class="n">mediaobject</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">mediaobject</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># setting `viewport_size` to it&#39;s actual size </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span> <span class="o">=</span> <span class="n">actual_viewport_size</span></div>
+
+
+<div class="viewcode-block" id="Scene.add">
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.add">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mediaobject</span><span class="p">:</span> <span class="s1">&#39;MediaObject.MediaObject&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            Scene.add(mediaobject)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            mediaobject : MediaObject</span>
+
+<span class="sd">        Scene.add(mediaobject) --&gt; None</span>
+
+<span class="sd">        Add mediaobject from the list of elements that get to</span>
+<span class="sd">        be rendered on the scene.</span>
+
+<span class="sd">        Inside a thread safe selection: add `mediaobject` to this scene by </span>
+<span class="sd">        checking if given mediaobject is already in `__objects` list, if </span>
+<span class="sd">        it is nothing is done, otherwise mediaobject it&#39;s appended to the </span>
+<span class="sd">        `__objects` list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects_lock</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">mediaobject</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">:</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mediaobject</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Scene.remove">
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.remove">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mediaobject</span><span class="p">:</span> <span class="s1">&#39;MediaObject.MediaObject&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            Scene.remove(mediaobject)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            mediaobject : MediaObject</span>
+
+<span class="sd">        Scene.remove(mediaobject) --&gt; None</span>
+
+<span class="sd">        Remove mediaobject from the list of elements that get to</span>
+<span class="sd">        be rendered on the scene and purge all&#39;related tiles through</span>
+<span class="sd">        TileManager.purge(&#39;media_id&#39;) method.</span>
+
+<span class="sd">        Thread safely cycle through *__objects* until *mediaobject*</span>
+<span class="sd">        match with the respective element of the *__objects* list</span>
+<span class="sd">        and removes it from the *__objects* list. Then gets</span>
+<span class="sd">        mediaobject.media_id attribute and check if other *__objects*</span>
+<span class="sd">        elements have the same media_id, if it&#39;s not the case the media_id</span>
+<span class="sd">        gets purged from the TileManager. </span>
+
+<span class="sd">        See: :meth:`pyzui.tilesystem.tilemanager.purge`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects_lock</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">mediaobject</span><span class="p">)</span>
+
+                <span class="n">media_id</span> <span class="o">=</span> <span class="n">mediaobject</span><span class="o">.</span><span class="n">media_id</span>
+                <span class="n">media_active</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">media_id</span> <span class="o">==</span> <span class="n">media_id</span><span class="p">:</span>
+                        <span class="c1">## another object exists for</span>
+                        <span class="c1">## this media, meaning that</span>
+                        <span class="c1">## this media is active</span>
+                        <span class="n">media_active</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">media_active</span><span class="p">:</span>
+                    <span class="n">TileManager</span><span class="o">.</span><span class="n">purge</span><span class="p">(</span><span class="n">media_id</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__sort_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            `internal method` self.__sort_objects()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        __sort_objects() --&gt; None</span>
+
+<span class="sd">        Sort self.__objects from largest to smallest area using</span>
+<span class="sd">        mediaobject.onscreen_area attribute which returns mediaobject</span>
+<span class="sd">        current onscreen area.</span>
+
+<span class="sd">        See :  :attr:`pyzui.objects.mediaobjects.mediaobject.MediaObject.onscreen_area` </span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">mediaobject</span><span class="p">:</span> \
+                <span class="n">mediaobject</span><span class="o">.</span><span class="n">onscreen_area</span><span class="p">)</span>
+            
+
+<div class="viewcode-block" id="Scene.get">
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.get">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;MediaObject.MediaObject&#39;</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            Scene.get(pos)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            pos : Tuple[float, float]</span>
+
+<span class="sd">        Scene.get(pos) --&gt; MediaObject or None</span>
+
+<span class="sd">        Return the foremost visible *MediaObject* which overlaps the</span>
+<span class="sd">        on-screen point *pos*. *pos* is the mouse position at the last</span>
+<span class="sd">        left or right click mouse event.</span>
+
+<span class="sd">        Return None if there are no *MediaObjects* overlapping the point.</span>
+
+<span class="sd">        get(tuple[float,float]) --&gt; MediaObject or None</span>
+
+<span class="sd">        Mouse click event is caught by: :meth:`pyzui.qzui.QZUI.mousePressEvent`</span>
+<span class="sd">        which returns mouse position *pos*</span>
+<span class="sd">        </span>
+<span class="sd">        Thread safely cycle through *__objects*. For each mediaobject checks if</span>
+<span class="sd">        *pos* is within mediaobject area, if it is the mediaobject is returned as</span>
+<span class="sd">        *foremost* </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">foremost</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sort_objects</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">:</span>
+                <span class="n">left</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="n">mediaobject</span><span class="o">.</span><span class="n">topleft</span>
+                <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">=</span> <span class="n">mediaobject</span><span class="o">.</span><span class="n">bottomright</span>
+                <span class="k">if</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">left</span>  <span class="ow">and</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">top</span> <span class="ow">and</span> \
+                   <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">right</span> <span class="ow">and</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">bottom</span><span class="p">:</span>
+                    <span class="n">foremost</span> <span class="o">=</span> <span class="n">mediaobject</span>
+
+        <span class="k">return</span> <span class="n">foremost</span></div>
+
+
+<div class="viewcode-block" id="Scene.zoom">
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.zoom">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Zoom by the given `amount` with the centre maintaining its position</span>
+<span class="sd">        on the screen.</span>
+
+<span class="sd">        Parameters :</span>
+<span class="sd">            amount : float</span>
+
+<span class="sd">        zoom(float) -&gt; None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## P is the onscreen objec position of the centre</span>
+        <span class="c1">## C is the coordinates of the centre</span>
+        <span class="c1">## zoomlevel&#39; = zoomlevel + amount</span>
+        <span class="c1">## P  = pos  + C * 2**zoomlevel</span>
+        <span class="c1">##    =&gt; C = (P - pos) * 2**-zoomlevel</span>
+        <span class="c1">## P&#39; = pos&#39; + C * 2**zoomlevel&#39;</span>
+        <span class="c1">##    = pos&#39; + (P - pos) * 2**(zoomlevel&#39;-zoomlevel)</span>
+        <span class="c1">## solving for P = P&#39; yields:</span>
+        <span class="c1">##   pos&#39; = P - (P - pos) * 2**amount</span>
+
+        <span class="n">Px</span><span class="p">,</span> <span class="n">Py</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">Px</span> <span class="o">-</span> <span class="p">(</span><span class="n">Px</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">amount</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">Py</span> <span class="o">-</span> <span class="p">(</span><span class="n">Py</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">amount</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">+=</span> <span class="n">amount</span></div>
+
+    
+
+<div class="viewcode-block" id="Scene.render">
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.render">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">QPainter</span><span class="p">,</span> <span class="n">draft</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s1">&#39;MediaObject.MediaObject&#39;</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            Scene.render(painter, draft)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            painter : QPainter</span>
+<span class="sd">            draft : bool</span>
+
+<span class="sd">        Scene.render(painter, draft) --&gt; List[MediaObject]</span>
+
+<span class="sd">        Render the scene using the given `painter`.</span>
+
+<span class="sd">        If *draft* is True, draft mode is enabled. Otherwise High-Quality mode</span>
+<span class="sd">        is enabled.</span>
+
+<span class="sd">        If any errors occur rendering any of the *MediaObjects*, then they will</span>
+<span class="sd">        be removed from the scene and a list of tuples representing the errors</span>
+<span class="sd">        will be returned. Otherwise the empty list will be returned.</span>
+
+<span class="sd">        render(QPainter, bool) -&gt; list[tuple[MediaObject,MediaObject.LoadError]]</span>
+
+<span class="sd">        See source code comments :</span>
+
+<span class="sd">            :meth:`Scene.render` </span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">#Error list to be filled with MediaObject.LoadError.</span>
+        <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sort __objects from least to most displayed area and thread safely </span>
+<span class="sd">        cycle through them&quot;&quot;&quot;</span> 
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sort_objects</span><span class="p">()</span>
+            <span class="c1">#If hidden=True mediaobject is added to hidden_objects set </span>
+            <span class="n">hidden</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1">#Creates an empty set for hidden mediaobjects</span>
+            <span class="n">hidden_objects</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;cycles through __objects in reverse order, from smallest area to</span>
+<span class="sd">            biggest area, if they result hidden they don&#39;t get to be rendered</span>
+<span class="sd">            and they&#39;re added to hidden_objects set&quot;&quot;&quot;</span> 
+            <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">hidden</span><span class="p">:</span>
+                    <span class="n">hidden_objects</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mediaobject</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1">#gets topleft and bottomright coordinates</span>
+                    <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">mediaobject</span><span class="o">.</span><span class="n">topleft</span>
+                    <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">mediaobject</span><span class="o">.</span><span class="n">bottomright</span>
+
+                    <span class="k">if</span> <span class="n">x1</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">y1</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">and</span> \
+                       <span class="n">x2</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> \
+                       <span class="n">y2</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="c1">## mediaobject fills the entire</span>
+                        <span class="c1">## screen, so mark the rest of</span>
+                        <span class="c1">## the mediaobjects behind it</span>
+                        <span class="c1">## as hidden</span>
+                        <span class="n">hidden</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Set of hidden_objects it&#39;s updated: now we cycle through __objects</span>
+<span class="sd">            once again setting mediaobject.RenderMode, we set Invisible is </span>
+<span class="sd">            mediaobject is in hidden_objects, we set in Draft if draft class input</span>
+<span class="sd">            parameter is passed as True, otherwise we set HighQuality&quot;&quot;&quot;</span>
+
+            <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="n">hidden_objects</span><span class="p">:</span>
+                    <span class="n">mode</span> <span class="o">=</span> <span class="n">MediaObject</span><span class="o">.</span><span class="n">RenderMode</span><span class="o">.</span><span class="n">Invisible</span>
+                <span class="k">elif</span> <span class="n">draft</span><span class="p">:</span>
+                    <span class="n">mode</span> <span class="o">=</span> <span class="n">MediaObject</span><span class="o">.</span><span class="n">RenderMode</span><span class="o">.</span><span class="n">Draft</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">mode</span> <span class="o">=</span> <span class="n">MediaObject</span><span class="o">.</span><span class="n">RenderMode</span><span class="o">.</span><span class="n">HighQuality</span>
+<span class="w">                </span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;Now we try to render using mediaobject.render() method wich is </span>
+<span class="sd">                inherited from the specific type of mediaobject, namely: </span>
+<span class="sd">                tilemediaobject, stringmediaobject, scgmediaobject, each of these</span>
+<span class="sd">                mediaobjects has it&#39;s specific render method&quot;&quot;&quot;</span>
+                <span class="k">try</span><span class="p">:</span>   
+                    <span class="n">mediaobject</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">MediaObject</span><span class="o">.</span><span class="n">LoadError</span> <span class="p">:</span>
+<span class="w">                    </span><span class="sd">&quot;&quot;&quot;If mediaobject render fails MediaObject.LoadError type is </span>
+<span class="sd">                    returned and appended to errors list&quot;&quot;&quot;</span>
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">mediaobject</span><span class="p">))</span>
+                    
+            <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
+                <span class="c1">## remove mediaobjects that have raised errors</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;## remove mediaobjects that have raised MediaObject.LoadError&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">mediaobject</span><span class="p">)</span>
+                <span class="c1">#Remove mediaobject using the Scene.remove() method</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">mediaobject</span><span class="p">)</span>
+<span class="w">            </span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;qzui.mousePressEvent handles mouse selection and adjourn `selection`</span>
+<span class="sd">            and right_selection, assigning to them the mouse selected mediaobject. </span>
+<span class="sd">            If selection or right_selection isn&#39;t None a colored border gets drawn </span>
+<span class="sd">            around selected of right_selected mediaobject using QtGui.QPainter </span>
+<span class="sd">            `painter`&quot;&quot;&quot;</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selection</span> <span class="p">:</span>
+                <span class="c1">#using mediaobject.topleft mediaobject.topright attributes</span>
+                <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selection</span><span class="o">.</span><span class="n">topleft</span>
+                <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selection</span><span class="o">.</span><span class="n">bottomright</span>
+
+                <span class="c1">## clamp values</span>
+                <span class="n">x1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">y1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">y1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">x2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x2</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">y2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">y2</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="c1">#Draing border using QtGui.QPainter attributes</span>
+                <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">green</span><span class="p">)</span>
+                <span class="n">painter</span><span class="o">.</span><span class="n">drawRect</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="o">-</span><span class="n">x1</span><span class="p">,</span> <span class="n">y2</span><span class="o">-</span><span class="n">y1</span><span class="p">)</span>
+                
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span> <span class="p">:</span>
+                <span class="c1">#using mediaobject.topleft mediaobject.toptight attributes</span>
+                <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="o">.</span><span class="n">topleft</span>
+                <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="o">.</span><span class="n">bottomright</span>
+
+                <span class="c1">## clamp values</span>
+                <span class="n">x1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">y1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">y1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">x2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x2</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">y2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">y2</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="c1">#Draing border using QtGui.QPainter attributes</span>
+                <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">blue</span><span class="p">)</span>
+                <span class="n">painter</span><span class="o">.</span><span class="n">drawRect</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="o">-</span><span class="n">x1</span><span class="p">,</span> <span class="n">y2</span><span class="o">-</span><span class="n">y1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;StringMediaObject&#39;</span> <span class="p">:</span>
+
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">))</span> <span class="p">:</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_media_id</span><span class="p">[</span><span class="mi">14</span><span class="p">:]</span> <span class="o">==</span>\
+                      <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="o">.</span><span class="n">_media_id</span><span class="p">[</span><span class="mi">14</span><span class="p">:]</span> <span class="p">:</span>                        
+                        
+                        <span class="n">dialog</span> <span class="o">=</span> <span class="n">DialogWindows</span><span class="o">.</span><span class="n">modify_string_input_dialog</span><span class="p">(</span>\
+                            <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_media_id</span><span class="p">)</span>
+                        <span class="k">try</span> <span class="p">:</span>
+                            <span class="n">ok</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">string_color</span><span class="p">,</span> <span class="n">edited_text</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">_run_dialog</span><span class="p">()</span>
+
+                        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                            <span class="n">ok</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="n">media_id</span> <span class="o">=</span> <span class="kc">False</span>      
+                        <span class="k">if</span> <span class="n">ok</span> <span class="ow">and</span> <span class="n">media_id</span><span class="p">:</span> 
+                            
+                            <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+
+                            <span class="n">j</span><span class="o">=</span><span class="mi">0</span>
+                            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">edited_text</span><span class="p">)</span> <span class="p">:</span>  
+                                    <span class="c1"># If a \n char is encountered a new sublist is appended to self.lines              </span>
+                                    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="p">:</span>                    
+                                        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+                                        <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+                                    <span class="k">else</span> <span class="p">:</span>
+                                    <span class="c1"># Otherwise the char is appended to the currend self.lines sublist</span>
+                                        <span class="n">lines</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                            
+                            <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="n">lines</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_media_id</span> <span class="o">=</span> <span class="n">media_id</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_StringMediaObject__str</span> <span class="o">=</span> <span class="n">edited_text</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_StringMediaObject__color</span> <span class="o">=</span>\
+                                <span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="o">+</span><span class="n">string_color</span><span class="p">)</span>
+                            <span class="c1">#print(self.__objects[i].__dict__)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">break</span>
+
+        <span class="c1">#returning MediaObject.LoadError</span>
+        <span class="k">return</span> <span class="n">errors</span></div>
+
+
+<div class="viewcode-block" id="Scene.step">
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            Scene.step(t)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            t : float</span>
+
+<span class="sd">        Scene.step(t) --&gt; None</span>
+
+<span class="sd">        Step the scene and all contained `MediaObjects` forward `t` seconds</span>
+<span class="sd">        in time.</span>
+
+<span class="sd">        Thread safely cycle through `__objects` mediaobjects set and for each of</span>
+<span class="sd">        them call :meth:`pyzui.objects.physicalobject.PhysicalObject.step` inherited method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects_lock</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">:</span>
+                <span class="n">mediaobject</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">PhysicalObject</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">moving</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property :</span>
+<span class="sd">            Scene.moving</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Scene.moving --&gt; bool</span>
+
+<span class="sd">        Boolean value indicating whether the scene or any contained</span>
+<span class="sd">        *MediaObjects* have a non-zero velocity.</span>
+
+<span class="sd">        Checks if the inherited, vx, vy and vz values from *PhysicalObject*</span>
+<span class="sd">        are not zero. If it is that means the scene is moving and True is</span>
+<span class="sd">        returned, If that&#39;s not the case it thread safely cycles through</span>
+<span class="sd">        mediaobjects in *__objects* checking if *mediaobject.moving* is</span>
+<span class="sd">        True. If it is True is returned. *mediaobject.moving* is also</span>
+<span class="sd">        inherited property of *PhysicalObject* class.</span>
+
+<span class="sd">        See : :class:`pyzui.objects.physicalobject.PhysicalObject` </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vx</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">vy</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">vz</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects_lock</span> <span class="p">:</span>
+                <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">mediaobject</span><span class="o">.</span><span class="n">moving</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__get_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __get_origin</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        __get_origin --&gt; Tuple[float, float]</span>
+
+<span class="sd">        Returns the Scene origin by retrieving _x, and _y variables</span>
+<span class="sd">        inherited by PhysicalObject class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__set_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __set_origin(origin)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            origin : Tuple[float, float]</span>
+
+<span class="sd">        __set_origin --&gt; None</span>
+
+<span class="sd">        Set PhysicalObject._x and PhysicalObject._y parameters to new values</span>
+<span class="sd">        given as input parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">origin</span>
+
+    <span class="n">origin</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_origin</span><span class="p">,</span> <span class="n">__set_origin</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creating Scene.origin property with __get_origin as getter and </span>
+<span class="sd">    __set_origin as setter&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__get_viewport_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __get_viewport_size</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        __get_viewport_size --&gt; Tuple[int, int]</span>
+
+<span class="sd">        Return the current dimensions of the viewport.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__viewport_size</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__set_viewport_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">viewport_size</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            __set_viewport_size(viewport_size)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            viewport_size : Tuple[int, int]</span>
+
+<span class="sd">        __set_viewport_size --&gt; None</span>
+
+<span class="sd">        Happens when mainwindow gets resized or a scene get&#39;s loaded having</span>
+<span class="sd">        different viewport_size than the current mainwindow size. All necessary</span>
+<span class="sd">        adjustment are handled here</span>
+
+<span class="sd">        Centers PhysicalObject._x and PhysicalObject._y to the new input </span>
+<span class="sd">        parameter viewport_size center, also adjourn PhysicalObject.centre. </span>
+<span class="sd">        Calculates the ratio between previous viewport_size center and the </span>
+<span class="sd">        input parameter viewport_size, then calls PhysicalObject.zoom() and</span>
+<span class="sd">        zooms the scene by base 2 log of the ratio between old and new </span>
+<span class="sd">        viewport.</span>
+
+<span class="sd">        then adjourn the __viewport_size variable with the value given by </span>
+<span class="sd">        the input parameter viewport_size.</span>
+
+<span class="sd">        old_viewport::</span>
+
+<span class="sd">            ---------------------------------&gt;</span>
+<span class="sd">            |</span>
+<span class="sd">            |      ----------------------</span>
+<span class="sd">            |     |                      |                 </span>
+<span class="sd">            |     |             *------  |       </span>
+<span class="sd">            |     |           % |      | |   </span>
+<span class="sd">            |     |             +------&quot; |      </span>
+<span class="sd">            |     |                      |</span>
+<span class="sd">            |      ----------------------#</span>
+<span class="sd">            |</span>
+<span class="sd">            |</span>
+<span class="sd">            ∨</span>
+<span class="sd">        </span>
+<span class="sd">        new_viewport::</span>
+
+<span class="sd">            -----------------------------------&gt;</span>
+<span class="sd">            |</span>
+<span class="sd">            |  ------------------------------</span>
+<span class="sd">            | |                              |</span>
+<span class="sd">            | |                              |</span>
+<span class="sd">            | |                              |                 </span>
+<span class="sd">            | |                *------       |       </span>
+<span class="sd">            | |              % |      |      |   </span>
+<span class="sd">            | |                +------&quot;      |      </span>
+<span class="sd">            | |                              |</span>
+<span class="sd">            | |                              | </span>
+<span class="sd">            |  ------------------------------#</span>
+<span class="sd">            |</span>
+<span class="sd">            |</span>
+<span class="sd">            ∨</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## centre the scene in the new viewport</span>
+        <span class="n">old_viewport_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__viewport_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">+=</span> <span class="p">(</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">old_viewport_size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">+=</span> <span class="p">(</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">old_viewport_size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="c1">## scale the scene such that the minimum dimension of the old</span>
+        <span class="c1">## viewport is the same in-scene distance as the minimum</span>
+        <span class="c1">## dimension of the new viewport</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="p">(</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">viewport_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">viewport_size</span><span class="p">))</span> <span class="o">/</span> <span class="nb">min</span><span class="p">(</span><span class="n">old_viewport_size</span><span class="p">)</span>
+        
+        <span class="c1">#we have math.log(scale, 2) as pos&#39; = pos+2**zoomlevel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__viewport_size</span> <span class="o">=</span> <span class="n">viewport_size</span>
+
+        
+    <span class="n">viewport_size</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_viewport_size</span><span class="p">,</span> <span class="n">__set_viewport_size</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creating Scene.viewport_size property with __get_viewport_size as </span>
+<span class="sd">    getter and __set_viewport_size as setter&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="new">
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.new">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">new</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Scene</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function :</span>
+<span class="sd">        new()</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        None</span>
+
+<span class="sd">    new() --&gt; Scene</span>
+
+<span class="sd">    Create and return a new `Scene` object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Scene</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="load_scene">
+<a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.load_scene">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_scene</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Scene</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function :</span>
+<span class="sd">        load_scene(filename)</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        filename : str</span>
+
+<span class="sd">    load_scene(filename) --&gt; Scene</span>
+
+<span class="sd">    Load the scene stored in the file given by `filename`.</span>
+
+<span class="sd">    Precondition: `filename` refers to a file in the same format as</span>
+<span class="sd">    produced by `Scene.save`</span>
+
+<span class="sd">    See source code comments:</span>
+
+<span class="sd">        :func:`load_scene`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#Declares a new Scene() object</span>
+    <span class="n">scene</span> <span class="o">=</span> <span class="n">Scene</span><span class="p">()</span>
+    
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> 
+
+    <span class="c1">#First line of a scene file ale zoomlevel _x and _y of th scene origin</span>
+    <span class="n">zoomlevel</span><span class="p">,</span> <span class="n">ox</span><span class="p">,</span> <span class="n">oy</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">scene</span><span class="o">.</span><span class="n">zoomlevel</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">zoomlevel</span><span class="p">)</span>
+    <span class="n">scene</span><span class="o">.</span><span class="n">origin</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ox</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">oy</span><span class="p">))</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Any line then represent a mediaobject, namely composed by :    </span>
+<span class="sd">            </span>
+<span class="sd">            media id: mediaobject.media_id (replacing &#39;%3A&#39; with :) </span>
+<span class="sd">            </span>
+<span class="sd">            zoomlevel: mediaobject.zoomlevel </span>
+<span class="sd">            </span>
+<span class="sd">            x position: mediaobject.pos[0]</span>
+<span class="sd">            </span>
+<span class="sd">            y position: mediaobject.pos[1]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">class_name</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">zoomlevel</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">media_id</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">unquote</span><span class="p">(</span><span class="n">media_id</span><span class="p">)</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; mediaobjects are sorted by their mediaobject type and </span>
+<span class="sd">        initialized by their appropiate classes&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">class_name</span> <span class="o">==</span> <span class="s1">&#39;TiledMediaObject&#39;</span> <span class="ow">or</span> \
+           <span class="n">class_name</span> <span class="o">==</span> <span class="s1">&#39;StringMediaObject&#39;</span> <span class="ow">or</span> \
+           <span class="n">class_name</span> <span class="o">==</span> <span class="s1">&#39;SVGMediaObject&#39;</span><span class="p">:</span>
+            <span class="k">if</span>   <span class="n">class_name</span> <span class="o">==</span>   <span class="s1">&#39;TiledMediaObject&#39;</span><span class="p">:</span>
+                <span class="n">mediaobject</span> <span class="o">=</span> <span class="n">TiledMediaObject</span><span class="p">(</span>
+                    <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">class_name</span> <span class="o">==</span>   <span class="s1">&#39;StringMediaObject&#39;</span><span class="p">:</span>
+                <span class="n">mediaobject</span> <span class="o">=</span> <span class="n">StringMediaObject</span><span class="p">(</span>
+                    <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
+                
+            <span class="k">elif</span> <span class="n">class_name</span> <span class="o">==</span>   <span class="s1">&#39;SVGMediaObject&#39;</span><span class="p">:</span>
+                <span class="n">mediaobject</span> <span class="o">=</span> <span class="n">SVGMediaObject</span><span class="p">(</span>
+                    <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
+
+            <span class="c1">#mediaobjects are zoomed by the level read in the loaded scene file</span>
+            <span class="n">mediaobject</span><span class="o">.</span><span class="n">zoomlevel</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">zoomlevel</span><span class="p">)</span>
+            <span class="c1">#mediaobjects are placed in the position read in the loaded scene file</span>
+            <span class="n">mediaobject</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+            <span class="c1">#mediaobjects are added to the scene</span>
+            <span class="n">scene</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mediaobject</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">## ignore instances of any other class</span>
+            <span class="k">pass</span>
+
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">scene</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyZui</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../gettingstarted/installation.html">PyZui installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../gettingstarted/installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../gettingstarted/installation.html#running-pyzui">Running PyZUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../gettingstarted/installation.html#generating-documentation">Generating Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage Instructions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usageinstructions/userinterface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usageinstructions/programconfiguration.html">Program Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/readingdocumentation.html">Reading Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/projectstructure.html">Project structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/objectsystem.html">Object System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/convertersystem.html">Converter System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/tiledmediaobject.html">Tiled media object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/tilingsystem.html">Tiling System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/windowsystem.html">Window System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../technicaldocumentation/logging.html">Logging System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Testing Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../testingdocumentation/unittest.html">Unit Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../testingdocumentation/integrationtest.html">Integration Testing Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Benchmarks Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarksdocumentation/qzuibenchmark.html">QZUI Benchmark Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarksdocumentation/converterbenchmark.html">Converter Benchmark Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, David Roberts, Andrea Silvestri.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
