@@ -9,7 +9,7 @@ pan and zoom through the collection.
 ---
 
 This project is a fork of [github.com/davidar/pyzui](https://github.com/davidar/pyzui),
-original work from which it derives its initial architecture and features.
+original work from which it derives its architecture and features.
 
 ## PyZUI is compatible with the following media formats:
 
