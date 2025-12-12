@@ -54,13 +54,13 @@ Getting Started with Contributing
 
      .. code-block:: bash
 
-        conda install pyside6=6.7.2 pillow=11.0.3 pyvips=2.2.3
+        conda install pyside6=6.7.2 pillow=12.0.0 pyvips=3.0.0
 
    - Install additional dependencies from conda-forge:
 
      .. code-block:: bash
 
-        conda install -c conda-forge poppler=24.09.0
+        conda install -c conda-forge poppler=24.12.0
 
    - Install testing dependencies:
 
