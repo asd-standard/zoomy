@@ -1,3 +1,18 @@
+## PyZUI - Python Zooming User Interface
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 3
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
+
 import pytest
 import os
 import hashlib
@@ -244,7 +259,6 @@ class TestTilestoreModule:
         result = tilestore.tiled('media_id')
         assert result is False
 
-
 class TestTilestoreDirectorySize:
     """
     Feature: Tile Store Directory Size Calculation
@@ -302,7 +316,6 @@ class TestTilestoreDirectorySize:
 
         result = tilestore.get_directory_size('/test/path')
         assert result == 0
-
 
 class TestTilestoreStats:
     """
@@ -375,7 +388,6 @@ class TestTilestoreStats:
         # Should return partial stats without crashing
         assert 'total_size' in result
         assert 'media_count' in result
-
 
 class TestTilestoreCleanup:
     """
@@ -587,7 +599,6 @@ class TestTilestoreCleanup:
 
         mock_cleanup.assert_called_once_with(max_age_days=7, dry_run=False)
 
-
 class TestTilestoreMetadataTypes:
     """
     Feature: Tile Store Metadata Type Parsing
@@ -671,7 +682,6 @@ class TestTilestoreMetadataTypes:
         value = tilestore.get_metadata('test_str_media', 'name')
         assert value == 'test'
         assert isinstance(value, str)
-
 
 class TestTilestorePathFormatting:
     """

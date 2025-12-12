@@ -1,4 +1,19 @@
 #!/usr/bin/env python3
+## PyZUI - Python Zooming User Interface
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 3
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
+
 """
 GUI Integration Tests for PyZUI
 ================================
@@ -64,7 +79,6 @@ from pyzui.logger import LoggerConfig, get_logger
 from pyzui.windows.mainwindow import MainWindow
 import pyzui.tilesystem.tilemanager as TileManager
 
-
 # =============================================================================
 # TIMING CONFIGURATION - Adjust these for slower/faster testing
 # =============================================================================
@@ -74,7 +88,6 @@ LONG_DELAY_MS = 5000        # Long delay for loading/rendering (5 seconds)
 IMAGE_LOAD_DELAY_MS = 10000 # Extra time for images to fully load/tile (10 seconds)
 ZOOM_STEP_DELAY_MS = 800    # Delay between zoom steps (0.8 seconds)
 MOVE_STEP_DELAY_MS = 500    # Delay between movement steps (0.5 seconds)
-
 
 # =============================================================================
 # IMAGE CREATION UTILITIES
@@ -126,7 +139,6 @@ def create_ppm_image(filepath: str, width: int, height: int,
         f.write(header.encode('ascii'))
         for row in pixels:
             f.write(row)
-
 
 def create_png_image(filepath: str, width: int, height: int,
                      color: tuple = (128, 128, 128), pattern: str = "solid") -> bool:
@@ -189,7 +201,6 @@ def create_png_image(filepath: str, width: int, height: int,
     except ImportError:
         return False
 
-
 def get_pytest_style_temp_dir() -> Path:
     """
     Create a temp directory structure similar to pytest:
@@ -219,7 +230,6 @@ def get_pytest_style_temp_dir() -> Path:
     test_dir.mkdir(exist_ok=True)
 
     return test_dir
-
 
 # =============================================================================
 # TEST LOGGER
@@ -256,7 +266,6 @@ class GUITestLogger:
         self.logger.info(f"# {title}")
         self.logger.info("#" * 70)
         self.logger.info("")
-
 
 # =============================================================================
 # MAIN GUI TEST CLASS
@@ -949,7 +958,6 @@ class GUIIntegrationTest:
         finally:
             self.teardown()
 
-
 # =============================================================================
 # MAIN ENTRY POINT
 # =============================================================================
@@ -989,7 +997,6 @@ won't automatically pick it up. Run it directly with python.
         return
 
     test.run(start_step=args.start_step)
-
 
 if __name__ == '__main__':
     main()

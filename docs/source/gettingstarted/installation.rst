@@ -5,7 +5,7 @@ This PyZUI fork was developed with debian 13 "trixie" as d.e and a miniconda for
 dependencies management. It has also been tested on AArch64 and Win11, always 
 with a miniconda enviroment managing all dependencies.
 
-original project can be found at:
+This project is a fork, original project can be found at:
 https://github.com/davidar/pyzui
 
 Dependencies
@@ -13,13 +13,13 @@ Dependencies
 
 PyZui has been developed with the following python version
 
-- python = 3.12.12
+- python=3.12.12
 
 All dependencies have been installed in a miniconda enviroment, for all 3 
 platforms tested the procedure has always been to install miniconda, create an 
 enviroment:
 
-  conda create -n "enviroment name" python = 3.12.12
+  conda create -n "enviroment name" python=3.12.12
   
 And activate such enviroment
 
@@ -31,9 +31,8 @@ with all the core dependencies installed trough the default Anaconda channel:
 
 PyZUI depends on the following Python packages:
 
-- pyside6 = 6.7.2 
-- pillow= 11.0.3
-- pyvips = 2.2.3
+- pyside6=6.7.2 
+- pillow=12.0.0
 
 The following non-Python packages are also required by certain features of the
 application, those are installed trough the Conda-Forge Anaconda channel. 
@@ -43,10 +42,21 @@ enviroment:
 
   conda install -c conda-forge "package"="version number"
 
-- poppler=24.09.0
-  pdftoppm from Poppler or Xpdf (optional if you do not intend viewing PDFs);
+- pyvips=3.0.0
+    
+  Poppler usually gets installed with pyvips so it's not necessary to 
+  install it's anyway an explicit codebase dependency for pdf management. 
 
-After completion of this dependencies set up you can install  
+- poppler=24.12.0
+
+pdftoppm from Poppler or Xpdf (optional if you do not intend viewing PDFs);
+
+These are the bare minimum dependencies for the project to run, on linux DE's 
+using Wayland as display server you can also install:
+
+- qt6-wayland-6.7.2
+
+  This allow the project to run natively and take advantage of hardware acceleration
 
 Ubuntu/Debian, AArch64, specific instructions
 ---------------------------------------------

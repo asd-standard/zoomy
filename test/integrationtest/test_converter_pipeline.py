@@ -1,3 +1,18 @@
+## PyZUI - Python Zooming User Interface
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 3
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
+
 """
 Integration Tests: Converter Pipeline
 ======================================
@@ -38,7 +53,6 @@ from pyzui.tilesystem.tiler import Tiler
 from pyzui.tilesystem import tilestore
 from pyzui.tilesystem import tilemanager
 
-
 class ConcreteTiler(Tiler):
     """
     A concrete implementation of Tiler for testing the converter pipeline.
@@ -65,7 +79,6 @@ class ConcreteTiler(Tiler):
         self._current_row += 1
         return bytes(row_data)
 
-
 def is_pdftoppm_available():
     """Check if pdftoppm is available on the system."""
     try:
@@ -78,7 +91,6 @@ def is_pdftoppm_available():
     except (subprocess.SubprocessError, FileNotFoundError):
         return False
 
-
 def is_pyvips_available():
     """Check if pyvips is available and functional."""
     try:
@@ -86,7 +98,6 @@ def is_pyvips_available():
         return True
     except ImportError:
         return False
-
 
 @pytest.fixture
 def temp_tilestore(tmp_path):
@@ -114,7 +125,6 @@ def temp_tilestore(tmp_path):
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
 
-
 @pytest.fixture
 def initialized_tilemanager(temp_tilestore):
     """
@@ -126,7 +136,6 @@ def initialized_tilemanager(temp_tilestore):
     tilemanager.init(total_cache_size=100, auto_cleanup=False)
     yield
     tilemanager.purge()
-
 
 @pytest.fixture
 def sample_images(tmp_path):
@@ -172,7 +181,6 @@ def sample_images(tmp_path):
     images['rgba'] = str(rgba_path)
 
     yield images
-
 
 @pytest.fixture
 def sample_pdf(tmp_path):
@@ -223,7 +231,6 @@ startxref
             f.write(minimal_pdf)
 
         yield str(pdf_path)
-
 
 class TestVipsConverterBasicOperations:
     """
@@ -339,7 +346,6 @@ class TestVipsConverterBasicOperations:
         output_img = Image.open(outfile)
         assert output_img.size == (2048, 1536)
 
-
 class TestVipsConverterErrorHandling:
     """
     Feature: VipsConverter Error Handling
@@ -406,7 +412,6 @@ class TestVipsConverterErrorHandling:
         converter.run()
 
         assert converter.error is not None
-
 
 class TestPDFConverterBasicOperations:
     """
@@ -476,7 +481,6 @@ class TestPDFConverterBasicOperations:
             assert img_high.size[0] > img_low.size[0]
             assert img_high.size[1] > img_low.size[1]
 
-
 class TestPDFConverterErrorHandling:
     """
     Feature: PDFConverter Error Handling
@@ -521,7 +525,6 @@ class TestPDFConverterErrorHandling:
         converter.run()
 
         assert converter.error is not None
-
 
 class TestConverterToTilerPipeline:
     """
@@ -625,7 +628,6 @@ class TestConverterToTilerPipeline:
         # Verify
         assert tilestore.tiled(media_id)
 
-
 class TestConverterProgressTracking:
     """
     Feature: Converter Progress Tracking
@@ -682,7 +684,6 @@ class TestConverterProgressTracking:
 
         assert converter.progress == 1.0
         assert converter.error is not None
-
 
 class TestConverterThreading:
     """
@@ -745,7 +746,6 @@ class TestConverterThreading:
             assert c.progress == 1.0
             if c.error is None:
                 assert os.path.exists(str(tmp_path / f"output_{i}.ppm"))
-
 
 class TestConcurrentConversionOperations:
     """
@@ -842,7 +842,6 @@ class TestConcurrentConversionOperations:
                 f"Pipeline {idx} failed: {result.get('error')}"
             assert result.get('tiled', False), f"Pipeline {idx} not tiled"
 
-
 class TestConverterOutputValidation:
     """
     Feature: Converter Output Validation
@@ -918,7 +917,6 @@ class TestConverterOutputValidation:
         # Access pixel data
         pixel = output_img.getpixel((0, 0))
         assert len(pixel) == 3  # RGB
-
 
 class TestConverterStringRepresentation:
     """

@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """Dynamic tile provider for Barnsley's fern."""
 
@@ -56,7 +54,6 @@ class FernTileProvider(DynamicTileProvider):
     """
     def __init__(self, tilecache: Any) -> None:
         DynamicTileProvider.__init__(self, tilecache)
-
 
     filext = 'png'
     tilesize = 256
@@ -122,7 +119,6 @@ class FernTileProvider(DynamicTileProvider):
                 n -= probability
         return transformation
 
-
     def __transform(self, x: float, y: float) -> Tuple[float, float]:
         """
         Method :
@@ -150,7 +146,6 @@ class FernTileProvider(DynamicTileProvider):
         x_new = t[0]*x + t[1]*y + t[2]
         y_new = t[3]*x + t[4]*y + t[5]
         return (x_new,y_new)
-
 
     def __draw_point(self, tile: Any, x: float, y: float, tilesize_units: float) -> None:
         """
@@ -189,7 +184,6 @@ class FernTileProvider(DynamicTileProvider):
         y = min(int(self.tilesize - y), self.tilesize-1)
 
         tile.putpixel((x,y), self.color)
-
 
     def _load_dynamic(self, tile_id: Tuple[str, int, int, int], outfile: str) -> None:
         """

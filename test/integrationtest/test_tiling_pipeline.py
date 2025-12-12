@@ -1,3 +1,18 @@
+## PyZUI - Python Zooming User Interface
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 3
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
+
 """
 Integration Tests: Tiling Pipeline
 ===================================
@@ -28,7 +43,6 @@ from pyzui.tilesystem import tilestore
 from pyzui.tilesystem import tilemanager
 from pyzui.tilesystem.tilestore import TileCache
 from pyzui.tilesystem.tileproviders.statictileprovider import StaticTileProvider
-
 
 class ConcreteTiler(Tiler):
     """
@@ -66,7 +80,6 @@ class ConcreteTiler(Tiler):
         self._current_row += 1
         return bytes(row_data)
 
-
 @pytest.fixture
 def temp_tilestore(tmp_path):
     """
@@ -96,7 +109,6 @@ def temp_tilestore(tmp_path):
     tilestore.tile_dir = original_tile_dir
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
-
 
 @pytest.fixture
 def sample_images(tmp_path):
@@ -138,7 +150,6 @@ def sample_images(tmp_path):
     for path in images.values():
         if os.path.exists(path):
             os.remove(path)
-
 
 class TestTilingPipelineEndToEnd:
     """
@@ -330,7 +341,6 @@ class TestTilingPipelineEndToEnd:
         # After completion
         assert tiler.progress == 1.0
 
-
 class TestTileRetrievalIntegration:
     """
     Feature: Tile Retrieval After Tiling
@@ -410,7 +420,6 @@ class TestTileRetrievalIntegration:
         assert tilestore.get_metadata(media_id, 'tilesize') == 128
         assert tilestore.get_metadata(media_id, 'filext') == 'png'
         assert tilestore.get_metadata(media_id, 'maxtilelevel') is not None
-
 
 class TestTileCacheIntegration:
     """
@@ -516,7 +525,6 @@ class TestTileCacheIntegration:
         assert tile_id in cache
         assert ('media', 9, 9, 9) not in cache
 
-
 class TestMultipleImageTiling:
     """
     Feature: Multiple Image Tiling
@@ -565,7 +573,6 @@ class TestMultipleImageTiling:
 
         assert tilestore.get_metadata("image_1", 'maxtilelevel') == 0
         assert tilestore.get_metadata("image_2", 'maxtilelevel') == 1
-
 
 class TestTilePathConsistency:
     """
@@ -621,7 +628,6 @@ class TestTilePathConsistency:
 
         assert expected_hash in path
 
-
 class TestTilingErrorHandling:
     """
     Feature: Tiling Error Handling
@@ -670,7 +676,6 @@ class TestTilingErrorHandling:
         except Exception:
             # Exception during init or run is acceptable
             pass
-
 
 class TestTileStorageStats:
     """

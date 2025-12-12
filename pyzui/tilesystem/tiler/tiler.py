@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """Threaded image tiler (abstract base class)."""
 
@@ -106,7 +104,6 @@ class Tiler(Thread):
 
         
 
-
     def _scanline(self) -> str:
         """
         Method :
@@ -144,7 +141,6 @@ class Tiler(Thread):
         
         self.__progress += 1.0/self.__numtiles
         self.__logger.info("%3d%% tiled", int(self.__progress*100))
-
 
     def __load_row_from_file(self, row: int) -> Optional[List[Any]]:
         """
@@ -200,7 +196,6 @@ class Tiler(Thread):
                     #print(tiles[i],'\n')
         
 
-
         for i in range(self.__numtiles_across_total):
             if i == self.__numtiles_across_total-1:
                 ## last tile in row
@@ -213,7 +208,6 @@ class Tiler(Thread):
                 
         
         return tiles
-
 
     def __mergerows(self, row_a: Optional[List[Any]], row_b: Optional[List[Any]] = None) -> Optional[List[Any]]:
         """
@@ -247,7 +241,6 @@ class Tiler(Thread):
                 row_b.pop(0), row_b.pop(0)))
 
         return tiles
-
 
     def __tiles(self, tilelevel: int = 0, row: int = 0) -> Optional[List[Any]]:
         """
@@ -313,7 +306,6 @@ class Tiler(Thread):
 
         return tiles
 
-
     def __calculate_maxtilelevel(self) -> int:
         """
         Method :
@@ -351,7 +343,6 @@ class Tiler(Thread):
             
             return maxtilelevel
 
-
     def __calculate_numtiles(self) -> int:
         """
         Method :
@@ -379,7 +370,6 @@ class Tiler(Thread):
             numtiles += numtiles_across * numtiles_down
 
         return numtiles
-
 
     def run(self) -> None:
         """
@@ -441,7 +431,6 @@ class Tiler(Thread):
         self.__progress = 1.0
         self.__logger.debug("tiling complete")
 
-
     @property
     def progress(self) -> float:
         """
@@ -457,7 +446,6 @@ class Tiler(Thread):
         """
         return self.__progress
 
-
     def __str__(self) -> str:
         """
         Method :
@@ -471,7 +459,6 @@ class Tiler(Thread):
         """
         return "Tiler(%s)" % self._infile
 
-
     def __repr__(self) -> str:
         """
         Method :
@@ -484,7 +471,4 @@ class Tiler(Thread):
         Return formal string representation of the Tiler object.
         """
         return "Tiler(%s)" % repr(self._infile)
-
-
-
 

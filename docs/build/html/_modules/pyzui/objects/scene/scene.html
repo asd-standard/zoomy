@@ -31,12 +31,12 @@
           <div class="body" role="main">
             
   <h1>Source code for pyzui.objects.scene.scene</h1><div class="highlight"><pre>
-<span></span><span class="c1">## PyZUI 0.1 - Python Zooming User Interface</span>
-<span class="c1">## Copyright (C) 2009  David Roberts &lt;d@vidr.cc&gt;</span>
+<span></span><span class="c1">## PyZUI - Python Zooming User Interface</span>
+<span class="c1">## Copyright (C) 2009 David Roberts &lt;d@vidr.cc&gt;</span>
 <span class="c1">##</span>
 <span class="c1">## This program is free software; you can redistribute it and/or</span>
 <span class="c1">## modify it under the terms of the GNU General Public License</span>
-<span class="c1">## as published by the Free Software Foundation; either version 2</span>
+<span class="c1">## as published by the Free Software Foundation; either version 3</span>
 <span class="c1">## of the License, or (at your option) any later version.</span>
 <span class="c1">##</span>
 <span class="c1">## This program is distributed in the hope that it will be useful,</span>
@@ -45,18 +45,14 @@
 <span class="c1">## GNU General Public License for more details.</span>
 <span class="c1">##</span>
 <span class="c1">## You should have received a copy of the GNU General Public License</span>
-<span class="c1">## along with this program; if not, write to the Free Software</span>
-<span class="c1">## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA</span>
-<span class="c1">## 02110-1301, USA.</span>
+<span class="c1">## along with this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
 
 <span class="sd">&quot;&quot;&quot;A collection of media objects.&quot;&quot;&quot;</span>
-
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">RLock</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span><span class="o">,</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="o">,</span><span class="w"> </span><span class="nn">urllib.error</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
-
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QPainter</span>
@@ -83,11 +79,10 @@
 
 <span class="sd">    `Scene` objects are used to hold a collection of `MediaObjects`.</span>
 <span class="sd">    This class manages all the objects that can be rendered in the interface,</span>
-<span class="sd">    Their positioning (_x, _y) on the scene and their zoom (_z) and the acces to </span>
-<span class="sd">    them.</span>
+<span class="sd">    Their positioning (_x, _y) on the scene and their zoom (_z) and the acces </span>
+<span class="sd">    to them.</span>
 
 <span class="sd">    Scene objects can also be saved to files, and loaded from files.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">#: an arbitrary size that is common to all scenes upon creation `scene size`</span>
@@ -97,15 +92,12 @@
 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        New scene is made by initiating a :class:`~pyzui.objects.physicalobject.PhysicalObject`, </span>
-
-<span class="sd">        creating an objects list `__objects` and thread safe selection for `__objects`</span>
-<span class="sd">        given by declaring RLock list `__objects_lock`, </span>
+<span class="sd">        creating an objects list *__objects* and thread safe selection for *__objects* given by </span>
+<span class="sd">        declaring RLock list *__objects_lock*, seting up *__viewport_size*, setting up mouse </span>
+<span class="sd">        selection variables *selection* and *right_selection* and logger setup *__logger*. </span>
 <span class="sd">        </span>
-<span class="sd">        set up `__viewport_size`</span>
+<span class="sd">        For better explaining of this scheme look at :  :class:`pyzui.objects.mediaobjects.mediaobject` </span>
 
-<span class="sd">        mouse selection variables `selection` and `right_selection` and logger setup</span>
-<span class="sd">        `__logger`. </span>
-<span class="sd">        </span>
 <span class="sd">        World::</span>
 
 <span class="sd">             ---------------------------------------&gt;</span>
@@ -139,11 +131,10 @@
 <span class="sd">        @ origin position of the scene it&#39;s relative to an absolute frame of </span>
 <span class="sd">        reference, with 0,0 as it&#39;s origin.</span>
 
-<span class="sd">        % Scene center it&#39;s given by</span>
-<span class="sd">          scene.centre[0] = scene.origin + (Scene.viewport_size[0]/2)*2**(zoomlevel)</span>
-<span class="sd">          scene.centre[1] = scene.origin + (Scene.viewport_size[1]/2)*2**(zoomlevel)</span>
+<span class="sd">        % Scene center it&#39;s given by::</span>
 
-
+<span class="sd">            scene.centre[0] = scene.origin + (Scene.viewport_size[0]/2)*2**(zoomlevel)</span>
+<span class="sd">            scene.centre[1] = scene.origin + (Scene.viewport_size[1]/2)*2**(zoomlevel)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -157,7 +148,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">selection</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span> <span class="o">=</span> <span class="kc">None</span>
         
-        <span class="c1">#commented out on 20250314 </span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;Scene&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Scene.save">
@@ -179,7 +169,7 @@
 <span class="sd">        open a file `filename`, writes on the first line zoom level (z) and </span>
 <span class="sd">        position (x, y) of the scene origin defined by Scene.__set_origin()</span>
 <span class="sd">        then thread safely, once sorted `__objects`, cicles through them, </span>
-<span class="sd">        writing for each of them a line on `fielname` with:  </span>
+<span class="sd">        writing for each of them a line on `fielname` with::  </span>
 <span class="sd">            </span>
 <span class="sd">            object type: `type(mediaobject).__name__`</span>
 <span class="sd">            </span>
@@ -197,6 +187,7 @@
 <span class="sd">        By doing this once the scene it&#39;s loaded it can be then scaled to fit</span>
 <span class="sd">        whatever viewport the user currently has, independent of the viewport </span>
 <span class="sd">        the scene was having when it was saved.&quot;&quot;&quot;</span>
+
         <span class="n">actual_viewport_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span>
         <span class="c1"># setting `viewport_size` to standard size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_viewport_size</span>
@@ -221,7 +212,6 @@
 
         <span class="c1"># setting `viewport_size` to it&#39;s actual size </span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span> <span class="o">=</span> <span class="n">actual_viewport_size</span></div>
-
 
 
 <div class="viewcode-block" id="Scene.add">
@@ -265,14 +255,14 @@
 <span class="sd">        be rendered on the scene and purge all&#39;related tiles through</span>
 <span class="sd">        TileManager.purge(&#39;media_id&#39;) method.</span>
 
-<span class="sd">        Thread safely cycle through `__objects` until `mediaobject`</span>
-<span class="sd">        match with the respective element of the `__objects` list</span>
-<span class="sd">        and removes it from the `__objects` list. Then gets</span>
-<span class="sd">        mediaobject.media_id attribute and check if other `__objects`</span>
+<span class="sd">        Thread safely cycle through *__objects* until *mediaobject*</span>
+<span class="sd">        match with the respective element of the *__objects* list</span>
+<span class="sd">        and removes it from the *__objects* list. Then gets</span>
+<span class="sd">        mediaobject.media_id attribute and check if other *__objects*</span>
 <span class="sd">        elements have the same media_id, if it&#39;s not the case the media_id</span>
 <span class="sd">        gets purged from the TileManager. </span>
 
-<span class="sd">        See: :meth:`pyzui.tilemanager.purge`</span>
+<span class="sd">        See: :meth:`pyzui.tilesystem.tilemanager.purge`</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -291,7 +281,6 @@
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">media_active</span><span class="p">:</span>
                     <span class="n">TileManager</span><span class="o">.</span><span class="n">purge</span><span class="p">(</span><span class="n">media_id</span><span class="p">)</span></div>
-
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__sort_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -315,7 +304,6 @@
                 <span class="n">mediaobject</span><span class="o">.</span><span class="n">onscreen_area</span><span class="p">)</span>
             
 
-
 <div class="viewcode-block" id="Scene.get">
 <a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.get">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;MediaObject.MediaObject&#39;</span><span class="p">]:</span>
@@ -327,8 +315,8 @@
 
 <span class="sd">        Scene.get(pos) --&gt; MediaObject or None</span>
 
-<span class="sd">        Return the foremost visible `MediaObject` which overlaps the</span>
-<span class="sd">        on-screen point `pos`. `pos` is the mouse position at the last</span>
+<span class="sd">        Return the foremost visible *MediaObject* which overlaps the</span>
+<span class="sd">        on-screen point *pos*. *pos* is the mouse position at the last</span>
 <span class="sd">        left or right click mouse event.</span>
 
 <span class="sd">        Return None if there are no *MediaObjects* overlapping the point.</span>
@@ -336,7 +324,7 @@
 <span class="sd">        get(tuple[float,float]) --&gt; MediaObject or None</span>
 
 <span class="sd">        Mouse click event is caught by: :meth:`pyzui.qzui.QZUI.mousePressEvent`</span>
-<span class="sd">        which returns mouse position `pos`</span>
+<span class="sd">        which returns mouse position *pos*</span>
 <span class="sd">        </span>
 <span class="sd">        Thread safely cycle through *__objects*. For each mediaobject checks if</span>
 <span class="sd">        *pos* is within mediaobject area, if it is the mediaobject is returned as</span>
@@ -378,7 +366,6 @@
         <span class="c1">## solving for P = P&#39; yields:</span>
         <span class="c1">##   pos&#39; = P - (P - pos) * 2**amount</span>
 
-
         <span class="n">Px</span><span class="p">,</span> <span class="n">Py</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">Px</span> <span class="o">-</span> <span class="p">(</span><span class="n">Px</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">amount</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">Py</span> <span class="o">-</span> <span class="p">(</span><span class="n">Py</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">amount</span>
@@ -400,7 +387,7 @@
 
 <span class="sd">        Render the scene using the given `painter`.</span>
 
-<span class="sd">        If `draft` is True, draft mode is enabled. Otherwise High-Quality mode</span>
+<span class="sd">        If *draft* is True, draft mode is enabled. Otherwise High-Quality mode</span>
 <span class="sd">        is enabled.</span>
 
 <span class="sd">        If any errors occur rendering any of the *MediaObjects*, then they will</span>
@@ -551,12 +538,8 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="k">break</span>
 
-
-
-
         <span class="c1">#returning MediaObject.LoadError</span>
         <span class="k">return</span> <span class="n">errors</span></div>
-
 
 
 <div class="viewcode-block" id="Scene.step">
@@ -581,7 +564,6 @@
             <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">:</span>
                 <span class="n">mediaobject</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
             <span class="n">PhysicalObject</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span></div>
-
 
 
     <span class="nd">@property</span>
@@ -756,7 +738,6 @@
     <span class="k">return</span> <span class="n">Scene</span><span class="p">()</span></div>
 
 
-
 <div class="viewcode-block" id="load_scene">
 <a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.load_scene">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_scene</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Scene</span><span class="p">:</span>
@@ -829,7 +810,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1">## ignore instances of any other class</span>
             <span class="k">pass</span>
-
 
     <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 

@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,18 +12,14 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """A collection of media objects."""
-
 
 from threading import RLock
 import urllib.request, urllib.parse, urllib.error
 import math
 from typing import Optional, Tuple, List
-
 
 from PySide6 import QtCore
 from PySide6.QtGui import QColor, QPainter
@@ -48,11 +44,10 @@ class Scene(PhysicalObject):
 
     `Scene` objects are used to hold a collection of `MediaObjects`.
     This class manages all the objects that can be rendered in the interface,
-    Their positioning (_x, _y) on the scene and their zoom (_z) and the acces to 
-    them.
+    Their positioning (_x, _y) on the scene and their zoom (_z) and the acces 
+    to them.
 
     Scene objects can also be saved to files, and loaded from files.
-
     """
 
     #: an arbitrary size that is common to all scenes upon creation `scene size`
@@ -62,15 +57,12 @@ class Scene(PhysicalObject):
 
         """
         New scene is made by initiating a :class:`~pyzui.objects.physicalobject.PhysicalObject`, 
-
-        creating an objects list `__objects` and thread safe selection for `__objects`
-        given by declaring RLock list `__objects_lock`, 
+        creating an objects list *__objects* and thread safe selection for *__objects* given by 
+        declaring RLock list *__objects_lock*, seting up *__viewport_size*, setting up mouse 
+        selection variables *selection* and *right_selection* and logger setup *__logger*. 
         
-        set up `__viewport_size`
+        For better explaining of this scheme look at :  :class:`pyzui.objects.mediaobjects.mediaobject` 
 
-        mouse selection variables `selection` and `right_selection` and logger setup
-        `__logger`. 
-        
         World::
 
              --------------------------------------->
@@ -104,11 +96,10 @@ class Scene(PhysicalObject):
         @ origin position of the scene it's relative to an absolute frame of 
         reference, with 0,0 as it's origin.
 
-        % Scene center it's given by
-          scene.centre[0] = scene.origin + (Scene.viewport_size[0]/2)*2**(zoomlevel)
-          scene.centre[1] = scene.origin + (Scene.viewport_size[1]/2)*2**(zoomlevel)
+        % Scene center it's given by::
 
-
+            scene.centre[0] = scene.origin + (Scene.viewport_size[0]/2)*2**(zoomlevel)
+            scene.centre[1] = scene.origin + (Scene.viewport_size[1]/2)*2**(zoomlevel)
 
         """
 
@@ -122,7 +113,6 @@ class Scene(PhysicalObject):
         self.selection = None
         self.right_selection = None
         
-        #commented out on 20250314 
         self.__logger = get_logger("Scene")
 
     def save(self, filename: str) -> None:
@@ -142,7 +132,7 @@ class Scene(PhysicalObject):
         open a file `filename`, writes on the first line zoom level (z) and 
         position (x, y) of the scene origin defined by Scene.__set_origin()
         then thread safely, once sorted `__objects`, cicles through them, 
-        writing for each of them a line on `fielname` with:  
+        writing for each of them a line on `fielname` with::  
             
             object type: `type(mediaobject).__name__`
             
@@ -160,6 +150,7 @@ class Scene(PhysicalObject):
         By doing this once the scene it's loaded it can be then scaled to fit
         whatever viewport the user currently has, independent of the viewport 
         the scene was having when it was saved."""
+
         actual_viewport_size = self.viewport_size
         # setting `viewport_size` to standard size
         self.viewport_size = self.standard_viewport_size
@@ -184,7 +175,6 @@ class Scene(PhysicalObject):
 
         # setting `viewport_size` to it's actual size 
         self.viewport_size = actual_viewport_size
-
 
     def add(self, mediaobject: 'MediaObject.MediaObject') -> None:
         """
@@ -222,14 +212,14 @@ class Scene(PhysicalObject):
         be rendered on the scene and purge all'related tiles through
         TileManager.purge('media_id') method.
 
-        Thread safely cycle through `__objects` until `mediaobject`
-        match with the respective element of the `__objects` list
-        and removes it from the `__objects` list. Then gets
-        mediaobject.media_id attribute and check if other `__objects`
+        Thread safely cycle through *__objects* until *mediaobject*
+        match with the respective element of the *__objects* list
+        and removes it from the *__objects* list. Then gets
+        mediaobject.media_id attribute and check if other *__objects*
         elements have the same media_id, if it's not the case the media_id
         gets purged from the TileManager. 
 
-        See: :meth:`pyzui.tilemanager.purge`
+        See: :meth:`pyzui.tilesystem.tilemanager.purge`
 
         """
 
@@ -248,7 +238,6 @@ class Scene(PhysicalObject):
 
                 if not media_active:
                     TileManager.purge(media_id)
-
 
     def __sort_objects(self) -> None:
         """
@@ -271,7 +260,6 @@ class Scene(PhysicalObject):
                 mediaobject.onscreen_area)
             
 
-
     def get(self, pos: Tuple[float, float]) -> Optional['MediaObject.MediaObject']:
         """
         Method :
@@ -281,8 +269,8 @@ class Scene(PhysicalObject):
 
         Scene.get(pos) --> MediaObject or None
 
-        Return the foremost visible `MediaObject` which overlaps the
-        on-screen point `pos`. `pos` is the mouse position at the last
+        Return the foremost visible *MediaObject* which overlaps the
+        on-screen point *pos*. *pos* is the mouse position at the last
         left or right click mouse event.
 
         Return None if there are no *MediaObjects* overlapping the point.
@@ -290,7 +278,7 @@ class Scene(PhysicalObject):
         get(tuple[float,float]) --> MediaObject or None
 
         Mouse click event is caught by: :meth:`pyzui.qzui.QZUI.mousePressEvent`
-        which returns mouse position `pos`
+        which returns mouse position *pos*
         
         Thread safely cycle through *__objects*. For each mediaobject checks if
         *pos* is within mediaobject area, if it is the mediaobject is returned as
@@ -329,7 +317,6 @@ class Scene(PhysicalObject):
         ## solving for P = P' yields:
         ##   pos' = P - (P - pos) * 2**amount
 
-
         Px, Py = self.centre
         self._x = Px - (Px - self._x) * 2**amount
         self._y = Py - (Py - self._y) * 2**amount
@@ -348,7 +335,7 @@ class Scene(PhysicalObject):
 
         Render the scene using the given `painter`.
 
-        If `draft` is True, draft mode is enabled. Otherwise High-Quality mode
+        If *draft* is True, draft mode is enabled. Otherwise High-Quality mode
         is enabled.
 
         If any errors occur rendering any of the *MediaObjects*, then they will
@@ -499,12 +486,8 @@ class Scene(PhysicalObject):
                         self.right_selection = None
                         break
 
-
-
-
         #returning MediaObject.LoadError
         return errors
-
 
     def step(self, t: float) -> None:
         """
@@ -526,7 +509,6 @@ class Scene(PhysicalObject):
             for mediaobject in self.__objects:
                 mediaobject.step(t)
             PhysicalObject.step(self, t)
-
 
     @property
     def moving(self) -> bool:
@@ -696,7 +678,6 @@ def new() -> Scene:
     """
     return Scene()
 
-
 def load_scene(filename: str) -> Scene:
     """
     Function :
@@ -767,7 +748,6 @@ def load_scene(filename: str) -> Scene:
         else:
             ## ignore instances of any other class
             pass
-
 
     f.close()
 

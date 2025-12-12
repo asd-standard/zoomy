@@ -1,3 +1,18 @@
+## PyZUI - Python Zooming User Interface
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 3
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
+
 import pytest
 from unittest.mock import Mock, patch
 from threading import Thread
@@ -168,7 +183,6 @@ class TestTiler:
         """
         tiler = Tiler("input.jpg", filext="png")
         assert tiler._Tiler__filext == 'png'
-
 
 class TestTilerCalculations:
     """
@@ -373,7 +387,6 @@ class TestTilerCalculations:
         # Total = 21
         assert result == 21
 
-
 class TestTilerMergeRows:
     """
     Feature: Tiler Row Merging
@@ -459,7 +472,6 @@ class TestTilerMergeRows:
 
         # 3 tiles -> 4 tiles (buffered), then merged into 2
         assert mock_merged.call_count == 2
-
 
 class TestTilerRun:
     """
@@ -596,7 +608,6 @@ class TestTilerRun:
         # maxtilelevel should be 1
         # Level 1: 2x2 = 4, Level 0: 1x1 = 1, Total = 5
         assert tiler._Tiler__numtiles == 5
-
 
 class TestTilerLoadRow:
     """

@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """Media to be displayed in the ZUI (abstract base class)."""
 
@@ -74,29 +72,28 @@ class MediaObject(PhysicalObject) :
         % -> Scene.center()
         @ -> Scene.origin()
 
-    MediaObject topleft coordinates relative to screen view are given by:
+    MediaObject topleft coordinates relative to screen view are given by::
 
-    MediaObject.topleft[0-1] = \
-    self._scene.origin[0-1] + self.pos[0-1] * (2 ** self._scene.zoomlevel)
+        MediaObject.topleft[0-1] = self._scene.origin[0-1] + self.pos[0-1] * (2 ** self._scene.zoomlevel)
 
-    Where self.pos[0-1] it's MediaObject position relative to Scene reference 
+    Where *self.pos[0-1]* it's MediaObject position relative to Scene reference 
     system wich get's scaled by 2** of scene zoom level
 
     MediaObject centre coordinates relative to screen view are given firstly by
-    calculating image center coordinates relative to Scene reference coordinates:
+    calculating image center coordinates relative to Scene reference coordinates::
 
-    C_s[0-1] = self.pos[0-1] + self._centre[0-1] * 2**self._z
+        C_s[0-1] = self.pos[0-1] + self._centre[0-1] * 2**self._z
 
-    Where self._centre[0-1] are center coordinates relative to the mediaobject
-    frame of reference and self._z it's MediaObject reference frame scaling 
+    Where *self._centre[0-1]* are center coordinates relative to the mediaobject
+    frame of reference and *self._z* it's MediaObject reference frame scaling 
     (zoom).
 
     Take note that self.pos[0-1] dosen't get to be scaled by self._z as that 
     position it's relative to Scene reference frame.
 
-    Then we can calculate MediaObject centre coordinates relative to screen view as:
+    Then we can calculate MediaObject centre coordinates relative to screen view as::
 
-    MediaObject.centre[0-1] = self._scene.origin[0] + C_s[0-1] * 2**self._scene.zoomlevel
+        MediaObject.centre[0-1] = self._scene.origin[0] + C_s[0-1] * 2**self._scene.zoomlevel
 
     
     """
@@ -122,7 +119,6 @@ class MediaObject(PhysicalObject) :
         self._media_id = media_id
         self._scene = scene
 
-
     def render(self, painter: Any, mode: int) -> None:
         """
         Method :
@@ -139,7 +135,6 @@ class MediaObject(PhysicalObject) :
         :class:`RenderMode`
         """
         pass
-
 
     def move(self, dx: float, dy: float) -> None:
         """
@@ -159,7 +154,6 @@ class MediaObject(PhysicalObject) :
         #mediaobject.pos dosen't support += operation
         self._x += dx * (2 ** -self._scene.zoomlevel)
         self._y += dy * (2 ** -self._scene.zoomlevel)
-
 
     def zoom(self, amount: float) -> None:
         """
@@ -200,7 +194,6 @@ class MediaObject(PhysicalObject) :
         self._y = C_sy - (C_sy - self._y) * 2**amount
         self._z += amount
 
-
     def hides(self, other: 'MediaObject') -> bool:
         """
         Method :
@@ -237,7 +230,6 @@ class MediaObject(PhysicalObject) :
 
         return o_left  >= s_left  and o_top    >= s_top and \
                o_right <= s_right and o_bottom <= s_bottom
-
 
     def fit(self, bbox: Tuple[float, float, float, float]) -> None:
         """
@@ -281,7 +273,6 @@ class MediaObject(PhysicalObject) :
             * (2 ** -self._scene.zoomlevel)
         #print('self._y',self._y)
 
-
     def __cmp__(self, other: 'MediaObject') -> int:
         """
         Method :
@@ -303,7 +294,6 @@ class MediaObject(PhysicalObject) :
         else:
             return 1
 
-
     @property
     def media_id(self) -> str:
         """
@@ -317,7 +307,6 @@ class MediaObject(PhysicalObject) :
         The object's media_id.
         """
         return self._media_id
-
 
     @property
     def scale(self) -> float:
@@ -333,7 +322,6 @@ class MediaObject(PhysicalObject) :
         when rendering it to the screen.
         """
         return 2 ** (self._scene.zoomlevel + self.zoomlevel)
-
 
     @property
     def topleft(self) -> Tuple[float, float]:
@@ -358,7 +346,6 @@ class MediaObject(PhysicalObject) :
         y = self._scene.origin[1] + self.pos[1] * (2 ** self._scene.zoomlevel)
         return (x,y)
 
-
     @property
     def onscreen_size(self) -> Tuple[float, float]:
         """
@@ -374,7 +361,6 @@ class MediaObject(PhysicalObject) :
         TiledMediaObject, etc.)
         """
         pass
-
 
     @property
     def bottomright(self) -> Tuple[float, float]:
@@ -393,7 +379,6 @@ class MediaObject(PhysicalObject) :
         x = o[0] + s[0]
         y = o[1] + s[1]
         return (x,y)
-
 
     @property
     def onscreen_area(self) -> float:
@@ -518,7 +503,6 @@ class MediaObject(PhysicalObject) :
         """
         return "%s(%s)" % (type(self).__name__, self._media_id)
 
-
     def __repr__(self) -> str:
         """
         Method :
@@ -534,7 +518,6 @@ class MediaObject(PhysicalObject) :
         """
         return "%s(%s)" % (type(self).__name__, repr(self._media_id))
 
-
 class LoadError(Exception):
     """
     Exception :
@@ -545,7 +528,6 @@ class LoadError(Exception):
     format conversion, or media initialization.
     """
     pass
-
 
 class RenderMode:
     """
@@ -566,9 +548,4 @@ class RenderMode:
     Invisible = 0
     Draft = 1
     HighQuality = 2
-
-
-
-
-
 

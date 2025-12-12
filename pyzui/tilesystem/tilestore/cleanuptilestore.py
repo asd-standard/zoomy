@@ -1,4 +1,19 @@
 #!/usr/bin/env python
+## PyZUI - Python Zooming User Interface
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 3
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
+
 """Manual tilestore cleanup utility for PyZUI.
 
 This script allows you to manually clean up old tiles from the tilestore directory.
@@ -13,7 +28,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 import tilestore as TileStore
 from logger import LoggerConfig, get_logger
-
 
 def main() -> int:
     """
@@ -147,7 +161,6 @@ Examples:
         print('='*60 + '\n')
 
     return 0
-
 
 if __name__ == '__main__':
     sys.exit(main())

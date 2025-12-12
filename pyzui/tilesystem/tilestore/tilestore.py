@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """Module for managing the disk-based tile storage facility."""
 import os
@@ -79,7 +77,6 @@ def get_media_path(media_id: str) -> str:
     media_dir = os.path.join(tile_dir, media_hash)
     return media_dir
 
-
 def get_tile_path(tile_id: Tuple[str, int, int, int], mkdirp: bool = False, prefix: Optional[str] = None, filext: Optional[str] = None) -> str:
     """
     Function :
@@ -127,7 +124,6 @@ def get_tile_path(tile_id: Tuple[str, int, int, int], mkdirp: bool = False, pref
     
     return filename
 
-
 def load_metadata(media_id: str) -> bool:
     """
     Function :
@@ -166,7 +162,6 @@ def load_metadata(media_id: str) -> bool:
 
     return True
 
-
 def get_metadata(media_id: str, key: str) -> Optional[Any]:
     """
     Function :
@@ -183,7 +178,6 @@ def get_metadata(media_id: str, key: str) -> Optional[Any]:
     if media_id not in __metadata and not load_metadata(media_id):
         return None
     return __metadata[media_id].get(key)
-
 
 def write_metadata(media_id: str, **kwargs: Any) -> None:
     """
@@ -204,7 +198,6 @@ def write_metadata(media_id: str, **kwargs: Any) -> None:
             % (key, str(val), type(val).__name__))
     f.close()
 
-
 def tiled(media_id: str) -> bool:
     """
     Function :
@@ -224,7 +217,6 @@ def tiled(media_id: str) -> bool:
     #print(os.path.join(path, "metadata"))
     return os.path.exists(os.path.join(path, "metadata")) and \
            os.path.exists(get_tile_path((media_id, 0, 0, 0)))
-
 
 def get_directory_size(path: str) -> int:
     """
@@ -247,7 +239,6 @@ def get_directory_size(path: str) -> int:
     except Exception as e:
         _get_logger().warning(f'Error calculating directory size for {path}: {e}')
     return total_size
-
 
 def get_tilestore_stats() -> Dict[str, Any]:
     """
@@ -293,7 +284,6 @@ def get_tilestore_stats() -> Dict[str, Any]:
         logger.error(f'Error getting tilestore stats: {e}')
 
     return stats
-
 
 def cleanup_old_tiles(max_age_days: int = 3, dry_run: bool = False) -> Dict[str, Any]:
     """
@@ -431,7 +421,6 @@ def cleanup_old_tiles(max_age_days: int = 3, dry_run: bool = False) -> Dict[str,
 
     return stats
 
-
 def auto_cleanup(max_age_days: int = 3, enable: bool = True) -> Optional[Dict[str, Any]]:
     """
     Function :
@@ -475,21 +464,4 @@ def auto_cleanup(max_age_days: int = 3, enable: bool = True) -> Optional[Dict[st
     )
 
     return cleanup_stats
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

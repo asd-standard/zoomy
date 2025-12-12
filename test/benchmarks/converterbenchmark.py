@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """
 Converter Benchmark Module
@@ -53,7 +51,6 @@ from pyzui.objects.scene.qzui import QZUI
 import pyzui.objects.scene.scene as Scene
 from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject
 
-
 def mem(size: str = 'rss') -> int:
     """
     Function :
@@ -76,7 +73,6 @@ def mem(size: str = 'rss') -> int:
     """
     return int(os.popen("ps -p %d -o %s | tail -1" %
         (os.getpid(), size)).read())
-
 
 def benchmark(filename: str, ppmfile: str) -> None:
     """
@@ -199,7 +195,6 @@ def benchmark(filename: str, ppmfile: str) -> None:
     print("Done: %d frames took %.2fs, mean framerate %.2f FPS" %
           (num_frames, elapsed, fps))
 
-
 def main() -> None:
     """
     Function :
@@ -244,7 +239,6 @@ def main() -> None:
         ## Cleanup temporary directories and files
         shutil.rmtree(TileStore.tile_dir, ignore_errors=True)
         os.unlink(ppmfile)
-
 
 if __name__ == '__main__':
     main()

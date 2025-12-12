@@ -50,13 +50,18 @@ of precedence (later sources override earlier ones):</p>
 quickly override specific settings via command-line flags for testing or debugging.</p>
 <section id="configuration-categories">
 <h2>Configuration Categories<a class="headerlink" href="#configuration-categories" title="Link to this heading">¶</a></h2>
-<dl class="simple">
+<dl>
 <dt><strong>Logging Configuration</strong></dt><dd><p>Controls how PyZUI logs information during execution.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>By default, PyZUI logs only to file (not to console) for silent operation.
+Use <code class="docutils literal notranslate"><span class="pre">--console</span></code> to enable console output.</p>
+</div>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">debug</span></code> (bool): Enable debug mode with maximum logging detail</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">verbose</span></code> (bool): Enable verbose mode with detailed info logging</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">log_to_file</span></code> (bool): Write logs to rotating log files</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">log_to_console</span></code> (bool): Display logs in the terminal</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">log_to_file</span></code> (bool): Write logs to rotating log files (default: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">log_to_console</span></code> (bool): Display logs in the terminal (default: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">colored_output</span></code> (bool): Use ANSI color codes in console output</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">log_dir</span></code> (str): Directory path for log files (default: <code class="docutils literal notranslate"><span class="pre">./logs</span></code>)</p></li>
 </ul>
@@ -102,6 +107,7 @@ quickly override specific settings via command-line flags for testing or debuggi
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>-d,<span class="w"> </span>--debug<span class="w">              </span><span class="c1"># Enable debug mode (maximum logging detail)</span>
 -v,<span class="w"> </span>--verbose<span class="w">            </span><span class="c1"># Enable verbose mode (detailed info logging)</span>
 --log-dir<span class="w"> </span>DIR<span class="w">            </span><span class="c1"># Custom directory for log files</span>
+--console<span class="w">                </span><span class="c1"># Enable console logging (default: disabled)</span>
 --no-console<span class="w">             </span><span class="c1"># Disable console logging</span>
 --no-file<span class="w">                </span><span class="c1"># Disable file logging</span>
 --no-color<span class="w">               </span><span class="c1"># Disable colored console output</span>
@@ -117,7 +123,7 @@ quickly override specific settings via command-line flags for testing or debuggi
 <h2>Configuration Examples<a class="headerlink" href="#configuration-examples" title="Link to this heading">¶</a></h2>
 <p><strong>Example 1: Development Mode with Full Debug Logging</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run with debug logging to both console and file</span>
-python<span class="w"> </span>main.py<span class="w"> </span>--debug
+python<span class="w"> </span>main.py<span class="w"> </span>--debug<span class="w"> </span>--console
 
 <span class="c1"># This enables:</span>
 <span class="c1"># - DEBUG level console output</span>
@@ -126,19 +132,19 @@ python<span class="w"> </span>main.py<span class="w"> </span>--debug
 <span class="c1"># - File logging to ./logs/pyzui.log</span>
 </pre></div>
 </div>
-<p><strong>Example 2: Production Mode with Minimal Console Output</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run with warnings only in console, but full logging to file</span>
-python<span class="w"> </span>main.py<span class="w"> </span>--no-console<span class="w"> </span>--log-dir<span class="w"> </span>/var/log/pyzui
+<p><strong>Example 2: Production Mode with Custom Log Directory</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run with default settings (file only) to custom directory</span>
+python<span class="w"> </span>main.py<span class="w"> </span>--log-dir<span class="w"> </span>/var/log/pyzui
 
 <span class="c1"># This enables:</span>
-<span class="c1"># - No console output</span>
+<span class="c1"># - No console output (default)</span>
 <span class="c1"># - Full logging to /var/log/pyzui/pyzui.log</span>
 <span class="c1"># - Default tilestore cleanup</span>
 </pre></div>
 </div>
 <p><strong>Example 3: Quick Testing Without Logging</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run without any logging for performance testing</span>
-python<span class="w"> </span>main.py<span class="w"> </span>--no-console<span class="w"> </span>--no-file
+python<span class="w"> </span>main.py<span class="w"> </span>--no-file
 </pre></div>
 </div>
 <p><strong>Example 4: Extended Tile Cache</strong></p>
@@ -160,17 +166,22 @@ python<span class="w"> </span>main.py<span class="w"> </span>--cleanup-age<span 
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Run with temporary debug override:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use production config but enable debug for this session</span>
-python<span class="w"> </span>main.py<span class="w"> </span>--config<span class="w"> </span>production.json<span class="w"> </span>--debug
+<p>Run with temporary debug override and console output:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use production config but enable debug and console for this session</span>
+python<span class="w"> </span>main.py<span class="w"> </span>--config<span class="w"> </span>production.json<span class="w"> </span>--debug<span class="w"> </span>--console
 
-<span class="c1"># Result: Production settings are loaded, but debug mode</span>
-<span class="c1"># overrides the verbose=false setting from the config file</span>
+<span class="c1"># Result: Production settings are loaded, but debug mode and</span>
+<span class="c1"># console output override the settings from the config file</span>
 </pre></div>
 </div>
-<p><strong>Example 6: Custom Log Directory Structure</strong></p>
+<p><strong>Example 6: Console-Only Logging for Development</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Log only to console (no file) with verbose output</span>
+python<span class="w"> </span>main.py<span class="w"> </span>--verbose<span class="w"> </span>--console<span class="w"> </span>--no-file
+</pre></div>
+</div>
+<p><strong>Example 7: Custom Log Directory Structure</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Organize logs by date in a custom location</span>
-python<span class="w"> </span>main.py<span class="w"> </span>--verbose<span class="w"> </span>--log-dir<span class="w"> </span>~/pyzui-logs/<span class="k">$(</span>date<span class="w"> </span>+%Y-%m-%d<span class="k">)</span>
+python<span class="w"> </span>main.py<span class="w"> </span>--log-dir<span class="w"> </span>~/pyzui-logs/<span class="k">$(</span>date<span class="w"> </span>+%Y-%m-%d<span class="k">)</span>
 </pre></div>
 </div>
 </section>
@@ -182,7 +193,7 @@ python<span class="w"> </span>main.py<span class="w"> </span>--verbose<span clas
         <span class="s1">&#39;debug&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s1">&#39;verbose&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s1">&#39;log_to_file&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s1">&#39;log_to_console&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;log_to_console&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s1">&#39;colored_output&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="s1">&#39;log_dir&#39;</span><span class="p">:</span> <span class="s1">&#39;logs&#39;</span>
     <span class="p">},</span>
@@ -196,9 +207,8 @@ python<span class="w"> </span>main.py<span class="w"> </span>--verbose<span clas
 </div>
 <dl class="simple">
 <dt>This results in:</dt><dd><ul class="simple">
-<li><p>Console logging at WARNING level</p></li>
-<li><p>File logging at INFO level</p></li>
-<li><p>Colored console output enabled</p></li>
+<li><p>No console logging (silent operation)</p></li>
+<li><p>File logging at INFO level to ./logs/pyzui.log</p></li>
 <li><p>Automatic tilestore cleanup on startup</p></li>
 <li><p>Tiles older than 3 days are removed</p></li>
 </ul>
@@ -207,11 +217,20 @@ python<span class="w"> </span>main.py<span class="w"> </span>--verbose<span clas
 </section>
 <section id="viewing-current-configuration">
 <h2>Viewing Current Configuration<a class="headerlink" href="#viewing-current-configuration" title="Link to this heading">¶</a></h2>
-<p>PyZUI logs its active configuration when starting. Look for output like:</p>
+<p>PyZUI logs its active configuration when starting. To view this information, either enable
+console output with <code class="docutils literal notranslate"><span class="pre">--console</span></code> or check the log file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># View configuration on console</span>
+python<span class="w"> </span>main.py<span class="w"> </span>--console
+
+<span class="c1"># Or check the log file</span>
+tail<span class="w"> </span>-f<span class="w"> </span>logs/pyzui.log
+</pre></div>
+</div>
+<p>Look for output like:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[INFO    ] pyzui.LoggerConfig       | ============================================================
 [INFO    ] pyzui.LoggerConfig       | PyZUI Logging System Initialized
 [INFO    ] pyzui.LoggerConfig       | Debug Mode: False
-[INFO    ] pyzui.LoggerConfig       | Console Level: WARNING
+[INFO    ] pyzui.LoggerConfig       | Console Level: OFF
 [INFO    ] pyzui.LoggerConfig       | File Level: INFO
 [INFO    ] pyzui.LoggerConfig       | Log File: /path/to/logs/pyzui.log
 [INFO    ] pyzui.LoggerConfig       | ============================================================

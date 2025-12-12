@@ -31,12 +31,12 @@
           <div class="body" role="main">
             
   <h1>Source code for pyzui.objects.physicalobject</h1><div class="highlight"><pre>
-<span></span><span class="c1">## PyZUI 0.1 - Python Zooming User Interface</span>
-<span class="c1">## Copyright (C) 2009  David Roberts &lt;d@vidr.cc&gt;</span>
+<span></span><span class="c1">## PyZUI - Python Zooming User Interface</span>
+<span class="c1">## Copyright (C) 2009 David Roberts &lt;d@vidr.cc&gt;</span>
 <span class="c1">##</span>
 <span class="c1">## This program is free software; you can redistribute it and/or</span>
 <span class="c1">## modify it under the terms of the GNU General Public License</span>
-<span class="c1">## as published by the Free Software Foundation; either version 2</span>
+<span class="c1">## as published by the Free Software Foundation; either version 3</span>
 <span class="c1">## of the License, or (at your option) any later version.</span>
 <span class="c1">##</span>
 <span class="c1">## This program is distributed in the hope that it will be useful,</span>
@@ -45,9 +45,7 @@
 <span class="c1">## GNU General Public License for more details.</span>
 <span class="c1">##</span>
 <span class="c1">## You should have received a copy of the GNU General Public License</span>
-<span class="c1">## along with this program; if not, write to the Free Software</span>
-<span class="c1">## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA</span>
-<span class="c1">## 02110-1301, USA.</span>
+<span class="c1">## along with this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
 
 <span class="sd">&quot;&quot;&quot;An object that obeys the laws of physics.&quot;&quot;&quot;</span>
 
@@ -128,7 +126,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;the velocity is damped at each frame such that each second it is </span>
 <span class="sd">    reduced by a factor of damping_factor: v = u * damping_factor**-t&quot;&quot;&quot;</span>
     <span class="n">damping_factor</span> <span class="o">=</span> <span class="mi">512</span> <span class="c1">#256</span>
@@ -157,7 +154,6 @@
         <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">velocity</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span>
             <span class="n">velocity</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="k">return</span> <span class="n">velocity</span>
-
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">u</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -198,7 +194,6 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">u</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">damping_factor</span><span class="p">))</span> \
                <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">damping_factor</span><span class="o">**-</span><span class="n">t</span><span class="p">)</span>
 
-
 <div class="viewcode-block" id="PhysicalObject.move">
 <a class="viewcode-back" href="../../../pyzui/physicalobject.html#pyzui.objects.physicalobject.PhysicalObject.move">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dy</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -217,7 +212,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">+=</span> <span class="n">dx</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">+=</span> <span class="n">dy</span></div>
-
 
 
 <div class="viewcode-block" id="PhysicalObject.zoom">
@@ -247,7 +241,6 @@
         <span class="c1">##    = pos&#39; + (P - pos) * 2**(zoomlevel&#39;-zoomlevel)</span>
         <span class="c1">## solving for P = P&#39; yields:</span>
         <span class="c1">##   pos&#39; = P - (P - pos) * 2**amount</span>
-
 
         <span class="n">Px</span><span class="p">,</span> <span class="n">Py</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">Px</span> <span class="o">-</span> <span class="p">(</span><span class="n">Px</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">amount</span>
@@ -294,7 +287,6 @@
         <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vz</span> <span class="o">+=</span> <span class="n">u</span></div>
 
 
-
 <div class="viewcode-block" id="PhysicalObject.step">
 <a class="viewcode-back" href="../../../pyzui/physicalobject.html#pyzui.objects.physicalobject.PhysicalObject.step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -329,7 +321,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">vz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__damp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vz</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span></div>
 
 
-
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">moving</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -346,7 +337,6 @@
 <span class="sd">        Returns False if all velocity components are zero.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vx</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">vy</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">vz</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__get_zoomlevel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -439,10 +429,6 @@
     <span class="n">centre</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_centre</span><span class="p">,</span> <span class="n">__set_centre</span><span class="p">)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creating PhysicalObject.centre property with __get_centre as</span>
 <span class="sd">    getter and __set_centre as setter&quot;&quot;&quot;</span></div>
-
-
-
-
 
 
 </pre></div>

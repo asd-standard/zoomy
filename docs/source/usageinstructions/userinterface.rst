@@ -3,9 +3,9 @@ User Interface
 
 Upon startup of PyZUI, the user is presented with the home scene:
 
-.. image:: ../_static/home_scene.png
+.. image:: ../../../data/home.png
    :align: center
-   :width: 500px
+   :width: 800px
    :alt: PyZUI logo
 
 The menus provide the following actions:

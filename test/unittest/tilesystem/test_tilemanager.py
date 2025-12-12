@@ -1,3 +1,18 @@
+## PyZUI - Python Zooming User Interface
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 3
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
+
 import pytest
 from unittest.mock import Mock, patch, MagicMock, call
 from pyzui.tilesystem import tilemanager
@@ -525,7 +540,6 @@ class TestTileManager:
         assert tilemanager.get_metadata('dynamic:fern', 'width') == expected_dimension
         assert tilemanager.get_metadata('dynamic:fern', 'height') == expected_dimension
 
-
 class TestTileManagerCutTile:
     """
     Feature: Tile Manager Tile Synthesis (cut_tile)
@@ -788,7 +802,6 @@ class TestTileManagerCutTile:
             assert parent_level == expected_level
             assert parent_row == expected_row
             assert parent_col == expected_col
-
 
 class TestTileManagerEdgeCases:
     """

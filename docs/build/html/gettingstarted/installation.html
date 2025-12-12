@@ -38,20 +38,20 @@
 <p>This PyZUI fork was developed with debian 13 “trixie” as d.e and a miniconda for
 dependencies management. It has also been tested on AArch64 and Win11, always
 with a miniconda enviroment managing all dependencies.</p>
-<p>original project can be found at:
+<p>This project is a fork, original project can be found at:
 <a class="reference external" href="https://github.com/davidar/pyzui">https://github.com/davidar/pyzui</a></p>
 </section>
 <section id="dependencies">
 <h1>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">¶</a></h1>
 <p>PyZui has been developed with the following python version</p>
 <ul class="simple">
-<li><p>python = 3.12.12</p></li>
+<li><p>python=3.12.12</p></li>
 </ul>
 <p>All dependencies have been installed in a miniconda enviroment, for all 3
 platforms tested the procedure has always been to install miniconda, create an
 enviroment:</p>
 <blockquote>
-<div><p>conda create -n “enviroment name” python = 3.12.12</p>
+<div><p>conda create -n “enviroment name” python=3.12.12</p>
 </div></blockquote>
 <p>And activate such enviroment</p>
 <blockquote>
@@ -63,9 +63,8 @@ enviroment:</p>
 </div></blockquote>
 <p>PyZUI depends on the following Python packages:</p>
 <ul class="simple">
-<li><p>pyside6 = 6.7.2</p></li>
-<li><p>pillow= 11.0.3</p></li>
-<li><p>pyvips = 2.2.3</p></li>
+<li><p>pyside6=6.7.2</p></li>
+<li><p>pillow=12.0.0</p></li>
 </ul>
 <p>The following non-Python packages are also required by certain features of the
 application, those are installed trough the Conda-Forge Anaconda channel.
@@ -75,11 +74,21 @@ enviroment:</p>
 <blockquote>
 <div><p>conda install -c conda-forge “package”=”version number”</p>
 </div></blockquote>
-<ul class="simple">
-<li><p>poppler=24.09.0
-pdftoppm from Poppler or Xpdf (optional if you do not intend viewing PDFs);</p></li>
+<ul>
+<li><p>pyvips=3.0.0</p>
+<p>Poppler usually gets installed with pyvips so it’s not necessary to
+install it’s anyway an explicit codebase dependency for pdf management.</p>
+</li>
+<li><p>poppler=24.12.0</p></li>
 </ul>
-<p>After completion of this dependencies set up you can install</p>
+<p>pdftoppm from Poppler or Xpdf (optional if you do not intend viewing PDFs);</p>
+<p>These are the bare minimum dependencies for the project to run, on linux DE’s
+using Wayland as display server you can also install:</p>
+<ul>
+<li><p>qt6-wayland-6.7.2</p>
+<p>This allow the project to run natively and take advantage of hardware acceleration</p>
+</li>
+</ul>
 <section id="ubuntu-debian-aarch64-specific-instructions">
 <h2>Ubuntu/Debian, AArch64, specific instructions<a class="headerlink" href="#ubuntu-debian-aarch64-specific-instructions" title="Link to this heading">¶</a></h2>
 <ul class="simple">

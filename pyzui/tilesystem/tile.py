@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """Class for representing image tiles."""
 
@@ -61,7 +59,6 @@ class Tile(object):
 
             
 
-
     def crop(self, bbox: Tuple[int, int, int, int]) -> 'Tile':
         """
         Method :
@@ -80,7 +77,6 @@ class Tile(object):
         
         return Tile(self.__image.copy(int(x), int(y), int(w), int(h)))
 
-
     def resize(self, width: int, height: int) -> 'Tile':
         """
         Method :
@@ -97,7 +93,6 @@ class Tile(object):
             QtCore.Qt.IgnoreAspectRatio,
             QtCore.Qt.FastTransformation))
 
-
     def save(self, filename: str) -> None:
         """
         Method :
@@ -111,7 +106,6 @@ class Tile(object):
         method.
         """
         self.__image.save(filename)
-
 
     def draw(self, painter: 'QtGui.QPainter', x: int, y: int) -> None:
         """
@@ -128,7 +122,6 @@ class Tile(object):
         """
         painter.drawImage(x, y, self.__image)
 
-
     @property
     def size(self) -> Tuple[int, int]:
         """
@@ -144,8 +137,6 @@ class Tile(object):
         """
         return (self.__image.width(), self.__image.height())
 
-
-
 def new(width: int, height: int) -> Tile:
     """
     Function :
@@ -159,7 +150,6 @@ def new(width: int, height: int) -> Tile:
     Create a new tile with the given dimensions calling QtGui.QImage() istance.
     """
     return Tile(QtGui.QImage(width, height, QtGui.QImage.Format_RGB32))
-
 
 def fromstring(string: str, width: int, height: int) -> Tile:
     """
@@ -177,7 +167,6 @@ def fromstring(string: str, width: int, height: int) -> Tile:
     """
       
     return Tile(Image.frombytes('RGB', (width, height), string.encode('latin-1')))
-
 
 def merged(t1: Tile, t2: Optional[Tile], t3: Optional[Tile], t4: Optional[Tile]) -> Tile:
     """

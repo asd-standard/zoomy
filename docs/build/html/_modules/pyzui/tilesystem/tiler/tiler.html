@@ -31,12 +31,12 @@
           <div class="body" role="main">
             
   <h1>Source code for pyzui.tilesystem.tiler.tiler</h1><div class="highlight"><pre>
-<span></span><span class="c1">## PyZUI 0.1 - Python Zooming User Interface</span>
-<span class="c1">## Copyright (C) 2009  David Roberts &lt;d@vidr.cc&gt;</span>
+<span></span><span class="c1">## PyZUI - Python Zooming User Interface</span>
+<span class="c1">## Copyright (C) 2009 David Roberts &lt;d@vidr.cc&gt;</span>
 <span class="c1">##</span>
 <span class="c1">## This program is free software; you can redistribute it and/or</span>
 <span class="c1">## modify it under the terms of the GNU General Public License</span>
-<span class="c1">## as published by the Free Software Foundation; either version 2</span>
+<span class="c1">## as published by the Free Software Foundation; either version 3</span>
 <span class="c1">## of the License, or (at your option) any later version.</span>
 <span class="c1">##</span>
 <span class="c1">## This program is distributed in the hope that it will be useful,</span>
@@ -45,9 +45,7 @@
 <span class="c1">## GNU General Public License for more details.</span>
 <span class="c1">##</span>
 <span class="c1">## You should have received a copy of the GNU General Public License</span>
-<span class="c1">## along with this program; if not, write to the Free Software</span>
-<span class="c1">## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA</span>
-<span class="c1">## 02110-1301, USA.</span>
+<span class="c1">## along with this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
 
 <span class="sd">&quot;&quot;&quot;Threaded image tiler (abstract base class).&quot;&quot;&quot;</span>
 
@@ -141,7 +139,6 @@
 
         
 
-
 <div class="viewcode-block" id="Tiler._scanline">
 <a class="viewcode-back" href="../../../../pyzui/tiler.html#pyzui.tilesystem.tiler.Tiler._scanline">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_scanline</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -182,7 +179,6 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">__progress</span> <span class="o">+=</span> <span class="mf">1.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">__numtiles</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%3d%%</span><span class="s2"> tiled&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__progress</span><span class="o">*</span><span class="mi">100</span><span class="p">))</span>
-
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__load_row_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -238,7 +234,6 @@
                     <span class="c1">#print(tiles[i],&#39;\n&#39;)</span>
         
 
-
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__numtiles_across_total</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__numtiles_across_total</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                 <span class="c1">## last tile in row</span>
@@ -251,7 +246,6 @@
                 
         
         <span class="k">return</span> <span class="n">tiles</span>
-
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__mergerows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row_a</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">row_b</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -285,7 +279,6 @@
                 <span class="n">row_b</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">row_b</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span>
 
         <span class="k">return</span> <span class="n">tiles</span>
-
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__tiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilelevel</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -351,7 +344,6 @@
 
         <span class="k">return</span> <span class="n">tiles</span>
 
-
     <span class="k">def</span><span class="w"> </span><span class="nf">__calculate_maxtilelevel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -389,7 +381,6 @@
             
             <span class="k">return</span> <span class="n">maxtilelevel</span>
 
-
     <span class="k">def</span><span class="w"> </span><span class="nf">__calculate_numtiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -417,7 +408,6 @@
             <span class="n">numtiles</span> <span class="o">+=</span> <span class="n">numtiles_across</span> <span class="o">*</span> <span class="n">numtiles_down</span>
 
         <span class="k">return</span> <span class="n">numtiles</span>
-
 
 <div class="viewcode-block" id="Tiler.run">
 <a class="viewcode-back" href="../../../../pyzui/tiler.html#pyzui.tilesystem.tiler.Tiler.run">[docs]</a>
@@ -482,7 +472,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;tiling complete&quot;</span><span class="p">)</span></div>
 
 
-
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">progress</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -498,7 +487,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__progress</span>
 
-
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -512,7 +500,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;Tiler(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_infile</span>
 
-
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -525,9 +512,6 @@
 <span class="sd">        Return formal string representation of the Tiler object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;Tiler(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_infile</span><span class="p">)</span></div>
-
-
-
 
 
 </pre></div>

@@ -1,3 +1,18 @@
+## PyZUI - Python Zooming User Interface
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 3
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
+
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -32,7 +47,6 @@ exclude_patterns = []
 # Automatically generate autosummary pages
 autosummary_generate = True
 
-
 # -- Options for autodoc -----------------------------------------------------
 
 autodoc_default_options = {
@@ -42,7 +56,6 @@ autodoc_default_options = {
 autodoc_member_order = 'bysource'
 autodoc_typehints = 'none'  # Don't auto-generate type hint documentation
 autoclass_content = 'both'
-
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

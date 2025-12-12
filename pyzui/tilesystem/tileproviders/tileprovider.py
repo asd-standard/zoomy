@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """Threaded class for loading tiles into memory (abstract base class)."""
 
@@ -67,7 +65,6 @@ class TileProvider(Thread):
 
         self._logger = get_logger(str(self))
 
-
     def request(self, tile_id: Tuple[str, int, int, int]) -> None:
         """
         Method :
@@ -90,7 +87,6 @@ class TileProvider(Thread):
         self.__tasks_available.notify()
         self.__tasks_available.release()
 
-
     def _load(self, tile_id: Tuple[str, int, int, int]) -> Optional[Any]:
         """
         Method :
@@ -105,7 +101,6 @@ class TileProvider(Thread):
         Returns None if the tile does not exist.
         """
         pass
-
 
     def run(self) -> None:
         """
@@ -141,7 +136,6 @@ class TileProvider(Thread):
                     self._logger.debug("unavailable %s", str(tile_id))
                     self.__tilecache[tile_id] = None
 
-
     def purge(self, media_id: Optional[str] = None) -> None:
         """
         Method :
@@ -166,12 +160,9 @@ class TileProvider(Thread):
             self.__tasks = deque()
         self.__tasks_available.release()
 
-
     def __str__(self) -> str:
         return type(self).__name__
 
-
     def __repr__(self) -> str:
         return "%s()" % type(self).__name__
-
 

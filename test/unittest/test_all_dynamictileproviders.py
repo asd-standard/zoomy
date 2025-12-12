@@ -1,3 +1,18 @@
+## PyZUI - Python Zooming User Interface
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 3
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
+
 """
 Automated test suite for all DynamicTileProvider implementations.
 
@@ -25,7 +40,6 @@ from typing import List, Tuple, Type
 
 # Import base classes
 from pyzui.tilesystem.tileproviders import DynamicTileProvider
-
 
 # =============================================================================
 # PROVIDER DISCOVERY
@@ -73,13 +87,11 @@ def discover_dynamic_providers() -> List[Tuple[str, Type]]:
 
     return providers
 
-
 # Discover all providers at module load time
 DISCOVERED_PROVIDERS = discover_dynamic_providers()
 
 # Create parameter list for pytest (provider_name for test IDs)
 PROVIDER_PARAMS = [(name, cls) for name, cls in DISCOVERED_PROVIDERS]
-
 
 # =============================================================================
 # PARAMETRIZED TESTS - RUN FOR ALL DISCOVERED PROVIDERS
@@ -341,7 +353,6 @@ class TestAllDynamicTileProviders:
             mock_image.save.assert_called_once_with(outfile), \
                 f"{provider_name}._load_dynamic() should save tile to outfile"
 
-
 # =============================================================================
 # DISCOVERY VERIFICATION TEST
 # =============================================================================
@@ -392,7 +403,6 @@ class TestProviderDiscovery:
             assert len(name) > 0, "Provider name cannot be empty"
             assert name[0].isupper(), f"Provider class name '{name}' should start with uppercase"
             assert 'Provider' in name, f"Provider class '{name}' should contain 'Provider'"
-
 
 # =============================================================================
 # USAGE INFORMATION

@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """QWidget for displaying the ZUI."""
 
@@ -81,7 +79,6 @@ class QZUI(QtWidgets.QWidget, Thread) :
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.setMouseTracking(True)
 
-
     def __zoom(self, num_steps: float) -> None:
         """
         Method :
@@ -102,7 +99,6 @@ class QZUI(QtWidgets.QWidget, Thread) :
         self.__active_object.centre = self.__mousepos
         self.__active_object.vz += scale * num_steps
 
-
     def __centre(self) -> None:
         """
         Method :
@@ -120,7 +116,6 @@ class QZUI(QtWidgets.QWidget, Thread) :
         self.__active_object.vx = self.__active_object.vy = 0.0
         self.__active_object.aim('x', self.width()/2  - self.__mousepos[0])
         self.__active_object.aim('y', self.height()/2 - self.__mousepos[1])
-
 
     def paintEvent(self, event: QtGui.QPaintEvent) -> None:
         """
@@ -160,7 +155,6 @@ class QZUI(QtWidgets.QWidget, Thread) :
         if self.__mouse_left_down:
             self.__active_object.vx = self.__active_object.vy = 0.0
 
-
     def timerEvent(self, event: QtCore.QTimerEvent) -> None:
         """
         Method :
@@ -194,7 +188,6 @@ class QZUI(QtWidgets.QWidget, Thread) :
         else:
             QtWidgets.QWidget.timerEvent(self, event)
 
-
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
         """
         Method :
@@ -210,7 +203,6 @@ class QZUI(QtWidgets.QWidget, Thread) :
         num_steps = round(num_degrees / self.zoom_sensitivity , 3) #15
         self.__mousepos = (int(event.position().x()), int(event.position().y()))
         self.__zoom(num_steps)
-
 
     def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
         """
@@ -237,7 +229,6 @@ class QZUI(QtWidgets.QWidget, Thread) :
                 ## shift-click won't change the selection
                 self.scene.right_selection = self.scene.get(self.__mousepos)
 
-
     def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
         """
         Method :
@@ -259,7 +250,6 @@ class QZUI(QtWidgets.QWidget, Thread) :
 
         self.__mousepos = (int(event.position().x()), int(event.position().y()))
 
-
     def mouseReleaseEvent(self, event: QtGui.QMouseEvent) -> None:
         """
         Method :
@@ -273,7 +263,6 @@ class QZUI(QtWidgets.QWidget, Thread) :
         """
         if event.button() == QtCore.Qt.LeftButton and self.__mouse_left_down:
             self.__mouse_left_down = False
-
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         """
@@ -319,7 +308,6 @@ class QZUI(QtWidgets.QWidget, Thread) :
         else:
             QtWidgets.QWidget.keyPressEvent(self, event)
 
-
     def keyReleaseEvent(self, event: QtGui.QKeyEvent) -> None:
         """
         Method :
@@ -339,7 +327,6 @@ class QZUI(QtWidgets.QWidget, Thread) :
         else:
             QtWidgets.QWidget.keyPressEvent(self, event)
 
-
     def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         """
         Method :
@@ -352,7 +339,6 @@ class QZUI(QtWidgets.QWidget, Thread) :
         Handle resize events to update the viewport size.
         """
         self.__scene.viewport_size = (self.width(), self.height())
-
 
     @property
     def __active_object(self) -> Any:
@@ -370,7 +356,6 @@ class QZUI(QtWidgets.QWidget, Thread) :
             return self.scene.selection
         else:
             return self.scene
-
 
     def __get_framerate(self) -> int:
         """
@@ -439,8 +424,4 @@ class QZUI(QtWidgets.QWidget, Thread) :
         self.__scene.aim('z', 5.0)
 
     scene = property(__get_scene, __set_scene)
-
-
-
-
 

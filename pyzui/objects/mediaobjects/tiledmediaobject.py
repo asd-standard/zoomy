@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """Tiled media to be displayed in the ZUI."""
 
@@ -169,7 +167,6 @@ class TiledMediaObject(MediaObject):
         else:
             return 0.5 * (self.__converter.progress + self.__tiler.progress)
 
-
     def __pixpos2rowcol(self, pixpos: Tuple[float, float], tilescale: float) -> Tuple[int, int]:
         """
         Method :
@@ -187,7 +184,6 @@ class TiledMediaObject(MediaObject):
         col = int((pixpos[0]-o[0]) / (tilescale*self.__tilesize))
         row = int((pixpos[1]-o[1]) / (tilescale*self.__tilesize))
         return (row,col)
-
 
     def __rowcol_bound(self, tilelevel: int) -> Tuple[int, int]:
         """
@@ -218,7 +214,6 @@ class TiledMediaObject(MediaObject):
             col_bound = int((self.__width  - 1) / tile_pixsize)
 
         return row_bound, col_bound
-
 
     def __render_tileblock(self, tileblock_id: Tuple[int, int, int, int, int], mode: int) -> Any:
         """
@@ -284,7 +279,6 @@ class TiledMediaObject(MediaObject):
         self.__tileblock_age = 0
 
         return tileblock
-
 
     def __render_media(self, painter: Any, mode: int) -> None:
         """
@@ -359,7 +353,6 @@ class TiledMediaObject(MediaObject):
         
         painter.drawImage(int(x), int(y), image_scaled)
 
-
     def __render_placeholder(self, painter: Any) -> None:
         """
         Method :
@@ -395,7 +388,6 @@ class TiledMediaObject(MediaObject):
                 painter.setFont(font)
                 painter.drawText(x, y, w, h, QtCore.Qt.AlignCenter,
                     "loading...")
-
 
     def __try_load(self) -> None:
         """
@@ -453,7 +445,6 @@ class TiledMediaObject(MediaObject):
                 self.fit((old_x1, old_y1, old_x2, old_y2))
                 self.centre = old_centre
 
-
     def __run_tiler(self) -> None:
         """
         Method :
@@ -488,7 +479,6 @@ class TiledMediaObject(MediaObject):
             
         except IOError :
             raise LoadError("there was an error creating the tiler: %s")
-
 
     def render(self, painter: Any, mode: int) -> None:
         """
@@ -542,7 +532,6 @@ class TiledMediaObject(MediaObject):
 
         else:
             self.__render_placeholder(painter)
-
 
     @property
     def onscreen_size(self) -> Tuple[float, float]:

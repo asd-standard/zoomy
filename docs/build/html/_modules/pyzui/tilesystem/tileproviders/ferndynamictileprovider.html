@@ -31,12 +31,12 @@
           <div class="body" role="main">
             
   <h1>Source code for pyzui.tilesystem.tileproviders.ferndynamictileprovider</h1><div class="highlight"><pre>
-<span></span><span class="c1">## PyZUI 0.1 - Python Zooming User Interface</span>
-<span class="c1">## Copyright (C) 2009  David Roberts &lt;d@vidr.cc&gt;</span>
+<span></span><span class="c1">## PyZUI - Python Zooming User Interface</span>
+<span class="c1">## Copyright (C) 2009 David Roberts &lt;d@vidr.cc&gt;</span>
 <span class="c1">##</span>
 <span class="c1">## This program is free software; you can redistribute it and/or</span>
 <span class="c1">## modify it under the terms of the GNU General Public License</span>
-<span class="c1">## as published by the Free Software Foundation; either version 2</span>
+<span class="c1">## as published by the Free Software Foundation; either version 3</span>
 <span class="c1">## of the License, or (at your option) any later version.</span>
 <span class="c1">##</span>
 <span class="c1">## This program is distributed in the hope that it will be useful,</span>
@@ -45,9 +45,7 @@
 <span class="c1">## GNU General Public License for more details.</span>
 <span class="c1">##</span>
 <span class="c1">## You should have received a copy of the GNU General Public License</span>
-<span class="c1">## along with this program; if not, write to the Free Software</span>
-<span class="c1">## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA</span>
-<span class="c1">## 02110-1301, USA.</span>
+<span class="c1">## along with this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
 
 <span class="sd">&quot;&quot;&quot;Dynamic tile provider for Barnsley&#39;s fern.&quot;&quot;&quot;</span>
 
@@ -91,7 +89,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">DynamicTileProvider</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">)</span>
-
 
     <span class="n">filext</span> <span class="o">=</span> <span class="s1">&#39;png&#39;</span>
     <span class="n">tilesize</span> <span class="o">=</span> <span class="mi">256</span>
@@ -157,7 +154,6 @@
                 <span class="n">n</span> <span class="o">-=</span> <span class="n">probability</span>
         <span class="k">return</span> <span class="n">transformation</span>
 
-
     <span class="k">def</span><span class="w"> </span><span class="nf">__transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method :</span>
@@ -185,7 +181,6 @@
         <span class="n">x_new</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="n">y_new</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">x_new</span><span class="p">,</span><span class="n">y_new</span><span class="p">)</span>
-
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__draw_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">tilesize_units</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -224,7 +219,6 @@
         <span class="n">y</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tilesize</span> <span class="o">-</span> <span class="n">y</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilesize</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="n">tile</span><span class="o">.</span><span class="n">putpixel</span><span class="p">((</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">)</span>
-
 
 <div class="viewcode-block" id="FernTileProvider._load_dynamic">
 <a class="viewcode-back" href="../../../../pyzui/ferntileprovider.html#pyzui.tilesystem.tileproviders.ferndynamictileprovider.FernTileProvider._load_dynamic">[docs]</a>

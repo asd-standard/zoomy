@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """The TileManager is responsible for requesting tiles from TileProviders,
 caching them in memory, and providing them to MediaObjects when requested
@@ -40,7 +38,6 @@ __temptilecache = None
 __tp_static = None
 __tp_dynamic = {}
 __logger = None
-
 
 def init(total_cache_size: int = 1024, auto_cleanup: bool = True, cleanup_max_age_days: int = 3) -> None:
     """
@@ -119,7 +116,6 @@ def load_tile(tile_id: Tuple[str, int, int, int]) -> None:
     else:
         __tp_static.request(tile_id)
 
-
 def get_tile(tile_id: Tuple[str, int, int, int]) -> Any:
     """
     Function :
@@ -153,7 +149,6 @@ def get_tile(tile_id: Tuple[str, int, int, int]) -> Any:
         return tile
     else:
         raise TileNotAvailable
-
 
 def cut_tile(tile_id: Tuple[str, int, int, int], tempcache: int = 0) -> Tuple[Any, bool]:
     """
@@ -235,7 +230,6 @@ def cut_tile(tile_id: Tuple[str, int, int, int], tempcache: int = 0) -> Tuple[An
 
     return tile, final
 
-
 def get_tile_robust(tile_id: Tuple[str, int, int, int]) -> Any:
     """
     Function :
@@ -256,7 +250,6 @@ def get_tile_robust(tile_id: Tuple[str, int, int, int]) -> Any:
     except (TileNotLoaded, TileNotAvailable):
         return cut_tile(tile_id)[0]
 
-
 def tiled(media_id: str) -> bool:
     """
     Function :
@@ -271,7 +264,6 @@ def tiled(media_id: str) -> bool:
     Will always return True for dynamic media.
     """
     return media_id.startswith('dynamic:') or TileStore.tiled(media_id)
-
 
 def get_metadata(media_id: str, key: str) -> Optional[Any]:
     """
@@ -300,7 +292,6 @@ def get_metadata(media_id: str, key: str) -> Optional[Any]:
     else:
         return TileStore.get_metadata(media_id, key)
 
-
 def purge(media_id: Optional[str] = None) -> None:
     """
     Function :
@@ -320,7 +311,6 @@ def purge(media_id: Optional[str] = None) -> None:
     for tp in list(__tp_dynamic.values()):
         tp.purge(media_id)
 
-
 class MediaNotTiled(Exception):
     """Exception for when tiles are requested from a media that has not been
     tiled yet.
@@ -330,12 +320,10 @@ class MediaNotTiled(Exception):
     """
     pass
 
-
 class TileNotLoaded(Exception):
     """Exception for when tiles are requested before they have been loaded into
     the tile cache."""
     pass
-
 
 class TileNotAvailable(Exception):
     """Exception for when an attempt to load the requested tile has previously

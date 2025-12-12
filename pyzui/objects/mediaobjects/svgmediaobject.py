@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """SVG objects to be displayed in the ZUI."""
 
@@ -66,7 +64,6 @@ class SVGMediaObject(MediaObject):
         self.__width = size.width()
         self.__height = size.height()
 
-
     transparent = True
 
     def render(self, painter: Any, mode: int) -> None:
@@ -90,7 +87,6 @@ class SVGMediaObject(MediaObject):
             x,y = self.topleft
             w,h = self.onscreen_size
             self.__renderer.render(painter, QtCore.QRectF(x,y,w,h))
-
 
     @property
     def onscreen_size(self) -> Tuple[float, float]:

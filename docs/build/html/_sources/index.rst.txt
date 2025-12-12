@@ -20,7 +20,7 @@ pan and zoom through the collection.
 ---
 
 This project is a fork of `github.com/davidar/pyzui <https://github.com/davidar/pyzui>`_, 
-original work from which it derives its initial architecture and features.
+original work from which it derives its architecture and main features.
 
 PyZUI is compatible with the following media formats:
 -----------------------------------------------------
@@ -31,7 +31,7 @@ PyZUI is compatible with the following media formats:
 ---
 
 This project is covered under the GNU General Public License v3.0, a copy must
-be under LICENCE on project root, otherwise visit `gnu.org <https://www.gnu.org/licenses/gpl-3.0.html>`_
+be under COPYING.txt on project root, otherwise visit `gnu.org <https://www.gnu.org/licenses/gpl-3.0.html>`_
 
 ---
 

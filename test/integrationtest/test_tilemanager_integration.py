@@ -1,3 +1,18 @@
+## PyZUI - Python Zooming User Interface
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 3
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
+
 """
 Integration Tests: TileManager Coordination
 ============================================
@@ -39,7 +54,6 @@ from pyzui.tilesystem.tilemanager import (
 )
 from pyzui.tilesystem.tiler import Tiler
 
-
 class ConcreteTiler(Tiler):
     """
     A concrete implementation of Tiler for testing purposes.
@@ -72,7 +86,6 @@ class ConcreteTiler(Tiler):
         self._current_row += 1
         return bytes(row_data)
 
-
 @pytest.fixture
 def temp_tilestore(tmp_path):
     """
@@ -100,7 +113,6 @@ def temp_tilestore(tmp_path):
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
 
-
 @pytest.fixture
 def initialized_tilemanager(temp_tilestore):
     """
@@ -115,7 +127,6 @@ def initialized_tilemanager(temp_tilestore):
     tilemanager.init(total_cache_size=100, auto_cleanup=False)
     yield
     tilemanager.purge()
-
 
 @pytest.fixture
 def sample_images(tmp_path):
@@ -146,7 +157,6 @@ def sample_images(tmp_path):
 
     yield images
 
-
 @pytest.fixture
 def tiled_media(temp_tilestore, sample_images, initialized_tilemanager):
     """
@@ -165,7 +175,6 @@ def tiled_media(temp_tilestore, sample_images, initialized_tilemanager):
 
     assert tiler.error is None
     yield media_id
-
 
 class TestTileManagerInitialization:
     """
@@ -227,7 +236,6 @@ class TestTileManagerInitialization:
         assert tilemanager.tiled("dynamic:fern") is True
 
         tilemanager.purge()
-
 
 class TestTileRequestRouting:
     """
@@ -298,7 +306,6 @@ class TestTileRequestRouting:
 
         with pytest.raises(MediaNotTiled):
             tilemanager.get_tile(tile_id)
-
 
 class TestGetTileBehavior:
     """
@@ -374,7 +381,6 @@ class TestGetTileBehavior:
 
         with pytest.raises(TileNotAvailable):
             tilemanager.get_tile(tile_id)
-
 
 class TestGetTileRobust:
     """
@@ -461,7 +467,6 @@ class TestGetTileRobust:
 
         tile = tilemanager.get_tile_robust(tile_id)
         assert tile is not None
-
 
 class TestCutTileOperation:
     """
@@ -558,7 +563,6 @@ class TestCutTileOperation:
 
         assert tile is not None
 
-
 class TestNegativeTileLevels:
     """
     Feature: Negative Tile Level Handling
@@ -613,7 +617,6 @@ class TestNegativeTileLevels:
         for level in [-1, -2, -3]:
             tile, final = tilemanager.cut_tile((tiled_media, level, 0, 0))
             assert final is True, f"Level {level} should be final"
-
 
 class TestMetadataAccess:
     """
@@ -675,7 +678,6 @@ class TestMetadataAccess:
         result = tilemanager.get_metadata(tiled_media, 'nonexistent_key')
         assert result is None
 
-
 class TestTiledCheck:
     """
     Feature: Media Tiled Status Check
@@ -719,7 +721,6 @@ class TestTiledCheck:
         assert tilemanager.tiled("dynamic:fern") is True
         assert tilemanager.tiled("dynamic:unknown") is True
 
-
 class TestPurgeOperation:
     """
     Feature: Provider Purge Through TileManager
@@ -757,7 +758,6 @@ class TestPurgeOperation:
         """
         # This is primarily a non-crash test
         tilemanager.purge("specific_media.jpg")
-
 
 class TestDualCacheCoordination:
     """

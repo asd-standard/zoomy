@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """PyZUI QMainWindow."""
 
@@ -55,7 +53,6 @@ class MainWindow(QtWidgets.QMainWindow):
     in qzui class
     """
 
-
     def __init__(self, framerate: int = 10, zoom_sensitivity: int = 50) -> None:
         """
         Create a new MainWindow.
@@ -79,7 +76,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.zui.error.connect(self.__show_error)
 
         self.__action_open_scene_home()
-
 
     def sizeHint(self) -> QtCore.QSize:
         """
@@ -107,7 +103,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         return QtCore.QSize(160,120)
 
-
     def __show_error(self, text: str, details: Any) -> None:
         """
         Method :
@@ -126,7 +121,6 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.setDetailedText(str(details))
         dialog.setIcon(QtWidgets.QMessageBox.Warning)
         dialog.exec()
-
 
     def __create_action(self, key: str, text: str, callback: Optional[Any] = None,
                         shortcut: Optional[str] = None, checkable: bool = False) -> None:
@@ -154,7 +148,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.__action[key].setCheckable(checkable)
 
-
     def __action_new_scene(self) -> None:
         """
         Method :
@@ -167,7 +160,6 @@ class MainWindow(QtWidgets.QMainWindow):
         Create a new scene.
         """
         self.zui.scene = Scene.new()
-
 
     def __action_open_scene(self) -> None:
         """
@@ -191,7 +183,6 @@ class MainWindow(QtWidgets.QMainWindow):
             except Exception as e :
                 self.__show_error("Unable to open scene ERROR in mainwindow.__action_open_scene \n", e)
 
-
     def __action_open_scene_home(self) -> None:
         """
         Method :
@@ -207,7 +198,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.zui.scene = Scene.load_scene(os.path.join("data", "home.pzs"))
         except Exception as e:
             self.__show_error('Unable to open the Home scene, ERROR in mainwindow.__action_open_scene_home \n', str(e))
-
 
     def __action_save_scene(self) -> None:
         """
@@ -232,7 +222,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.zui.scene.save(filename)
             except Exception as e:
                 self.__show_error("Unable to save scene ERROR in mainwindow.__action_save_scene \n", e)
-
 
     def __action_save_screenshot(self) -> None:
         """
@@ -260,7 +249,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 pixmap.save(filename[0])
             except Exception as e:
                 self.__show_error("Unable to save screenshot ERROR in mainwindow.__action_save_screenshot", e)
-
 
     def __open_media(self, media_id: str, add: bool = True) -> Optional[Any]:
         """
@@ -322,7 +310,6 @@ class MainWindow(QtWidgets.QMainWindow):
             #print('mainwindow-216-filename', filename)
             self.__prev_dir = os.path.dirname(filename[0])
             self.__open_media(filename[0])
-
 
     def __action_open_media_string(self) -> None:
         """
@@ -394,7 +381,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
                     self.zui.scene.add(mediaobject)
 
-
     def __action_set_fps(self, act: QtGui.QAction) -> None:
         """
         Method :
@@ -408,7 +394,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         self.zui.framerate = int(act.fps/2)
 
-
     def __action_fullscreen(self) -> None:
         """
         Method :
@@ -421,7 +406,6 @@ class MainWindow(QtWidgets.QMainWindow):
         Toggles fullscreen mode.
         """
         self.setWindowState(self.windowState() ^ QtCore.Qt.WindowFullScreen)
-
 
     def __action_about(self) -> None:
         """
@@ -439,7 +423,6 @@ class MainWindow(QtWidgets.QMainWindow):
             PyZUI.__doc__ + '\n' +
             PyZUI.__copyright__ + '\n' +
             PyZUI.__copyright_notice__)
-
 
     def __action_about_qt(self) -> None:
         """
@@ -596,7 +579,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__create_action('about', "&About", self.__action_about)
         self.__create_action('about_qt', "About &Qt", self.__action_about_qt)
 
-
     def __create_menus(self) -> None:
         """
         Method :
@@ -630,7 +612,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__menu['help'] = self.menuBar().addMenu("&Help")
         self.__menu['help'].addAction(self.__action['about'])
         self.__menu['help'].addAction(self.__action['about_qt'])
-
 
     def showEvent(self, event: QtGui.QShowEvent) -> None:
         """

@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """
 Stress Benchmark for PyZUI Performance Testing.
@@ -78,7 +76,6 @@ import pyzui.objects.scene.scene as Scene
 from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject
 from pyzui.objects.mediaobjects.stringmediaobject import StringMediaObject
 
-
 ## ============================================================================
 ## Data Classes for Metrics
 ## ============================================================================
@@ -119,7 +116,6 @@ class FrameMetrics:
     memory_vms_mb: float
     object_count: int
     dropped: bool
-
 
 @dataclass
 class BenchmarkResults:
@@ -177,7 +173,6 @@ class BenchmarkResults:
     peak_memory_vms_mb: float
     final_object_count: int
 
-
 @dataclass
 class BenchmarkConfig:
     """
@@ -232,7 +227,6 @@ class BenchmarkConfig:
     pan_amplitude: float = 0.3
     enable_movement: bool = True
 
-
 ## ============================================================================
 ## Memory Monitoring
 ## ============================================================================
@@ -277,7 +271,6 @@ def get_memory_usage() -> Tuple[float, float]:
         pass
 
     return 0.0, 0.0
-
 
 ## ============================================================================
 ## Stress Benchmark Class
@@ -858,7 +851,6 @@ class StressBenchmark:
         """
         return self.__frame_metrics.copy()
 
-
 ## ============================================================================
 ## Utility Functions
 ## ============================================================================
@@ -889,7 +881,6 @@ def find_test_images(data_dir: str) -> List[str]:
                 images.append(os.path.join(data_dir, filename))
 
     return images
-
 
 def parse_arguments() -> BenchmarkConfig:
     """
@@ -1008,7 +999,6 @@ Examples:
         enable_movement=not args.no_movement
     )
 
-
 ## ============================================================================
 ## Main Entry Point
 ## ============================================================================
@@ -1053,7 +1043,6 @@ def main() -> None:
     benchmark = StressBenchmark(config)
     results = benchmark.run()
     benchmark.print_results(results)
-
 
 if __name__ == '__main__':
     main()

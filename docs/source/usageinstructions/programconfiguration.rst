@@ -24,10 +24,14 @@ Configuration Categories
 **Logging Configuration**
     Controls how PyZUI logs information during execution.
 
+    .. note::
+        By default, PyZUI logs only to file (not to console) for silent operation.
+        Use ``--console`` to enable console output.
+
     - ``debug`` (bool): Enable debug mode with maximum logging detail
     - ``verbose`` (bool): Enable verbose mode with detailed info logging
-    - ``log_to_file`` (bool): Write logs to rotating log files
-    - ``log_to_console`` (bool): Display logs in the terminal
+    - ``log_to_file`` (bool): Write logs to rotating log files (default: ``True``)
+    - ``log_to_console`` (bool): Display logs in the terminal (default: ``False``)
     - ``colored_output`` (bool): Use ANSI color codes in console output
     - ``log_dir`` (str): Directory path for log files (default: ``./logs``)
 
@@ -79,6 +83,7 @@ All configuration options can be overridden via command-line arguments:
     -d, --debug              # Enable debug mode (maximum logging detail)
     -v, --verbose            # Enable verbose mode (detailed info logging)
     --log-dir DIR            # Custom directory for log files
+    --console                # Enable console logging (default: disabled)
     --no-console             # Disable console logging
     --no-file                # Disable file logging
     --no-color               # Disable colored console output
@@ -98,7 +103,7 @@ Configuration Examples
 .. code-block:: bash
 
     # Run with debug logging to both console and file
-    python main.py --debug
+    python main.py --debug --console
 
     # This enables:
     # - DEBUG level console output
@@ -106,15 +111,15 @@ Configuration Examples
     # - Colored console output
     # - File logging to ./logs/pyzui.log
 
-**Example 2: Production Mode with Minimal Console Output**
+**Example 2: Production Mode with Custom Log Directory**
 
 .. code-block:: bash
 
-    # Run with warnings only in console, but full logging to file
-    python main.py --no-console --log-dir /var/log/pyzui
+    # Run with default settings (file only) to custom directory
+    python main.py --log-dir /var/log/pyzui
 
     # This enables:
-    # - No console output
+    # - No console output (default)
     # - Full logging to /var/log/pyzui/pyzui.log
     # - Default tilestore cleanup
 
@@ -123,7 +128,7 @@ Configuration Examples
 .. code-block:: bash
 
     # Run without any logging for performance testing
-    python main.py --no-console --no-file
+    python main.py --no-file
 
 **Example 4: Extended Tile Cache**
 
@@ -149,22 +154,29 @@ Create ``production.json``:
         }
     }
 
-Run with temporary debug override:
+Run with temporary debug override and console output:
 
 .. code-block:: bash
 
-    # Use production config but enable debug for this session
-    python main.py --config production.json --debug
+    # Use production config but enable debug and console for this session
+    python main.py --config production.json --debug --console
 
-    # Result: Production settings are loaded, but debug mode
-    # overrides the verbose=false setting from the config file
+    # Result: Production settings are loaded, but debug mode and
+    # console output override the settings from the config file
 
-**Example 6: Custom Log Directory Structure**
+**Example 6: Console-Only Logging for Development**
+
+.. code-block:: bash
+
+    # Log only to console (no file) with verbose output
+    python main.py --verbose --console --no-file
+
+**Example 7: Custom Log Directory Structure**
 
 .. code-block:: bash
 
     # Organize logs by date in a custom location
-    python main.py --verbose --log-dir ~/pyzui-logs/$(date +%Y-%m-%d)
+    python main.py --log-dir ~/pyzui-logs/$(date +%Y-%m-%d)
 
 Default Configuration
 ~~~~~~~~~~~~~~~~~~~~~
@@ -178,7 +190,7 @@ If no configuration file or command-line arguments are provided, PyZUI uses thes
             'debug': False,
             'verbose': False,
             'log_to_file': True,
-            'log_to_console': True,
+            'log_to_console': False,
             'colored_output': True,
             'log_dir': 'logs'
         },
@@ -190,23 +202,33 @@ If no configuration file or command-line arguments are provided, PyZUI uses thes
     }
 
 This results in:
-    - Console logging at WARNING level
-    - File logging at INFO level
-    - Colored console output enabled
+    - No console logging (silent operation)
+    - File logging at INFO level to ./logs/pyzui.log
     - Automatic tilestore cleanup on startup
     - Tiles older than 3 days are removed
 
 Viewing Current Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-PyZUI logs its active configuration when starting. Look for output like:
+PyZUI logs its active configuration when starting. To view this information, either enable
+console output with ``--console`` or check the log file:
+
+.. code-block:: bash
+
+    # View configuration on console
+    python main.py --console
+
+    # Or check the log file
+    tail -f logs/pyzui.log
+
+Look for output like:
 
 .. code-block:: text
 
     [INFO    ] pyzui.LoggerConfig       | ============================================================
     [INFO    ] pyzui.LoggerConfig       | PyZUI Logging System Initialized
     [INFO    ] pyzui.LoggerConfig       | Debug Mode: False
-    [INFO    ] pyzui.LoggerConfig       | Console Level: WARNING
+    [INFO    ] pyzui.LoggerConfig       | Console Level: OFF
     [INFO    ] pyzui.LoggerConfig       | File Level: INFO
     [INFO    ] pyzui.LoggerConfig       | Log File: /path/to/logs/pyzui.log
     [INFO    ] pyzui.LoggerConfig       | ============================================================

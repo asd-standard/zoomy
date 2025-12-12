@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """Thread-safe Least Recently Used (LRU) cache for storing tiles."""
 
@@ -75,7 +73,6 @@ class TileCache(object):
         self.__periodic_clean_thread.daemon = True
         self.__periodic_clean_thread.start()
 
-
     def insert(self, tile_id: Tuple[str, int, int, int], tile: Any, maxaccesses: int = 0) -> None:
         """
         Method :
@@ -98,7 +95,6 @@ class TileCache(object):
             if maxaccesses > 0:
                 self.__maxaccesses[tile_id] = maxaccesses
 
-
     # def expire(self):
     #     """Expire all tiles that have been set to expire after having been
     #     accessed a certain number of times (i.e. if `insert` has been called
@@ -111,7 +107,6 @@ class TileCache(object):
     #         for tile_id in tile_ids:
     #             del self[tile_id]
 
-
     # def temporary(self, tile_id):
     #     """Return True iff the tile with the given `tile_id` has been set to
     #     expire after having been accessed a certain number of times (i.e. if
@@ -120,7 +115,6 @@ class TileCache(object):
     #     temporary(tuple<string,int,int,int>) -> bool
     #     """
     #     return tile_id in self.__maxaccesses
-
 
     def __mortal(self, tile_id: Tuple[str, int, int, int], tile: Any) -> bool:
         """
@@ -139,7 +133,6 @@ class TileCache(object):
         None tiles and (0,0,0) tiles are the only ones considered immortal.
         """
         return tile is not None and tile_id[1] != 0
-
 
     def __getitem__(self, tile_id: Tuple[str, int, int, int]) -> Any:
         """
@@ -174,7 +167,6 @@ class TileCache(object):
             else:
                 raise KeyError
 
-
     def __periodic_clean(self) -> None:
         """
         Method :
@@ -197,7 +189,6 @@ class TileCache(object):
                     tile_id = self.__discard_queue[0]
                     del self[tile_id]
 
-
     def __clean(self) -> None:
         """
         Method :
@@ -213,7 +204,6 @@ class TileCache(object):
             while self.__maxsize > 0 and self.__num_tiles > self.__maxsize:
                 tile_id = self.__discard_queue[0]
                 del self[tile_id]
-
 
     def __setitem__(self, tile_id: Tuple[str, int, int, int], tile: Any) -> None:
         """
@@ -249,7 +239,6 @@ class TileCache(object):
             elif tile_id not in self.__d:
                 self.__d[tile_id] = None
 
-
     def __delitem__(self, tile_id: Tuple[str, int, int, int]) -> None:
         """
         Method :
@@ -274,7 +263,6 @@ class TileCache(object):
 
             del self.__d[tile_id]
 
-
     def __contains__(self, tile_id: Tuple[str, int, int, int]) -> bool:
         """
         Method :
@@ -289,7 +277,6 @@ class TileCache(object):
         """
         with self.__lock:
             return tile_id in self.__d
-
 
     def purge(self) -> None:
         """

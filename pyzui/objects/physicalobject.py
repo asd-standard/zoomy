@@ -1,9 +1,9 @@
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,9 +12,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """An object that obeys the laws of physics."""
 
@@ -93,7 +91,6 @@ class PhysicalObject(): #removed object from class argument and Thread
 
         self._centre = (0,0)
 
-
     """the velocity is damped at each frame such that each second it is 
     reduced by a factor of damping_factor: v = u * damping_factor**-t"""
     damping_factor = 512 #256
@@ -122,7 +119,6 @@ class PhysicalObject(): #removed object from class argument and Thread
         if abs(velocity) < 0.1:
             velocity = 0.0
         return velocity
-
 
     def __displacement(self, t: float, u: float) -> float:
         """
@@ -163,7 +159,6 @@ class PhysicalObject(): #removed object from class argument and Thread
         return (u / math.log(self.damping_factor)) \
                * (1 - self.damping_factor**-t)
 
-
     def move(self, dx: float, dy: float) -> None:
         """
         Method :
@@ -180,7 +175,6 @@ class PhysicalObject(): #removed object from class argument and Thread
         """
         self._x += dx
         self._y += dy
-
 
     def zoom(self, amount: float) -> None:
         """
@@ -207,7 +201,6 @@ class PhysicalObject(): #removed object from class argument and Thread
         ##    = pos' + (P - pos) * 2**(zoomlevel'-zoomlevel)
         ## solving for P = P' yields:
         ##   pos' = P - (P - pos) * 2**amount
-
 
         Px, Py = self.centre
         self._x = Px - (Px - self._x) * 2**amount
@@ -250,7 +243,6 @@ class PhysicalObject(): #removed object from class argument and Thread
         elif v == 'y': self.vy += u
         elif v == 'z': self.vz += u
 
-
     def step(self, t: float) -> None:
         """
         Method :
@@ -282,7 +274,6 @@ class PhysicalObject(): #removed object from class argument and Thread
             self.zoom(self.__displacement(t, self.vz))
             self.vz = self.__damp(self.vz, t)
 
-
     @property
     def moving(self) -> bool:
         """
@@ -299,7 +290,6 @@ class PhysicalObject(): #removed object from class argument and Thread
         Returns False if all velocity components are zero.
         """
         return not (self.vx == self.vy == self.vz == 0)
-
 
     def __get_zoomlevel(self) -> float:
         """
@@ -392,8 +382,4 @@ class PhysicalObject(): #removed object from class argument and Thread
     centre = property(__get_centre, __set_centre)
     """Creating PhysicalObject.centre property with __get_centre as
     getter and __set_centre as setter"""
-
-
-
-
 

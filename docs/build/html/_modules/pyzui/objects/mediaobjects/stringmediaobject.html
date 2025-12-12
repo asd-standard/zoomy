@@ -31,12 +31,12 @@
           <div class="body" role="main">
             
   <h1>Source code for pyzui.objects.mediaobjects.stringmediaobject</h1><div class="highlight"><pre>
-<span></span><span class="c1">## PyZUI 0.1 - Python Zooming User Interface</span>
-<span class="c1">## Copyright (C) 2009  David Roberts &lt;d@vidr.cc&gt;</span>
+<span></span><span class="c1">## PyZUI - Python Zooming User Interface</span>
+<span class="c1">## Copyright (C) 2009 David Roberts &lt;d@vidr.cc&gt;</span>
 <span class="c1">##</span>
 <span class="c1">## This program is free software; you can redistribute it and/or</span>
 <span class="c1">## modify it under the terms of the GNU General Public License</span>
-<span class="c1">## as published by the Free Software Foundation; either version 2</span>
+<span class="c1">## as published by the Free Software Foundation; either version 3</span>
 <span class="c1">## of the License, or (at your option) any later version.</span>
 <span class="c1">##</span>
 <span class="c1">## This program is distributed in the hope that it will be useful,</span>
@@ -45,9 +45,7 @@
 <span class="c1">## GNU General Public License for more details.</span>
 <span class="c1">##</span>
 <span class="c1">## You should have received a copy of the GNU General Public License</span>
-<span class="c1">## along with this program; if not, write to the Free Software</span>
-<span class="c1">## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA</span>
-<span class="c1">## 02110-1301, USA.</span>
+<span class="c1">## along with this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
 
 <span class="sd">&quot;&quot;&quot;Strings to be displayed in the ZUI.&quot;&quot;&quot;</span>
 
@@ -130,7 +128,6 @@
         
         
 
-
     <span class="n">transparent</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1">## point size of the font when the scale is 100%</span>
@@ -202,7 +199,6 @@
            
             
 
-
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__pointsize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -218,7 +214,6 @@
 <span class="sd">        Returns base_pointsize multiplied by the current scale factor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_pointsize</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__font</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
@@ -244,7 +239,6 @@
         <span class="n">font</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s1">&#39;Sans Serif&#39;</span><span class="p">)</span>
         <span class="n">font</span><span class="o">.</span><span class="n">setPointSizeF</span><span class="p">(</span><span class="n">pointsize</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">font</span>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">onscreen_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
@@ -278,7 +272,6 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span></div>
-
 
 
 </pre></div>

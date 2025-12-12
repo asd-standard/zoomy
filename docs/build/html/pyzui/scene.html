@@ -47,15 +47,14 @@
 <p>Scene() –&gt; None</p>
 <p><cite>Scene</cite> objects are used to hold a collection of <cite>MediaObjects</cite>.
 This class manages all the objects that can be rendered in the interface,
-Their positioning (_x, _y) on the scene and their zoom (_z) and the acces to
-them.</p>
+Their positioning (_x, _y) on the scene and their zoom (_z) and the acces
+to them.</p>
 <p>Scene objects can also be saved to files, and loaded from files.</p>
-<p>New scene is made by initiating a <a class="reference internal" href="physicalobject.html#pyzui.objects.physicalobject.PhysicalObject" title="pyzui.objects.physicalobject.PhysicalObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalObject</span></code></a>,</p>
-<p>creating an objects list <cite>__objects</cite> and thread safe selection for <cite>__objects</cite>
-given by declaring RLock list <cite>__objects_lock</cite>,</p>
-<p>set up <cite>__viewport_size</cite></p>
-<p>mouse selection variables <cite>selection</cite> and <cite>right_selection</cite> and logger setup
-<cite>__logger</cite>.</p>
+<p>New scene is made by initiating a <a class="reference internal" href="physicalobject.html#pyzui.objects.physicalobject.PhysicalObject" title="pyzui.objects.physicalobject.PhysicalObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalObject</span></code></a>,
+creating an objects list <em>__objects</em> and thread safe selection for <em>__objects</em> given by
+declaring RLock list <em>__objects_lock</em>, seting up <em>__viewport_size</em>, setting up mouse
+selection variables <em>selection</em> and <em>right_selection</em> and logger setup <em>__logger</em>.</p>
+<p>For better explaining of this scheme look at :  <a class="reference internal" href="mediaobject.html#module-pyzui.objects.mediaobjects.mediaobject" title="pyzui.objects.mediaobjects.mediaobject"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyzui.objects.mediaobjects.mediaobject</span></code></a></p>
 <p>World:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span> ---------------------------------------&gt;
 |   Scene
@@ -87,11 +86,11 @@ given by declaring RLock list <cite>__objects_lock</cite>,</p>
 to the absolute frame of reference _center</p>
 <p>&#64; origin position of the scene it’s relative to an absolute frame of
 reference, with 0,0 as it’s origin.</p>
-<dl class="simple">
-<dt>% Scene center it’s given by</dt><dd><p>scene.centre[0] = scene.origin + (Scene.viewport_size[0]/2)*2**(zoomlevel)
-scene.centre[1] = scene.origin + (Scene.viewport_size[1]/2)*2**(zoomlevel)</p>
-</dd>
-</dl>
+<p>% Scene center it’s given by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scene</span><span class="o">.</span><span class="n">centre</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">origin</span> <span class="o">+</span> <span class="p">(</span><span class="n">Scene</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">zoomlevel</span><span class="p">)</span>
+<span class="n">scene</span><span class="o">.</span><span class="n">centre</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">origin</span> <span class="o">+</span> <span class="p">(</span><span class="n">Scene</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">zoomlevel</span><span class="p">)</span>
+</pre></div>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyzui.objects.scene.scene.Scene.standard_viewport_size">
 <span class="sig-name descname"><span class="pre">standard_viewport_size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(1280,</span> <span class="pre">720)</span></em><a class="headerlink" href="#pyzui.objects.scene.scene.Scene.standard_viewport_size" title="Link to this definition">¶</a></dt>
@@ -115,13 +114,17 @@ filename be ‘.pzs’.</p>
 position (x, y) of the scene origin defined by Scene.__set_origin()
 then thread safely, once sorted <cite>__objects</cite>, cicles through them,
 writing for each of them a line on <cite>fielname</cite> with:</p>
-<blockquote>
-<div><p>object type: <cite>type(mediaobject).__name__</cite></p>
-<p>media id: mediaobject.media_id (replacing ‘%3A’ with :)</p>
-<p>zoomlevel: mediaobject.zoomlevel</p>
-<p>x position: mediaobject.pos[0]</p>
-<p>y position: mediaobject.pos[1]</p>
-</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>object type: `type(mediaobject).__name__`
+
+media id: mediaobject.media_id (replacing &#39;%3A&#39; with :)
+
+zoomlevel: mediaobject.zoomlevel
+
+x position: mediaobject.pos[0]
+
+y position: mediaobject.pos[1]
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -155,13 +158,13 @@ it is nothing is done, otherwise mediaobject it’s appended to the
 <p>Remove mediaobject from the list of elements that get to
 be rendered on the scene and purge all’related tiles through
 TileManager.purge(‘media_id’) method.</p>
-<p>Thread safely cycle through <cite>__objects</cite> until <cite>mediaobject</cite>
-match with the respective element of the <cite>__objects</cite> list
-and removes it from the <cite>__objects</cite> list. Then gets
-mediaobject.media_id attribute and check if other <cite>__objects</cite>
+<p>Thread safely cycle through <em>__objects</em> until <em>mediaobject</em>
+match with the respective element of the <em>__objects</em> list
+and removes it from the <em>__objects</em> list. Then gets
+mediaobject.media_id attribute and check if other <em>__objects</em>
 elements have the same media_id, if it’s not the case the media_id
 gets purged from the TileManager.</p>
-<p>See: <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyzui.tilemanager.purge()</span></code></p>
+<p>See: <a class="reference internal" href="tilemanager.html#pyzui.tilesystem.tilemanager.purge" title="pyzui.tilesystem.tilemanager.purge"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyzui.tilesystem.tilemanager.purge()</span></code></a></p>
 </dd></dl>
 
 <dl class="py method">
@@ -190,13 +193,13 @@ current onscreen area.</p>
 </dd>
 </dl>
 <p>Scene.get(pos) –&gt; MediaObject or None</p>
-<p>Return the foremost visible <cite>MediaObject</cite> which overlaps the
-on-screen point <cite>pos</cite>. <cite>pos</cite> is the mouse position at the last
+<p>Return the foremost visible <em>MediaObject</em> which overlaps the
+on-screen point <em>pos</em>. <em>pos</em> is the mouse position at the last
 left or right click mouse event.</p>
 <p>Return None if there are no <em>MediaObjects</em> overlapping the point.</p>
 <p>get(tuple[float,float]) –&gt; MediaObject or None</p>
 <p>Mouse click event is caught by: <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyzui.qzui.QZUI.mousePressEvent()</span></code>
-which returns mouse position <cite>pos</cite></p>
+which returns mouse position <em>pos</em></p>
 <p>Thread safely cycle through <em>__objects</em>. For each mediaobject checks if
 <em>pos</em> is within mediaobject area, if it is the mediaobject is returned as
 <em>foremost</em></p>
@@ -226,7 +229,7 @@ draft : bool</p>
 </dl>
 <p>Scene.render(painter, draft) –&gt; List[MediaObject]</p>
 <p>Render the scene using the given <cite>painter</cite>.</p>
-<p>If <cite>draft</cite> is True, draft mode is enabled. Otherwise High-Quality mode
+<p>If <em>draft</em> is True, draft mode is enabled. Otherwise High-Quality mode
 is enabled.</p>
 <p>If any errors occur rendering any of the <em>MediaObjects</em>, then they will
 be removed from the scene and a list of tuples representing the errors

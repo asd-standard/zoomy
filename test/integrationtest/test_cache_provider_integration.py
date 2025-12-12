@@ -1,3 +1,18 @@
+## PyZUI - Python Zooming User Interface
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 3
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
+
 """
 Integration Tests: Cache and Provider Interaction
 ==================================================
@@ -37,7 +52,6 @@ from pyzui.tilesystem.tileproviders.statictileprovider import StaticTileProvider
 from pyzui.tilesystem.tileproviders.dynamictileprovider import DynamicTileProvider
 from pyzui.tilesystem import tilestore
 from pyzui.tilesystem import tilemanager
-
 
 class MockTileProvider(TileProvider):
     """
@@ -81,7 +95,6 @@ class MockTileProvider(TileProvider):
         """Mark a tile as unavailable (will return None)."""
         self.images_to_return[tile_id] = None
 
-
 class MockDynamicProvider(DynamicTileProvider):
     """
     A mock dynamic tile provider for testing procedural tile generation.
@@ -118,7 +131,6 @@ class MockDynamicProvider(DynamicTileProvider):
         img = Image.new('RGB', (256, 256), color=(r, g, b))
         img.save(outfile)
 
-
 @pytest.fixture
 def cache():
     """
@@ -132,7 +144,6 @@ def cache():
     """
     return TileCache(maxsize=100, maxage=3600)
 
-
 @pytest.fixture
 def small_cache():
     """
@@ -144,7 +155,6 @@ def small_cache():
         TileCache: A cache limited to 5 tiles.
     """
     return TileCache(maxsize=5, maxage=3600)
-
 
 @pytest.fixture
 def temp_tilestore(tmp_path):
@@ -172,7 +182,6 @@ def temp_tilestore(tmp_path):
     tilestore.tile_dir = original_tile_dir
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
-
 
 class TestProviderCacheBasicInteraction:
     """
@@ -263,7 +272,6 @@ class TestProviderCacheBasicInteraction:
         # And: Provider was called for each
         assert provider.load_call_count == len(tile_ids)
 
-
 class TestDynamicProviderCacheInteraction:
     """
     Feature: Dynamic Provider Cache Integration
@@ -349,7 +357,6 @@ class TestDynamicProviderCacheInteraction:
         for tile_id in tile_ids:
             assert tile_id in cache
 
-
 class TestCacheEvictionProviderBehavior:
     """
     Feature: Cache Eviction and Provider Reload
@@ -430,7 +437,6 @@ class TestCacheEvictionProviderBehavior:
         assert immortal_id in small_cache
         assert small_cache[immortal_id] is immortal_tile
 
-
 class TestMultiProviderCacheSharing:
     """
     Feature: Multiple Providers Sharing Cache
@@ -492,7 +498,6 @@ class TestMultiProviderCacheSharing:
         assert static_tile_id in cache
         assert dynamic_tile_id in cache
 
-
 class TestProviderRequestQueue:
     """
     Feature: Provider Request Queue Behavior
@@ -552,7 +557,6 @@ class TestProviderRequestQueue:
         assert tile_id in cache
         # Load count should be 1 (subsequent requests find tile in cache)
         assert provider.load_call_count == 1
-
 
 class TestProviderPurgeOperation:
     """
@@ -622,7 +626,6 @@ class TestProviderPurgeOperation:
         assert loaded_media_a == 3
         assert loaded_media_b == 3
 
-
 class TestCacheTemporaryTileHandling:
     """
     Feature: Temporary Tile Cache Handling
@@ -669,7 +672,6 @@ class TestCacheTemporaryTileHandling:
         # Original tile should be preserved
         assert tile_id in cache
         assert cache[tile_id] is original_tile
-
 
 class TestProviderErrorHandling:
     """
@@ -740,7 +742,6 @@ class TestProviderErrorHandling:
         assert good_id in cache
         assert isinstance(cache[good_id], Tile)
 
-
 class TestCacheAccessPatterns:
     """
     Feature: Cache Access Pattern Optimization
@@ -804,7 +805,6 @@ class TestCacheAccessPatterns:
 
         # Tile should be expired (removed) after max accesses
         assert tile_id not in cache
-
 
 class TestProviderLifecycle:
     """

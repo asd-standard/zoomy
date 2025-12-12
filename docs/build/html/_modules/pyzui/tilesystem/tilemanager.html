@@ -31,12 +31,12 @@
           <div class="body" role="main">
             
   <h1>Source code for pyzui.tilesystem.tilemanager</h1><div class="highlight"><pre>
-<span></span><span class="c1">## PyZUI 0.1 - Python Zooming User Interface</span>
-<span class="c1">## Copyright (C) 2009  David Roberts &lt;d@vidr.cc&gt;</span>
+<span></span><span class="c1">## PyZUI - Python Zooming User Interface</span>
+<span class="c1">## Copyright (C) 2009 David Roberts &lt;d@vidr.cc&gt;</span>
 <span class="c1">##</span>
 <span class="c1">## This program is free software; you can redistribute it and/or</span>
 <span class="c1">## modify it under the terms of the GNU General Public License</span>
-<span class="c1">## as published by the Free Software Foundation; either version 2</span>
+<span class="c1">## as published by the Free Software Foundation; either version 3</span>
 <span class="c1">## of the License, or (at your option) any later version.</span>
 <span class="c1">##</span>
 <span class="c1">## This program is distributed in the hope that it will be useful,</span>
@@ -45,9 +45,7 @@
 <span class="c1">## GNU General Public License for more details.</span>
 <span class="c1">##</span>
 <span class="c1">## You should have received a copy of the GNU General Public License</span>
-<span class="c1">## along with this program; if not, write to the Free Software</span>
-<span class="c1">## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA</span>
-<span class="c1">## 02110-1301, USA.</span>
+<span class="c1">## along with this program; if not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
 
 <span class="sd">&quot;&quot;&quot;The TileManager is responsible for requesting tiles from TileProviders,</span>
 <span class="sd">caching them in memory, and providing them to MediaObjects when requested</span>
@@ -73,7 +71,6 @@
 <span class="n">__tp_static</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="n">__tp_dynamic</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">__logger</span> <span class="o">=</span> <span class="kc">None</span>
-
 
 <div class="viewcode-block" id="init">
 <a class="viewcode-back" href="../../../pyzui/tilemanager.html#pyzui.tilesystem.tilemanager.init">[docs]</a>
@@ -158,7 +155,6 @@
         <span class="n">__tp_static</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)</span></div>
 
 
-
 <div class="viewcode-block" id="get_tile">
 <a class="viewcode-back" href="../../../pyzui/tilemanager.html#pyzui.tilesystem.tilemanager.get_tile">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_tile</span><span class="p">(</span><span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
@@ -194,7 +190,6 @@
         <span class="k">return</span> <span class="n">tile</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">TileNotAvailable</span></div>
-
 
 
 <div class="viewcode-block" id="cut_tile">
@@ -280,7 +275,6 @@
     <span class="k">return</span> <span class="n">tile</span><span class="p">,</span> <span class="n">final</span></div>
 
 
-
 <div class="viewcode-block" id="get_tile_robust">
 <a class="viewcode-back" href="../../../pyzui/tilemanager.html#pyzui.tilesystem.tilemanager.get_tile_robust">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_tile_robust</span><span class="p">(</span><span class="n">tile_id</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
@@ -304,7 +298,6 @@
         <span class="k">return</span> <span class="n">cut_tile</span><span class="p">(</span><span class="n">tile_id</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
-
 <div class="viewcode-block" id="tiled">
 <a class="viewcode-back" href="../../../pyzui/tilemanager.html#pyzui.tilesystem.tilemanager.tiled">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">tiled</span><span class="p">(</span><span class="n">media_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -321,7 +314,6 @@
 <span class="sd">    Will always return True for dynamic media.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">media_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;dynamic:&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">TileStore</span><span class="o">.</span><span class="n">tiled</span><span class="p">(</span><span class="n">media_id</span><span class="p">)</span></div>
-
 
 
 <div class="viewcode-block" id="get_metadata">
@@ -354,7 +346,6 @@
         <span class="k">return</span> <span class="n">TileStore</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="n">media_id</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span></div>
 
 
-
 <div class="viewcode-block" id="purge">
 <a class="viewcode-back" href="../../../pyzui/tilemanager.html#pyzui.tilesystem.tilemanager.purge">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">purge</span><span class="p">(</span><span class="n">media_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -377,7 +368,6 @@
         <span class="n">tp</span><span class="o">.</span><span class="n">purge</span><span class="p">(</span><span class="n">media_id</span><span class="p">)</span></div>
 
 
-
 <div class="viewcode-block" id="MediaNotTiled">
 <a class="viewcode-back" href="../../../pyzui/tilemanager.html#pyzui.tilesystem.tilemanager.MediaNotTiled">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MediaNotTiled</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
@@ -390,14 +380,12 @@
     <span class="k">pass</span></div>
 
 
-
 <div class="viewcode-block" id="TileNotLoaded">
 <a class="viewcode-back" href="../../../pyzui/tilemanager.html#pyzui.tilesystem.tilemanager.TileNotLoaded">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TileNotLoaded</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception for when tiles are requested before they have been loaded into</span>
 <span class="sd">    the tile cache.&quot;&quot;&quot;</span>
     <span class="k">pass</span></div>
-
 
 
 <div class="viewcode-block" id="TileNotAvailable">

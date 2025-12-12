@@ -90,26 +90,23 @@ All converters output to PPM format, which is then processed by the tiling syste
               │ Format Check   │
               └────────┬───────┘
                        │
-       ┌───────────────┼───────────────┬──────────────┐
-       │               │               │              │
-       ▼               ▼               ▼              ▼
+       ┌───────────────┼───────────────┬──────────┐
+       │               │               │          │
+       ▼               ▼               ▼          ▼
 ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
 │   .pdf   │   │   .jpg   │   │   .png   │   │   .ppm   │
 │          │   │   .tiff  │   │   .gif   │   │ (direct) │
 └────┬─────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘
      │              │              │              │
      ▼              ▼              │              │
-┌──────────┐   ┌──────────┐       │              │
-│   PDF    │   │  Vips    │       │              │
-│Converter │   │Converter │◀──────┘              │
-└────┬─────┘   └────┬─────┘                      │
+┌──────────┐   ┌──────────┐        │              │
+│   PDF    │   │  Vips    │        │              │
+│Converter │   │Converter │◀───────┘              │
+└────┬─────┘   └────┬─────┘                       │
      │              │                             │
      │     Creates  │                             │
      │   temp file  │                             │
-     ▼              ▼                             │
-┌─────────────────────────────────────────────────┘
-│
-▼
+     ▼              ▼                             ▼
 ┌──────────────────────────────────────────────────────────┐
 │                    PPM File                              │
 │           (Portable Pixmap Format)                       │
@@ -464,60 +461,35 @@ which automatically selects and uses the appropriate converter.</p>
 </section>
 <section id="conversion-workflow">
 <h3>Conversion Workflow<a class="headerlink" href="#conversion-workflow" title="Link to this heading">¶</a></h3>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TiledMediaObject Creation
-        │
-        ▼
-┌─────────────────┐
-│  Check if       │
-│  already tiled  │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    │         │
-  YES        NO
-    │         │
-    │         ▼
-    │  ┌────────────────┐
-    │  │ Create temp    │
-    │  │ file for PPM   │
-    │  └────────┬───────┘
-    │           │
-    │           ▼
-    │  ┌────────────────┐
-    │  │ Select and     │
-    │  │ start converter│
-    │  └────────┬───────┘
-    │           │
-    │           ▼
-    │  ┌────────────────┐
-    │  │ Converter runs │
-    │  │ in background  │
-    │  └────────┬───────┘
-    │           │
-    │           ▼
-    │  ┌────────────────┐
-    │  │ Show loading   │
-    │  │ placeholder    │
-    │  └────────┬───────┘
-    │           │
-    │           ▼
-    │  ┌────────────────┐
-    │  │ Converter      │
-    │  │ completes      │
-    │  └────────┬───────┘
-    │           │
-    │           ▼
-    │  ┌────────────────┐
-    │  │ Start PPMTiler │
-    │  └────────┬───────┘
-    │           │
-    └───────────┘
-            │
-            ▼
-┌─────────────────────┐
-│ Load and display    │
-│ tiles               │
-└─────────────────────┘
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TiledMediaObject Creation        |     │              │
+        │                        |     │              ▼
+        ▼                        |     │     ┌────────────────┐
+┌─────────────────┐              |     │     │ Show loading   │
+│  Check if       │              |     │     │ placeholder    │
+│  already tiled  │              |     │     └────────┬───────┘
+└────────┬────────┘              |     │              │
+         │                       |     │              ▼
+    ┌────┴────┐                  |     │     ┌────────────────┐
+    │         │                  |     │     │ Converter      │
+  YES        NO                  |     │     │ completes      │
+    │         │                  |     │     └────────┬───────┘
+    │         ▼                  |     │              │
+    │  ┌────────────────┐        |     │              ▼
+    │  │ Create temp    │        |     │     ┌────────────────┐
+    │  │ file for PPM   │        |     │     │ Start PPMTiler │
+    │  └────────┬───────┘        |     │     └────────┬───────┘
+    │           │                |     │              │
+    │           ▼                |     └──────────────│
+    │  ┌────────────────┐        |                    │
+    │  │ Select and     │        |                    ▼
+    │  │ start converter│        |      ┌─────────────────────┐
+    │  └────────┬───────┘        |      │ Load and display    │
+    │           │                |      │ tiles               │
+    │           ▼                |      └─────────────────────┘
+    │  ┌────────────────┐        |
+    │  │ Converter runs │        |
+    │  │ in background  │        |
+    │  └────────────────┘        |
 </pre></div>
 </div>
 </section>

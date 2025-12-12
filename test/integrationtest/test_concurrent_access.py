@@ -1,3 +1,18 @@
+## PyZUI - Python Zooming User Interface
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 3
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
+
 """
 Integration Tests: Concurrent Access and Thread Safety
 =======================================================
@@ -43,7 +58,6 @@ from pyzui.tilesystem.tilemanager import (
 from pyzui.tilesystem.tiler import Tiler
 from pyzui.tilesystem.tileproviders.tileprovider import TileProvider
 
-
 class ConcreteTiler(Tiler):
     """
     A concrete implementation of Tiler for testing purposes.
@@ -77,7 +91,6 @@ class ConcreteTiler(Tiler):
             self._current_row += 1
             return bytes(row_data)
 
-
 class MockTileProvider(TileProvider):
     """
     Mock provider with configurable delay for race condition testing.
@@ -98,7 +111,6 @@ class MockTileProvider(TileProvider):
             self.load_call_count += 1
             self.load_calls.append(tile_id)
         return Image.new('RGB', (256, 256), color='gray')
-
 
 @pytest.fixture
 def temp_tilestore(tmp_path):
@@ -126,7 +138,6 @@ def temp_tilestore(tmp_path):
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
 
-
 @pytest.fixture
 def initialized_tilemanager(temp_tilestore):
     """
@@ -138,7 +149,6 @@ def initialized_tilemanager(temp_tilestore):
     tilemanager.init(total_cache_size=200, auto_cleanup=False)
     yield
     tilemanager.purge()
-
 
 @pytest.fixture
 def sample_images(tmp_path):
@@ -159,7 +169,6 @@ def sample_images(tmp_path):
 
     yield images
 
-
 @pytest.fixture
 def cache():
     """
@@ -169,7 +178,6 @@ def cache():
         TileCache: A fresh cache instance.
     """
     return TileCache(maxsize=100, maxage=3600)
-
 
 class TestConcurrentTileRequests:
     """
@@ -281,7 +289,6 @@ class TestConcurrentTileRequests:
         loaded_count = sum(1 for tid in unique_tiles if tid in cache)
         assert loaded_count == len(unique_tiles)
 
-
 class TestConcurrentTilingOperations:
     """
     Feature: Concurrent Image Tiling
@@ -365,7 +372,6 @@ class TestConcurrentTilingOperations:
             assert tilestore.tiled(media_id)
             assert tilestore.get_metadata(media_id, 'width') == 512
             assert tilestore.get_metadata(media_id, 'height') == 512
-
 
 class TestCacheThreadSafety:
     """
@@ -528,7 +534,6 @@ class TestCacheThreadSafety:
 
         assert len(errors) == 0
 
-
 class TestProviderQueueConcurrency:
     """
     Feature: Provider Queue Thread Safety
@@ -614,7 +619,6 @@ class TestProviderQueueConcurrency:
         # Verify purge was called multiple times without deadlock
         assert purge_count[0] > 5
 
-
 class TestMetadataConcurrency:
     """
     Feature: Thread-Safe Metadata Access
@@ -658,7 +662,6 @@ class TestMetadataConcurrency:
         assert len(errors) == 0
         # All results should be consistent
         assert all(r == (512, 512) for r in results)
-
 
 class TestTileManagerConcurrency:
     """
@@ -747,7 +750,6 @@ class TestTileManagerConcurrency:
 
         assert len(errors) == 0, f"Errors: {errors}"
         assert all(results)
-
 
 class TestStressConditions:
     """

@@ -85,19 +85,25 @@ into view.</p>
 </pre></div>
 </div>
 <p>MediaObject topleft coordinates relative to screen view are given by:</p>
-<p>MediaObject.topleft[0-1] =     self._scene.origin[0-1] + self.pos[0-1] * (2 ** self._scene.zoomlevel)</p>
-<p>Where self.pos[0-1] it’s MediaObject position relative to Scene reference
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MediaObject</span><span class="o">.</span><span class="n">topleft</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">origin</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">zoomlevel</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Where <em>self.pos[0-1]</em> it’s MediaObject position relative to Scene reference
 system wich get’s scaled by 2** of scene zoom level</p>
 <p>MediaObject centre coordinates relative to screen view are given firstly by
 calculating image center coordinates relative to Scene reference coordinates:</p>
-<p>C_s[0-1] = self.pos[0-1] + self._centre[0-1] * 2**self._z</p>
-<p>Where self._centre[0-1] are center coordinates relative to the mediaobject
-frame of reference and self._z it’s MediaObject reference frame scaling
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C_s</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span>
+</pre></div>
+</div>
+<p>Where <em>self._centre[0-1]</em> are center coordinates relative to the mediaobject
+frame of reference and <em>self._z</em> it’s MediaObject reference frame scaling
 (zoom).</p>
 <p>Take note that self.pos[0-1] dosen’t get to be scaled by self._z as that
 position it’s relative to Scene reference frame.</p>
 <p>Then we can calculate MediaObject centre coordinates relative to screen view as:</p>
-<p>MediaObject.centre[0-1] = self._scene.origin[0] + C_s[0-1] * 2**self._scene.zoomlevel</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MediaObject</span><span class="o">.</span><span class="n">centre</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">origin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">C_s</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">zoomlevel</span>
+</pre></div>
+</div>
 <dl class="simple">
 <dt>Constructor :</dt><dd><p>MediaObject(media_id, scene)</p>
 </dd>
