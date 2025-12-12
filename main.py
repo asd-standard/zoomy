@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-## PyZUI 0.1 - Python Zooming User Interface
-## Copyright (C) 2009  David Roberts <d@vidr.cc>
+## PyZUI - Python Zooming User Interface
+## Copyright (C) 2009 David Roberts <d@vidr.cc>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -13,9 +13,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301, USA.
+## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 import sys
 import os
@@ -26,10 +24,9 @@ from pathlib import Path
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from pyzui.objects.scene.qzui import QZUI
-import pyzui.tilemanager as TileManager
-from pyzui.objects.scene.mainwindow import MainWindow
+import pyzui.tilesystem.tilemanager as TileManager
+from pyzui.windows.mainwindow import MainWindow
 from pyzui.logger import LoggerConfig, get_logger
-
 
 def load_config(config_file=None):
     """Load configuration from JSON file.
@@ -45,7 +42,7 @@ def load_config(config_file=None):
             'debug': False,
             'verbose': False,
             'log_to_file': True,
-            'log_to_console': True,
+            'log_to_console': False,
             'colored_output': True,
             'log_dir': 'logs'
         },
@@ -71,7 +68,6 @@ def load_config(config_file=None):
 
     return default_config
 
-
 def parse_arguments():
     """Parse command-line arguments.
 
@@ -83,11 +79,12 @@ def parse_arguments():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                      # Run with default settings
-  %(prog)s --debug              # Run in debug mode with verbose logging
-  %(prog)s --verbose            # Run with verbose logging to console
+  %(prog)s                      # Run with default settings (logs to file only)
+  %(prog)s --console            # Enable console output
+  %(prog)s --debug --console    # Run in debug mode with console output
+  %(prog)s --verbose --console  # Run with verbose logging to console
   %(prog)s --config pyzui.json  # Load settings from config file
-  %(prog)s --no-console         # Disable console logging
+  %(prog)s --no-file            # Log to console only (disable file logging)
   %(prog)s --log-dir /tmp/logs  # Use custom log directory
         """
     )
@@ -116,6 +113,12 @@ Examples:
         type=str,
         metavar='DIR',
         help='Directory for log files (default: ./logs)'
+    )
+
+    parser.add_argument(
+        '--console',
+        action='store_true',
+        help='Enable console logging (default: disabled)'
     )
 
     parser.add_argument(
@@ -151,7 +154,6 @@ Examples:
 
     return parser.parse_args()
 
-
 def main():
     """Start the PyZUI application."""
 
@@ -168,6 +170,8 @@ def main():
         config['logging']['verbose'] = True
     if args.log_dir:
         config['logging']['log_dir'] = args.log_dir
+    if args.console:
+        config['logging']['log_to_console'] = True
     if args.no_console:
         config['logging']['log_to_console'] = False
     if args.no_file:
@@ -225,9 +229,6 @@ def main():
 
     sys.exit(exit_code)
 
-
 if __name__ == '__main__':
     main()
-
-
 
