@@ -8,6 +8,10 @@ pan and zoom through the collection.
 
 ---
 
+Full documentation available at [asd-standard.github.io/zoomy](https://asd-standard.github.io/zoomy/)
+
+---
+
 This project is a fork of [github.com/davidar/pyzui](https://github.com/davidar/pyzui),
 original work from which it derives its architecture and features.
 
