@@ -46,13 +46,15 @@ Help menu:
 Mouse/Keyboard actions:
 -----------------------
 
-- **Left-click** Select the foremost media under the cursor:
+- **Left-click** Select the topmost media under the cursor (smaller objects
+  appear on top of larger ones):
   	- if there is no media under the cursor then the currently selected media
   	  will be deselected
   	- if the Shift key is currently being held then no change will be made
   	  to the current selection
 
-- **Click`n'drag** Select and move the foremost media under the cursor
+- **Click`n'drag** Select and move the topmost media under the cursor
+    - smaller objects are rendered above larger ones and will be selected first
     - if there is no media under the cursor then the currently selected media
       will be deselected and the entire scene will be moved
     - if the Shift key is currently being held then no change will be made

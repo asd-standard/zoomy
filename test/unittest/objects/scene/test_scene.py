@@ -55,3 +55,66 @@ class TestScene:
         Then they should pass to maintain test suite integrity
         """
         assert True
+
+    def test_render_order_smaller_objects_on_top(self):
+        """
+        Scenario: Verify smaller objects are rendered on top of larger objects
+
+        Given a scene with multiple media objects of different sizes
+        When the scene is rendered
+        Then smaller objects should be rendered after (on top of) larger objects
+        """
+        from pyzui.objects.scene.scene import Scene
+        from pyzui.objects.mediaobjects import mediaobject as MediaObject
+
+        # Create a scene
+        scene = Scene()
+        scene.viewport_size = (800, 600)
+
+        # Track render order
+        render_order = []
+
+        # Create mock media objects with different sizes
+        class MockMediaObject:
+            def __init__(self, name, area):
+                self.name = name
+                self._area = area
+                self._topleft = (100, 100)
+                self._bottomright = (200, 200)
+
+            @property
+            def onscreen_area(self):
+                return self._area
+
+            @property
+            def topleft(self):
+                return self._topleft
+
+            @property
+            def bottomright(self):
+                return self._bottomright
+
+            def render(self, painter, mode):
+                if mode != MediaObject.RenderMode.Invisible:
+                    render_order.append(self.name)
+
+        # Create objects: large (1000), medium (500), small (100)
+        large_obj = MockMediaObject("large", 1000)
+        medium_obj = MockMediaObject("medium", 500)
+        small_obj = MockMediaObject("small", 100)
+
+        # Add in random order
+        scene.add(medium_obj)
+        scene.add(small_obj)
+        scene.add(large_obj)
+
+        # Create a mock painter
+        mock_painter = Mock()
+
+        # Render the scene
+        scene.render(mock_painter, draft=True)
+
+        # Verify render order: largest first, smallest last
+        # This ensures smaller objects are painted on top
+        assert render_order == ["large", "medium", "small"], \
+            f"Expected ['large', 'medium', 'small'], got {render_order}"

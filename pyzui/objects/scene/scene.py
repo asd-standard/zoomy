@@ -281,11 +281,9 @@ class Scene(PhysicalObject):
         which returns mouse position *pos*
         
         Thread safely cycle through *__objects*. For each mediaobject checks if
-        *pos* is within mediaobject area, if it is the mediaobject is returned as
-        *foremost* 
+        *pos* is within mediaobject area. Since smaller objects are rendered on
+        top, we return the first (smallest) matching object.
         """
-        foremost = None
-
         with self.__objects_lock:
             self.__sort_objects()
             for mediaobject in self.__objects:
@@ -293,9 +291,9 @@ class Scene(PhysicalObject):
                 right, bottom = mediaobject.bottomright
                 if pos[0] >= left  and pos[1] >= top and \
                    pos[0] <= right and pos[1] <= bottom:
-                    foremost = mediaobject
+                    return mediaobject
 
-        return foremost
+        return None
 
     def zoom(self, amount: float) -> None:
         """Zoom by the given `amount` with the centre maintaining its position
@@ -361,10 +359,11 @@ class Scene(PhysicalObject):
             hidden = False
             #Creates an empty set for hidden mediaobjects
             hidden_objects = set()
-            """cycles through __objects in reverse order, from smallest area to
-            biggest area, if they result hidden they don't get to be rendered
-            and they're added to hidden_objects set""" 
-            for mediaobject in reversed(self.__objects):
+            """cycles through __objects from smallest area to biggest area,
+            if they result hidden they don't get to be rendered and they're
+            added to hidden_objects set. This ensures smaller objects render
+            on top of larger ones."""
+            for mediaobject in self.__objects:
                 if hidden:
                     hidden_objects.add(mediaobject)
                 else:
@@ -376,17 +375,19 @@ class Scene(PhysicalObject):
                        x2 >= self.viewport_size[0] and \
                        y2 >= self.viewport_size[1]:
                         ## mediaobject fills the entire
-                        ## screen, so mark the rest of
-                        ## the mediaobjects behind it
+                        ## screen, so mark larger objects
+                        ## (which are rendered behind it)
                         ## as hidden
                         hidden = True
 
             """Set of hidden_objects it's updated: now we cycle through __objects
-            once again setting mediaobject.RenderMode, we set Invisible is 
-            mediaobject is in hidden_objects, we set in Draft if draft class input
-            parameter is passed as True, otherwise we set HighQuality"""
+            in reverse order (largest to smallest) setting mediaobject.RenderMode.
+            We set Invisible if mediaobject is in hidden_objects, we set in Draft
+            if draft class input parameter is passed as True, otherwise we set
+            HighQuality. Rendering largest first means smallest objects are painted
+            last and appear on top."""
 
-            for mediaobject in self.__objects:
+            for mediaobject in reversed(self.__objects):
                 if mediaobject in hidden_objects:
                     mode = MediaObject.RenderMode.Invisible
                 elif draft:
@@ -729,12 +730,16 @@ def load_scene(filename: str) -> Scene:
            class_name == 'StringMediaObject' or \
            class_name == 'SVGMediaObject':
             if   class_name ==   'TiledMediaObject':
+                # autofit=False is critical: when loading from a file, we must
+                # preserve the saved zoomlevel. If autofit=True, the zoomlevel
+                # would be recalculated when actual image dimensions load,
+                # overwriting the saved value and causing size discrepancies.
                 mediaobject = TiledMediaObject(
-                    media_id, scene)
+                    media_id, scene, autofit=False)
             elif class_name ==   'StringMediaObject':
                 mediaobject = StringMediaObject(
                     media_id, scene)
-                
+
             elif class_name ==   'SVGMediaObject':
                 mediaobject = SVGMediaObject(
                     media_id, scene)
