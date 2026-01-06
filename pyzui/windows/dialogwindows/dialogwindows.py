@@ -20,6 +20,7 @@
 from .zoomsensitivitydialog import open_zoom_sensitivity_input_dialog
 from .stringinputdialog import OpenNewStringInputDialog
 from .modifystringdialog import ModifyStringInputDialog
+from .modifytiledmediaobjectdialog import ModifyTiledMediaObjectDialog
 
 class DialogWindows:
     """
@@ -42,6 +43,7 @@ class DialogWindows:
     # Nested classes for backward compatibility
     open_new_string_input_dialog = OpenNewStringInputDialog
     modify_string_input_dialog = ModifyStringInputDialog
+    modify_tiled_media_object_dialog = ModifyTiledMediaObjectDialog
 
 # Also expose at module level for direct imports
 __all__ = [
@@ -49,4 +51,5 @@ __all__ = [
     'open_zoom_sensitivity_input_dialog',
     'OpenNewStringInputDialog',
     'ModifyStringInputDialog',
+    'ModifyTiledMediaObjectDialog',
 ]

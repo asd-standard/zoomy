@@ -23,7 +23,6 @@ import shutil
 
 from .converter import Converter
 from pyzui.tilesystem.tiler.ppm import read_ppm_header
-from pyzui.tilesystem import tilestore as TileStore
 
 class PDFConverter(Converter):
     """
@@ -42,6 +41,21 @@ class PDFConverter(Converter):
     should be used in conjunction with :class:`VipsConverter`.
     """
     def __init__(self, infile: str, outfile: str) -> None:
+        """
+        Constructor :
+            PDFConverter(infile, outfile)
+        Parameters :
+            infile : str
+            outfile : str
+
+        PDFConverter(infile, outfile) --> None
+
+        Create a new PDFConverter for rasterizing PDF files.
+
+        The infile parameter is the path to the source PDF file.
+        The outfile parameter is the path where the rasterized PPM will be written.
+        The default resolution is 300 DPI.
+        """
         Converter.__init__(self, infile, outfile)
 
         self.resolution = 300
@@ -123,41 +137,60 @@ class PDFConverter(Converter):
         string describing the error.
         """
 
-        with TileStore.disk_lock:
-            tmpdir = tempfile.mkdtemp()
-            self._logger.info("calling pdftoppm")
-            process = subprocess.Popen(['pdftoppm',
-                '-r', str(self.resolution),
-                self._infile, os.path.join(tmpdir, 'page')],
-                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            stdout = process.communicate()[0]
+        tmpdir = tempfile.mkdtemp()
+        self._logger.info("calling pdftoppm")
+        process = subprocess.Popen(['pdftoppm',
+            '-r', str(self.resolution),
+            self._infile, os.path.join(tmpdir, 'page')],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        stdout = process.communicate()[0]
 
-            if process.returncode == 0:
-                try:
-                    self.__merge(tmpdir)
-                
-                except Exception as e:
-                    self.error = 'Error in PDFConverter.__merge() \n' + str(e)
-                    self._logger.error(self.error)
-                    
-                    try:
-                        os.unlink(self._outfile)
-                    except:
-                        self.__logger.exception("unable to unlink temporary "
-                            "file '%s'" % self._outfile)
-                          
-            else:
-                self.error = "conversion failed with return code %d:\n%s" % \
-                    (process.returncode, stdout)
+        if process.returncode == 0:
+            try:
+                self.__merge(tmpdir)
+
+            except Exception as e:
+                self.error = 'Error in PDFConverter.__merge() \n' + str(e)
                 self._logger.error(self.error)
 
-            shutil.rmtree(tmpdir, ignore_errors=True)
-            self._progress = 1.0
+                try:
+                    os.unlink(self._outfile)
+                except:
+                    self.__logger.exception("unable to unlink temporary "
+                        "file '%s'" % self._outfile)
+
+        else:
+            self.error = "conversion failed with return code %d:\n%s" % \
+                (process.returncode, stdout)
+            self._logger.error(self.error)
+
+        shutil.rmtree(tmpdir, ignore_errors=True)
+        self._progress = 1.0
 
     def __str__(self) -> str:
+        """
+        Method :
+            PDFConverter.__str__()
+        Parameters :
+            None
+
+        PDFConverter.__str__() --> str
+
+        Return a human-readable string representation of the PDFConverter.
+        """
         return "PDFConverter(%s, %s)" % (self._infile, self._outfile)
 
     def __repr__(self) -> str:
+        """
+        Method :
+            PDFConverter.__repr__()
+        Parameters :
+            None
+
+        PDFConverter.__repr__() --> str
+
+        Return a formal string representation of the PDFConverter.
+        """
         return "PDFConverter(%s, %s)" % \
             (repr(self._infile), repr(self._outfile))
 

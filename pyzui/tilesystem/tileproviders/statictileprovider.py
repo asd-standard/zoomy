@@ -89,6 +89,19 @@ class StaticTileProvider(TileProvider):
 
     """
     def __init__(self, tilecache: Any) -> None:
+        """
+        Constructor :
+            StaticTileProvider(tilecache)
+        Parameters :
+            tilecache : Any
+
+        StaticTileProvider(tilecache) --> None
+
+        Create a new StaticTileProvider with the given TileCache.
+
+        The tilecache parameter is the TileCache instance that this provider
+        will use to store loaded tiles.
+        """
         TileProvider.__init__(self, tilecache)
 
     def _load(self, tile_id: Tuple[str, int, int, int]) -> Optional[Any]:

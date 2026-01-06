@@ -161,8 +161,28 @@ class TileProvider(Thread):
         self.__tasks_available.release()
 
     def __str__(self) -> str:
+        """
+        Method :
+            TileProvider.__str__()
+        Parameters :
+            None
+
+        TileProvider.__str__() --> str
+
+        Return a human-readable string representation of the TileProvider.
+        """
         return type(self).__name__
 
     def __repr__(self) -> str:
+        """
+        Method :
+            TileProvider.__repr__()
+        Parameters :
+            None
+
+        TileProvider.__repr__() --> str
+
+        Return a formal string representation of the TileProvider.
+        """
         return "%s()" % type(self).__name__
 

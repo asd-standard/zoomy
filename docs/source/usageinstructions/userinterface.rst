@@ -53,6 +53,18 @@ Mouse/Keyboard actions:
   	- if the Shift key is currently being held then no change will be made
   	  to the current selection
 
+- **Right-click** Open a context dialog for the media object under the cursor:
+    - **StringMediaObject**: Opens the Modify String dialog allowing you to edit
+      the text content and change the color of the string
+    - **TiledMediaObject**: Opens the Tiled Media Object Options dialog with
+      image manipulation tools:
+
+      - Rotate Left/Right: Rotate the image by 90° increments
+      - Invert Colors: Apply color inversion effect
+      - Black and White: Convert the image to grayscale
+
+      Changes are previewed in the dialog and applied when clicking Apply.
+
 - **Click`n'drag** Select and move the topmost media under the cursor
     - smaller objects are rendered above larger ones and will be selected first
     - if there is no media under the cursor then the currently selected media

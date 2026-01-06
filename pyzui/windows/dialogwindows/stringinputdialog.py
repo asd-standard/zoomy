@@ -40,6 +40,20 @@ class OpenNewStringInputDialog:
     Also gives a selection column of the last 20 used colors.
     """
     def __init__(self) -> None:
+        """
+        Constructor :
+            OpenNewStringInputDialog()
+        Parameters :
+            None
+
+        OpenNewStringInputDialog() --> None
+
+        Create a new OpenNewStringInputDialog for gathering string input with color selection.
+
+        Initializes the dialog with empty string color, loads previously used colors
+        from the color store file, or creates default colors (red, green, blue) if
+        no color history exists.
+        """
         self.string_color = ''
         self.passed_color = ''
         self.color_codes = deque(maxlen=24)
@@ -227,6 +241,10 @@ class OpenNewStringInputDialog:
         if dialog.exec() == QDialog.Accepted:
             if len(self.string_color) != 6:
                 self.string_color = self.custom_color_input.text()
+                
+                if self.string_color[0]=="#" :
+                    self.string_color = self.string_color[1:]
+                
                 self.color_codes.append(self.string_color)
                 f = open(self.color_dir+'/color_list.txt', 'w')
                 for i in self.color_codes:

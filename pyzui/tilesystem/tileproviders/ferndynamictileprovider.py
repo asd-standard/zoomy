@@ -53,6 +53,19 @@ class FernTileProvider(DynamicTileProvider):
         - Color is RGB (100, 170, 0) for a green fern appearance
     """
     def __init__(self, tilecache: Any) -> None:
+        """
+        Constructor :
+            FernTileProvider(tilecache)
+        Parameters :
+            tilecache : Any
+
+        FernTileProvider(tilecache) --> None
+
+        Create a new FernTileProvider with the given TileCache.
+
+        The tilecache parameter is the TileCache instance that this provider
+        will use to store generated fern fractal tiles.
+        """
         DynamicTileProvider.__init__(self, tilecache)
 
     filext = 'png'

@@ -58,8 +58,8 @@ class LoggerConfig:
     }
 
     @classmethod
-    def initialize(cls, debug=False, log_to_file=True, log_to_console=True,
-                   log_dir=None, colored_output=True, verbose=False):
+    def initialize(cls, debug: bool = False, log_to_file: bool = True, log_to_console: bool = True,
+                   log_dir: str = None, colored_output: bool = True, verbose: bool = False) -> None:
         """
         Method :
             LoggerConfig.initialize(debug, log_to_file, log_to_console, log_dir, colored_output, verbose)
@@ -163,7 +163,7 @@ class LoggerConfig:
         init_logger.info('='*60)
 
     @classmethod
-    def get_logger(cls, name):
+    def get_logger(cls, name: str) -> logging.Logger:
         """
         Method :
             LoggerConfig.get_logger(name)
@@ -191,7 +191,7 @@ class LoggerConfig:
         return cls._loggers[name]
 
     @classmethod
-    def set_level(cls, level, module=None):
+    def set_level(cls, level: int, module: str = None) -> None:
         """
         Method :
             LoggerConfig.set_level(level, module)
@@ -219,7 +219,7 @@ class LoggerConfig:
                     handler.setLevel(level)
 
     @classmethod
-    def enable_debug(cls):
+    def enable_debug(cls) -> None:
         """
         Method :
             LoggerConfig.enable_debug()
@@ -235,7 +235,7 @@ class LoggerConfig:
         logger.info('Debug mode enabled')
 
     @classmethod
-    def disable_debug(cls):
+    def disable_debug(cls) -> None:
         """
         Method :
             LoggerConfig.disable_debug()
@@ -251,7 +251,7 @@ class LoggerConfig:
         logger.info('Debug mode disabled')
 
     @classmethod
-    def get_log_file_path(cls):
+    def get_log_file_path(cls) -> Path:
         """
         Method :
             LoggerConfig.get_log_file_path()
@@ -279,7 +279,7 @@ class ColoredFormatter(logging.Formatter):
     Custom formatter that adds color to console output.
     """
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         """
         Method :
             ColoredFormatter.format(record)
@@ -303,7 +303,7 @@ class ColoredFormatter(logging.Formatter):
 
         return super().format(record)
 
-def get_logger(name):
+def get_logger(name: str) -> logging.Logger:
     """
     Function :
         get_logger(name)

@@ -14,3 +14,19 @@
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 """PyZUI Dialog Windows - UI dialog components."""
+
+from .dialogwindows import (
+    DialogWindows,
+    OpenNewStringInputDialog,
+    ModifyStringInputDialog,
+    ModifyTiledMediaObjectDialog,
+    open_zoom_sensitivity_input_dialog
+)
+
+__all__ = [
+    'DialogWindows',
+    'OpenNewStringInputDialog',
+    'ModifyStringInputDialog',
+    'ModifyTiledMediaObjectDialog',
+    'open_zoom_sensitivity_input_dialog'
+]

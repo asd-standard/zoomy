@@ -85,6 +85,19 @@ class DynamicTileProvider(TileProvider):
 
     """
     def __init__(self, tilecache: Any) -> None:
+        """
+        Constructor :
+            DynamicTileProvider(tilecache)
+        Parameters :
+            tilecache : Any
+
+        DynamicTileProvider(tilecache) --> None
+
+        Create a new DynamicTileProvider with the given TileCache.
+
+        The tilecache parameter is the TileCache instance that this provider
+        will use to store dynamically generated or retrieved tiles.
+        """
         TileProvider.__init__(self, tilecache)
 
     ## set default values (derived classes may override these values)

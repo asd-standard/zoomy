@@ -487,6 +487,32 @@ class Scene(PhysicalObject):
                         self.right_selection = None
                         break
 
+            if type(self.right_selection).__name__ == 'TiledMediaObject' :
+
+                for i in range(len(self.__objects)) :
+
+                    if self.__objects[i]._media_id ==\
+                      self.right_selection._media_id :
+
+                        dialog = DialogWindows.modify_tiled_media_object_dialog(\
+                            self.__objects[i])
+                        try :
+                            ok, media_id = dialog._run_dialog()
+
+                        except Exception as e:
+                            print(f"Error opening TiledMediaObject dialog: {e}")
+                            ok = False
+                            media_id = None
+
+                        if ok and media_id:
+                            # For now, the dialog is just a mockup
+                            # In the future, this would handle actual transformations
+                            # self.__objects[i]._media_id = media_id
+                            pass
+
+                        self.right_selection = None
+                        break
+
         #returning MediaObject.LoadError
         return errors
 

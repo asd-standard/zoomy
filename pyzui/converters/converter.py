@@ -79,9 +79,29 @@ class Converter(Thread):
         return self._progress
 
     def __str__(self) -> str:
+        """
+        Method :
+            Converter.__str__()
+        Parameters :
+            None
+
+        Converter.__str__() --> str
+
+        Return a human-readable string representation of the Converter.
+        """
         return "Converter(%s, %s)" % (self._infile, self._outfile)
 
     def __repr__(self) -> str:
+        """
+        Method :
+            Converter.__repr__()
+        Parameters :
+            None
+
+        Converter.__repr__() --> str
+
+        Return a formal string representation of the Converter.
+        """
         return "Converter(%s, %s)" % (repr(self._infile), repr(self._outfile))
     
     

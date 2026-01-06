@@ -40,6 +40,20 @@ class ModifyStringInputDialog:
     Also gives a selection column of the last 20 used colors.
     """
     def __init__(self, media_id: Optional[str]) -> None:
+        """
+        Constructor :
+            ModifyStringInputDialog(media_id)
+        Parameters :
+            media_id : Optional[str]
+
+        ModifyStringInputDialog(media_id) --> None
+
+        Create a new ModifyStringInputDialog for editing an existing string media object.
+
+        The media_id parameter contains the string URI in format 'string:RRGGBB:text'.
+        If media_id is provided, the dialog is pre-populated with the existing color
+        and text. Loads previously used colors from the color store file.
+        """
         self.start_string = ''
         self.string_color = ''
         self.passed_color = ''
