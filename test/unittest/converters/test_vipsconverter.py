@@ -214,7 +214,7 @@ class TestVipsConverter:
         Then it should return the expected format
         """
         converter = VipsConverter("input.jpg", "output.ppm")
-        assert str(converter) == "VipsConverter(input.jpg, output.ppm)"
+        assert str(converter) == "VipsConverter(input.jpg, output.ppm, rotation=0, invert_colors=False, black_and_white=False)"
 
     def test_repr_representation(self):
         """
@@ -225,7 +225,7 @@ class TestVipsConverter:
         Then it should return the expected format
         """
         converter = VipsConverter("input.jpg", "output.ppm")
-        assert repr(converter) == "VipsConverter('input.jpg', 'output.ppm')"
+        assert repr(converter) == "VipsConverter('input.jpg', 'output.ppm', rotation=0, invert_colors=False, black_and_white=False)"
 
     def test_small_image_conversion(self):
         """
