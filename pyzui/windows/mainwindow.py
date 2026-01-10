@@ -332,6 +332,26 @@ class MainWindow(QtWidgets.QMainWindow):
         if ok and uri:
             self.__open_media(uri)
 
+    # Supported file extensions for media opening
+    # SVG handled by SVGMediaObject, PDF/PPM/images handled by TiledMediaObject
+    SUPPORTED_EXTENSIONS = {
+        '.svg',                         # SVGMediaObject
+        '.pdf',                         # PDFConverter
+        '.ppm',                         # Direct PPM support
+        '.jpg', '.jpeg',                # VipsConverter - JPEG
+        '.png',                         # VipsConverter - PNG
+        '.gif',                         # VipsConverter - GIF
+        '.tif', '.tiff',                # VipsConverter - TIFF
+        '.webp',                        # VipsConverter - WebP
+        '.bmp',                         # VipsConverter - BMP
+        '.heic', '.heif',               # VipsConverter - HEIC
+        '.avif',                        # VipsConverter - AVIF
+        '.jxl',                         # VipsConverter - JPEG XL
+    }
+
+    # Maximum file size for PDF files (2 MB)
+    MAX_PDF_SIZE_BYTES = 2 * 1024 * 1024
+
     def __action_open_media_dir(self) -> None:
         """
         Method :
@@ -342,7 +362,8 @@ class MainWindow(QtWidgets.QMainWindow):
         MainWindow.__action_open_media_dir() --> None
 
         Open media from the directory chosen by the user in a file
-        selection dialog.
+        selection dialog. Only files with supported extensions are opened.
+        PDF files larger than MAX_PDF_SIZE_BYTES are skipped.
         """
         directory = str(QtWidgets.QFileDialog.getExistingDirectory(
             self, "Open media directory", self.__prev_dir))
@@ -353,6 +374,13 @@ class MainWindow(QtWidgets.QMainWindow):
             for filename in os.listdir(directory):
                 filename = os.path.join(directory, filename)
                 if not os.path.isdir(filename):
+                    # Check if file has a supported extension
+                    ext = os.path.splitext(filename)[1].lower()
+                    if ext not in self.SUPPORTED_EXTENSIONS:
+                        continue
+                    # Skip PDF files larger than 2 MB
+                    if ext == '.pdf' and os.path.getsize(filename) > self.MAX_PDF_SIZE_BYTES:
+                        continue
                     mediaobject = self.__open_media(filename, False)
                     if mediaobject:
                         media.append(mediaobject)
