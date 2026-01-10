@@ -18,7 +18,7 @@
 
 from typing import Optional, Tuple, Any
 
-from threading import Thread, Condition
+from threading import Thread, Condition, Event
 from collections import deque
 
 from pyzui.tilesystem.tile import Tile
@@ -62,6 +62,10 @@ class TileProvider(Thread):
 
         self.__tasks = deque()
         self.__tasks_available = Condition()
+
+        # Pause/resume mechanism
+        self.__pause_event = Event()
+        self.__pause_event.set()  # Start in running (not paused) state
 
         self._logger = get_logger(str(self))
 
@@ -114,11 +118,17 @@ class TileProvider(Thread):
         Run a loop to load requested tiles.
         """
         while True:
+            # Wait if paused
+            self.__pause_event.wait()
+
             self.__tasks_available.acquire()
             while not self.__tasks:
                 self.__tasks_available.wait()
             tile_id = self.__tasks.pop()
             self.__tasks_available.release()
+
+            # Check pause again after acquiring task
+            self.__pause_event.wait()
 
             if tile_id not in self.__tilecache:
                 try:
@@ -130,7 +140,7 @@ class TileProvider(Thread):
                 if tile:
                     self._logger.debug("loaded %s", str(tile_id))
                     self.__tilecache[tile_id] = Tile(tile)
-                    
+
                     del tile
                 else:
                     self._logger.debug("unavailable %s", str(tile_id))
@@ -159,6 +169,35 @@ class TileProvider(Thread):
         else:
             self.__tasks = deque()
         self.__tasks_available.release()
+
+    def pause(self) -> None:
+        """
+        Method :
+            TileProvider.pause()
+        Parameters :
+            None
+
+        TileProvider.pause() --> None
+
+        Pause the tile provider thread. The thread will stop processing
+        new tasks until resume() is called.
+        """
+        self._logger.debug("pausing")
+        self.__pause_event.clear()
+
+    def resume(self) -> None:
+        """
+        Method :
+            TileProvider.resume()
+        Parameters :
+            None
+
+        TileProvider.resume() --> None
+
+        Resume the tile provider thread after it was paused.
+        """
+        self._logger.debug("resuming")
+        self.__pause_event.set()
 
     def __str__(self) -> str:
         """

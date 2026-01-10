@@ -136,7 +136,6 @@ class PDFConverter(Converter):
         If any errors are encountered then :attr:`self.error` will be set to a
         string describing the error.
         """
-
         tmpdir = tempfile.mkdtemp()
         self._logger.info("calling pdftoppm")
         process = subprocess.Popen(['pdftoppm',

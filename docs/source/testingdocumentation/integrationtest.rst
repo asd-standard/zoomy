@@ -42,6 +42,7 @@ Directory Organization
 
     test/integrationtest/
     ├── test_tiling_pipeline.py          # End-to-end tiling tests
+    ├── test_converter_pipeline.py       # Converter to tiler pipeline tests
     ├── test_concurrent_access.py        # Thread safety tests
     ├── test_cache_provider_integration.py  # Cache-provider interaction
     ├── test_tilemanager_integration.py  # TileManager coordination
@@ -61,7 +62,17 @@ Test Categories
 - Multiple image handling
 - Error handling in pipeline
 
-**2. Concurrent Access Tests** (``test_concurrent_access.py``)
+**2. Converter Pipeline Tests** (``test_converter_pipeline.py``)
+
+- VipsConverter image format conversion (PNG, JPG, TIFF to PPM)
+- PDFConverter PDF rasterization
+- Converter to Tiler pipeline integration
+- Progress tracking during conversion
+- Error handling for invalid/corrupted files
+- Process-based parallel conversion via ``converter_runner``
+- Output format validation
+
+**3. Concurrent Access Tests** (``test_concurrent_access.py``)
 
 - Thread-safe tile requests
 - Concurrent tiling operations
@@ -69,7 +80,7 @@ Test Categories
 - Provider queue concurrency
 - Race condition prevention
 
-**3. Cache-Provider Integration** (``test_cache_provider_integration.py``)
+**4. Cache-Provider Integration** (``test_cache_provider_integration.py``)
 
 - Provider-cache interaction
 - Cache hit prevention of redundant loads
@@ -77,7 +88,7 @@ Test Categories
 - Multi-provider cache sharing
 - Request queue processing
 
-**4. TileManager Coordination** (``test_tilemanager_integration.py``)
+**5. TileManager Coordination** (``test_tilemanager_integration.py``)
 
 - Request routing (static vs dynamic)
 - Tile synthesis and fallback
@@ -85,7 +96,7 @@ Test Categories
 - Negative tile level handling
 - Dual-cache management
 
-**5. GUI Integration** (``gui_integration.py``)
+**6. GUI Integration** (``gui_integration.py``)
 
 - Full application workflow
 - All user interactions
@@ -129,6 +140,13 @@ Basic Usage
 .. code-block:: bash
 
     pytest test_tiling_pipeline.py::TestTilingPipelineEndToEnd::test_tile_image_creates_pyramid_structure
+
+**Run converter pipeline tests:**
+
+.. code-block:: bash
+
+    # All converter tests (27 tests)
+    pytest test_converter_pipeline.py -v
 
 Integration Test Options
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -492,6 +510,224 @@ Validate tile caching behavior:
             assert ('m1', 1, 0, 0) not in cache
             assert ('m2', 1, 0, 0) in cache
             assert ('m3', 1, 0, 0) in cache
+
+Converter Pipeline Tests
+------------------------
+
+The converter pipeline tests (``test_converter_pipeline.py``) validate the complete workflow
+from image/PDF conversion through to tiling. These tests use a ``ConcreteTiler`` implementation
+that reads PPM image data using PIL.
+
+ConcreteTiler Implementation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The test file includes a ``ConcreteTiler`` class that implements the abstract ``_scanchunk``
+method for reading image rows:
+
+.. code-block:: python
+
+    class ConcreteTiler(Tiler):
+        """
+        A concrete implementation of Tiler for testing the converter pipeline.
+        Implements the _scanchunk method using PIL to read PPM image data.
+        """
+
+        def __init__(self, infile, media_id=None, filext='jpg', tilesize=256):
+            super().__init__(infile, media_id, filext, tilesize)
+            self._image = Image.open(infile).convert('RGB')
+            self._width, self._height = self._image.size
+            self._bytes_per_pixel = 3
+            self._current_row = 0
+
+        def _scanchunk(self):
+            """Read the next scanline from the image."""
+            if self._current_row >= self._height:
+                return b''
+            # Use crop to get entire row at once (much faster than getpixel)
+            row_img = self._image.crop(
+                (0, self._current_row, self._width, self._current_row + 1))
+            row_data = row_img.tobytes()
+            self._current_row += 1
+            return row_data
+
+**Performance Note:** The ``_scanchunk`` implementation uses ``crop().tobytes()`` rather than
+pixel-by-pixel reading with ``getpixel()``. This is critical for performance - reading a
+2048x1536 image pixel-by-pixel would require ~3 million ``getpixel()`` calls and cause
+tests to hang.
+
+VipsConverter Tests
+~~~~~~~~~~~~~~~~~~~
+
+Test VipsConverter image format conversion:
+
+.. code-block:: python
+
+    class TestVipsConverterBasicOperations:
+        """
+        Feature: VipsConverter Basic Operations
+
+        VipsConverter converts various image formats to PPM for tiling.
+        """
+
+        def test_convert_png_to_ppm(self, sample_images, tmp_path):
+            """
+            Scenario: Convert PNG to PPM format
+
+            Given a PNG image file
+            When VipsConverter processes the file
+            Then a valid PPM file is created
+            And the output has correct dimensions
+            """
+            infile = sample_images['png']
+            outfile = str(tmp_path / "output.ppm")
+
+            converter = VipsConverter(infile, outfile)
+            converter.run()
+
+            assert converter.error is None
+            assert converter.progress == 1.0
+            assert os.path.exists(outfile)
+
+**Test Classes:**
+
+- ``TestVipsConverterBasicOperations``: PNG, JPG, TIFF conversion
+- ``TestVipsConverterErrorHandling``: Invalid file handling
+- ``TestPDFConverterBasicOperations``: PDF rasterization
+- ``TestPDFConverterErrorHandling``: PDF error cases
+
+Converter to Tiler Pipeline
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Test the complete convert-then-tile workflow:
+
+.. code-block:: python
+
+    class TestConverterToTilerPipeline:
+        """
+        Feature: Converter to Tiler Pipeline
+
+        Images must be converted to PPM format before tiling.
+        This tests the complete conversion-to-tiling workflow.
+        """
+
+        def test_convert_then_tile_png(
+                self, sample_images, tmp_path, temp_tilestore,
+                initialized_tilemanager):
+            """
+            Scenario: Convert PNG then tile
+
+            Given a PNG image
+            When converted to PPM and then tiled
+            Then tiles are created successfully
+            And tile pyramid is accessible
+            """
+            infile = sample_images['png']
+            ppm_file = str(tmp_path / "converted.ppm")
+            media_id = "pipeline_test_png"
+
+            # Convert
+            converter = VipsConverter(infile, ppm_file)
+            converter.run()
+            assert converter.error is None
+
+            # Tile
+            tiler = ConcreteTiler(ppm_file, media_id=media_id, tilesize=256)
+            tiler.run()
+            assert tiler.error is None
+
+            # Verify
+            assert tilestore.tiled(media_id)
+
+Process-Based Parallel Conversion
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The converter pipeline uses process-based parallelism via ``converter_runner`` to enable
+multiple conversions to run concurrently without threading conflicts.
+
+**Why Process-Based?**
+
+pyvips uses its own internal thread pool for image operations. When multiple
+``VipsConverter`` instances run in threads alongside TileManager threads, conflicts
+can occur. By running conversions in separate processes:
+
+- Each pyvips instance runs in its own memory space
+- No interference with TileManager's TileProvider threads
+- True parallel execution (not limited by Python's GIL)
+
+**Process-Based Test Pattern:**
+
+.. code-block:: python
+
+    def test_multiple_converters_run_concurrently_via_processes(
+            self, sample_images, tmp_path):
+        """Test parallel conversion using processes."""
+        from pyzui.converters import converter_runner
+        from concurrent.futures import wait
+
+        futures = []
+        outfiles = []
+
+        for i in range(3):
+            infile = sample_images['png']
+            outfile = str(tmp_path / f"output_{i}.ppm")
+            outfiles.append(outfile)
+            future = converter_runner.submit_vips_conversion(infile, outfile)
+            futures.append(future)
+
+        # Wait for all to complete with timeout
+        done, not_done = wait(futures, timeout=60)
+        assert len(not_done) == 0, f"{len(not_done)} conversions timed out"
+
+        # Verify all completed successfully
+        for i, future in enumerate(futures):
+            error = future.result()
+            assert error is None, f"Conversion {i} failed: {error}"
+
+**Thread-Based Test (Single Converter):**
+
+Individual converters can still run in threads for simple use cases:
+
+.. code-block:: python
+
+    def test_converter_runs_in_thread(self, sample_images, tmp_path):
+        """Test converter runs correctly in a separate thread."""
+        import threading
+
+        converter = VipsConverter(infile, outfile)
+        result = {'done': False}
+
+        def run_conversion():
+            converter.run()
+            result['done'] = True
+
+        thread = threading.Thread(target=run_conversion)
+        thread.start()
+        thread.join(timeout=30)
+
+        assert result['done'], "Conversion thread timed out"
+        assert converter.progress == 1.0
+
+Converter Progress Tracking
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Test progress reporting during conversion:
+
+.. code-block:: python
+
+    class TestConverterProgressTracking:
+        def test_progress_starts_at_zero(self, sample_images, tmp_path):
+            """Progress starts at 0.0 before run()."""
+            converter = VipsConverter(sample_images['png'],
+                                      str(tmp_path / "out.ppm"))
+            assert converter.progress == 0.0
+
+        def test_progress_reaches_one_after_completion(
+                self, sample_images, tmp_path):
+            """Progress reaches 1.0 after successful conversion."""
+            converter = VipsConverter(sample_images['png'],
+                                      str(tmp_path / "out.ppm"))
+            converter.run()
+            assert converter.progress == 1.0
 
 Concurrent Access Tests
 -----------------------
@@ -1495,6 +1731,7 @@ Example Test Files
 Reference these for patterns:
 
 - ``test/integrationtest/test_tiling_pipeline.py`` - Complete pipeline testing
+- ``test/integrationtest/test_converter_pipeline.py`` - Converter and tiling pipeline
 - ``test/integrationtest/test_concurrent_access.py`` - Thread safety patterns
 - ``test/integrationtest/test_cache_provider_integration.py`` - Component interaction
 - ``test/integrationtest/test_tilemanager_integration.py`` - Coordination testing

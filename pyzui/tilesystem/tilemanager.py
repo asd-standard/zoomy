@@ -311,6 +311,43 @@ def purge(media_id: Optional[str] = None) -> None:
     for tp in list(__tp_dynamic.values()):
         tp.purge(media_id)
 
+def pause() -> None:
+    """
+    Function :
+        pause()
+    Parameters :
+        None
+
+    pause() --> None
+
+    Pause all TileProvider threads. This should be called before running
+    converter processes to avoid conflicts between pyvips and tile loading.
+    """
+    if __tp_static:
+        __tp_static.pause()
+    for tp in list(__tp_dynamic.values()):
+        tp.pause()
+    if __logger:
+        __logger.debug("all tile providers paused")
+
+def resume() -> None:
+    """
+    Function :
+        resume()
+    Parameters :
+        None
+
+    resume() --> None
+
+    Resume all TileProvider threads after they were paused.
+    """
+    if __tp_static:
+        __tp_static.resume()
+    for tp in list(__tp_dynamic.values()):
+        tp.resume()
+    if __logger:
+        __logger.debug("all tile providers resumed")
+
 class MediaNotTiled(Exception):
     """Exception for when tiles are requested from a media that has not been
     tiled yet.

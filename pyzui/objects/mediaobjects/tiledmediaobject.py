@@ -30,8 +30,8 @@ from pyzui.logger import get_logger
 # Subdivide a ppm image into tiles that fit the mediaobject frame
 from pyzui.tilesystem.tiler.ppm import PPMTiler
 
-# The classes that convert various format to ppm images
-from pyzui.converters import PDFConverter, VipsConverter
+# Process-based conversion for parallel media conversion
+from pyzui.converters import converter_runner
 
 class TiledMediaObject(MediaObject):
     """
@@ -104,32 +104,36 @@ class TiledMediaObject(MediaObject):
         
         #print('tiledmediaobject-70-TileManager.tiled(self._media_id):',TileManager.tiled(self._media_id))
         
-        if TileManager.tiled(self._media_id):   
-            #print(self._media_id)       
+        if TileManager.tiled(self._media_id):
+            #print(self._media_id)
             TileManager.load_tile((self._media_id, 0, 0, 0))
-            
+
         else:
             #print('tiledmediaobject-75-need-to-tile', self._media_id)
             self.__logger.info("need to tile media")
             fd, self.__tmpfile = tempfile.mkstemp('.ppm')
             os.close(fd)
-            
+
             if self._media_id.lower().endswith('.pdf'):
-                self.__converter = PDFConverter(
+                # Use process-based PDF conversion
+                future = converter_runner.submit_pdf_conversion(
                     self._media_id, self.__tmpfile)
+                self.__converter = converter_runner.ConversionHandle(
+                    future, self._media_id, self.__tmpfile)
                 self.__ppmfile = self.__tmpfile
-                self.__converter.start()
             elif self._media_id.lower().endswith('.ppm'):
                 ## assume media_id is a local PPM file
                 self.__logger.info(
                     "assuming media is a local PPM file")
                 self.__ppmfile = self._media_id
-                
+
             else:
-                self.__converter = VipsConverter(
+                # Use process-based Vips conversion
+                future = converter_runner.submit_vips_conversion(
                     self._media_id, self.__tmpfile)
+                self.__converter = converter_runner.ConversionHandle(
+                    future, self._media_id, self.__tmpfile)
                 self.__ppmfile = self.__tmpfile
-                self.__converter.start()
             
 
     transparent = False
