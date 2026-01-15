@@ -19,25 +19,38 @@
 This module provides functions to run converters in separate processes,
 avoiding threading conflicts between pyvips and TileManager threads.
 
-The multiprocessing context can be configured via the PYZUI_MP_CONTEXT
-environment variable:
-- 'fork': Default. Fast, clean shutdown. Safe when conversions are submitted
-  before other threads start (which is the normal use case).
-- 'spawn': Creates fresh Python interpreter per worker. Avoids fork-safety
-  issues but may hang during interpreter shutdown.
-- 'forkserver': Middle ground, but has similar shutdown issues to 'spawn'.
+The multiprocessing context is chosen automatically:
+- 'fork': Used when no other threads are running. Fast and clean shutdown.
+- 'spawn': Used when other threads exist (fork-after-threads is unsafe).
+  Creates fresh Python interpreter per worker.
+
+The context can be overridden via PYZUI_MP_CONTEXT environment variable.
 """
 
 from concurrent.futures import ProcessPoolExecutor, Future
 from typing import Optional, Literal, Dict, Any
 import multiprocessing
+import threading
 import atexit
 import os
 
-# Allow multiprocessing context to be configured via environment variable
-# Default to 'fork' which has cleaner shutdown semantics
-_mp_context_name = os.environ.get('PYZUI_MP_CONTEXT', 'fork')
-_mp_context = multiprocessing.get_context(_mp_context_name)
+
+def _get_safe_context():
+    """
+    Get a multiprocessing context that's safe for the current thread state.
+
+    Returns 'fork' if only the main thread is running (fast, clean shutdown).
+    Returns 'spawn' if other threads exist (avoids fork-after-threads issues).
+    """
+    env_context = os.environ.get('PYZUI_MP_CONTEXT')
+    if env_context:
+        return multiprocessing.get_context(env_context)
+
+    # Check if other threads are running (fork is unsafe with multiple threads)
+    if threading.active_count() > 1:
+        return multiprocessing.get_context('spawn')
+    else:
+        return multiprocessing.get_context('fork')
 
 
 def _run_vips_conversion(infile: str, outfile: str,
@@ -86,6 +99,7 @@ def _run_pdf_conversion(infile: str, outfile: str) -> Optional[str]:
 
 # Global executor for process-based conversion
 _executor: Optional[ProcessPoolExecutor] = None
+_executor_context_name: Optional[str] = None
 _max_workers: int = 8
 _atexit_registered: bool = False
 
@@ -97,13 +111,21 @@ def init(max_workers: int = 8) -> None:
     Parameters:
         max_workers: Maximum number of parallel conversion processes
     """
-    global _executor, _max_workers, _atexit_registered
+    global _executor, _executor_context_name, _max_workers, _atexit_registered
     _max_workers = max_workers
+
+    # Get context appropriate for current thread state
+    context = _get_safe_context()
+    context_name = context.get_start_method()
+
+    # If executor exists but with different context, shut it down first
+    if _executor is not None and _executor_context_name != context_name:
+        shutdown()
+
     if _executor is None:
-        # Use spawn context to create fresh Python interpreters
-        _executor = ProcessPoolExecutor(max_workers=max_workers, mp_context=_mp_context)
-        # Register atexit handler to ensure clean shutdown during interpreter finalization.
-        # This prevents hangs caused by spawn-context multiprocessing cleanup issues.
+        _executor = ProcessPoolExecutor(max_workers=max_workers, mp_context=context)
+        _executor_context_name = context_name
+        # Register atexit handler to ensure clean shutdown during interpreter finalization
         if not _atexit_registered:
             atexit.register(shutdown)
             _atexit_registered = True
@@ -113,11 +135,12 @@ def shutdown() -> None:
     """
     Shutdown the process pool executor and terminate any lingering processes.
     """
-    global _executor
+    global _executor, _executor_context_name
     if _executor is not None:
         # Shutdown the executor - don't wait to avoid blocking
         _executor.shutdown(wait=False, cancel_futures=True)
         _executor = None
+        _executor_context_name = None
 
     # Forcefully terminate any remaining child processes from multiprocessing
     # This prevents hangs during interpreter finalization
@@ -128,9 +151,19 @@ def shutdown() -> None:
 
 def _get_executor() -> ProcessPoolExecutor:
     """Get or create the process pool executor."""
-    global _executor
+    global _executor, _executor_context_name
+
+    # Check if we need to recreate executor due to context change
+    context = _get_safe_context()
+    context_name = context.get_start_method()
+
+    if _executor is not None and _executor_context_name != context_name:
+        # Context changed (e.g., threads were created), need new executor
+        shutdown()
+
     if _executor is None:
         init(_max_workers)
+
     return _executor
 
 
