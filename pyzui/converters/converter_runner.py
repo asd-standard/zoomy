@@ -19,18 +19,25 @@
 This module provides functions to run converters in separate processes,
 avoiding threading conflicts between pyvips and TileManager threads.
 
-Uses 'spawn' start method to ensure fresh Python interpreter in each
-subprocess, avoiding issues with forked pyvips state.
+The multiprocessing context can be configured via the PYZUI_MP_CONTEXT
+environment variable:
+- 'fork': Default. Fast, clean shutdown. Safe when conversions are submitted
+  before other threads start (which is the normal use case).
+- 'spawn': Creates fresh Python interpreter per worker. Avoids fork-safety
+  issues but may hang during interpreter shutdown.
+- 'forkserver': Middle ground, but has similar shutdown issues to 'spawn'.
 """
 
 from concurrent.futures import ProcessPoolExecutor, Future
 from typing import Optional, Literal, Dict, Any
 import multiprocessing
+import atexit
 import os
 
-# Use 'spawn' context to avoid forking issues with pyvips
-# 'spawn' creates a fresh Python interpreter, avoiding inherited state
-_mp_context = multiprocessing.get_context('spawn')
+# Allow multiprocessing context to be configured via environment variable
+# Default to 'fork' which has cleaner shutdown semantics
+_mp_context_name = os.environ.get('PYZUI_MP_CONTEXT', 'fork')
+_mp_context = multiprocessing.get_context(_mp_context_name)
 
 
 def _run_vips_conversion(infile: str, outfile: str,
@@ -80,6 +87,7 @@ def _run_pdf_conversion(infile: str, outfile: str) -> Optional[str]:
 # Global executor for process-based conversion
 _executor: Optional[ProcessPoolExecutor] = None
 _max_workers: int = 8
+_atexit_registered: bool = False
 
 
 def init(max_workers: int = 8) -> None:
@@ -89,21 +97,33 @@ def init(max_workers: int = 8) -> None:
     Parameters:
         max_workers: Maximum number of parallel conversion processes
     """
-    global _executor, _max_workers
+    global _executor, _max_workers, _atexit_registered
     _max_workers = max_workers
     if _executor is None:
         # Use spawn context to create fresh Python interpreters
         _executor = ProcessPoolExecutor(max_workers=max_workers, mp_context=_mp_context)
+        # Register atexit handler to ensure clean shutdown during interpreter finalization.
+        # This prevents hangs caused by spawn-context multiprocessing cleanup issues.
+        if not _atexit_registered:
+            atexit.register(shutdown)
+            _atexit_registered = True
 
 
 def shutdown() -> None:
     """
-    Shutdown the process pool executor.
+    Shutdown the process pool executor and terminate any lingering processes.
     """
     global _executor
     if _executor is not None:
-        _executor.shutdown(wait=True)
+        # Shutdown the executor - don't wait to avoid blocking
+        _executor.shutdown(wait=False, cancel_futures=True)
         _executor = None
+
+    # Forcefully terminate any remaining child processes from multiprocessing
+    # This prevents hangs during interpreter finalization
+    for child in multiprocessing.active_children():
+        child.terminate()
+        child.join(timeout=1)
 
 
 def _get_executor() -> ProcessPoolExecutor:
