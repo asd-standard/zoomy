@@ -53,7 +53,7 @@ class MainWindow(QtWidgets.QMainWindow):
     in qzui class
     """
 
-    def __init__(self, framerate: int = 10, zoom_sensitivity: int = 50) -> None:
+    def __init__(self, framerate: int = 20, zoom_sensitivity: int = 50) -> None:
         """
         Create a new MainWindow.
         """

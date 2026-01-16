@@ -43,7 +43,7 @@ class QZUI(QtWidgets.QWidget, Thread) :
     error = QtCore.Signal()
 
     def __init__(self, parent: Optional[QtWidgets.QWidget] = None,
-                 framerate: int = 10, zoom_sensitivity: int = 20) -> None:
+                 framerate: int = 20, zoom_sensitivity: int = 20) -> None:
         """
         Constructor :
             QZUI(parent, framerate, zoom_sensitivity)
