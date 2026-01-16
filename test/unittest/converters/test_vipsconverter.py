@@ -237,7 +237,7 @@ class TestVipsConverter:
         And progress should be 1.0
         And output file should exist with valid PPM format
         """
-        infile = "data/black_white_split_5x5.png"
+        infile = "../../data/07_climb.png"
 
         # Skip test if file doesn't exist
         if not os.path.exists(infile):
@@ -279,11 +279,20 @@ class TestVipsConverter:
         And progress should be 1.0
         And output file should exist with valid PPM format
         """
-        infile = "data/eso1031b.tif"
+
+        for name in os.listdir("../../data"):
+            fullpath = os.path.join("../../data", name)
+            
+            if os.path.isfile(fullpath) and name.lower().endswith(".tiff") \
+            or os.path.isfile(fullpath) and name.lower().endswith(".tif"):
+            
+                infile = fullpath
+            else :
+                infile = ""
 
         # Skip test if file doesn't exist
         if not os.path.exists(infile):
-            pytest.skip(f"Test file not found: {infile}")
+            pytest.skip(f"Test file not found, place .tif/.tiff test file in ./data folder")
 
         # Create temporary output file
         with tempfile.NamedTemporaryFile(suffix='.ppm', delete=False) as tmp:
@@ -321,11 +330,19 @@ class TestVipsConverter:
         And progress should be 1.0
         And output file should exist with valid PPM format
         """
-        infile = "data/eso1031b.jpg"
+        for name in os.listdir("../../data"):
+            fullpath = os.path.join("../../data", name)
+            
+            if os.path.isfile(fullpath) and name.lower().endswith(".jpg") \
+            or os.path.isfile(fullpath) and name.lower().endswith(".jpeg"):
+            
+                infile = fullpath
+            else :
+                infile = ""
 
         # Skip test if file doesn't exist
         if not os.path.exists(infile):
-            pytest.skip(f"Test file not found: {infile}")
+            pytest.skip(f"Test file not found, place .jpg/.jpeg test file in ./data folder")
 
         # Create temporary output file
         with tempfile.NamedTemporaryFile(suffix='.ppm', delete=False) as tmp:

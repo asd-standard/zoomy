@@ -269,11 +269,19 @@ class TestPPMTiler:
         from pyzui.converters.vipsconverter import VipsConverter
         from pyzui.tilesystem import tilestore as TileStore
 
-        tiff_file = "data/eso1031b.tif"
+        for name in os.listdir("../../data"):
+            fullpath = os.path.join("../../data", name)
+            
+            if os.path.isfile(fullpath) and name.lower().endswith(".jpg") \
+            or os.path.isfile(fullpath) and name.lower().endswith(".jpeg"):
+            
+                tiff_file = fullpath
+            else :
+                tiff_file = ""
 
         # Skip if TIFF file doesn't exist
         if not os.path.exists(tiff_file):
-            pytest.skip(f"Test file not found: {tiff_file}")
+            pytest.skip(f"Test file not found: place .tif/.tiff test file in ./data folder")
 
         # Convert TIFF to PPM first
         with tempfile.NamedTemporaryFile(suffix='.ppm', delete=False) as tmp:
