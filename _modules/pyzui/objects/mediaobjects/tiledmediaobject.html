@@ -64,7 +64,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem.tiler.ppm</span><span class="w"> </span><span class="kn">import</span> <span class="n">PPMTiler</span>
 
 <span class="c1"># Process-based conversion for parallel media conversion</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">converter_runner</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">converterrunner</span>
 
 <div class="viewcode-block" id="TiledMediaObject">
 <a class="viewcode-back" href="../../../../pyzui/tiledmediaobject.html#pyzui.objects.mediaobjects.tiledmediaobject.TiledMediaObject">[docs]</a>
@@ -151,9 +151,9 @@
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.pdf&#39;</span><span class="p">):</span>
                 <span class="c1"># Use process-based PDF conversion</span>
-                <span class="n">future</span> <span class="o">=</span> <span class="n">converter_runner</span><span class="o">.</span><span class="n">submit_pdf_conversion</span><span class="p">(</span>
+                <span class="n">future</span> <span class="o">=</span> <span class="n">converterrunner</span><span class="o">.</span><span class="n">submit_pdf_conversion</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">converter_runner</span><span class="o">.</span><span class="n">ConversionHandle</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">converterrunner</span><span class="o">.</span><span class="n">ConversionHandle</span><span class="p">(</span>
                     <span class="n">future</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.ppm&#39;</span><span class="p">):</span>
@@ -164,9 +164,9 @@
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Use process-based Vips conversion</span>
-                <span class="n">future</span> <span class="o">=</span> <span class="n">converter_runner</span><span class="o">.</span><span class="n">submit_vips_conversion</span><span class="p">(</span>
+                <span class="n">future</span> <span class="o">=</span> <span class="n">converterrunner</span><span class="o">.</span><span class="n">submit_vips_conversion</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">converter_runner</span><span class="o">.</span><span class="n">ConversionHandle</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">converterrunner</span><span class="o">.</span><span class="n">ConversionHandle</span><span class="p">(</span>
                     <span class="n">future</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span>
             

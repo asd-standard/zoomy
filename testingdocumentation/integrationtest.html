@@ -94,7 +94,7 @@ rather than mocks, validating the complete system behavior.</p>
 <li><p>Converter to Tiler pipeline integration</p></li>
 <li><p>Progress tracking during conversion</p></li>
 <li><p>Error handling for invalid/corrupted files</p></li>
-<li><p>Process-based parallel conversion via <code class="docutils literal notranslate"><span class="pre">converter_runner</span></code></p></li>
+<li><p>Process-based parallel conversion via <code class="docutils literal notranslate"><span class="pre">converterrunner</span></code></p></li>
 <li><p>Output format validation</p></li>
 </ul>
 <p><strong>3. Concurrent Access Tests</strong> (<code class="docutils literal notranslate"><span class="pre">test_concurrent_access.py</span></code>)</p>
@@ -612,7 +612,7 @@ tests to hang.</p>
 </section>
 <section id="process-based-parallel-conversion">
 <h3>Process-Based Parallel Conversion<a class="headerlink" href="#process-based-parallel-conversion" title="Link to this heading">¶</a></h3>
-<p>The converter pipeline uses process-based parallelism via <code class="docutils literal notranslate"><span class="pre">converter_runner</span></code> to enable
+<p>The converter pipeline uses process-based parallelism via <code class="docutils literal notranslate"><span class="pre">converterrunner</span></code> to enable
 multiple conversions to run concurrently without threading conflicts.</p>
 <p><strong>Why Process-Based?</strong></p>
 <p>pyvips uses its own internal thread pool for image operations. When multiple
@@ -627,7 +627,7 @@ can occur. By running conversions in separate processes:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_multiple_converters_run_concurrently_via_processes</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">sample_images</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test parallel conversion using processes.&quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">converter_runner</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">converterrunner</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">wait</span>
 
     <span class="n">futures</span> <span class="o">=</span> <span class="p">[]</span>
@@ -637,7 +637,7 @@ can occur. By running conversions in separate processes:</p>
         <span class="n">infile</span> <span class="o">=</span> <span class="n">sample_images</span><span class="p">[</span><span class="s1">&#39;png&#39;</span><span class="p">]</span>
         <span class="n">outfile</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;output_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.ppm&quot;</span><span class="p">)</span>
         <span class="n">outfiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
-        <span class="n">future</span> <span class="o">=</span> <span class="n">converter_runner</span><span class="o">.</span><span class="n">submit_vips_conversion</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+        <span class="n">future</span> <span class="o">=</span> <span class="n">converterrunner</span><span class="o">.</span><span class="n">submit_vips_conversion</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
         <span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
 
     <span class="c1"># Wait for all to complete with timeout</span>

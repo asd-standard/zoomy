@@ -69,7 +69,7 @@ instance, eliminating these conflicts while enabling true parallel conversion.</
 <section id="architecture">
 <h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading">¶</a></h2>
 <p>The converter system consists of the following components:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>converter_runner (Process Pool Manager)
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>converterrunner (Process Pool Manager)
 │   • ProcessPoolExecutor with &#39;spawn&#39; context
 │   • submit_vips_conversion() - submit image conversion job
 │   • submit_pdf_conversion() - submit PDF conversion job
@@ -103,12 +103,12 @@ Converter (Abstract Base, extends Thread)
 <p><strong>Conversion Pipeline:</strong></p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────────────────────────────────────────────────┐
 │                    TiledMediaObject                         │
-│              (Detects format, submits to converter_runner)  │
+│              (Detects format, submits to converterrunner)  │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                    converter_runner                         │
+│                    converterrunner                         │
 │              (ProcessPoolExecutor with &#39;spawn&#39;)             │
 └──────────────────────┬──────────────────────────────────────┘
                        │
@@ -472,18 +472,18 @@ monitor incrementally.</p>
 </pre></div>
 </div>
 </section>
-<section id="converter-runner-module">
-<h3>converter_runner Module<a class="headerlink" href="#converter-runner-module" title="Link to this heading">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">converter_runner</span></code> module provides process-based conversion execution,
+<section id="converterrunner-module">
+<h3>converterrunner Module<a class="headerlink" href="#converterrunner-module" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">converterrunner</span></code> module provides process-based conversion execution,
 enabling parallel conversions without threading conflicts.</p>
 <p><strong>Module Functions:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">converter_runner</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">converterrunner</span>
 
 <span class="c1"># Initialize process pool (optional, auto-initialized on first use)</span>
-<span class="n">converter_runner</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">converterrunner</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 
 <span class="c1"># Submit image conversion</span>
-<span class="n">future</span> <span class="o">=</span> <span class="n">converter_runner</span><span class="o">.</span><span class="n">submit_vips_conversion</span><span class="p">(</span>
+<span class="n">future</span> <span class="o">=</span> <span class="n">converterrunner</span><span class="o">.</span><span class="n">submit_vips_conversion</span><span class="p">(</span>
     <span class="n">infile</span><span class="o">=</span><span class="s1">&#39;image.jpg&#39;</span><span class="p">,</span>
     <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;output.ppm&#39;</span><span class="p">,</span>
     <span class="n">rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>           <span class="c1"># 0, 90, 180, or 270 degrees</span>
@@ -492,19 +492,19 @@ enabling parallel conversions without threading conflicts.</p>
 <span class="p">)</span>
 
 <span class="c1"># Submit PDF conversion</span>
-<span class="n">future</span> <span class="o">=</span> <span class="n">converter_runner</span><span class="o">.</span><span class="n">submit_pdf_conversion</span><span class="p">(</span>
+<span class="n">future</span> <span class="o">=</span> <span class="n">converterrunner</span><span class="o">.</span><span class="n">submit_pdf_conversion</span><span class="p">(</span>
     <span class="n">infile</span><span class="o">=</span><span class="s1">&#39;document.pdf&#39;</span><span class="p">,</span>
     <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;output.ppm&#39;</span>
 <span class="p">)</span>
 
 <span class="c1"># Shutdown pool when done</span>
-<span class="n">converter_runner</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+<span class="n">converterrunner</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 </pre></div>
 </div>
 <p><strong>ConversionHandle Class:</strong></p>
 <p>The <code class="docutils literal notranslate"><span class="pre">ConversionHandle</span></code> wraps a <code class="docutils literal notranslate"><span class="pre">Future</span></code> and provides a compatible interface
 with the thread-based <code class="docutils literal notranslate"><span class="pre">Converter</span></code> class:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters.converter_runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConversionHandle</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters.converterrunner</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConversionHandle</span>
 
 <span class="c1"># Create handle from future</span>
 <span class="n">handle</span> <span class="o">=</span> <span class="n">ConversionHandle</span><span class="p">(</span><span class="n">future</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
@@ -529,18 +529,18 @@ with the thread-based <code class="docutils literal notranslate"><span class="pr
 <section id="integration-with-tiledmediaobject">
 <h2>Integration with TiledMediaObject<a class="headerlink" href="#integration-with-tiledmediaobject" title="Link to this heading">¶</a></h2>
 <p>The converter system is tightly integrated with <code class="xref py py-class docutils literal notranslate"><span class="pre">TiledMediaObject</span></code>,
-which automatically selects and uses the appropriate converter via <code class="docutils literal notranslate"><span class="pre">converter_runner</span></code>.</p>
+which automatically selects and uses the appropriate converter via <code class="docutils literal notranslate"><span class="pre">converterrunner</span></code>.</p>
 <section id="format-detection-and-converter-selection">
 <h3>Format Detection and Converter Selection<a class="headerlink" href="#format-detection-and-converter-selection" title="Link to this heading">¶</a></h3>
 <p><code class="xref py py-class docutils literal notranslate"><span class="pre">TiledMediaObject</span></code> submits conversions to the process pool based on file extension:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># In TiledMediaObject.__init__()</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">converter_runner</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">converterrunner</span>
 
 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.pdf&#39;</span><span class="p">):</span>
     <span class="c1"># Use process-based PDF conversion</span>
-    <span class="n">future</span> <span class="o">=</span> <span class="n">converter_runner</span><span class="o">.</span><span class="n">submit_pdf_conversion</span><span class="p">(</span>
+    <span class="n">future</span> <span class="o">=</span> <span class="n">converterrunner</span><span class="o">.</span><span class="n">submit_pdf_conversion</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">converter_runner</span><span class="o">.</span><span class="n">ConversionHandle</span><span class="p">(</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">converterrunner</span><span class="o">.</span><span class="n">ConversionHandle</span><span class="p">(</span>
         <span class="n">future</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span>
 
@@ -551,9 +551,9 @@ which automatically selects and uses the appropriate converter via <code class="
 
 <span class="k">else</span><span class="p">:</span>
     <span class="c1"># Use process-based Vips conversion</span>
-    <span class="n">future</span> <span class="o">=</span> <span class="n">converter_runner</span><span class="o">.</span><span class="n">submit_vips_conversion</span><span class="p">(</span>
+    <span class="n">future</span> <span class="o">=</span> <span class="n">converterrunner</span><span class="o">.</span><span class="n">submit_vips_conversion</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">converter_runner</span><span class="o">.</span><span class="n">ConversionHandle</span><span class="p">(</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span> <span class="o">=</span> <span class="n">converterrunner</span><span class="o">.</span><span class="n">ConversionHandle</span><span class="p">(</span>
         <span class="n">future</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmpfile</span>
 </pre></div>
@@ -644,13 +644,13 @@ which automatically selects and uses the appropriate converter via <code class="
 <section id="process-based-isolation">
 <h3>Process-Based Isolation<a class="headerlink" href="#process-based-isolation" title="Link to this heading">¶</a></h3>
 <p>Converters run in separate processes via <code class="docutils literal notranslate"><span class="pre">ProcessPoolExecutor</span></code>, providing complete isolation:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">converter_runner</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">converterrunner</span>
 
 <span class="c1"># Submit conversion to process pool</span>
-<span class="n">future</span> <span class="o">=</span> <span class="n">converter_runner</span><span class="o">.</span><span class="n">submit_vips_conversion</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+<span class="n">future</span> <span class="o">=</span> <span class="n">converterrunner</span><span class="o">.</span><span class="n">submit_vips_conversion</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
 
 <span class="c1"># Track via ConversionHandle</span>
-<span class="n">handle</span> <span class="o">=</span> <span class="n">converter_runner</span><span class="o">.</span><span class="n">ConversionHandle</span><span class="p">(</span><span class="n">future</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+<span class="n">handle</span> <span class="o">=</span> <span class="n">converterrunner</span><span class="o">.</span><span class="n">ConversionHandle</span><span class="p">(</span><span class="n">future</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
 
 <span class="c1"># Check progress/completion</span>
 <span class="k">if</span> <span class="n">handle</span><span class="o">.</span><span class="n">progress</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
@@ -674,7 +674,7 @@ which automatically selects and uses the appropriate converter via <code class="
 <li><p>Process isolation eliminates these conflicts completely</p></li>
 </ul>
 <p><strong>Spawn Context:</strong></p>
-<p>The <code class="docutils literal notranslate"><span class="pre">converter_runner</span></code> uses Python’s ‘spawn’ multiprocessing context:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">converterrunner</span></code> uses Python’s ‘spawn’ multiprocessing context:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
 <span class="n">_mp_context</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">get_context</span><span class="p">(</span><span class="s1">&#39;spawn&#39;</span><span class="p">)</span>
 <span class="n">_executor</span> <span class="o">=</span> <span class="n">ProcessPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">mp_context</span><span class="o">=</span><span class="n">_mp_context</span><span class="p">)</span>
@@ -959,7 +959,7 @@ CPU vs I/O balance.</p>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h2>
 <section id="id1">
-<h3>converter_runner Module<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<h3>converterrunner Module<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Module functions</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">max_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">shutdown</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span>
@@ -1028,7 +1028,7 @@ CPU vs I/O balance.</p>
 <section id="key-classes">
 <h3>Key Classes<a class="headerlink" href="#key-classes" title="Link to this heading">¶</a></h3>
 <ul class="simple">
-<li><p><a class="reference internal" href="../pyzui/converter_runner.html#module-pyzui.converters.converter_runner" title="pyzui.converters.converter_runner"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyzui.converters.converter_runner</span></code></a> - Process-based conversion execution</p></li>
+<li><p><a class="reference internal" href="../pyzui/converterrunner.html#module-pyzui.converters.converterrunner" title="pyzui.converters.converterrunner"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyzui.converters.converterrunner</span></code></a> - Process-based conversion execution</p></li>
 <li><p><a class="reference internal" href="../pyzui/converter.html#pyzui.converters.converter.Converter" title="pyzui.converters.converter.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyzui.converters.converter.Converter</span></code></a> - Abstract base class</p></li>
 <li><p><a class="reference internal" href="../pyzui/pdfconverter.html#pyzui.converters.pdfconverter.PDFConverter" title="pyzui.converters.pdfconverter.PDFConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyzui.converters.pdfconverter.PDFConverter</span></code></a> - PDF converter</p></li>
 <li><p><a class="reference internal" href="../pyzui/vipsconverter.html#pyzui.converters.vipsconverter.VipsConverter" title="pyzui.converters.vipsconverter.VipsConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyzui.converters.vipsconverter.VipsConverter</span></code></a> - Image converter</p></li>

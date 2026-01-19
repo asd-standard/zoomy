@@ -45,7 +45,7 @@ The converter system consists of the following components:
 
 .. code-block:: text
 
-    converter_runner (Process Pool Manager)
+    converterrunner (Process Pool Manager)
     │   • ProcessPoolExecutor with 'spawn' context
     │   • submit_vips_conversion() - submit image conversion job
     │   • submit_pdf_conversion() - submit PDF conversion job
@@ -81,12 +81,12 @@ The converter system consists of the following components:
 
     ┌─────────────────────────────────────────────────────────────┐
     │                    TiledMediaObject                         │
-    │              (Detects format, submits to converter_runner)  │
+    │              (Detects format, submits to converterrunner)  │
     └──────────────────────┬──────────────────────────────────────┘
                            │
                            ▼
     ┌─────────────────────────────────────────────────────────────┐
-    │                    converter_runner                         │
+    │                    converterrunner                         │
     │              (ProcessPoolExecutor with 'spawn')             │
     └──────────────────────┬──────────────────────────────────────┘
                            │
@@ -488,23 +488,23 @@ Requires both:
     else:
         print(f"Converted image to PPM: {converter._outfile}")
 
-converter_runner Module
+converterrunner Module
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``converter_runner`` module provides process-based conversion execution,
+The ``converterrunner`` module provides process-based conversion execution,
 enabling parallel conversions without threading conflicts.
 
 **Module Functions:**
 
 .. code-block:: python
 
-    from pyzui.converters import converter_runner
+    from pyzui.converters import converterrunner
 
     # Initialize process pool (optional, auto-initialized on first use)
-    converter_runner.init(max_workers=4)
+    converterrunner.init(max_workers=4)
 
     # Submit image conversion
-    future = converter_runner.submit_vips_conversion(
+    future = converterrunner.submit_vips_conversion(
         infile='image.jpg',
         outfile='output.ppm',
         rotation=0,           # 0, 90, 180, or 270 degrees
@@ -513,13 +513,13 @@ enabling parallel conversions without threading conflicts.
     )
 
     # Submit PDF conversion
-    future = converter_runner.submit_pdf_conversion(
+    future = converterrunner.submit_pdf_conversion(
         infile='document.pdf',
         outfile='output.ppm'
     )
 
     # Shutdown pool when done
-    converter_runner.shutdown()
+    converterrunner.shutdown()
 
 **ConversionHandle Class:**
 
@@ -528,7 +528,7 @@ with the thread-based ``Converter`` class:
 
 .. code-block:: python
 
-    from pyzui.converters.converter_runner import ConversionHandle
+    from pyzui.converters.converterrunner import ConversionHandle
 
     # Create handle from future
     handle = ConversionHandle(future, infile, outfile)
@@ -551,7 +551,7 @@ Integration with TiledMediaObject
 ----------------------------------
 
 The converter system is tightly integrated with :class:`TiledMediaObject`,
-which automatically selects and uses the appropriate converter via ``converter_runner``.
+which automatically selects and uses the appropriate converter via ``converterrunner``.
 
 Format Detection and Converter Selection
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -561,13 +561,13 @@ Format Detection and Converter Selection
 .. code-block:: python
 
     # In TiledMediaObject.__init__()
-    from pyzui.converters import converter_runner
+    from pyzui.converters import converterrunner
 
     if self._media_id.lower().endswith('.pdf'):
         # Use process-based PDF conversion
-        future = converter_runner.submit_pdf_conversion(
+        future = converterrunner.submit_pdf_conversion(
             self._media_id, self.__tmpfile)
-        self.__converter = converter_runner.ConversionHandle(
+        self.__converter = converterrunner.ConversionHandle(
             future, self._media_id, self.__tmpfile)
         self.__ppmfile = self.__tmpfile
 
@@ -578,9 +578,9 @@ Format Detection and Converter Selection
 
     else:
         # Use process-based Vips conversion
-        future = converter_runner.submit_vips_conversion(
+        future = converterrunner.submit_vips_conversion(
             self._media_id, self.__tmpfile)
-        self.__converter = converter_runner.ConversionHandle(
+        self.__converter = converterrunner.ConversionHandle(
             future, self._media_id, self.__tmpfile)
         self.__ppmfile = self.__tmpfile
 
@@ -678,13 +678,13 @@ Converters run in separate processes via ``ProcessPoolExecutor``, providing comp
 
 .. code-block:: python
 
-    from pyzui.converters import converter_runner
+    from pyzui.converters import converterrunner
 
     # Submit conversion to process pool
-    future = converter_runner.submit_vips_conversion(infile, outfile)
+    future = converterrunner.submit_vips_conversion(infile, outfile)
 
     # Track via ConversionHandle
-    handle = converter_runner.ConversionHandle(future, infile, outfile)
+    handle = converterrunner.ConversionHandle(future, infile, outfile)
 
     # Check progress/completion
     if handle.progress == 1.0:
@@ -709,7 +709,7 @@ The process-based approach was adopted because:
 
 **Spawn Context:**
 
-The ``converter_runner`` uses Python's 'spawn' multiprocessing context:
+The ``converterrunner`` uses Python's 'spawn' multiprocessing context:
 
 .. code-block:: python
 
@@ -1028,7 +1028,7 @@ Handling Multiple Formats
 API Reference
 -------------
 
-converter_runner Module
+converterrunner Module
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
@@ -1102,7 +1102,7 @@ VipsConverter
 Key Classes
 ~~~~~~~~~~~
 
-- :class:`pyzui.converters.converter_runner` - Process-based conversion execution
+- :class:`pyzui.converters.converterrunner` - Process-based conversion execution
 - :class:`pyzui.converters.converter.Converter` - Abstract base class
 - :class:`pyzui.converters.pdfconverter.PDFConverter` - PDF converter
 - :class:`pyzui.converters.vipsconverter.VipsConverter` - Image converter

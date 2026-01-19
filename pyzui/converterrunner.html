@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyzui.converters.converter_runner module &#8212; PyZui 0.11 documentation</title>
+    <title>pyzui.converters.converterrunner module &#8212; PyZui 0.11 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=cc7d0dec" />
@@ -31,8 +31,8 @@
 
           <div class="body" role="main">
             
-  <section id="module-pyzui.converters.converter_runner">
-<span id="pyzui-converters-converter-runner-module"></span><h1>pyzui.converters.converter_runner module<a class="headerlink" href="#module-pyzui.converters.converter_runner" title="Link to this heading">¶</a></h1>
+  <section id="module-pyzui.converters.converterrunner">
+<span id="pyzui-converters-converterrunner-module"></span><h1>pyzui.converters.converterrunner module<a class="headerlink" href="#module-pyzui.converters.converterrunner" title="Link to this heading">¶</a></h1>
 <p>Process-based converter execution for parallel media conversion.</p>
 <p>This module provides functions to run converters in separate processes,
 avoiding threading conflicts between pyvips and TileManager threads.</p>
@@ -44,16 +44,16 @@ This creates a fresh Python interpreter per worker.</p></li>
 </ul>
 <p>The context can be overridden via PYZUI_MP_CONTEXT environment variable.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyzui.converters.converter_runner._get_safe_context">
-<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converter_runner.</span></span><span class="sig-name descname"><span class="pre">_get_safe_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converter_runner.html#_get_safe_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converter_runner._get_safe_context" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyzui.converters.converterrunner._get_safe_context">
+<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converterrunner.</span></span><span class="sig-name descname"><span class="pre">_get_safe_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#_get_safe_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner._get_safe_context" title="Link to this definition">¶</a></dt>
 <dd><p>Get a multiprocessing context that’s safe for the current thread state.</p>
 <p>Returns ‘fork’ if only the main thread is running (fast, clean shutdown).
 Returns ‘spawn’ if other threads exist (avoids fork-after-threads issues).</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyzui.converters.converter_runner._run_vips_conversion">
-<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converter_runner.</span></span><span class="sig-name descname"><span class="pre">_run_vips_conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invert_colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">black_and_white</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converter_runner.html#_run_vips_conversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converter_runner._run_vips_conversion" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyzui.converters.converterrunner._run_vips_conversion">
+<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converterrunner.</span></span><span class="sig-name descname"><span class="pre">_run_vips_conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invert_colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">black_and_white</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#_run_vips_conversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner._run_vips_conversion" title="Link to this definition">¶</a></dt>
 <dd><p>Run VipsConverter in a separate process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -72,8 +72,8 @@ Returns ‘spawn’ if other threads exist (avoids fork-after-threads issues).</
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyzui.converters.converter_runner._run_pdf_conversion">
-<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converter_runner.</span></span><span class="sig-name descname"><span class="pre">_run_pdf_conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converter_runner.html#_run_pdf_conversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converter_runner._run_pdf_conversion" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyzui.converters.converterrunner._run_pdf_conversion">
+<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converterrunner.</span></span><span class="sig-name descname"><span class="pre">_run_pdf_conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#_run_pdf_conversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner._run_pdf_conversion" title="Link to this definition">¶</a></dt>
 <dd><p>Run PDFConverter in a separate process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -89,8 +89,8 @@ Returns ‘spawn’ if other threads exist (avoids fork-after-threads issues).</
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyzui.converters.converter_runner.init">
-<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converter_runner.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converter_runner.html#init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converter_runner.init" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyzui.converters.converterrunner.init">
+<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converterrunner.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner.init" title="Link to this definition">¶</a></dt>
 <dd><p>Initialize the converter runner with a process pool.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -100,20 +100,20 @@ Returns ‘spawn’ if other threads exist (avoids fork-after-threads issues).</
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyzui.converters.converter_runner.shutdown">
-<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converter_runner.</span></span><span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converter_runner.html#shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converter_runner.shutdown" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyzui.converters.converterrunner.shutdown">
+<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converterrunner.</span></span><span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner.shutdown" title="Link to this definition">¶</a></dt>
 <dd><p>Shutdown the process pool executor and terminate any lingering processes.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyzui.converters.converter_runner._get_executor">
-<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converter_runner.</span></span><span class="sig-name descname"><span class="pre">_get_executor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converter_runner.html#_get_executor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converter_runner._get_executor" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyzui.converters.converterrunner._get_executor">
+<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converterrunner.</span></span><span class="sig-name descname"><span class="pre">_get_executor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#_get_executor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner._get_executor" title="Link to this definition">¶</a></dt>
 <dd><p>Get or create the process pool executor.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyzui.converters.converter_runner.submit_vips_conversion">
-<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converter_runner.</span></span><span class="sig-name descname"><span class="pre">submit_vips_conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invert_colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">black_and_white</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converter_runner.html#submit_vips_conversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converter_runner.submit_vips_conversion" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyzui.converters.converterrunner.submit_vips_conversion">
+<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converterrunner.</span></span><span class="sig-name descname"><span class="pre">submit_vips_conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invert_colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">black_and_white</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#submit_vips_conversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner.submit_vips_conversion" title="Link to this definition">¶</a></dt>
 <dd><p>Submit a VipsConverter job to run in a separate process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -132,8 +132,8 @@ Returns ‘spawn’ if other threads exist (avoids fork-after-threads issues).</
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyzui.converters.converter_runner.submit_pdf_conversion">
-<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converter_runner.</span></span><span class="sig-name descname"><span class="pre">submit_pdf_conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converter_runner.html#submit_pdf_conversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converter_runner.submit_pdf_conversion" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyzui.converters.converterrunner.submit_pdf_conversion">
+<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converterrunner.</span></span><span class="sig-name descname"><span class="pre">submit_pdf_conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#submit_pdf_conversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner.submit_pdf_conversion" title="Link to this definition">¶</a></dt>
 <dd><p>Submit a PDFConverter job to run in a separate process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -149,8 +149,8 @@ Returns ‘spawn’ if other threads exist (avoids fork-after-threads issues).</
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pyzui.converters.converter_runner.ConversionHandle">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.converters.converter_runner.</span></span><span class="sig-name descname"><span class="pre">ConversionHandle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">future</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converter_runner.html#ConversionHandle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converter_runner.ConversionHandle" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyzui.converters.converterrunner.ConversionHandle">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.converters.converterrunner.</span></span><span class="sig-name descname"><span class="pre">ConversionHandle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">future</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#ConversionHandle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner.ConversionHandle" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A handle to a running or completed conversion process.</p>
 <p>This class wraps a Future and provides a similar interface to the
@@ -166,34 +166,34 @@ thread-based Converter class, with progress and error properties.</p>
 </dd>
 </dl>
 <dl class="py property">
-<dt class="sig sig-object py" id="pyzui.converters.converter_runner.ConversionHandle.progress">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">progress</span></span><a class="headerlink" href="#pyzui.converters.converter_runner.ConversionHandle.progress" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyzui.converters.converterrunner.ConversionHandle.progress">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">progress</span></span><a class="headerlink" href="#pyzui.converters.converterrunner.ConversionHandle.progress" title="Link to this definition">¶</a></dt>
 <dd><p>Return the conversion progress.</p>
 <p>Since process-based conversion doesn’t support incremental progress,
 this returns 0.0 while running and 1.0 when done.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pyzui.converters.converter_runner.ConversionHandle.error">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">error</span></span><a class="headerlink" href="#pyzui.converters.converter_runner.ConversionHandle.error" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyzui.converters.converterrunner.ConversionHandle.error">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">error</span></span><a class="headerlink" href="#pyzui.converters.converterrunner.ConversionHandle.error" title="Link to this definition">¶</a></dt>
 <dd><p>Return the error message if conversion failed, None otherwise.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyzui.converters.converter_runner.ConversionHandle._check_result">
-<span class="sig-name descname"><span class="pre">_check_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converter_runner.html#ConversionHandle._check_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converter_runner.ConversionHandle._check_result" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyzui.converters.converterrunner.ConversionHandle._check_result">
+<span class="sig-name descname"><span class="pre">_check_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#ConversionHandle._check_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner.ConversionHandle._check_result" title="Link to this definition">¶</a></dt>
 <dd><p>Check the future result and update error status.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyzui.converters.converter_runner.ConversionHandle.is_alive">
-<span class="sig-name descname"><span class="pre">is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converter_runner.html#ConversionHandle.is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converter_runner.ConversionHandle.is_alive" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyzui.converters.converterrunner.ConversionHandle.is_alive">
+<span class="sig-name descname"><span class="pre">is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#ConversionHandle.is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner.ConversionHandle.is_alive" title="Link to this definition">¶</a></dt>
 <dd><p>Return True if the conversion is still running.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyzui.converters.converter_runner.ConversionHandle.join">
-<span class="sig-name descname"><span class="pre">join</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converter_runner.html#ConversionHandle.join"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converter_runner.ConversionHandle.join" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyzui.converters.converterrunner.ConversionHandle.join">
+<span class="sig-name descname"><span class="pre">join</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#ConversionHandle.join"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner.ConversionHandle.join" title="Link to this definition">¶</a></dt>
 <dd><p>Wait for the conversion to complete.</p>
 </dd></dl>
 
@@ -293,7 +293,7 @@ this returns 0.0 while running and 1.0 when done.</p>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
-      <a href="../_sources/pyzui/converter_runner.rst.txt"
+      <a href="../_sources/pyzui/converterrunner.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 
