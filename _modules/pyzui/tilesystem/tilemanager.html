@@ -368,6 +368,49 @@
         <span class="n">tp</span><span class="o">.</span><span class="n">purge</span><span class="p">(</span><span class="n">media_id</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="pause">
+<a class="viewcode-back" href="../../../pyzui/tilemanager.html#pyzui.tilesystem.tilemanager.pause">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pause</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function :</span>
+<span class="sd">        pause()</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        None</span>
+
+<span class="sd">    pause() --&gt; None</span>
+
+<span class="sd">    Pause all TileProvider threads. This should be called before running</span>
+<span class="sd">    converter processes to avoid conflicts between pyvips and tile loading.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">__tp_static</span><span class="p">:</span>
+        <span class="n">__tp_static</span><span class="o">.</span><span class="n">pause</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">__tp_dynamic</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+        <span class="n">tp</span><span class="o">.</span><span class="n">pause</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">__logger</span><span class="p">:</span>
+        <span class="n">__logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;all tile providers paused&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="resume">
+<a class="viewcode-back" href="../../../pyzui/tilemanager.html#pyzui.tilesystem.tilemanager.resume">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">resume</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function :</span>
+<span class="sd">        resume()</span>
+<span class="sd">    Parameters :</span>
+<span class="sd">        None</span>
+
+<span class="sd">    resume() --&gt; None</span>
+
+<span class="sd">    Resume all TileProvider threads after they were paused.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">__tp_static</span><span class="p">:</span>
+        <span class="n">__tp_static</span><span class="o">.</span><span class="n">resume</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">__tp_dynamic</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+        <span class="n">tp</span><span class="o">.</span><span class="n">resume</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">__logger</span><span class="p">:</span>
+        <span class="n">__logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;all tile providers resumed&quot;</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="MediaNotTiled">
 <a class="viewcode-back" href="../../../pyzui/tilemanager.html#pyzui.tilesystem.tilemanager.MediaNotTiled">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MediaNotTiled</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>

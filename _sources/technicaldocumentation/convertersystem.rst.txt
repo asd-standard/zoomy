@@ -14,24 +14,46 @@ Overview
 The converter system is responsible for:
 
 1. Converting various media formats to PPM (Portable Pixmap) format
-2. Running conversions in background threads to avoid blocking the UI
+2. Running conversions in background processes to avoid blocking the UI
 3. Tracking conversion progress for user feedback
 4. Handling errors gracefully during conversion
-5. Managing temporary files and disk access synchronization
+5. Managing temporary files and enabling true parallel conversion
 
-The system uses a **threaded architecture** where each converter runs as a separate thread,
-allowing multiple conversions to proceed concurrently without blocking the main application.
+The system uses a **process-based architecture** where each conversion runs in a separate
+process via ``ProcessPoolExecutor``. This design was chosen to avoid threading conflicts
+between pyvips (which has its own internal thread pool) and TileManager's background threads.
 All converters output to PPM format, which is then processed by the tiling system.
+
+**Why Process-Based?**
+
+The original thread-based design encountered issues when multiple ``VipsConverter``
+instances ran concurrently alongside TileManager threads:
+
+- pyvips uses its own internal threading for image operations
+- TileManager starts TileProvider threads for loading tiles
+- When these run together in the same process, threading conflicts can occur
+- The conflicts manifest as hangs or deadlocks during concurrent conversions
+
+By running conversions in separate processes (using Python's ``multiprocessing`` with
+the 'spawn' start method), each converter gets its own isolated memory space and pyvips
+instance, eliminating these conflicts while enabling true parallel conversion.
 
 Architecture
 ------------
 
-The converter system consists of the following class hierarchy:
+The converter system consists of the following components:
 
 .. code-block:: text
 
+    converter_runner (Process Pool Manager)
+    │   • ProcessPoolExecutor with 'spawn' context
+    │   • submit_vips_conversion() - submit image conversion job
+    │   • submit_pdf_conversion() - submit PDF conversion job
+    │   • ConversionHandle - tracks running/completed conversions
+    │   • init() / shutdown() - pool lifecycle management
+    │
     Converter (Abstract Base, extends Thread)
-    │   • Thread-based execution
+    │   • Can still run as thread for direct use
     │   • Progress tracking (0.0 to 1.0)
     │   • Error handling
     │   • Logger integration
@@ -51,6 +73,7 @@ The converter system consists of the following class hierarchy:
             • Automatic format detection
             • Bit-depth conversion (8-bit)
             • RGBA to RGB flattening
+            • Image transformations (rotation, invert, B&W)
 
 **Conversion Pipeline:**
 
@@ -58,13 +81,14 @@ The converter system consists of the following class hierarchy:
 
     ┌─────────────────────────────────────────────────────────────┐
     │                    TiledMediaObject                         │
-    │              (Detects format, selects converter)            │
+    │              (Detects format, submits to converter_runner)  │
     └──────────────────────┬──────────────────────────────────────┘
                            │
                            ▼
-                  ┌────────────────┐
-                  │ Format Check   │
-                  └────────┬───────┘
+    ┌─────────────────────────────────────────────────────────────┐
+    │                    converter_runner                         │
+    │              (ProcessPoolExecutor with 'spawn')             │
+    └──────────────────────┬──────────────────────────────────────┘
                            │
            ┌───────────────┼───────────────┬──────────┐
            │               │               │          │
@@ -78,6 +102,7 @@ The converter system consists of the following class hierarchy:
     ┌──────────┐   ┌──────────┐        │              │
     │   PDF    │   │  Vips    │        │              │
     │Converter │   │Converter │◀───────┘              │
+    │(process) │   │(process) │                       │
     └────┬─────┘   └────┬─────┘                       │
          │              │                             │
          │     Creates  │                             │
@@ -93,6 +118,29 @@ The converter system consists of the following class hierarchy:
     │                    PPMTiler                              │
     │           (Creates tile pyramid)                         │
     └──────────────────────────────────────────────────────────┘
+
+**Process Isolation:**
+
+.. code-block:: text
+
+    ┌─────────────────────────────────────┐    ┌────────────────────┐
+    │          Main Process               │    │  Worker Processes  │
+    │  ┌───────────────────────────────┐  │    │  ┌──────────────┐  │
+    │  │ TileManager Threads           │  │    │  │VipsConverter │  │
+    │  │  - StaticTileProvider         │  │    │  │  (isolated)  │  │
+    │  │  - DynamicTileProvider        │  │    │  └──────────────┘  │
+    │  └───────────────────────────────┘  │    │  ┌──────────────┐  │
+    │  ┌───────────────────────────────┐  │    │  │PDFConverter  │  │
+    │  │ ProcessPoolExecutor           │  │◄──►│  │  (isolated)  │  │
+    │  │  - submits conversion jobs    │  │    │  └──────────────┘  │
+    │  │  - tracks via Future          │  │    │                    │
+    │  └───────────────────────────────┘  │    │  Each process has  │
+    │  ┌───────────────────────────────┐  │    │  own pyvips, own   │
+    │  │ ConversionHandle              │  │    │  memory space      │
+    │  │  - wraps Future               │  │    │                    │
+    │  │  - provides progress/error    │  │    └────────────────────┘
+    │  └───────────────────────────────┘  │
+    └─────────────────────────────────────┘
 
 Why PPM Format?
 ~~~~~~~~~~~~~~~
@@ -440,27 +488,88 @@ Requires both:
     else:
         print(f"Converted image to PPM: {converter._outfile}")
 
+converter_runner Module
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``converter_runner`` module provides process-based conversion execution,
+enabling parallel conversions without threading conflicts.
+
+**Module Functions:**
+
+.. code-block:: python
+
+    from pyzui.converters import converter_runner
+
+    # Initialize process pool (optional, auto-initialized on first use)
+    converter_runner.init(max_workers=4)
+
+    # Submit image conversion
+    future = converter_runner.submit_vips_conversion(
+        infile='image.jpg',
+        outfile='output.ppm',
+        rotation=0,           # 0, 90, 180, or 270 degrees
+        invert_colors=False,
+        black_and_white=False
+    )
+
+    # Submit PDF conversion
+    future = converter_runner.submit_pdf_conversion(
+        infile='document.pdf',
+        outfile='output.ppm'
+    )
+
+    # Shutdown pool when done
+    converter_runner.shutdown()
+
+**ConversionHandle Class:**
+
+The ``ConversionHandle`` wraps a ``Future`` and provides a compatible interface
+with the thread-based ``Converter`` class:
+
+.. code-block:: python
+
+    from pyzui.converters.converter_runner import ConversionHandle
+
+    # Create handle from future
+    handle = ConversionHandle(future, infile, outfile)
+
+    # Check if still running
+    if handle.is_alive():
+        print("Still converting...")
+
+    # Get progress (0.0 or 1.0 for process-based)
+    print(f"Progress: {handle.progress * 100}%")
+
+    # Wait for completion
+    handle.join(timeout=30)
+
+    # Check for errors
+    if handle.error:
+        print(f"Failed: {handle.error}")
+
 Integration with TiledMediaObject
 ----------------------------------
 
 The converter system is tightly integrated with :class:`TiledMediaObject`,
-which automatically selects and uses the appropriate converter.
+which automatically selects and uses the appropriate converter via ``converter_runner``.
 
 Format Detection and Converter Selection
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:class:`TiledMediaObject` selects converters based on file extension:
+:class:`TiledMediaObject` submits conversions to the process pool based on file extension:
 
 .. code-block:: python
 
     # In TiledMediaObject.__init__()
+    from pyzui.converters import converter_runner
 
     if self._media_id.lower().endswith('.pdf'):
-        # Use PDFConverter for PDF files
-        self.__converter = PDFConverter(
+        # Use process-based PDF conversion
+        future = converter_runner.submit_pdf_conversion(
             self._media_id, self.__tmpfile)
+        self.__converter = converter_runner.ConversionHandle(
+            future, self._media_id, self.__tmpfile)
         self.__ppmfile = self.__tmpfile
-        self.__converter.start()
 
     elif self._media_id.lower().endswith('.ppm'):
         # PPM files need no conversion
@@ -468,11 +577,12 @@ Format Detection and Converter Selection
         self.__ppmfile = self._media_id
 
     else:
-        # Use VipsConverter for all other image formats
-        self.__converter = VipsConverter(
+        # Use process-based Vips conversion
+        future = converter_runner.submit_vips_conversion(
             self._media_id, self.__tmpfile)
+        self.__converter = converter_runner.ConversionHandle(
+            future, self._media_id, self.__tmpfile)
         self.__ppmfile = self.__tmpfile
-        self.__converter.start()
 
 Conversion Workflow
 ~~~~~~~~~~~~~~~~~~~
@@ -558,39 +668,78 @@ Converters create temporary PPM files that are cleaned up after tiling:
             self._logger.exception(
                 f"unable to unlink temporary file '{self.__tmpfile}'")
 
-Thread Safety and Disk Access
-------------------------------
+Thread Safety and Process Isolation
+------------------------------------
 
-Synchronization
-~~~~~~~~~~~~~~~
+Process-Based Isolation
+~~~~~~~~~~~~~~~~~~~~~~~
 
-Converters use ``TileStore.disk_lock`` to synchronize disk access:
+Converters run in separate processes via ``ProcessPoolExecutor``, providing complete isolation:
 
 .. code-block:: python
 
-    from pyzui.tilesystem import tilestore as TileStore
+    from pyzui.converters import converter_runner
 
-    def run(self) -> None:
-        with TileStore.disk_lock:
-            # Perform conversion with exclusive disk access
-            # This prevents conflicts with concurrent tiling operations
-            ...
+    # Submit conversion to process pool
+    future = converter_runner.submit_vips_conversion(infile, outfile)
+
+    # Track via ConversionHandle
+    handle = converter_runner.ConversionHandle(future, infile, outfile)
+
+    # Check progress/completion
+    if handle.progress == 1.0:
+        if handle.error:
+            print(f"Failed: {handle.error}")
 
 This ensures:
 
-1. No conflicts between multiple converters
-2. No conflicts between converters and tilers
-3. Proper serialization of disk I/O operations
-4. Prevention of corrupted output files
+1. No threading conflicts with TileManager threads
+2. Each pyvips instance runs in its own memory space
+3. True parallel conversion (multiple conversions run simultaneously)
+4. No deadlocks from pyvips internal threading
 
-**Why Disk Lock?**
+**Why Process-Based?**
 
-The disk lock is necessary because:
+The process-based approach was adopted because:
 
-- Multiple TiledMediaObjects may load simultaneously
-- Each may spawn a converter and tiler
-- Without synchronization, concurrent disk writes could corrupt data
-- The lock ensures only one converter/tiler writes at a time
+- pyvips uses its own internal thread pool for image operations
+- TileManager starts TileProvider threads for tile loading
+- When these run in the same process, threading conflicts can occur
+- Process isolation eliminates these conflicts completely
+
+**Spawn Context:**
+
+The ``converter_runner`` uses Python's 'spawn' multiprocessing context:
+
+.. code-block:: python
+
+    import multiprocessing
+    _mp_context = multiprocessing.get_context('spawn')
+    _executor = ProcessPoolExecutor(max_workers=4, mp_context=_mp_context)
+
+The 'spawn' method creates a fresh Python interpreter for each subprocess,
+avoiding issues that occur when forking a process that already has pyvips initialized.
+
+TileManager Pause/Resume (Optional)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TileManager includes pause/resume functionality that can be used if needed:
+
+.. code-block:: python
+
+    from pyzui.tilesystem import tilemanager
+
+    # Pause all tile provider threads
+    tilemanager.pause()
+
+    # Perform operations...
+
+    # Resume tile provider threads
+    tilemanager.resume()
+
+This mechanism pauses the ``StaticTileProvider`` and ``DynamicTileProvider`` threads,
+which may be useful in certain scenarios. However, with process-based conversion,
+this is typically not needed since converters run in separate processes.
 
 Logging and Debugging
 ---------------------
@@ -879,6 +1028,30 @@ Handling Multiple Formats
 API Reference
 -------------
 
+converter_runner Module
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+    # Module functions
+    def init(max_workers: int = 4) -> None
+    def shutdown() -> None
+    def submit_vips_conversion(infile, outfile, rotation=0,
+                               invert_colors=False, black_and_white=False) -> Future
+    def submit_pdf_conversion(infile, outfile) -> Future
+
+    # ConversionHandle class
+    class ConversionHandle:
+        def __init__(self, future: Future, infile: str, outfile: str) -> None
+
+        @property
+        def progress(self) -> float  # 0.0 or 1.0
+        @property
+        def error(self) -> Optional[str]
+
+        def is_alive(self) -> bool
+        def join(self, timeout: Optional[float] = None) -> None
+
 Converter (Abstract Base)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -915,14 +1088,21 @@ VipsConverter
 .. code-block:: python
 
     class VipsConverter(Converter):
-        def __init__(self, infile: str, outfile: str) -> None
+        def __init__(self, infile: str, outfile: str,
+                     rotation: Literal[0, 90, 180, 270] = 0,
+                     invert_colors: bool = False,
+                     black_and_white: bool = False) -> None
 
         # Attributes
         self.bitdepth: int  # Bit depth (default: 8)
+        self.rotation: int  # Rotation angle
+        self.invert_colors: bool  # Color inversion flag
+        self.black_and_white: bool  # Grayscale conversion flag
 
 Key Classes
 ~~~~~~~~~~~
 
+- :class:`pyzui.converters.converter_runner` - Process-based conversion execution
 - :class:`pyzui.converters.converter.Converter` - Abstract base class
 - :class:`pyzui.converters.pdfconverter.PDFConverter` - PDF converter
 - :class:`pyzui.converters.vipsconverter.VipsConverter` - Image converter

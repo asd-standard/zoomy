@@ -66,6 +66,7 @@ rather than mocks, validating the complete system behavior.</p>
 <h3>Directory Organization<a class="headerlink" href="#directory-organization" title="Link to this heading">¶</a></h3>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>test/integrationtest/
 ├── test_tiling_pipeline.py          # End-to-end tiling tests
+├── test_converter_pipeline.py       # Converter to tiler pipeline tests
 ├── test_concurrent_access.py        # Thread safety tests
 ├── test_cache_provider_integration.py  # Cache-provider interaction
 ├── test_tilemanager_integration.py  # TileManager coordination
@@ -86,7 +87,17 @@ rather than mocks, validating the complete system behavior.</p>
 <li><p>Multiple image handling</p></li>
 <li><p>Error handling in pipeline</p></li>
 </ul>
-<p><strong>2. Concurrent Access Tests</strong> (<code class="docutils literal notranslate"><span class="pre">test_concurrent_access.py</span></code>)</p>
+<p><strong>2. Converter Pipeline Tests</strong> (<code class="docutils literal notranslate"><span class="pre">test_converter_pipeline.py</span></code>)</p>
+<ul class="simple">
+<li><p>VipsConverter image format conversion (PNG, JPG, TIFF to PPM)</p></li>
+<li><p>PDFConverter PDF rasterization</p></li>
+<li><p>Converter to Tiler pipeline integration</p></li>
+<li><p>Progress tracking during conversion</p></li>
+<li><p>Error handling for invalid/corrupted files</p></li>
+<li><p>Process-based parallel conversion via <code class="docutils literal notranslate"><span class="pre">converter_runner</span></code></p></li>
+<li><p>Output format validation</p></li>
+</ul>
+<p><strong>3. Concurrent Access Tests</strong> (<code class="docutils literal notranslate"><span class="pre">test_concurrent_access.py</span></code>)</p>
 <ul class="simple">
 <li><p>Thread-safe tile requests</p></li>
 <li><p>Concurrent tiling operations</p></li>
@@ -94,7 +105,7 @@ rather than mocks, validating the complete system behavior.</p>
 <li><p>Provider queue concurrency</p></li>
 <li><p>Race condition prevention</p></li>
 </ul>
-<p><strong>3. Cache-Provider Integration</strong> (<code class="docutils literal notranslate"><span class="pre">test_cache_provider_integration.py</span></code>)</p>
+<p><strong>4. Cache-Provider Integration</strong> (<code class="docutils literal notranslate"><span class="pre">test_cache_provider_integration.py</span></code>)</p>
 <ul class="simple">
 <li><p>Provider-cache interaction</p></li>
 <li><p>Cache hit prevention of redundant loads</p></li>
@@ -102,7 +113,7 @@ rather than mocks, validating the complete system behavior.</p>
 <li><p>Multi-provider cache sharing</p></li>
 <li><p>Request queue processing</p></li>
 </ul>
-<p><strong>4. TileManager Coordination</strong> (<code class="docutils literal notranslate"><span class="pre">test_tilemanager_integration.py</span></code>)</p>
+<p><strong>5. TileManager Coordination</strong> (<code class="docutils literal notranslate"><span class="pre">test_tilemanager_integration.py</span></code>)</p>
 <ul class="simple">
 <li><p>Request routing (static vs dynamic)</p></li>
 <li><p>Tile synthesis and fallback</p></li>
@@ -110,7 +121,7 @@ rather than mocks, validating the complete system behavior.</p>
 <li><p>Negative tile level handling</p></li>
 <li><p>Dual-cache management</p></li>
 </ul>
-<p><strong>5. GUI Integration</strong> (<code class="docutils literal notranslate"><span class="pre">gui_integration.py</span></code>)</p>
+<p><strong>6. GUI Integration</strong> (<code class="docutils literal notranslate"><span class="pre">gui_integration.py</span></code>)</p>
 <ul class="simple">
 <li><p>Full application workflow</p></li>
 <li><p>All user interactions</p></li>
@@ -143,6 +154,11 @@ pytest
 </div>
 <p><strong>Run specific test:</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>test_tiling_pipeline.py::TestTilingPipelineEndToEnd::test_tile_image_creates_pyramid_structure
+</pre></div>
+</div>
+<p><strong>Run converter pipeline tests:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># All converter tests (27 tests)</span>
+pytest<span class="w"> </span>test_converter_pipeline.py<span class="w"> </span>-v
 </pre></div>
 </div>
 </section>
@@ -472,6 +488,207 @@ pytest<span class="w"> </span>-n<span class="w"> </span>auto
         <span class="k">assert</span> <span class="p">(</span><span class="s1">&#39;m1&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cache</span>
         <span class="k">assert</span> <span class="p">(</span><span class="s1">&#39;m2&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cache</span>
         <span class="k">assert</span> <span class="p">(</span><span class="s1">&#39;m3&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cache</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="converter-pipeline-tests">
+<h2>Converter Pipeline Tests<a class="headerlink" href="#converter-pipeline-tests" title="Link to this heading">¶</a></h2>
+<p>The converter pipeline tests (<code class="docutils literal notranslate"><span class="pre">test_converter_pipeline.py</span></code>) validate the complete workflow
+from image/PDF conversion through to tiling. These tests use a <code class="docutils literal notranslate"><span class="pre">ConcreteTiler</span></code> implementation
+that reads PPM image data using PIL.</p>
+<section id="concretetiler-implementation">
+<h3>ConcreteTiler Implementation<a class="headerlink" href="#concretetiler-implementation" title="Link to this heading">¶</a></h3>
+<p>The test file includes a <code class="docutils literal notranslate"><span class="pre">ConcreteTiler</span></code> class that implements the abstract <code class="docutils literal notranslate"><span class="pre">_scanchunk</span></code>
+method for reading image rows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ConcreteTiler</span><span class="p">(</span><span class="n">Tiler</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A concrete implementation of Tiler for testing the converter pipeline.</span>
+<span class="sd">    Implements the _scanchunk method using PIL to read PPM image data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">media_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filext</span><span class="o">=</span><span class="s1">&#39;jpg&#39;</span><span class="p">,</span> <span class="n">tilesize</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">filext</span><span class="p">,</span> <span class="n">tilesize</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="o">.</span><span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bytes_per_pixel</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_row</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_scanchunk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read the next scanline from the image.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_row</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+        <span class="c1"># Use crop to get entire row at once (much faster than getpixel)</span>
+        <span class="n">row_img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span>
+            <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_row</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_row</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">row_data</span> <span class="o">=</span> <span class="n">row_img</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">row_data</span>
+</pre></div>
+</div>
+<p><strong>Performance Note:</strong> The <code class="docutils literal notranslate"><span class="pre">_scanchunk</span></code> implementation uses <code class="docutils literal notranslate"><span class="pre">crop().tobytes()</span></code> rather than
+pixel-by-pixel reading with <code class="docutils literal notranslate"><span class="pre">getpixel()</span></code>. This is critical for performance - reading a
+2048x1536 image pixel-by-pixel would require ~3 million <code class="docutils literal notranslate"><span class="pre">getpixel()</span></code> calls and cause
+tests to hang.</p>
+</section>
+<section id="vipsconverter-tests">
+<h3>VipsConverter Tests<a class="headerlink" href="#vipsconverter-tests" title="Link to this heading">¶</a></h3>
+<p>Test VipsConverter image format conversion:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestVipsConverterBasicOperations</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Feature: VipsConverter Basic Operations</span>
+
+<span class="sd">    VipsConverter converts various image formats to PPM for tiling.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_convert_png_to_ppm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_images</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Convert PNG to PPM format</span>
+
+<span class="sd">        Given a PNG image file</span>
+<span class="sd">        When VipsConverter processes the file</span>
+<span class="sd">        Then a valid PPM file is created</span>
+<span class="sd">        And the output has correct dimensions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">infile</span> <span class="o">=</span> <span class="n">sample_images</span><span class="p">[</span><span class="s1">&#39;png&#39;</span><span class="p">]</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;output.ppm&quot;</span><span class="p">)</span>
+
+        <span class="n">converter</span> <span class="o">=</span> <span class="n">VipsConverter</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+        <span class="n">converter</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="n">converter</span><span class="o">.</span><span class="n">error</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">converter</span><span class="o">.</span><span class="n">progress</span> <span class="o">==</span> <span class="mf">1.0</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Test Classes:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">TestVipsConverterBasicOperations</span></code>: PNG, JPG, TIFF conversion</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TestVipsConverterErrorHandling</span></code>: Invalid file handling</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TestPDFConverterBasicOperations</span></code>: PDF rasterization</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TestPDFConverterErrorHandling</span></code>: PDF error cases</p></li>
+</ul>
+</section>
+<section id="converter-to-tiler-pipeline">
+<h3>Converter to Tiler Pipeline<a class="headerlink" href="#converter-to-tiler-pipeline" title="Link to this heading">¶</a></h3>
+<p>Test the complete convert-then-tile workflow:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestConverterToTilerPipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Feature: Converter to Tiler Pipeline</span>
+
+<span class="sd">    Images must be converted to PPM format before tiling.</span>
+<span class="sd">    This tests the complete conversion-to-tiling workflow.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_convert_then_tile_png</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">sample_images</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">temp_tilestore</span><span class="p">,</span>
+            <span class="n">initialized_tilemanager</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scenario: Convert PNG then tile</span>
+
+<span class="sd">        Given a PNG image</span>
+<span class="sd">        When converted to PPM and then tiled</span>
+<span class="sd">        Then tiles are created successfully</span>
+<span class="sd">        And tile pyramid is accessible</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">infile</span> <span class="o">=</span> <span class="n">sample_images</span><span class="p">[</span><span class="s1">&#39;png&#39;</span><span class="p">]</span>
+        <span class="n">ppm_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;converted.ppm&quot;</span><span class="p">)</span>
+        <span class="n">media_id</span> <span class="o">=</span> <span class="s2">&quot;pipeline_test_png&quot;</span>
+
+        <span class="c1"># Convert</span>
+        <span class="n">converter</span> <span class="o">=</span> <span class="n">VipsConverter</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">ppm_file</span><span class="p">)</span>
+        <span class="n">converter</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">converter</span><span class="o">.</span><span class="n">error</span> <span class="ow">is</span> <span class="kc">None</span>
+
+        <span class="c1"># Tile</span>
+        <span class="n">tiler</span> <span class="o">=</span> <span class="n">ConcreteTiler</span><span class="p">(</span><span class="n">ppm_file</span><span class="p">,</span> <span class="n">media_id</span><span class="o">=</span><span class="n">media_id</span><span class="p">,</span> <span class="n">tilesize</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+        <span class="n">tiler</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">tiler</span><span class="o">.</span><span class="n">error</span> <span class="ow">is</span> <span class="kc">None</span>
+
+        <span class="c1"># Verify</span>
+        <span class="k">assert</span> <span class="n">tilestore</span><span class="o">.</span><span class="n">tiled</span><span class="p">(</span><span class="n">media_id</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="process-based-parallel-conversion">
+<h3>Process-Based Parallel Conversion<a class="headerlink" href="#process-based-parallel-conversion" title="Link to this heading">¶</a></h3>
+<p>The converter pipeline uses process-based parallelism via <code class="docutils literal notranslate"><span class="pre">converter_runner</span></code> to enable
+multiple conversions to run concurrently without threading conflicts.</p>
+<p><strong>Why Process-Based?</strong></p>
+<p>pyvips uses its own internal thread pool for image operations. When multiple
+<code class="docutils literal notranslate"><span class="pre">VipsConverter</span></code> instances run in threads alongside TileManager threads, conflicts
+can occur. By running conversions in separate processes:</p>
+<ul class="simple">
+<li><p>Each pyvips instance runs in its own memory space</p></li>
+<li><p>No interference with TileManager’s TileProvider threads</p></li>
+<li><p>True parallel execution (not limited by Python’s GIL)</p></li>
+</ul>
+<p><strong>Process-Based Test Pattern:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_multiple_converters_run_concurrently_via_processes</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">sample_images</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test parallel conversion using processes.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">converter_runner</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">wait</span>
+
+    <span class="n">futures</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">outfiles</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">infile</span> <span class="o">=</span> <span class="n">sample_images</span><span class="p">[</span><span class="s1">&#39;png&#39;</span><span class="p">]</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;output_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.ppm&quot;</span><span class="p">)</span>
+        <span class="n">outfiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+        <span class="n">future</span> <span class="o">=</span> <span class="n">converter_runner</span><span class="o">.</span><span class="n">submit_vips_conversion</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+        <span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+
+    <span class="c1"># Wait for all to complete with timeout</span>
+    <span class="n">done</span><span class="p">,</span> <span class="n">not_done</span> <span class="o">=</span> <span class="n">wait</span><span class="p">(</span><span class="n">futures</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">not_done</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">not_done</span><span class="p">)</span><span class="si">}</span><span class="s2"> conversions timed out&quot;</span>
+
+    <span class="c1"># Verify all completed successfully</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">future</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">futures</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">error</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Conversion </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> failed: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p><strong>Thread-Based Test (Single Converter):</strong></p>
+<p>Individual converters can still run in threads for simple use cases:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_converter_runs_in_thread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_images</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test converter runs correctly in a separate thread.&quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+
+    <span class="n">converter</span> <span class="o">=</span> <span class="n">VipsConverter</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;done&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_conversion</span><span class="p">():</span>
+        <span class="n">converter</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;done&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">run_conversion</span><span class="p">)</span>
+    <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;done&#39;</span><span class="p">],</span> <span class="s2">&quot;Conversion thread timed out&quot;</span>
+    <span class="k">assert</span> <span class="n">converter</span><span class="o">.</span><span class="n">progress</span> <span class="o">==</span> <span class="mf">1.0</span>
+</pre></div>
+</div>
+</section>
+<section id="converter-progress-tracking">
+<h3>Converter Progress Tracking<a class="headerlink" href="#converter-progress-tracking" title="Link to this heading">¶</a></h3>
+<p>Test progress reporting during conversion:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestConverterProgressTracking</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_progress_starts_at_zero</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_images</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Progress starts at 0.0 before run().&quot;&quot;&quot;</span>
+        <span class="n">converter</span> <span class="o">=</span> <span class="n">VipsConverter</span><span class="p">(</span><span class="n">sample_images</span><span class="p">[</span><span class="s1">&#39;png&#39;</span><span class="p">],</span>
+                                  <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;out.ppm&quot;</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">converter</span><span class="o">.</span><span class="n">progress</span> <span class="o">==</span> <span class="mf">0.0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_progress_reaches_one_after_completion</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">sample_images</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Progress reaches 1.0 after successful conversion.&quot;&quot;&quot;</span>
+        <span class="n">converter</span> <span class="o">=</span> <span class="n">VipsConverter</span><span class="p">(</span><span class="n">sample_images</span><span class="p">[</span><span class="s1">&#39;png&#39;</span><span class="p">],</span>
+                                  <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;out.ppm&quot;</span><span class="p">))</span>
+        <span class="n">converter</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">converter</span><span class="o">.</span><span class="n">progress</span> <span class="o">==</span> <span class="mf">1.0</span>
 </pre></div>
 </div>
 </section>
@@ -1407,6 +1624,7 @@ python<span class="w"> </span>gui_integration.py
 <p>Reference these for patterns:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">test/integrationtest/test_tiling_pipeline.py</span></code> - Complete pipeline testing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test/integrationtest/test_converter_pipeline.py</span></code> - Converter and tiling pipeline</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">test/integrationtest/test_concurrent_access.py</span></code> - Thread safety patterns</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">test/integrationtest/test_cache_provider_integration.py</span></code> - Component interaction</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">test/integrationtest/test_tilemanager_integration.py</span></code> - Coordination testing</p></li>

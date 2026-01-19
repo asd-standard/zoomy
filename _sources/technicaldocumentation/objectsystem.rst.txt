@@ -232,8 +232,8 @@ of the viewport:
 
 - ``add(mediaobject)``: Add object to scene
 - ``remove(mediaobject)``: Remove object and purge unused tiles
-- ``get(pos)``: Get foremost object at screen position
-- ``render(painter, draft)``: Render all objects with occlusion culling
+- ``get(pos)``: Get topmost (smallest) object at screen position
+- ``render(painter, draft)``: Render all objects with occlusion culling (smaller on top)
 - ``step(t)``: Update physics for scene and all objects
 - ``save(filename)``: Save scene to .pzs file
 - ``load_scene(filename)``: Load scene from .pzs file (static method)
@@ -493,15 +493,18 @@ The :meth:`Scene.render` method orchestrates rendering of all objects:
     1. Sort objects by onscreen_area (smallest to largest)
 
     2. Occlusion Culling:
-       - Iterate objects in reverse (largest first)
-       - If object fills entire viewport, mark rest as hidden
+       - Iterate objects smallest to largest
+       - If object fills entire viewport, mark larger objects as hidden
+       - This ensures smaller objects (rendered on top) occlude larger ones
 
     3. Assign Render Modes:
        - Hidden objects: RenderMode.Invisible
        - Draft mode: RenderMode.Draft (fast rendering)
        - Otherwise: RenderMode.HighQuality
 
-    4. Render Each Object:
+    4. Render Each Object (largest to smallest):
+       - Iterate in reverse order so smaller objects are painted last
+       - Smaller objects appear on top of larger ones
        - Call object.render(painter, mode)
        - Catch LoadError exceptions
        - Remove objects with errors
@@ -511,6 +514,9 @@ The :meth:`Scene.render` method orchestrates rendering of all objects:
        - Blue border for right-click selection
 
     6. Return error list
+
+**Z-Order:** Smaller objects are always rendered on top of larger objects.
+When objects overlap, the smaller one will be visible and selectable.
 
 **Render Modes:**
 
@@ -659,7 +665,7 @@ Coordinate Transformations
     # Get screen position of object
     screen_x, screen_y = obj.topleft
 
-    # Get object at mouse position
+    # Get topmost (smallest) object at mouse position
     clicked_obj = scene.get((mouse_x, mouse_y))
 
     # Fit object to bounding box

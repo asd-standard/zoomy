@@ -327,11 +327,9 @@
 <span class="sd">        which returns mouse position *pos*</span>
 <span class="sd">        </span>
 <span class="sd">        Thread safely cycle through *__objects*. For each mediaobject checks if</span>
-<span class="sd">        *pos* is within mediaobject area, if it is the mediaobject is returned as</span>
-<span class="sd">        *foremost* </span>
+<span class="sd">        *pos* is within mediaobject area. Since smaller objects are rendered on</span>
+<span class="sd">        top, we return the first (smallest) matching object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">foremost</span> <span class="o">=</span> <span class="kc">None</span>
-
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__sort_objects</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">:</span>
@@ -339,9 +337,9 @@
                 <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">=</span> <span class="n">mediaobject</span><span class="o">.</span><span class="n">bottomright</span>
                 <span class="k">if</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">left</span>  <span class="ow">and</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">top</span> <span class="ow">and</span> \
                    <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">right</span> <span class="ow">and</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">bottom</span><span class="p">:</span>
-                    <span class="n">foremost</span> <span class="o">=</span> <span class="n">mediaobject</span>
+                    <span class="k">return</span> <span class="n">mediaobject</span>
 
-        <span class="k">return</span> <span class="n">foremost</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="Scene.zoom">
@@ -413,10 +411,11 @@
             <span class="n">hidden</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="c1">#Creates an empty set for hidden mediaobjects</span>
             <span class="n">hidden_objects</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;cycles through __objects in reverse order, from smallest area to</span>
-<span class="sd">            biggest area, if they result hidden they don&#39;t get to be rendered</span>
-<span class="sd">            and they&#39;re added to hidden_objects set&quot;&quot;&quot;</span> 
-            <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;cycles through __objects from smallest area to biggest area,</span>
+<span class="sd">            if they result hidden they don&#39;t get to be rendered and they&#39;re</span>
+<span class="sd">            added to hidden_objects set. This ensures smaller objects render</span>
+<span class="sd">            on top of larger ones.&quot;&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">hidden</span><span class="p">:</span>
                     <span class="n">hidden_objects</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mediaobject</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -428,17 +427,19 @@
                        <span class="n">x2</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> \
                        <span class="n">y2</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
                         <span class="c1">## mediaobject fills the entire</span>
-                        <span class="c1">## screen, so mark the rest of</span>
-                        <span class="c1">## the mediaobjects behind it</span>
+                        <span class="c1">## screen, so mark larger objects</span>
+                        <span class="c1">## (which are rendered behind it)</span>
                         <span class="c1">## as hidden</span>
                         <span class="n">hidden</span> <span class="o">=</span> <span class="kc">True</span>
 
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Set of hidden_objects it&#39;s updated: now we cycle through __objects</span>
-<span class="sd">            once again setting mediaobject.RenderMode, we set Invisible is </span>
-<span class="sd">            mediaobject is in hidden_objects, we set in Draft if draft class input</span>
-<span class="sd">            parameter is passed as True, otherwise we set HighQuality&quot;&quot;&quot;</span>
+<span class="sd">            in reverse order (largest to smallest) setting mediaobject.RenderMode.</span>
+<span class="sd">            We set Invisible if mediaobject is in hidden_objects, we set in Draft</span>
+<span class="sd">            if draft class input parameter is passed as True, otherwise we set</span>
+<span class="sd">            HighQuality. Rendering largest first means smallest objects are painted</span>
+<span class="sd">            last and appear on top.&quot;&quot;&quot;</span>
 
-            <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="n">hidden_objects</span><span class="p">:</span>
                     <span class="n">mode</span> <span class="o">=</span> <span class="n">MediaObject</span><span class="o">.</span><span class="n">RenderMode</span><span class="o">.</span><span class="n">Invisible</span>
                 <span class="k">elif</span> <span class="n">draft</span><span class="p">:</span>
@@ -535,6 +536,32 @@
                             <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_StringMediaObject__color</span> <span class="o">=</span>\
                                 <span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="o">+</span><span class="n">string_color</span><span class="p">)</span>
                             <span class="c1">#print(self.__objects[i].__dict__)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">break</span>
+
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;TiledMediaObject&#39;</span> <span class="p">:</span>
+
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">))</span> <span class="p">:</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_media_id</span> <span class="o">==</span>\
+                      <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="o">.</span><span class="n">_media_id</span> <span class="p">:</span>
+
+                        <span class="n">dialog</span> <span class="o">=</span> <span class="n">DialogWindows</span><span class="o">.</span><span class="n">modify_tiled_media_object_dialog</span><span class="p">(</span>\
+                            <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                        <span class="k">try</span> <span class="p">:</span>
+                            <span class="n">ok</span><span class="p">,</span> <span class="n">media_id</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">_run_dialog</span><span class="p">()</span>
+
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error opening TiledMediaObject dialog: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="n">ok</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="n">media_id</span> <span class="o">=</span> <span class="kc">None</span>
+
+                        <span class="k">if</span> <span class="n">ok</span> <span class="ow">and</span> <span class="n">media_id</span><span class="p">:</span>
+                            <span class="c1"># For now, the dialog is just a mockup</span>
+                            <span class="c1"># In the future, this would handle actual transformations</span>
+                            <span class="c1"># self.__objects[i]._media_id = media_id</span>
+                            <span class="k">pass</span>
+
                         <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="k">break</span>
 
@@ -791,12 +818,16 @@
            <span class="n">class_name</span> <span class="o">==</span> <span class="s1">&#39;StringMediaObject&#39;</span> <span class="ow">or</span> \
            <span class="n">class_name</span> <span class="o">==</span> <span class="s1">&#39;SVGMediaObject&#39;</span><span class="p">:</span>
             <span class="k">if</span>   <span class="n">class_name</span> <span class="o">==</span>   <span class="s1">&#39;TiledMediaObject&#39;</span><span class="p">:</span>
+                <span class="c1"># autofit=False is critical: when loading from a file, we must</span>
+                <span class="c1"># preserve the saved zoomlevel. If autofit=True, the zoomlevel</span>
+                <span class="c1"># would be recalculated when actual image dimensions load,</span>
+                <span class="c1"># overwriting the saved value and causing size discrepancies.</span>
                 <span class="n">mediaobject</span> <span class="o">=</span> <span class="n">TiledMediaObject</span><span class="p">(</span>
-                    <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
+                    <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">autofit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">class_name</span> <span class="o">==</span>   <span class="s1">&#39;StringMediaObject&#39;</span><span class="p">:</span>
                 <span class="n">mediaobject</span> <span class="o">=</span> <span class="n">StringMediaObject</span><span class="p">(</span>
                     <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
-                
+
             <span class="k">elif</span> <span class="n">class_name</span> <span class="o">==</span>   <span class="s1">&#39;SVGMediaObject&#39;</span><span class="p">:</span>
                 <span class="n">mediaobject</span> <span class="o">=</span> <span class="n">SVGMediaObject</span><span class="p">(</span>
                     <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>

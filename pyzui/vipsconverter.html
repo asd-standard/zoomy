@@ -36,33 +36,40 @@
 <p>Image converter based upon libvips (via pyvips).</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyzui.converters.vipsconverter.VipsConverter">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.converters.vipsconverter.</span></span><span class="sig-name descname"><span class="pre">VipsConverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/vipsconverter.html#VipsConverter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.vipsconverter.VipsConverter" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.converters.vipsconverter.</span></span><span class="sig-name descname"><span class="pre">VipsConverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invert_colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">black_and_white</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/vipsconverter.html#VipsConverter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.vipsconverter.VipsConverter" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="converter.html#pyzui.converters.converter.Converter" title="pyzui.converters.converter.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
 <dl class="simple">
-<dt>Constructor :</dt><dd><p>VipsConverter(infile, outfile)</p>
+<dt>Constructor :</dt><dd><p>VipsConverter(infile, outfile, rotation=0, invert_colors=False, black_and_white=False)</p>
 </dd>
 <dt>Parameters :</dt><dd><p>infile : str
-outfile : str</p>
+outfile : str
+rotation : int (0, 90, 180, or 270)
+invert_colors : bool
+black_and_white : bool</p>
 </dd>
 </dl>
-<p>VipsConverter(infile, outfile) –&gt; None</p>
+<p>VipsConverter(infile, outfile, rotation=0, invert_colors=False, black_and_white=False) –&gt; None</p>
 <p>VipsConverter objects are used for converting media with libvips.
 libvips is a fast image processing library that can handle very large images
 with low memory usage. For a list of supported image formats see
 <a class="reference external" href="https://www.libvips.org/API/current/file-format.html">https://www.libvips.org/API/current/file-format.html</a></p>
-<p>This constructor should always be called with keyword arguments. Arguments are:</p>
-<p><em>group</em> should be None; reserved for future extension when a ThreadGroup
-class is implemented.</p>
-<p><em>target</em> is the callable object to be invoked by the run()
-method. Defaults to None, meaning nothing is called.</p>
-<p><em>name</em> is the thread name. By default, a unique name is constructed of
-the form “Thread-N” where N is a small decimal number.</p>
-<p><em>args</em> is a list or tuple of arguments for the target invocation. Defaults to ().</p>
-<p><em>kwargs</em> is a dictionary of keyword arguments for the target
-invocation. Defaults to {}.</p>
-<p>If a subclass overrides the constructor, it must make sure to invoke
-the base class constructor (Thread.__init__()) before doing anything
-else to the thread.</p>
+<dl class="simple">
+<dt>Constructor :</dt><dd><p>VipsConverter(infile, outfile, rotation, invert_colors, black_and_white)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>infile : str
+outfile : str
+rotation : Literal[0, 90, 180, 270]
+invert_colors : bool
+black_and_white : bool</p>
+</dd>
+</dl>
+<p>VipsConverter(infile, outfile, rotation, invert_colors, black_and_white) –&gt; None</p>
+<p>Create a new VipsConverter for converting media files using libvips.</p>
+<p>The infile parameter is the path to the source image file.
+The outfile parameter is the path where the converted PPM will be written.
+The rotation parameter specifies rotation angle in degrees (0, 90, 180, or 270).
+The invert_colors parameter enables color inversion when True.
+The black_and_white parameter enables grayscale conversion when True.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.converters.vipsconverter.VipsConverter.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/vipsconverter.html#VipsConverter.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.vipsconverter.VipsConverter.run" title="Link to this definition">¶</a></dt>

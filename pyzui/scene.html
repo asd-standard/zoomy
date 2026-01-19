@@ -201,8 +201,8 @@ left or right click mouse event.</p>
 <p>Mouse click event is caught by: <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyzui.qzui.QZUI.mousePressEvent()</span></code>
 which returns mouse position <em>pos</em></p>
 <p>Thread safely cycle through <em>__objects</em>. For each mediaobject checks if
-<em>pos</em> is within mediaobject area, if it is the mediaobject is returned as
-<em>foremost</em></p>
+<em>pos</em> is within mediaobject area. Since smaller objects are rendered on
+top, we return the first (smallest) matching object.</p>
 </dd></dl>
 
 <dl class="py method">

@@ -51,7 +51,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Thread</span><span class="p">,</span> <span class="n">Condition</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Thread</span><span class="p">,</span> <span class="n">Condition</span><span class="p">,</span> <span class="n">Event</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem.tile</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tile</span>
@@ -97,6 +97,10 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__tasks</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__tasks_available</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">()</span>
+
+        <span class="c1"># Pause/resume mechanism</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pause_event</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pause_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>  <span class="c1"># Start in running (not paused) state</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
@@ -157,11 +161,17 @@
 <span class="sd">        Run a loop to load requested tiles.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># Wait if paused</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__pause_event</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">__tasks_available</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
             <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tasks</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__tasks_available</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
             <span class="n">tile_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tasks</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__tasks_available</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+            <span class="c1"># Check pause again after acquiring task</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__pause_event</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="n">tile_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tilecache</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -173,7 +183,7 @@
                 <span class="k">if</span> <span class="n">tile</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;loaded </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tile_id</span><span class="p">))</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__tilecache</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Tile</span><span class="p">(</span><span class="n">tile</span><span class="p">)</span>
-                    
+
                     <span class="k">del</span> <span class="n">tile</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;unavailable </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tile_id</span><span class="p">))</span>
@@ -207,10 +217,65 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__tasks_available</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div>
 
 
+<div class="viewcode-block" id="TileProvider.pause">
+<a class="viewcode-back" href="../../../../pyzui/tileprovider.html#pyzui.tilesystem.tileproviders.tileprovider.TileProvider.pause">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pause</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            TileProvider.pause()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        TileProvider.pause() --&gt; None</span>
+
+<span class="sd">        Pause the tile provider thread. The thread will stop processing</span>
+<span class="sd">        new tasks until resume() is called.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;pausing&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pause_event</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="TileProvider.resume">
+<a class="viewcode-back" href="../../../../pyzui/tileprovider.html#pyzui.tilesystem.tileproviders.tileprovider.TileProvider.resume">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resume</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            TileProvider.resume()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        TileProvider.resume() --&gt; None</span>
+
+<span class="sd">        Resume the tile provider thread after it was paused.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;resuming&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pause_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span></div>
+
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            TileProvider.__str__()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        TileProvider.__str__() --&gt; str</span>
+
+<span class="sd">        Return a human-readable string representation of the TileProvider.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            TileProvider.__repr__()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        TileProvider.__repr__() --&gt; str</span>
+
+<span class="sd">        Return a formal string representation of the TileProvider.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">()&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span></div>
 
 

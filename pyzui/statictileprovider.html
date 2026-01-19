@@ -102,15 +102,15 @@ and returns None if the requested tile does not exist or cannot be loaded.</p>
 </pre></div>
 </div>
 <dl class="simple">
-<dt>Method :</dt><dd><p>TileProvider.__init__(tilecache)</p>
+<dt>Constructor :</dt><dd><p>StaticTileProvider(tilecache)</p>
 </dd>
-<dt>Parameters :</dt><dd><p>tilecache : TileCache</p>
+<dt>Parameters :</dt><dd><p>tilecache : Any</p>
 </dd>
 </dl>
-<p>TileProvider.__init__(tilecache) –&gt; None</p>
-<p>Create a new TileProvider for loading tiles into the given <cite>tilecache</cite>.</p>
-<p>Initializes the thread infrastructure, task queue, and logger for this
-tile provider instance.</p>
+<p>StaticTileProvider(tilecache) –&gt; None</p>
+<p>Create a new StaticTileProvider with the given TileCache.</p>
+<p>The tilecache parameter is the TileCache instance that this provider
+will use to store loaded tiles.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.statictileprovider.StaticTileProvider._load">
 <span class="sig-name descname"><span class="pre">_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tileproviders/statictileprovider.html#StaticTileProvider._load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tileproviders.statictileprovider.StaticTileProvider._load" title="Link to this definition">¶</a></dt>

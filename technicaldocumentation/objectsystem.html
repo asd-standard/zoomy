@@ -238,8 +238,8 @@ of the viewport:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">add(mediaobject)</span></code>: Add object to scene</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">remove(mediaobject)</span></code>: Remove object and purge unused tiles</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">get(pos)</span></code>: Get foremost object at screen position</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">render(painter,</span> <span class="pre">draft)</span></code>: Render all objects with occlusion culling</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get(pos)</span></code>: Get topmost (smallest) object at screen position</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">render(painter,</span> <span class="pre">draft)</span></code>: Render all objects with occlusion culling (smaller on top)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">step(t)</span></code>: Update physics for scene and all objects</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">save(filename)</span></code>: Save scene to .pzs file</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">load_scene(filename)</span></code>: Load scene from .pzs file (static method)</p></li>
@@ -467,15 +467,18 @@ displacement:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>1. Sort objects by onscreen_area (smallest to largest)
 
 2. Occlusion Culling:
-   - Iterate objects in reverse (largest first)
-   - If object fills entire viewport, mark rest as hidden
+   - Iterate objects smallest to largest
+   - If object fills entire viewport, mark larger objects as hidden
+   - This ensures smaller objects (rendered on top) occlude larger ones
 
 3. Assign Render Modes:
    - Hidden objects: RenderMode.Invisible
    - Draft mode: RenderMode.Draft (fast rendering)
    - Otherwise: RenderMode.HighQuality
 
-4. Render Each Object:
+4. Render Each Object (largest to smallest):
+   - Iterate in reverse order so smaller objects are painted last
+   - Smaller objects appear on top of larger ones
    - Call object.render(painter, mode)
    - Catch LoadError exceptions
    - Remove objects with errors
@@ -487,6 +490,8 @@ displacement:</p>
 6. Return error list
 </pre></div>
 </div>
+<p><strong>Z-Order:</strong> Smaller objects are always rendered on top of larger objects.
+When objects overlap, the smaller one will be visible and selectable.</p>
 <p><strong>Render Modes:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">RenderMode</span><span class="p">:</span>
     <span class="n">Invisible</span> <span class="o">=</span> <span class="mi">0</span>      <span class="c1"># Don&#39;t render</span>
@@ -620,7 +625,7 @@ StringMediaObject    string:ff0000:Hello    0.0    300.0    400.0
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get screen position of object</span>
 <span class="n">screen_x</span><span class="p">,</span> <span class="n">screen_y</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">topleft</span>
 
-<span class="c1"># Get object at mouse position</span>
+<span class="c1"># Get topmost (smallest) object at mouse position</span>
 <span class="n">clicked_obj</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">mouse_x</span><span class="p">,</span> <span class="n">mouse_y</span><span class="p">))</span>
 
 <span class="c1"># Fit object to bounding box</span>

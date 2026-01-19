@@ -188,6 +188,33 @@ is omitted then all media will be purged.</p>
 <em>MediaObjects</em> for the media should exist).</p>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tilemanager.pause">
+<span class="sig-prename descclassname"><span class="pre">pyzui.tilesystem.tilemanager.</span></span><span class="sig-name descname"><span class="pre">pause</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tilemanager.html#pause"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tilemanager.pause" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>pause()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>pause() –&gt; None</p>
+<p>Pause all TileProvider threads. This should be called before running
+converter processes to avoid conflicts between pyvips and tile loading.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tilemanager.resume">
+<span class="sig-prename descclassname"><span class="pre">pyzui.tilesystem.tilemanager.</span></span><span class="sig-name descname"><span class="pre">resume</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tilemanager.html#resume"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tilemanager.resume" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>resume()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>resume() –&gt; None</p>
+<p>Resume all TileProvider threads after they were paused.</p>
+</dd></dl>
+
 <dl class="py exception">
 <dt class="sig sig-object py" id="pyzui.tilesystem.tilemanager.MediaNotTiled">
 <em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.tilesystem.tilemanager.</span></span><span class="sig-name descname"><span class="pre">MediaNotTiled</span></span><a class="reference internal" href="../_modules/pyzui/tilesystem/tilemanager.html#MediaNotTiled"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tilemanager.MediaNotTiled" title="Link to this definition">¶</a></dt>

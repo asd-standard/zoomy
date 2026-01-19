@@ -272,16 +272,46 @@ Help
     <span class="k">if</span> <span class="n">ok</span> <span class="ow">and</span> <span class="n">uri</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__open_media</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
 
+<span class="c1"># Supported file extensions for media opening</span>
+<span class="n">SUPPORTED_EXTENSIONS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;.svg&#39;</span><span class="p">,</span>                         <span class="c1"># SVGMediaObject</span>
+    <span class="s1">&#39;.pdf&#39;</span><span class="p">,</span>                         <span class="c1"># PDFConverter</span>
+    <span class="s1">&#39;.ppm&#39;</span><span class="p">,</span>                         <span class="c1"># Direct PPM support</span>
+    <span class="s1">&#39;.jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;.jpeg&#39;</span><span class="p">,</span>                <span class="c1"># VipsConverter - JPEG</span>
+    <span class="s1">&#39;.png&#39;</span><span class="p">,</span>                         <span class="c1"># VipsConverter - PNG</span>
+    <span class="s1">&#39;.gif&#39;</span><span class="p">,</span>                         <span class="c1"># VipsConverter - GIF</span>
+    <span class="s1">&#39;.tif&#39;</span><span class="p">,</span> <span class="s1">&#39;.tiff&#39;</span><span class="p">,</span>                <span class="c1"># VipsConverter - TIFF</span>
+    <span class="s1">&#39;.webp&#39;</span><span class="p">,</span>                        <span class="c1"># VipsConverter - WebP</span>
+    <span class="s1">&#39;.bmp&#39;</span><span class="p">,</span>                         <span class="c1"># VipsConverter - BMP</span>
+    <span class="s1">&#39;.heic&#39;</span><span class="p">,</span> <span class="s1">&#39;.heif&#39;</span><span class="p">,</span>               <span class="c1"># VipsConverter - HEIC</span>
+    <span class="s1">&#39;.avif&#39;</span><span class="p">,</span>                        <span class="c1"># VipsConverter - AVIF</span>
+    <span class="s1">&#39;.jxl&#39;</span><span class="p">,</span>                         <span class="c1"># VipsConverter - JPEG XL</span>
+<span class="p">}</span>
+
+<span class="c1"># Maximum file size for PDF files (2 MB)</span>
+<span class="n">MAX_PDF_SIZE_BYTES</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>
+
 <span class="k">def</span><span class="w"> </span><span class="nf">__action_open_media_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Open all media files from directory in grid layout.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Open supported media files from directory in grid layout.</span>
+
+<span class="sd">    Only files with extensions in SUPPORTED_EXTENSIONS are opened.</span>
+<span class="sd">    PDF files larger than MAX_PDF_SIZE_BYTES (2 MB) are skipped.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">directory</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Open media directory&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__prev_dir</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">directory</span><span class="p">:</span>
-        <span class="c1"># Load all files</span>
+        <span class="c1"># Load supported files only</span>
         <span class="n">media</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+                <span class="c1"># Check if file has a supported extension</span>
+                <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">ext</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SUPPORTED_EXTENSIONS</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="c1"># Skip PDF files larger than 2 MB</span>
+                <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.pdf&#39;</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">MAX_PDF_SIZE_BYTES</span><span class="p">:</span>
+                    <span class="k">continue</span>
                 <span class="n">mediaobject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__open_media</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">mediaobject</span><span class="p">:</span>
                     <span class="n">media</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mediaobject</span><span class="p">)</span>
@@ -1069,6 +1099,10 @@ Instead, Qt’s event loop handles all updates:</p>
 <section id="id1">
 <h3>MainWindow<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MainWindow</span><span class="p">(</span><span class="n">QMainWindow</span><span class="p">):</span>
+    <span class="c1"># Class constants for media directory import</span>
+    <span class="n">SUPPORTED_EXTENSIONS</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>  <span class="c1"># Supported file extensions</span>
+    <span class="n">MAX_PDF_SIZE_BYTES</span><span class="p">:</span> <span class="nb">int</span>         <span class="c1"># Maximum PDF file size (2 MB)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">framerate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
                  <span class="n">zoom_sensitivity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 
@@ -1079,6 +1113,14 @@ Instead, Qt’s event loop handles all updates:</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">zui</span><span class="p">:</span> <span class="n">QZUI</span>
 </pre></div>
 </div>
+<p><strong>Class Constants:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SUPPORTED_EXTENSIONS</span></code>: Set of supported file extensions for “Open Media Directory”
+(<code class="docutils literal notranslate"><span class="pre">.svg</span></code>, <code class="docutils literal notranslate"><span class="pre">.pdf</span></code>, <code class="docutils literal notranslate"><span class="pre">.ppm</span></code>, <code class="docutils literal notranslate"><span class="pre">.jpg</span></code>, <code class="docutils literal notranslate"><span class="pre">.jpeg</span></code>, <code class="docutils literal notranslate"><span class="pre">.png</span></code>, <code class="docutils literal notranslate"><span class="pre">.gif</span></code>, <code class="docutils literal notranslate"><span class="pre">.tif</span></code>,
+<code class="docutils literal notranslate"><span class="pre">.tiff</span></code>, <code class="docutils literal notranslate"><span class="pre">.webp</span></code>, <code class="docutils literal notranslate"><span class="pre">.bmp</span></code>, <code class="docutils literal notranslate"><span class="pre">.heic</span></code>, <code class="docutils literal notranslate"><span class="pre">.heif</span></code>, <code class="docutils literal notranslate"><span class="pre">.avif</span></code>, <code class="docutils literal notranslate"><span class="pre">.jxl</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAX_PDF_SIZE_BYTES</span></code>: Maximum file size for PDF files when opening from directory
+(default: 2 MB = 2,097,152 bytes). Larger PDFs are skipped.</p></li>
+</ul>
 </section>
 <section id="qzui">
 <h3>QZUI<a class="headerlink" href="#qzui" title="Link to this heading">¶</a></h3>

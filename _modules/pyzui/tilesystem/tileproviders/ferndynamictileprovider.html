@@ -88,6 +88,19 @@
 <span class="sd">        - Color is RGB (100, 170, 0) for a green fern appearance</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor :</span>
+<span class="sd">            FernTileProvider(tilecache)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            tilecache : Any</span>
+
+<span class="sd">        FernTileProvider(tilecache) --&gt; None</span>
+
+<span class="sd">        Create a new FernTileProvider with the given TileCache.</span>
+
+<span class="sd">        The tilecache parameter is the TileCache instance that this provider</span>
+<span class="sd">        will use to store generated fern fractal tiles.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">DynamicTileProvider</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilecache</span><span class="p">)</span>
 
     <span class="n">filext</span> <span class="o">=</span> <span class="s1">&#39;png&#39;</span>

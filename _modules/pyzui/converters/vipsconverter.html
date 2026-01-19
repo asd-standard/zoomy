@@ -51,33 +51,65 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyvips</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.converter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Converter</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilestore</span> <span class="k">as</span> <span class="n">TileStore</span>
 
 <div class="viewcode-block" id="VipsConverter">
 <a class="viewcode-back" href="../../../pyzui/vipsconverter.html#pyzui.converters.vipsconverter.VipsConverter">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">VipsConverter</span><span class="p">(</span><span class="n">Converter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor :</span>
-<span class="sd">        VipsConverter(infile, outfile)</span>
+<span class="sd">        VipsConverter(infile, outfile, rotation=0, invert_colors=False, black_and_white=False)</span>
 <span class="sd">    Parameters :</span>
 <span class="sd">        infile : str</span>
 <span class="sd">        outfile : str</span>
+<span class="sd">        rotation : int (0, 90, 180, or 270)</span>
+<span class="sd">        invert_colors : bool</span>
+<span class="sd">        black_and_white : bool</span>
 
-<span class="sd">    VipsConverter(infile, outfile) --&gt; None</span>
+<span class="sd">    VipsConverter(infile, outfile, rotation=0, invert_colors=False, black_and_white=False) --&gt; None</span>
 
 <span class="sd">    VipsConverter objects are used for converting media with libvips.</span>
 <span class="sd">    libvips is a fast image processing library that can handle very large images</span>
 <span class="sd">    with low memory usage. For a list of supported image formats see</span>
 <span class="sd">    https://www.libvips.org/API/current/file-format.html</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">rotation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">270</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">invert_colors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">black_and_white</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor :</span>
+<span class="sd">            VipsConverter(infile, outfile, rotation, invert_colors, black_and_white)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            infile : str</span>
+<span class="sd">            outfile : str</span>
+<span class="sd">            rotation : Literal[0, 90, 180, 270]</span>
+<span class="sd">            invert_colors : bool</span>
+<span class="sd">            black_and_white : bool</span>
+
+<span class="sd">        VipsConverter(infile, outfile, rotation, invert_colors, black_and_white) --&gt; None</span>
+
+<span class="sd">        Create a new VipsConverter for converting media files using libvips.</span>
+
+<span class="sd">        The infile parameter is the path to the source image file.</span>
+<span class="sd">        The outfile parameter is the path where the converted PPM will be written.</span>
+<span class="sd">        The rotation parameter specifies rotation angle in degrees (0, 90, 180, or 270).</span>
+<span class="sd">        The invert_colors parameter enables color inversion when True.</span>
+<span class="sd">        The black_and_white parameter enables grayscale conversion when True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Converter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
 
         <span class="c1">## since PPMTiler only supports 8-bit images</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bitdepth</span> <span class="o">=</span> <span class="mi">8</span>
+
+        <span class="c1">## rotation angle in degrees (0, 90, 180, or 270)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">=</span> <span class="n">rotation</span>
+
+        <span class="c1">## color manipulation flags</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">invert_colors</span> <span class="o">=</span> <span class="n">invert_colors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">black_and_white</span> <span class="o">=</span> <span class="n">black_and_white</span>
 
 <div class="viewcode-block" id="VipsConverter.run">
 <a class="viewcode-back" href="../../../pyzui/vipsconverter.html#pyzui.converters.vipsconverter.VipsConverter.run">[docs]</a>
@@ -98,31 +130,51 @@
 <span class="sd">        string describing the error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">TileStore</span><span class="o">.</span><span class="n">disk_lock</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;loading image with libvips&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;loading image with libvips&quot;</span><span class="p">)</span>
 
-                <span class="c1"># Load the image using libvips</span>
-                <span class="n">image</span> <span class="o">=</span> <span class="n">pyvips</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">new_from_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_infile</span><span class="p">,</span> <span class="n">access</span><span class="o">=</span><span class="s1">&#39;sequential&#39;</span><span class="p">)</span>
+            <span class="c1"># Load the image using libvips</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="n">pyvips</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">new_from_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_infile</span><span class="p">,</span> <span class="n">access</span><span class="o">=</span><span class="s1">&#39;sequential&#39;</span><span class="p">)</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;loaded </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">height</span><span class="si">}</span><span class="s2"> image with </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">bands</span><span class="si">}</span><span class="s2"> bands&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;loaded </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">height</span><span class="si">}</span><span class="s2"> image with </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">bands</span><span class="si">}</span><span class="s2"> bands&quot;</span><span class="p">)</span>
 
-                <span class="c1"># Convert to the specified bit depth if needed</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bitdepth</span> <span class="o">==</span> <span class="mi">8</span> <span class="ow">and</span> <span class="n">image</span><span class="o">.</span><span class="n">format</span> <span class="o">!=</span> <span class="s1">&#39;uchar&#39;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;converting from </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">format</span><span class="si">}</span><span class="s2"> to 8-bit&quot;</span><span class="p">)</span>
-                    <span class="c1"># Scale to 8-bit range</span>
-                    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;uchar&#39;</span><span class="p">)</span>
+            <span class="c1"># Apply rotation if specified</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;rotating image by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="si">}</span><span class="s2"> degrees&quot;</span><span class="p">)</span>
+                <span class="n">angle_map</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="mi">90</span><span class="p">:</span> <span class="n">pyvips</span><span class="o">.</span><span class="n">Angle</span><span class="o">.</span><span class="n">D90</span><span class="p">,</span>
+                    <span class="mi">180</span><span class="p">:</span> <span class="n">pyvips</span><span class="o">.</span><span class="n">Angle</span><span class="o">.</span><span class="n">D180</span><span class="p">,</span>
+                    <span class="mi">270</span><span class="p">:</span> <span class="n">pyvips</span><span class="o">.</span><span class="n">Angle</span><span class="o">.</span><span class="n">D270</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">rot</span><span class="p">(</span><span class="n">angle_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="p">])</span>
 
-                <span class="c1"># Ensure we have RGB or grayscale format for PPM</span>
-                <span class="k">if</span> <span class="n">image</span><span class="o">.</span><span class="n">bands</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>  <span class="c1"># RGBA</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;flattening RGBA to RGB&quot;</span><span class="p">)</span>
-                    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-                <span class="k">elif</span> <span class="n">image</span><span class="o">.</span><span class="n">bands</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">image</span><span class="o">.</span><span class="n">bands</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;extracting first 3 bands from </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">bands</span><span class="si">}</span><span class="s2">-band image&quot;</span><span class="p">)</span>
-                    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">extract_band</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="c1"># Apply black and white conversion if specified (before invert)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_and_white</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;converting to black and white (grayscale)&quot;</span><span class="p">)</span>
+                <span class="c1"># Convert to grayscale using colourspace, then back to sRGB for PPM</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">colourspace</span><span class="p">(</span><span class="s1">&#39;b-w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">colourspace</span><span class="p">(</span><span class="s1">&#39;srgb&#39;</span><span class="p">)</span>
 
-                <span class="c1"># Write to PPM format</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;writing to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_outfile</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">image</span><span class="o">.</span><span class="n">write_to_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outfile</span><span class="p">)</span>
+            <span class="c1"># Apply color inversion if specified</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invert_colors</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;inverting colors&quot;</span><span class="p">)</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">invert</span><span class="p">()</span>
+
+            <span class="c1"># Convert to the specified bit depth if needed</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bitdepth</span> <span class="o">==</span> <span class="mi">8</span> <span class="ow">and</span> <span class="n">image</span><span class="o">.</span><span class="n">format</span> <span class="o">!=</span> <span class="s1">&#39;uchar&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;converting from </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">format</span><span class="si">}</span><span class="s2"> to 8-bit&quot;</span><span class="p">)</span>
+                <span class="c1"># Scale to 8-bit range</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;uchar&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Ensure we have RGB or grayscale format for PPM</span>
+            <span class="k">if</span> <span class="n">image</span><span class="o">.</span><span class="n">bands</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>  <span class="c1"># RGBA</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;flattening RGBA to RGB&quot;</span><span class="p">)</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">image</span><span class="o">.</span><span class="n">bands</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">image</span><span class="o">.</span><span class="n">bands</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;extracting first 3 bands from </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">bands</span><span class="si">}</span><span class="s2">-band image&quot;</span><span class="p">)</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">extract_band</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+            <span class="c1"># Write to PPM format</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;writing to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_outfile</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">image</span><span class="o">.</span><span class="n">write_to_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outfile</span><span class="p">)</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;conversion failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -142,11 +194,34 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;VipsConverter(</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span>  <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_infile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outfile</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            VipsConverter.__str__()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        VipsConverter.__str__() --&gt; str</span>
+
+<span class="sd">        Return a human-readable string representation of the VipsConverter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;VipsConverter(</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, rotation=</span><span class="si">%d</span><span class="s2">, invert_colors=</span><span class="si">%s</span><span class="s2">, black_and_white=</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_infile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outfile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">invert_colors</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_and_white</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;VipsConverter(</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> \
-            <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_infile</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outfile</span><span class="p">))</span></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            VipsConverter.__repr__()</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        VipsConverter.__repr__() --&gt; str</span>
+
+<span class="sd">        Return a formal string representation of the VipsConverter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;VipsConverter(</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, rotation=</span><span class="si">%d</span><span class="s2">, invert_colors=</span><span class="si">%s</span><span class="s2">, black_and_white=</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_infile</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outfile</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">invert_colors</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_and_white</span><span class="p">)</span></div>
 
 
 </pre></div>

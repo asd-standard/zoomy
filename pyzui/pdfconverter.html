@@ -50,19 +50,18 @@ outfile : str</p>
 <p>The output format will always be PPM irrespective of the file extension of
 the output file. If another output format is required then <a class="reference internal" href="#pyzui.converters.pdfconverter.PDFConverter" title="pyzui.converters.pdfconverter.PDFConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDFConverter</span></code></a>
 should be used in conjunction with <code class="xref py py-class docutils literal notranslate"><span class="pre">VipsConverter</span></code>.</p>
-<p>This constructor should always be called with keyword arguments. Arguments are:</p>
-<p><em>group</em> should be None; reserved for future extension when a ThreadGroup
-class is implemented.</p>
-<p><em>target</em> is the callable object to be invoked by the run()
-method. Defaults to None, meaning nothing is called.</p>
-<p><em>name</em> is the thread name. By default, a unique name is constructed of
-the form “Thread-N” where N is a small decimal number.</p>
-<p><em>args</em> is a list or tuple of arguments for the target invocation. Defaults to ().</p>
-<p><em>kwargs</em> is a dictionary of keyword arguments for the target
-invocation. Defaults to {}.</p>
-<p>If a subclass overrides the constructor, it must make sure to invoke
-the base class constructor (Thread.__init__()) before doing anything
-else to the thread.</p>
+<dl class="simple">
+<dt>Constructor :</dt><dd><p>PDFConverter(infile, outfile)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>infile : str
+outfile : str</p>
+</dd>
+</dl>
+<p>PDFConverter(infile, outfile) –&gt; None</p>
+<p>Create a new PDFConverter for rasterizing PDF files.</p>
+<p>The infile parameter is the path to the source PDF file.
+The outfile parameter is the path where the rasterized PPM will be written.
+The default resolution is 300 DPI.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.converters.pdfconverter.PDFConverter.__merge">
 <span class="sig-name descname"><span class="pre">__merge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmpdir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.converters.pdfconverter.PDFConverter.__merge" title="Link to this definition">¶</a></dt>

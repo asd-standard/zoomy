@@ -97,15 +97,15 @@ specific tile generation or retrieval logic</p></li>
 </pre></div>
 </div>
 <dl class="simple">
-<dt>Method :</dt><dd><p>TileProvider.__init__(tilecache)</p>
+<dt>Constructor :</dt><dd><p>DynamicTileProvider(tilecache)</p>
 </dd>
-<dt>Parameters :</dt><dd><p>tilecache : TileCache</p>
+<dt>Parameters :</dt><dd><p>tilecache : Any</p>
 </dd>
 </dl>
-<p>TileProvider.__init__(tilecache) –&gt; None</p>
-<p>Create a new TileProvider for loading tiles into the given <cite>tilecache</cite>.</p>
-<p>Initializes the thread infrastructure, task queue, and logger for this
-tile provider instance.</p>
+<p>DynamicTileProvider(tilecache) –&gt; None</p>
+<p>Create a new DynamicTileProvider with the given TileCache.</p>
+<p>The tilecache parameter is the TileCache instance that this provider
+will use to store dynamically generated or retrieved tiles.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider.filext">
 <span class="sig-name descname"><span class="pre">filext</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'png'</span></em><a class="headerlink" href="#pyzui.tilesystem.tileproviders.dynamictileprovider.DynamicTileProvider.filext" title="Link to this definition">¶</a></dt>

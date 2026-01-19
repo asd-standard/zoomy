@@ -78,19 +78,38 @@ frequency</p></li>
 </section>
 <section id="mouse-keyboard-actions">
 <h2>Mouse/Keyboard actions:<a class="headerlink" href="#mouse-keyboard-actions" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><dl class="simple">
-<dt><strong>Left-click</strong> Select the foremost media under the cursor:</dt><dd><ul>
+<ul>
+<li><p><strong>Left-click</strong> Select the topmost media under the cursor (smaller objects
+appear on top of larger ones):</p>
+<blockquote>
+<div><ul class="simple">
 <li><p>if there is no media under the cursor then the currently selected media
 will be deselected</p></li>
 <li><p>if the Shift key is currently being held then no change will be made
 to the current selection</p></li>
 </ul>
+</div></blockquote>
+</li>
+<li><dl>
+<dt><strong>Right-click</strong> Open a context dialog for the media object under the cursor:</dt><dd><ul>
+<li><p><strong>StringMediaObject</strong>: Opens the Modify String dialog allowing you to edit
+the text content and change the color of the string</p></li>
+<li><p><strong>TiledMediaObject</strong>: Opens the Tiled Media Object Options dialog with
+image manipulation tools:</p>
+<ul class="simple">
+<li><p>Rotate Left/Right: Rotate the image by 90° increments</p></li>
+<li><p>Invert Colors: Apply color inversion effect</p></li>
+<li><p>Black and White: Convert the image to grayscale</p></li>
+</ul>
+<p>Changes are previewed in the dialog and applied when clicking Apply.</p>
+</li>
+</ul>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><strong>Click`n’drag</strong> Select and move the foremost media under the cursor</dt><dd><ul>
+<dt><strong>Click`n’drag</strong> Select and move the topmost media under the cursor</dt><dd><ul class="simple">
+<li><p>smaller objects are rendered above larger ones and will be selected first</p></li>
 <li><p>if there is no media under the cursor then the currently selected media
 will be deselected and the entire scene will be moved</p></li>
 <li><p>if the Shift key is currently being held then no change will be made
@@ -101,7 +120,7 @@ to the current selection and the entire scene will be moved</p></li>
 </li>
 <li><p><strong>Esc</strong> Deselect the currently selected media</p></li>
 <li><dl class="simple">
-<dt><strong>PgUp/PgDn or Scrollwheel</strong> Zoom the currently selected media</dt><dd><ul>
+<dt><strong>PgUp/PgDn or Scrollwheel</strong> Zoom the currently selected media</dt><dd><ul class="simple">
 <li><p>if there is no currently selected media, or if the Shift key is currently
 being held, then the entire scene will be zoomed</p></li>
 <li><p>if the Alt key is currently being held, then the zoom amount will
@@ -113,7 +132,7 @@ screen</p></li>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><strong>Arrow keys</strong> Move the currently selected media in the specified direction</dt><dd><ul>
+<dt><strong>Arrow keys</strong> Move the currently selected media in the specified direction</dt><dd><ul class="simple">
 <li><p>if there is no currently selected media, or if the Shift key is currently
 being held, then the entire scene will be moved</p></li>
 <li><p>if the Alt key is currently being held, then the move amount will
@@ -123,7 +142,7 @@ reduced allowing for finer control</p></li>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><strong>Space bar</strong> Move the point under the cursor to the centre of the screen</dt><dd><ul>
+<dt><strong>Space bar</strong> Move the point under the cursor to the centre of the screen</dt><dd><ul class="simple">
 <li><p>holding the Space bar allows panning by moving the cursor around
 the centre of the viewport</p></li>
 </ul>
