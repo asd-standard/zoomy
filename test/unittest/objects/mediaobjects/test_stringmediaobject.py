@@ -99,8 +99,8 @@ class TestStringMediaObject:
         scene = Mock()
         obj = StringMediaObject("string:000000:HelloWorld", scene)
 
-        # Text should be parsed into lines
-        assert obj.lines == [['H', 'e', 'l', 'l', 'o', 'W', 'o', 'r', 'l', 'd']]
+        # Text should be parsed into lines (optimized: stored as strings, not character lists)
+        assert obj.lines == ['HelloWorld']
 
     def test_multiline_text_parses_into_separate_lines(self):
         """
@@ -113,10 +113,10 @@ class TestStringMediaObject:
         scene = Mock()
         obj = StringMediaObject("string:000000:Hello\nWorld", scene)
 
-        # Should have 2 lines
+        # Should have 2 lines (optimized: stored as strings, not character lists)
         assert len(obj.lines) == 2
-        assert obj.lines[0] == ['H', 'e', 'l', 'l', 'o']
-        assert obj.lines[1] == ['W', 'o', 'r', 'l', 'd']
+        assert obj.lines[0] == 'Hello'
+        assert obj.lines[1] == 'World'
 
     def test_multiline_text_with_multiple_newlines(self):
         """
@@ -130,9 +130,9 @@ class TestStringMediaObject:
         obj = StringMediaObject("string:000000:Line1\nLine2\nLine3", scene)
 
         assert len(obj.lines) == 3
-        assert obj.lines[0] == ['L', 'i', 'n', 'e', '1']
-        assert obj.lines[1] == ['L', 'i', 'n', 'e', '2']
-        assert obj.lines[2] == ['L', 'i', 'n', 'e', '3']
+        assert obj.lines[0] == 'Line1'
+        assert obj.lines[1] == 'Line2'
+        assert obj.lines[2] == 'Line3'
 
     def test_parses_various_colors(self):
         """
@@ -162,7 +162,7 @@ class TestStringMediaObject:
         obj = StringMediaObject("string:000000:", scene)
 
         assert len(obj.lines) == 1
-        assert obj.lines[0] == []
+        assert obj.lines[0] == ''
 
     def test_text_with_special_characters(self):
         """
@@ -175,8 +175,8 @@ class TestStringMediaObject:
         scene = Mock()
         obj = StringMediaObject("string:000000:Hello @#$%!", scene)
 
-        expected_chars = ['H', 'e', 'l', 'l', 'o', ' ', '@', '#', '$', '%', '!']
-        assert obj.lines[0] == expected_chars
+        # Optimized: stored as string, not character list
+        assert obj.lines[0] == 'Hello @#$%!'
 
     def test_zoomlevel_attribute(self):
         """

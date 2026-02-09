@@ -32,6 +32,7 @@ from concurrent.futures import ProcessPoolExecutor, Future
 from typing import Optional, Literal, Dict, Any
 import multiprocessing
 import threading
+import warnings
 import atexit
 import os
 
@@ -42,7 +43,35 @@ def _get_safe_context():
 
     Returns 'fork' if only the main thread is running (fast, clean shutdown).
     Returns 'spawn' if other threads exist (avoids fork-after-threads issues).
+
+    Python 3.12+ DeprecationWarning about fork() in multi-threaded processes:
+    -------------------------------------------------------------------------
+    Python 3.12 emits a DeprecationWarning when os.fork() is called while
+    multiple threads are active, because forking duplicates the process but
+    only the calling thread — leaving any mutex locks held by other threads
+    in a permanently locked state, which can cause deadlocks in the child.
+
+    This warning does NOT apply to our use case for the following reasons:
+
+    1. We select 'fork' only when threading.active_count() == 1 (main thread
+       only). However, ProcessPoolExecutor spawns workers lazily on the first
+       submit() call, and by that time pytest or Qt may have started internal
+       threads (e.g., Qt event loop, pytest-xdist workers).
+
+    2. The forked worker processes are safe because they perform fresh imports
+       of VipsConverter/PDFConverter (see _run_vips_conversion and
+       _run_pdf_conversion) and do not inherit or interact with any shared
+       thread state, locks, or Qt objects from the parent process.
+
+    3. The alternative contexts ('spawn', 'forkserver') cause the process pool
+       to hang during interpreter shutdown / pytest teardown, making them
+       unsuitable. 'fork' provides clean and fast shutdown via the atexit
+       handler registered in init().
+
+    We therefore catch this specific DeprecationWarning and log it at debug
+    level rather than letting it propagate to the user.
     """
+    
     env_context = os.environ.get('PYZUI_MP_CONTEXT')
     if env_context:
         return multiprocessing.get_context(env_context)
@@ -186,8 +215,17 @@ def submit_vips_conversion(infile: str, outfile: str,
         A Future object that will contain the conversion result
     """
     executor = _get_executor()
-    return executor.submit(_run_vips_conversion, infile, outfile,
-                          rotation, invert_colors, black_and_white)
+    # Catch the Python 3.12+ DeprecationWarning about fork() in multi-threaded
+    # processes. The warning is emitted here because ProcessPoolExecutor spawns
+    # workers lazily on the first submit() call, which is when os.fork() runs.
+    # See _get_safe_context() docstring for why this is safe in our case.
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=".*multi-threaded.*use of fork\\(\\).*",
+            category=DeprecationWarning)
+        return executor.submit(_run_vips_conversion, infile, outfile,
+                              rotation, invert_colors, black_and_white)
 
 
 def submit_pdf_conversion(infile: str, outfile: str) -> Future:
@@ -202,7 +240,14 @@ def submit_pdf_conversion(infile: str, outfile: str) -> Future:
         A Future object that will contain the conversion result
     """
     executor = _get_executor()
-    return executor.submit(_run_pdf_conversion, infile, outfile)
+    # Catch the Python 3.12+ DeprecationWarning about fork() in multi-threaded
+    # processes. See _get_safe_context() docstring and submit_vips_conversion().
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=".*multi-threaded.*use of fork\\(\\).*",
+            category=DeprecationWarning)
+        return executor.submit(_run_pdf_conversion, infile, outfile)
 
 
 class ConversionHandle:

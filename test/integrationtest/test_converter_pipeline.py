@@ -691,7 +691,7 @@ class TestConverterThreading:
     Converters can run in background threads for non-blocking operations.
     However, due to pyvips internal threading, running multiple VipsConverter
     instances concurrently in threads can cause conflicts. For parallel
-    conversions, use the process-based converter_runner module instead.
+    conversions, use the process-based converterrunner module instead.
     """
 
     @pytest.mark.skipif(not is_pyvips_available(), reason="pyvips not available")
@@ -736,7 +736,7 @@ class TestConverterThreading:
 
         Note: This uses process-based parallelism to avoid pyvips threading conflicts.
         """
-        from pyzui.converters import converter_runner
+        from pyzui.converters import converterrunner
         from concurrent.futures import wait
 
         futures = []
@@ -746,7 +746,7 @@ class TestConverterThreading:
             infile = sample_images['png']
             outfile = str(tmp_path / f"output_{i}.ppm")
             outfiles.append(outfile)
-            future = converter_runner.submit_vips_conversion(infile, outfile)
+            future = converterrunner.submit_vips_conversion(infile, outfile)
             futures.append(future)
 
         # Wait for all to complete with timeout
@@ -768,7 +768,7 @@ class TestConcurrentConversionOperations:
     usage correctly.
 
     Note: Due to pyvips internal threading conflicts, concurrent conversions
-    should use the process-based converter_runner rather than ThreadPoolExecutor.
+    should use the process-based converterrunner rather than ThreadPoolExecutor.
     """
 
     @pytest.mark.skipif(not is_pyvips_available(), reason="pyvips not available")
@@ -782,7 +782,7 @@ class TestConcurrentConversionOperations:
         Then each conversion completes independently
         And all outputs are valid
         """
-        from pyzui.converters import converter_runner
+        from pyzui.converters import converterrunner
         from concurrent.futures import wait
 
         files_to_convert = [
@@ -794,7 +794,7 @@ class TestConcurrentConversionOperations:
         # Submit all conversions to process pool
         futures = []
         for infile, outfile in files_to_convert:
-            future = converter_runner.submit_vips_conversion(infile, outfile)
+            future = converterrunner.submit_vips_conversion(infile, outfile)
             futures.append((future, outfile))
 
         # Wait for all to complete
@@ -821,7 +821,7 @@ class TestConcurrentConversionOperations:
         Note: Conversions run in separate processes for isolation. Tiling
         runs after conversion completes to avoid threading conflicts.
         """
-        from pyzui.converters import converter_runner
+        from pyzui.converters import converterrunner
         from concurrent.futures import wait
 
         # Initialize tilemanager locally
@@ -831,7 +831,7 @@ class TestConcurrentConversionOperations:
         conversion_jobs = []
         for i in range(3):
             ppm_file = str(tmp_path / f"converted_{i}.ppm")
-            future = converter_runner.submit_vips_conversion(
+            future = converterrunner.submit_vips_conversion(
                 sample_images['png'], ppm_file)
             conversion_jobs.append((i, ppm_file, future))
 
