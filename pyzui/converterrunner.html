@@ -49,6 +49,30 @@ This creates a fresh Python interpreter per worker.</p></li>
 <dd><p>Get a multiprocessing context that’s safe for the current thread state.</p>
 <p>Returns ‘fork’ if only the main thread is running (fast, clean shutdown).
 Returns ‘spawn’ if other threads exist (avoids fork-after-threads issues).</p>
+<section id="python-3-12-deprecationwarning-about-fork-in-multi-threaded-processes">
+<h2>Python 3.12+ DeprecationWarning about fork() in multi-threaded processes:<a class="headerlink" href="#python-3-12-deprecationwarning-about-fork-in-multi-threaded-processes" title="Link to this heading">¶</a></h2>
+<p>Python 3.12 emits a DeprecationWarning when os.fork() is called while
+multiple threads are active, because forking duplicates the process but
+only the calling thread — leaving any mutex locks held by other threads
+in a permanently locked state, which can cause deadlocks in the child.</p>
+<p>This warning does NOT apply to our use case for the following reasons:</p>
+<ol class="arabic simple">
+<li><p>We select ‘fork’ only when threading.active_count() == 1 (main thread
+only). However, ProcessPoolExecutor spawns workers lazily on the first
+submit() call, and by that time pytest or Qt may have started internal
+threads (e.g., Qt event loop, pytest-xdist workers).</p></li>
+<li><p>The forked worker processes are safe because they perform fresh imports
+of VipsConverter/PDFConverter (see _run_vips_conversion and
+_run_pdf_conversion) and do not inherit or interact with any shared
+thread state, locks, or Qt objects from the parent process.</p></li>
+<li><p>The alternative contexts (‘spawn’, ‘forkserver’) cause the process pool
+to hang during interpreter shutdown / pytest teardown, making them
+unsuitable. ‘fork’ provides clean and fast shutdown via the atexit
+handler registered in init().</p></li>
+</ol>
+<p>We therefore catch this specific DeprecationWarning and log it at debug
+level rather than letting it propagate to the user.</p>
+</section>
 </dd></dl>
 
 <dl class="py function">

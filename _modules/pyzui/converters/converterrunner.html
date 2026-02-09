@@ -65,6 +65,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">atexit</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
@@ -77,7 +78,35 @@
 
 <span class="sd">    Returns &#39;fork&#39; if only the main thread is running (fast, clean shutdown).</span>
 <span class="sd">    Returns &#39;spawn&#39; if other threads exist (avoids fork-after-threads issues).</span>
+
+<span class="sd">    Python 3.12+ DeprecationWarning about fork() in multi-threaded processes:</span>
+<span class="sd">    -------------------------------------------------------------------------</span>
+<span class="sd">    Python 3.12 emits a DeprecationWarning when os.fork() is called while</span>
+<span class="sd">    multiple threads are active, because forking duplicates the process but</span>
+<span class="sd">    only the calling thread — leaving any mutex locks held by other threads</span>
+<span class="sd">    in a permanently locked state, which can cause deadlocks in the child.</span>
+
+<span class="sd">    This warning does NOT apply to our use case for the following reasons:</span>
+
+<span class="sd">    1. We select &#39;fork&#39; only when threading.active_count() == 1 (main thread</span>
+<span class="sd">       only). However, ProcessPoolExecutor spawns workers lazily on the first</span>
+<span class="sd">       submit() call, and by that time pytest or Qt may have started internal</span>
+<span class="sd">       threads (e.g., Qt event loop, pytest-xdist workers).</span>
+
+<span class="sd">    2. The forked worker processes are safe because they perform fresh imports</span>
+<span class="sd">       of VipsConverter/PDFConverter (see _run_vips_conversion and</span>
+<span class="sd">       _run_pdf_conversion) and do not inherit or interact with any shared</span>
+<span class="sd">       thread state, locks, or Qt objects from the parent process.</span>
+
+<span class="sd">    3. The alternative contexts (&#39;spawn&#39;, &#39;forkserver&#39;) cause the process pool</span>
+<span class="sd">       to hang during interpreter shutdown / pytest teardown, making them</span>
+<span class="sd">       unsuitable. &#39;fork&#39; provides clean and fast shutdown via the atexit</span>
+<span class="sd">       handler registered in init().</span>
+
+<span class="sd">    We therefore catch this specific DeprecationWarning and log it at debug</span>
+<span class="sd">    level rather than letting it propagate to the user.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">env_context</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PYZUI_MP_CONTEXT&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">env_context</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">get_context</span><span class="p">(</span><span class="n">env_context</span><span class="p">)</span>
@@ -239,8 +268,17 @@
 <span class="sd">        A Future object that will contain the conversion result</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">executor</span> <span class="o">=</span> <span class="n">_get_executor</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">_run_vips_conversion</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span>
-                          <span class="n">rotation</span><span class="p">,</span> <span class="n">invert_colors</span><span class="p">,</span> <span class="n">black_and_white</span><span class="p">)</span></div>
+    <span class="c1"># Catch the Python 3.12+ DeprecationWarning about fork() in multi-threaded</span>
+    <span class="c1"># processes. The warning is emitted here because ProcessPoolExecutor spawns</span>
+    <span class="c1"># workers lazily on the first submit() call, which is when os.fork() runs.</span>
+    <span class="c1"># See _get_safe_context() docstring for why this is safe in our case.</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span>
+            <span class="s2">&quot;ignore&quot;</span><span class="p">,</span>
+            <span class="n">message</span><span class="o">=</span><span class="s2">&quot;.*multi-threaded.*use of fork</span><span class="se">\\</span><span class="s2">(</span><span class="se">\\</span><span class="s2">).*&quot;</span><span class="p">,</span>
+            <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">_run_vips_conversion</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span>
+                              <span class="n">rotation</span><span class="p">,</span> <span class="n">invert_colors</span><span class="p">,</span> <span class="n">black_and_white</span><span class="p">)</span></div>
 
 
 
@@ -258,7 +296,14 @@
 <span class="sd">        A Future object that will contain the conversion result</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">executor</span> <span class="o">=</span> <span class="n">_get_executor</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">_run_pdf_conversion</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span></div>
+    <span class="c1"># Catch the Python 3.12+ DeprecationWarning about fork() in multi-threaded</span>
+    <span class="c1"># processes. See _get_safe_context() docstring and submit_vips_conversion().</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span>
+            <span class="s2">&quot;ignore&quot;</span><span class="p">,</span>
+            <span class="n">message</span><span class="o">=</span><span class="s2">&quot;.*multi-threaded.*use of fork</span><span class="se">\\</span><span class="s2">(</span><span class="se">\\</span><span class="s2">).*&quot;</span><span class="p">,</span>
+            <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">_run_pdf_conversion</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span></div>
 
 
 
