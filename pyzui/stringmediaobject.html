@@ -120,6 +120,7 @@ rendering rectangle and using QtPainter.drawText</p>
 for the current scale.</p>
 <p>Returns None if the point size is less than 1 (too small to be seen).
 Otherwise returns a Sans Serif font with the calculated point size.</p>
+<p>Uses caching to avoid recreating font objects on every access.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -133,6 +134,7 @@ Otherwise returns a Sans Serif font with the calculated point size.</p>
 </dl>
 <p>StringMediaObject.onscreen_size –&gt; Tuple[float, float]</p>
 <p>Returns width and height of the MediaObject passed to the StringMediaObject Class.</p>
+<p>Uses caching to avoid recalculating size on every access.</p>
 </dd></dl>
 
 </dd></dl>

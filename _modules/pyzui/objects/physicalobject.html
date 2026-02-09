@@ -57,21 +57,21 @@
 <a class="viewcode-back" href="../../../pyzui/physicalobject.html#pyzui.objects.physicalobject.PhysicalObject">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PhysicalObject</span><span class="p">():</span> <span class="c1">#removed object from class argument and Thread</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Constructor : </span>
+<span class="sd">    Constructor :</span>
 <span class="sd">        PhysicalObject()</span>
 <span class="sd">    Parameters :</span>
 <span class="sd">        None</span>
 
 <span class="sd">    PhysicalObject() --&gt; None</span>
 
-<span class="sd">    Physicalobject objects are sets of declarations and methods that are used </span>
-<span class="sd">    to represent anything that has a 3-dimensional position and velocity, </span>
-<span class="sd">    where the z-dimension represents a zoomlevel. </span>
+<span class="sd">    Physicalobject objects are sets of declarations and methods that are used</span>
+<span class="sd">    to represent anything that has a 3-dimensional position and velocity,</span>
+<span class="sd">    where the z-dimension represents a zoomlevel.</span>
 
-<span class="sd">    PhysicalObject gets declared on MediaObject and Scene initializations, </span>
+<span class="sd">    PhysicalObject gets declared on MediaObject and Scene initializations,</span>
 <span class="sd">    giving them the necessary attributes, (position, zoomlevel, damp factor</span>
 <span class="sd">    zoomlevel, eccetera).</span>
-<span class="sd">    </span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -116,19 +116,19 @@
 <span class="sd">                   • Thread-safe operations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">vx</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vy</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vz</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vx</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vy</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vz</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_centre</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;the velocity is damped at each frame such that each second it is </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;the velocity is damped at each frame such that each second it is</span>
 <span class="sd">    reduced by a factor of damping_factor: v = u * damping_factor**-t&quot;&quot;&quot;</span>
-    <span class="n">damping_factor</span> <span class="o">=</span> <span class="mi">512</span> <span class="c1">#256</span>
+    <span class="n">damping_factor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">512</span> <span class="c1">#256</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__damp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">velocity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -242,12 +242,14 @@
         <span class="c1">## solving for P = P&#39; yields:</span>
         <span class="c1">##   pos&#39; = P - (P - pos) * 2**amount</span>
 
+        <span class="n">Px</span><span class="p">:</span> <span class="nb">float</span>
+        <span class="n">Py</span><span class="p">:</span> <span class="nb">float</span>
         <span class="n">Px</span><span class="p">,</span> <span class="n">Py</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">Px</span> <span class="o">-</span> <span class="p">(</span><span class="n">Px</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">amount</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">Py</span> <span class="o">-</span> <span class="p">(</span><span class="n">Py</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">amount</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">+=</span> <span class="n">amount</span></div>
 
-    
+
 
 <div class="viewcode-block" id="PhysicalObject.aim">
 <a class="viewcode-back" href="../../../pyzui/physicalobject.html#pyzui.objects.physicalobject.PhysicalObject.aim">[docs]</a>
@@ -270,6 +272,7 @@
 
 <span class="sd">        Precondition: `v` is either &#39;x&#39;, &#39;y&#39;, or &#39;z&#39;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">u</span><span class="p">:</span> <span class="nb">float</span>
         <span class="k">if</span> <span class="n">t</span><span class="p">:</span>
             <span class="c1">## s(t) = (u / log(d)) * (1 - d**-t)</span>
             <span class="c1">## =&gt; u = (s(t) * log(d)) / (1 - d**-t)</span>
@@ -429,7 +432,6 @@
     <span class="n">centre</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">__get_centre</span><span class="p">,</span> <span class="n">__set_centre</span><span class="p">)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creating PhysicalObject.centre property with __get_centre as</span>
 <span class="sd">    getter and __set_centre as setter&quot;&quot;&quot;</span></div>
-
 
 </pre></div>
 

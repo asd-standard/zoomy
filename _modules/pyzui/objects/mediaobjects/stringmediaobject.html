@@ -97,41 +97,56 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">MediaObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
 
-        <span class="c1">#Get color code &#39;rrggbb&#39; from media_id string and assign it to hexcol variable</span>
-        <span class="n">hexcol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;string:&#39;</span><span class="p">):</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;string:rrggbb&#39;</span><span class="p">)]</span>
-        <span class="c1">#initialize and assign QtGui.QColor which can then be passed to QtPainter.setPen </span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__color</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="n">hexcol</span><span class="p">)</span>
-        <span class="c1">#checks if color is valid to QtGui.QColor() and if not an error is raised </span>
+        <span class="c1"># Get color code &#39;rrggbb&#39; from media_id string and assign it to hexcol variable</span>
+        <span class="n">hexcol</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;string:&#39;</span><span class="p">):</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;string:rrggbb&#39;</span><span class="p">)]</span>
+
+        <span class="c1"># Initialize and assign QtGui.QColor which can then be passed to QtPainter.setPen</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__color</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="n">hexcol</span><span class="p">)</span>
+
+        <span class="c1"># Check if color is valid to QtGui.QColor() and if not an error is raised</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__color</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
             <span class="k">raise</span> <span class="n">LoadError</span><span class="p">(</span><span class="s2">&quot;the supplied colour is invalid&quot;</span><span class="p">)</span>
 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets to be displayed text `foobar` from media_id string and assign it</span>
 <span class="sd">        to self.__str variable.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;string:rrggbb:&#39;</span><span class="p">):]</span> 
+        <span class="c1"># Extract the text portion from media_id by slicing from position after &#39;string:rrggbb:&#39;</span>
+        <span class="c1"># Example: &#39;string:FF0000:Hello World&#39; -&gt; &#39;Hello World&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;string:rrggbb:&#39;</span><span class="p">):]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="c1"># Returns a list of strings, e.g., &#39;Hello\nWorld&#39; -&gt; [&#39;Hello&#39;, &#39;World&#39;]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;in order for a multi line string to be rendered of the exact size self.lines</span>
-<span class="sd">        have to be set to the right value before self.onscreen_size method gets called&quot;&quot;&quot;</span>
+        <span class="c1"># Pre-calculate which line is longest to avoid sorting on every render</span>
+        <span class="c1"># max() finds the maximum value from range(len(self.lines)) using a custom key function</span>
+        <span class="c1"># range(len(self.lines)) generates indices: 0, 1, 2, ... for each line</span>
+        <span class="c1"># key=lambda i: len(self.lines[i]) tells max() to compare lines by their length</span>
+        <span class="c1"># Returns the INDEX of the longest line, not the line itself</span>
+        <span class="c1"># Example: if lines = [&#39;Hi&#39;, &#39;Hello&#39;, &#39;Hey&#39;], this returns 1 (index of &#39;Hello&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__longest_line_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
 
-        <span class="n">j</span><span class="o">=</span><span class="mi">0</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__str</span><span class="p">)</span> <span class="p">:</span>
-                <span class="c1"># If a \n char is encountered a new sublist is appended to self.lines</span>
-                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-                    <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="k">else</span> <span class="p">:</span>
-                <span class="c1"># Otherwise the char is appended to the current self.lines sublist</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="c1"># Initialize private variables that will be used for caching optimizations                                                                             </span>
+        <span class="c1"># These start as None and will store computed values when first accessed</span>
+
+        <span class="c1"># Stores the scale value (2^(scene.zoomlevel + object.zoomlevel))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached_scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Stores the QFont object to avoid recreating it on every render call</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached_font</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Stores the QFontMetrics object (calculates text dimensions)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached_font_metrics</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFontMetrics</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> 
+
+        <span class="c1"># Stores the calculated (width, height) tuple for this string at current scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached_onscreen_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
         
         
 
-    <span class="n">transparent</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1"># Class variable: indicates this media object supports transparency</span>
+    <span class="n">transparent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="c1">## point size of the font when the scale is 100%</span>
-    <span class="n">base_pointsize</span> <span class="o">=</span> <span class="mf">24.0</span>
+    <span class="c1"># Class variable: point size of the font when the scale is 100%</span>
+    <span class="n">base_pointsize</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">24.0</span>
 
 <div class="viewcode-block" id="StringMediaObject.render">
 <a class="viewcode-back" href="../../../../pyzui/stringmediaobject.html#pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.render">[docs]</a>
@@ -148,53 +163,85 @@
 <span class="sd">        Given QPainter and Rendering mode renders the string calculating the</span>
 <span class="sd">        rendering rectangle and using QtPainter.drawText</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Call onscreen_size property once and unpack into two variables</span>
+        <span class="c1"># Tuple unpacking: (w, h) -&gt; onscreen_w=w, onscreen_h=h</span>
+        <span class="n">onscreen_w</span><span class="p">:</span> <span class="nb">float</span>
+        <span class="n">onscreen_h</span><span class="p">:</span> <span class="nb">float</span>
+        <span class="n">onscreen_w</span><span class="p">,</span> <span class="n">onscreen_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onscreen_size</span>
+
+        <span class="c1"># Visibility check: only render if text is appropriately sized for viewport</span>
+        <span class="c1"># self._scene.viewport_size is a tuple (viewport_width, viewport_height)</span>
+        <span class="c1"># Checks: text not too small (&gt;viewport_min/44) AND not too large (&lt;viewport_max/1.3) AND not invisible</span>
         
-        <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onscreen_size</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">((</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">))</span><span class="o">/</span><span class="mi">44</span><span class="p">)</span> <span class="ow">and</span> \
-        <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onscreen_size</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">))</span><span class="o">/</span><span class="mf">1.3</span><span class="p">)</span> <span class="ow">and</span> <span class="n">mode</span> \
+        <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">onscreen_w</span><span class="p">,</span> <span class="n">onscreen_h</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">((</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">))</span><span class="o">/</span><span class="mi">44</span><span class="p">)</span> <span class="ow">and</span> \
+        <span class="nb">max</span><span class="p">(</span><span class="n">onscreen_w</span><span class="p">,</span> <span class="n">onscreen_h</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">viewport_size</span><span class="p">))</span><span class="o">/</span><span class="mf">1.3</span><span class="p">)</span> <span class="ow">and</span> <span class="n">mode</span> \
         <span class="o">!=</span> <span class="n">RenderMode</span><span class="o">.</span><span class="n">Invisible</span><span class="p">:</span>
-            <span class="c1">## don&#39;t bother rendering if the string is too</span>
-            <span class="c1">## small to be seen, too big to fit screen or </span>
-            <span class="c1">## invisible mode is set</span>
-            
+    
+
+            <span class="c1"># painter.setPen() sets the color for subsequent drawing operations</span>
+            <span class="c1"># Uses the QColor object we created in __init__ from the hex color code</span>
             <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__color</span><span class="p">)</span>
-            <span class="n">painter</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__font</span><span class="p">)</span>
-            
-            <span class="c1"># Broke the string in a characters list     </span>
-            
-            <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topleft</span>
-            <span class="n">w</span><span class="p">,</span><span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onscreen_size</span> 
-            <span class="n">font</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__font</span>   
-         
-            <span class="k">if</span> <span class="n">font</span><span class="p">:</span>
-                <span class="n">fontmetrics</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFontMetrics</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
-            <span class="n">hl</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+
+            <span class="c1"># Accessing self.__font property triggers the getter which checks cache first</span>
+            <span class="c1"># Get cached font from property (returns cached value if scale unchanged)</span>
+            <span class="c1"># Returns QFont object or None if pointsize &lt; 1</span>
+            <span class="n">font</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__font</span>
+
+            <span class="c1"># Early return if font is None (text too small to render)</span>
+            <span class="c1"># return exits the method immediately, skipping all drawing code below</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">font</span><span class="p">:</span>
+                <span class="k">return</span>
+
+            <span class="c1"># painter.setFont() configures the painter to use this font for text rendering</span>
+            <span class="c1"># QFont object contains typeface, size, weight, and other font properties</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+
+            <span class="c1"># Get top-left corner position of the text object on screen</span>
+            <span class="c1"># self.topleft is a property that returns tuple (x, y) in screen coordinates</span>
+            <span class="n">x</span><span class="p">:</span> <span class="nb">float</span>
+            <span class="n">y</span><span class="p">:</span> <span class="nb">float</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topleft</span>
+
+            <span class="c1"># Access the cached QFontMetrics object created in __font property</span>
+            <span class="n">fontmetrics</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFontMetrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached_font_metrics</span>
+
+            <span class="c1"># fontmetrics.height() returns the vertical spacing for a line of text in pixels</span>
+            <span class="c1"># Includes ascent (above baseline) + descent (below baseline) + leading (line spacing)</span>
+            <span class="c1"># Used to calculate y-position for each subsequent line</span>
+            <span class="n">hl</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
                      
             
+            <span class="c1"># Check if we have multiple lines (multiline text)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">:</span>
-                <span class="n">yr</span> <span class="o">=</span> <span class="n">y</span>
-                <span class="n">rectlist</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c1"># yr (y-rendering) tracks the current y-position as we draw each line</span>
+                <span class="c1"># Start at the top y position</span>
+                <span class="n">yr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">y</span>
 
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">))</span> <span class="p">:</span>
-<span class="w">                    </span><span class="sd">&quot;&quot;&quot;for every line in self.lines a QRectF is created below the previous one</span>
-<span class="sd">                    for the line to be painted on by QtPainter.drawText method</span>
-<span class="sd">                    &quot;&quot;&quot;</span>
-            
-                    <span class="n">rectlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">yr</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">w</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">hl</span><span class="p">)))</span>
-                    <span class="n">yr</span> <span class="o">+=</span> <span class="n">hl</span>  
-       
-                    <span class="c1">#print(self.lines[i]) #, type(self.lines[i])</span>
-                    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span>                
-                        <span class="n">string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">][:])</span>
-                    <span class="k">else</span> <span class="p">:</span>
-                        <span class="n">string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">][:])</span>
-    
-                    <span class="n">rect</span> <span class="o">=</span> <span class="n">rectlist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                    <span class="n">painter</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="n">rect</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span> 
+                <span class="c1"># for loop iterates through each string in self.lines</span>
+                <span class="n">line</span><span class="p">:</span> <span class="nb">str</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+                    <span class="c1"># QtCore.QRectF creates a floating-point rectangle for text rendering</span>
+                    <span class="c1"># Parameters: (x, y, width, height) - all converted to integers</span>
+                    <span class="n">rect</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">yr</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">onscreen_w</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">hl</span><span class="p">))</span>
+
+                    <span class="c1"># painter.drawText() renders the text string within the rectangle</span>
+                    <span class="c1"># Uses the font and color set earlier with setFont() and setPen()</span>
+                    <span class="n">painter</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="n">rect</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+
+                    <span class="c1"># Move y-position down by one line height for next line</span>
+                    <span class="c1"># += adds hl to yr (yr = yr + hl)</span>
+                    <span class="n">yr</span> <span class="o">+=</span> <span class="n">hl</span> 
  
-            <span class="k">else</span> <span class="p">:</span>
-                <span class="n">rect</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">w</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">hl</span><span class="p">))</span>
-                <span class="n">string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>                
-                <span class="n">painter</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="n">rect</span><span class="p">,</span> <span class="n">string</span> <span class="p">)</span> <span class="c1">#, QtCore.Qt.AlignCenter</span></div>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Single line rendering</span>
+                <span class="c1"># Create a single rectangle for the entire text</span>
+                <span class="c1"># QtCore.QRectF(x, y, width, height) as above</span>
+                <span class="n">rect</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">onscreen_w</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">hl</span><span class="p">))</span>
+
+                <span class="c1"># Draw the first (and only) line</span>
+                <span class="c1"># self.lines[0] accesses the first element (index 0) of lines list</span>
+                <span class="n">painter</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="n">rect</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
 
            
@@ -217,7 +264,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_pointsize</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">__font</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__font</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Property :</span>
 <span class="sd">            __font</span>
@@ -231,14 +278,31 @@
 
 <span class="sd">        Returns None if the point size is less than 1 (too small to be seen).</span>
 <span class="sd">        Otherwise returns a Sans Serif font with the calculated point size.</span>
+
+<span class="sd">        Uses caching to avoid recreating font objects on every access.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">pointsize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pointsize</span>
+        <span class="n">current_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+
+        <span class="c1"># Return cached font if scale hasn&#39;t changed</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached_scale</span> <span class="o">==</span> <span class="n">current_scale</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached_font</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached_font</span>
+
+        <span class="n">pointsize</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pointsize</span>
         <span class="k">if</span> <span class="n">pointsize</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1">## too small to be seen</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cached_scale</span> <span class="o">=</span> <span class="n">current_scale</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cached_font</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cached_font_metrics</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="n">font</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s1">&#39;Sans Serif&#39;</span><span class="p">)</span>
+        <span class="n">font</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s1">&#39;Sans Serif&#39;</span><span class="p">)</span>
         <span class="n">font</span><span class="o">.</span><span class="n">setPointSizeF</span><span class="p">(</span><span class="n">pointsize</span><span class="p">)</span>
+
+        <span class="c1"># Cache the font and metrics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached_scale</span> <span class="o">=</span> <span class="n">current_scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached_font</span> <span class="o">=</span> <span class="n">font</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached_font_metrics</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFontMetrics</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">font</span>
 
     <span class="nd">@property</span>
@@ -252,27 +316,37 @@
 <span class="sd">        StringMediaObject.onscreen_size --&gt; Tuple[float, float]</span>
 
 <span class="sd">        Returns width and height of the MediaObject passed to the StringMediaObject Class.</span>
+
+<span class="sd">        Uses caching to avoid recalculating size on every access.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">font</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__font</span>
+        <span class="n">current_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+
+        <span class="c1"># Return cached size if scale hasn&#39;t changed</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached_scale</span> <span class="o">==</span> <span class="n">current_scale</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached_onscreen_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached_onscreen_size</span>
+
+        <span class="n">font</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__font</span>
 
         <span class="k">if</span> <span class="n">font</span><span class="p">:</span>
-            <span class="n">fontmetrics</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFontMetrics</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
-            
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">:</span>
-                <span class="c1"># Returns the width of the longest line in the paragraph stack.</span>
-                <span class="n">w</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">horizontalAdvance</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">][:])</span><span class="o">+</span><span class="s1">&#39;-------&#39;</span><span class="p">)</span>
-                <span class="c1"># Returns the font height times the number of lines in the paragraph stack</span>
-                <span class="n">h</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span>
+            <span class="c1"># Use cached font metrics instead of creating new ones</span>
+            <span class="n">fontmetrics</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFontMetrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached_font_metrics</span>
 
-            <span class="k">else</span> <span class="p">:</span>
-                <span class="c1"># If the string is not a paragraph just gives the length of the string</span>
-                <span class="n">w</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">horizontalAdvance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__str</span><span class="o">+</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
-                <span class="c1"># and the height of the font</span>
-                <span class="n">h</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>                
-            <span class="k">return</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
+            <span class="n">w</span><span class="p">:</span> <span class="nb">float</span>
+            <span class="n">h</span><span class="p">:</span> <span class="nb">float</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># Use cached longest line index instead of sorting every time</span>
+                <span class="n">longest_line</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__longest_line_idx</span><span class="p">]</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">horizontalAdvance</span><span class="p">(</span><span class="n">longest_line</span> <span class="o">+</span> <span class="s1">&#39;-------&#39;</span><span class="p">)</span>
+                <span class="n">h</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">horizontalAdvance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__str</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+                <span class="n">h</span> <span class="o">=</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
 
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cached_onscreen_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cached_onscreen_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
 </pre></div>
