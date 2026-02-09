@@ -20,9 +20,10 @@ This module provides functions to run converters in separate processes,
 avoiding threading conflicts between pyvips and TileManager threads.
 
 The multiprocessing context is chosen automatically:
+
 - 'fork': Used when no other threads are running. Fast and clean shutdown.
 - 'spawn': Used when other threads exist (fork-after-threads is unsafe).
-  Creates fresh Python interpreter per worker.
+  This creates a fresh Python interpreter per worker.
 
 The context can be overridden via PYZUI_MP_CONTEXT environment variable.
 """

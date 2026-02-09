@@ -69,7 +69,11 @@ class OpenNewStringInputDialog:
         if os.path.isfile(self.color_dir+'/color_list.txt'):
             with open(self.color_dir+'/color_list.txt', 'r') as f:
                 for line in f:
-                    self.color_codes.append(line.strip())
+                    stripline = line.strip()
+                    stripline = stripline.lower() 
+                    if len(stripline) == 6 :
+                        if stripline not in self.color_codes :
+                            self.color_codes.append(stripline)
 
         else:
             if os.path.isdir(self.color_dir):

@@ -58,7 +58,7 @@ class ModifyStringInputDialog:
         self.string_color = ''
         self.passed_color = ''
         self.color_codes = deque(maxlen=24)
-
+        
         if media_id == None:
             pass
         elif media_id[:6] == 'string':
@@ -66,7 +66,7 @@ class ModifyStringInputDialog:
             self.start_string = media_id[14:]
         else:
             pass
-
+        
         ## set the default tilestore directory, this can be overridden if required
         if 'APPDATA' in os.environ:
             ## Windows
@@ -78,7 +78,11 @@ class ModifyStringInputDialog:
         if os.path.isfile(self.color_dir+'/color_list.txt'):
             with open(self.color_dir+'/color_list.txt', 'r') as f:
                 for line in f:
-                    self.color_codes.append(line.strip())
+                    stripline = line.strip()
+                    stripline = stripline.lower() 
+                    if len(stripline) == 6 :
+                        if stripline not in self.color_codes :
+                            self.color_codes.append(stripline)
 
         else:
             if os.path.isdir(self.color_dir):
@@ -249,13 +253,29 @@ class ModifyStringInputDialog:
         dialog = self._main_dialog()
         # Run dialog and get result
         if dialog.exec() == QDialog.Accepted:
-            if len(self.string_color) != 6:
+            
+            if len(self.custom_color_input.text()) == 6 or \
+            len(self.custom_color_input.text()) == 7:
+            
                 self.string_color = self.custom_color_input.text()
-                self.color_codes.append(self.string_color)
-                f = open(self.color_dir+'/color_list.txt', 'w')
-                for i in self.color_codes:
-                    f.write(str(i)+'\n')
-                f.close()
+                
+                if len(self.string_color) == 6:
+                    self.color_codes.append(self.string_color)
+                    f = open(self.color_dir+'/color_list.txt', 'w')
+                    for i in self.color_codes:
+                        f.write(str(i)+'\n')
+                    f.close()
+
+                if self.string_color[0]=="#" :
+                    self.string_color = self.string_color[1:]
+                    self.color_codes.append(self.string_color)
+                    f = open(self.color_dir+'/color_list.txt', 'w')
+                    for i in self.color_codes:
+                        f.write(str(i)+'\n')
+                    f.close()
+
+                if len(self.string_color) == 7 and self.string_color[0] != "#" :
+                    pass
 
             elif len(self.string_color) != 6:
                 print('Error')

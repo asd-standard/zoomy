@@ -31,12 +31,12 @@ except ImportError:
     VIPS_AVAILABLE = False
 
 # Process-based converter runner for parallel conversion
-from . import converter_runner
+from . import converterrunner
 
 __all__ = [
     'Converter',
     'PDFConverter',
     'VipsConverter',
     'VIPS_AVAILABLE',
-    'converter_runner'
+    'converterrunner'
 ]
