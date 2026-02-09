@@ -8,7 +8,7 @@ Submodules
    :maxdepth: 4
 
    pyzui/converter
-   pyzui/converter_runner
+   pyzui/converterrunner
    pyzui/dynamictileprovider
    pyzui/ferntileprovider
    pyzui/mediaobject

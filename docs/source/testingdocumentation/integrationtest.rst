@@ -69,7 +69,7 @@ Test Categories
 - Converter to Tiler pipeline integration
 - Progress tracking during conversion
 - Error handling for invalid/corrupted files
-- Process-based parallel conversion via ``converter_runner``
+- Process-based parallel conversion via ``converterrunner``
 - Output format validation
 
 **3. Concurrent Access Tests** (``test_concurrent_access.py``)
@@ -641,7 +641,7 @@ Test the complete convert-then-tile workflow:
 Process-Based Parallel Conversion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The converter pipeline uses process-based parallelism via ``converter_runner`` to enable
+The converter pipeline uses process-based parallelism via ``converterrunner`` to enable
 multiple conversions to run concurrently without threading conflicts.
 
 **Why Process-Based?**
@@ -661,7 +661,7 @@ can occur. By running conversions in separate processes:
     def test_multiple_converters_run_concurrently_via_processes(
             self, sample_images, tmp_path):
         """Test parallel conversion using processes."""
-        from pyzui.converters import converter_runner
+        from pyzui.converters import converterrunner
         from concurrent.futures import wait
 
         futures = []
@@ -671,7 +671,7 @@ can occur. By running conversions in separate processes:
             infile = sample_images['png']
             outfile = str(tmp_path / f"output_{i}.ppm")
             outfiles.append(outfile)
-            future = converter_runner.submit_vips_conversion(infile, outfile)
+            future = converterrunner.submit_vips_conversion(infile, outfile)
             futures.append(future)
 
         # Wait for all to complete with timeout

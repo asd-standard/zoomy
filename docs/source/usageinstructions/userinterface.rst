@@ -48,10 +48,11 @@ Mouse/Keyboard actions:
 
 - **Left-click** Select the topmost media under the cursor (smaller objects
   appear on top of larger ones):
-  	- if there is no media under the cursor then the currently selected media
-  	  will be deselected
-  	- if the Shift key is currently being held then no change will be made
-  	  to the current selection
+
+    - if there is no media under the cursor then the currently selected media
+      will be deselected
+    - if the Shift key is currently being held then no change will be made
+      to the current selection
 
 - **Right-click** Open a context dialog for the media object under the cursor:
     - **StringMediaObject**: Opens the Modify String dialog allowing you to edit
