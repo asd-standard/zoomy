@@ -62,41 +62,56 @@ class StringMediaObject(MediaObject): #, Thread
         """
         MediaObject.__init__(self, media_id, scene)
 
-        #Get color code 'rrggbb' from media_id string and assign it to hexcol variable
-        hexcol = self._media_id[len('string:'):len('string:rrggbb')]
-        #initialize and assign QtGui.QColor which can then be passed to QtPainter.setPen 
-        self.__color = QtGui.QColor('#' + hexcol)
-        #checks if color is valid to QtGui.QColor() and if not an error is raised 
+        # Get color code 'rrggbb' from media_id string and assign it to hexcol variable
+        hexcol: str = self._media_id[len('string:'):len('string:rrggbb')]
+
+        # Initialize and assign QtGui.QColor which can then be passed to QtPainter.setPen
+        self.__color: QtGui.QColor = QtGui.QColor('#' + hexcol)
+
+        # Check if color is valid to QtGui.QColor() and if not an error is raised
         if not self.__color.isValid():
             raise LoadError("the supplied colour is invalid")
 
         """Gets to be displayed text `foobar` from media_id string and assign it
         to self.__str variable.
         """
-        self.__str = self._media_id[len('string:rrggbb:'):] 
+        # Extract the text portion from media_id by slicing from position after 'string:rrggbb:'
+        # Example: 'string:FF0000:Hello World' -> 'Hello World'
+        self.__str: str = self._media_id[len('string:rrggbb:'):]
 
-        self.lines = []
-        self.lines.append([])
+        # Returns a list of strings, e.g., 'Hello\nWorld' -> ['Hello', 'World']
+        self.lines: list[str] = self.__str.split('\n')
 
-        """in order for a multi line string to be rendered of the exact size self.lines
-        have to be set to the right value before self.onscreen_size method gets called"""
+        # Pre-calculate which line is longest to avoid sorting on every render
+        # max() finds the maximum value from range(len(self.lines)) using a custom key function
+        # range(len(self.lines)) generates indices: 0, 1, 2, ... for each line
+        # key=lambda i: len(self.lines[i]) tells max() to compare lines by their length
+        # Returns the INDEX of the longest line, not the line itself
+        # Example: if lines = ['Hi', 'Hello', 'Hey'], this returns 1 (index of 'Hello')
+        self.__longest_line_idx: int = max(range(len(self.lines)), key=lambda i: len(self.lines[i]))
 
-        j=0
-        for i in list(self.__str) :
-                # If a \n char is encountered a new sublist is appended to self.lines
-                if i == '\n' :
-                    self.lines.append([])
-                    j += 1
-                else :
-                # Otherwise the char is appended to the current self.lines sublist
-                    self.lines[j] += str(i)
+        # Initialize private variables that will be used for caching optimizations                                                                             
+        # These start as None and will store computed values when first accessed
+
+        # Stores the scale value (2^(scene.zoomlevel + object.zoomlevel))
+        self.__cached_scale: Optional[float] = None
+
+        # Stores the QFont object to avoid recreating it on every render call
+        self.__cached_font: Optional[QtGui.QFont] = None
+
+        # Stores the QFontMetrics object (calculates text dimensions)
+        self.__cached_font_metrics: Optional[QtGui.QFontMetrics] = None 
+
+        # Stores the calculated (width, height) tuple for this string at current scale
+        self.__cached_onscreen_size: Optional[Tuple[float, float]] = None
         
         
 
-    transparent = True
+    # Class variable: indicates this media object supports transparency
+    transparent: bool = True
 
-    ## point size of the font when the scale is 100%
-    base_pointsize = 24.0
+    # Class variable: point size of the font when the scale is 100%
+    base_pointsize: float = 24.0
 
     def render(self, painter: Any, mode: int) -> None:
         """
@@ -111,52 +126,85 @@ class StringMediaObject(MediaObject): #, Thread
         Given QPainter and Rendering mode renders the string calculating the
         rendering rectangle and using QtPainter.drawText
         """
+
+        # Call onscreen_size property once and unpack into two variables
+        # Tuple unpacking: (w, h) -> onscreen_w=w, onscreen_h=h
+        onscreen_w: float
+        onscreen_h: float
+        onscreen_w, onscreen_h = self.onscreen_size
+
+        # Visibility check: only render if text is appropriately sized for viewport
+        # self._scene.viewport_size is a tuple (viewport_width, viewport_height)
+        # Checks: text not too small (>viewport_min/44) AND not too large (<viewport_max/1.3) AND not invisible
         
-        if min(self.onscreen_size) > int((min(self._scene.viewport_size))/44) and \
-        max(self.onscreen_size) < int((max(self._scene.viewport_size))/1.3) and mode \
+        if min(onscreen_w, onscreen_h) > int((min(self._scene.viewport_size))/44) and \
+        max(onscreen_w, onscreen_h) < int((max(self._scene.viewport_size))/1.3) and mode \
         != RenderMode.Invisible:
-            ## don't bother rendering if the string is too
-            ## small to be seen, or invisible mode is set
-            
+    
+
+            # painter.setPen() sets the color for subsequent drawing operations
+            # Uses the QColor object we created in __init__ from the hex color code
             painter.setPen(self.__color)
-            painter.setFont(self.__font)
-            
-            # Broke the string in a characters list     
-            
-            x,y = self.topleft
-            w,h = self.onscreen_size 
-            font = self.__font   
-         
-            if font:
-                fontmetrics = QtGui.QFontMetrics(font)
-            hl = fontmetrics.height()
+
+            # Accessing self.__font property triggers the getter which checks cache first
+            # Get cached font from property (returns cached value if scale unchanged)
+            # Returns QFont object or None if pointsize < 1
+            font: Optional[QtGui.QFont] = self.__font
+
+            # Early return if font is None (text too small to render)
+            # return exits the method immediately, skipping all drawing code below
+            if not font:
+                return
+
+            # painter.setFont() configures the painter to use this font for text rendering
+            # QFont object contains typeface, size, weight, and other font properties
+            painter.setFont(font)
+
+            # Get top-left corner position of the text object on screen
+            # self.topleft is a property that returns tuple (x, y) in screen coordinates
+            x: float
+            y: float
+            x, y = self.topleft
+
+            # Access the cached QFontMetrics object created in __font property
+            fontmetrics: QtGui.QFontMetrics = self.__cached_font_metrics
+
+            # fontmetrics.height() returns the vertical spacing for a line of text in pixels
+            # Includes ascent (above baseline) + descent (below baseline) + leading (line spacing)
+            # Used to calculate y-position for each subsequent line
+            hl: int = fontmetrics.height()
                      
             
+            # Check if we have multiple lines (multiline text)
             if len(self.lines) > 1 :
-                yr = y
-                rectlist = []
+                # yr (y-rendering) tracks the current y-position as we draw each line
+                # Start at the top y position
+                yr: float = y
 
-                for i in range(len(self.lines)) :
-                    """for every line in self.lines a QRectF is created below the previous one
-                    for the line to be painted on by QtPainter.drawText method
-                    """
-            
-                    rectlist.append(QtCore.QRectF(int(x), int(yr), int(w), int(hl)))
-                    yr += hl  
-       
-                    #print(self.lines[i]) #, type(self.lines[i])
-                    if i < (len(self.lines)-1) :                
-                        string = ''.join(self.lines[i][:])
-                    else :
-                        string = ''.join(self.lines[i][:])
-    
-                    rect = rectlist[i]
-                    painter.drawText(rect, string) 
+                # for loop iterates through each string in self.lines
+                line: str
+                for line in self.lines:
+                    # QtCore.QRectF creates a floating-point rectangle for text rendering
+                    # Parameters: (x, y, width, height) - all converted to integers
+                    rect: QtCore.QRectF = QtCore.QRectF(int(x), int(yr), int(onscreen_w), int(hl))
+
+                    # painter.drawText() renders the text string within the rectangle
+                    # Uses the font and color set earlier with setFont() and setPen()
+                    painter.drawText(rect, line)
+
+                    # Move y-position down by one line height for next line
+                    # += adds hl to yr (yr = yr + hl)
+                    yr += hl 
  
-            else :
-                rect = QtCore.QRectF(int(x), int(y), int(w), int(hl))
-                string = ''.join(self.lines[0])                
-                painter.drawText(rect, string ) #, QtCore.Qt.AlignCenter
+            else:
+                # Single line rendering
+                # Create a single rectangle for the entire text
+                # QtCore.QRectF(x, y, width, height) as above
+                rect: QtCore.QRectF = QtCore.QRectF(int(x), int(y), int(onscreen_w), int(hl))
+
+                # Draw the first (and only) line
+                # self.lines[0] accesses the first element (index 0) of lines list
+                painter.drawText(rect, self.lines[0])
 
            
             
@@ -178,7 +226,7 @@ class StringMediaObject(MediaObject): #, Thread
         return self.base_pointsize * self.scale
 
     @property
-    def __font(self) -> Optional[Any]:
+    def __font(self) -> Optional[QtGui.QFont]:
         """
         Property :
             __font
@@ -192,14 +240,31 @@ class StringMediaObject(MediaObject): #, Thread
 
         Returns None if the point size is less than 1 (too small to be seen).
         Otherwise returns a Sans Serif font with the calculated point size.
+
+        Uses caching to avoid recreating font objects on every access.
         """
-        pointsize = self.__pointsize
+        current_scale: float = self.scale
+
+        # Return cached font if scale hasn't changed
+        if self.__cached_scale == current_scale and self.__cached_font is not None:
+            return self.__cached_font
+
+        pointsize: float = self.__pointsize
         if pointsize < 1:
             ## too small to be seen
+            self.__cached_scale = current_scale
+            self.__cached_font = None
+            self.__cached_font_metrics = None
             return None
 
-        font = QtGui.QFont('Sans Serif')
+        font: QtGui.QFont = QtGui.QFont('Sans Serif')
         font.setPointSizeF(pointsize)
+
+        # Cache the font and metrics
+        self.__cached_scale = current_scale
+        self.__cached_font = font
+        self.__cached_font_metrics = QtGui.QFontMetrics(font)
+
         return font
 
     @property
@@ -213,25 +278,35 @@ class StringMediaObject(MediaObject): #, Thread
         StringMediaObject.onscreen_size --> Tuple[float, float]
 
         Returns width and height of the MediaObject passed to the StringMediaObject Class.
+
+        Uses caching to avoid recalculating size on every access.
         """
-        font = self.__font
+        current_scale: float = self.scale
+
+        # Return cached size if scale hasn't changed
+        if self.__cached_scale == current_scale and self.__cached_onscreen_size is not None:
+            return self.__cached_onscreen_size
+
+        font: Optional[QtGui.QFont] = self.__font
 
         if font:
-            fontmetrics = QtGui.QFontMetrics(font)
-            
-            if len(self.lines) > 1 :
-                # Returns the width of the longest line in the paragraph stack.
-                w = fontmetrics.horizontalAdvance(''.join(sorted(self.lines, key=len, reverse=True)[0][:])+'-------')
-                # Returns the font height times the number of lines in the paragraph stack
-                h = fontmetrics.height()*len(self.lines)
+            # Use cached font metrics instead of creating new ones
+            fontmetrics: QtGui.QFontMetrics = self.__cached_font_metrics
 
-            else :
-                # If the string is not a paragraph just gives the length of the string
-                w = fontmetrics.horizontalAdvance(self.__str+'-')
-                # and the height of the font
-                h = fontmetrics.height()                
-            return (w,h)
+            w: float
+            h: float
+            if len(self.lines) > 1:
+                # Use cached longest line index instead of sorting every time
+                longest_line: str = self.lines[self.__longest_line_idx]
+                w = fontmetrics.horizontalAdvance(longest_line + '-------')
+                h = fontmetrics.height() * len(self.lines)
+            else:
+                w = fontmetrics.horizontalAdvance(self.__str + '-')
+                h = fontmetrics.height()
 
+            self.__cached_onscreen_size = (w, h)
+            return (w, h)
         else:
-            return (0,0)
+            self.__cached_onscreen_size = (0, 0)
+            return (0, 0)
 

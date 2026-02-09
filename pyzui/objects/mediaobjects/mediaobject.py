@@ -17,13 +17,13 @@
 """Media to be displayed in the ZUI (abstract base class)."""
 
 import math
-from typing import Tuple, Any
+from typing import Tuple, Any, List
 
-from pyzui.objects.physicalobject import PhysicalObject        
+from pyzui.objects.physicalobject import PhysicalObject
 
 class MediaObject(PhysicalObject) :
     """
-    Constructor : 
+    Constructor :
         MediaObject(media_id, scene)
     Parameters :
         media_id['string'], scene['Scene']
@@ -35,14 +35,14 @@ class MediaObject(PhysicalObject) :
 
     Screen view it's fixed unless user change mainwindow size on the screen.
     Both scene and MediaObjects have their own reference systems so that zooms
-    can be applied bot to Scene and Mediaobject indipendently trough their 
+    can be applied bot to Scene and Mediaobject indipendently trough their
     reference system transformation.
 
     You can think about it as fixed window looking at a scene that can strecth or
     shrink beneath it, with this stretch or shrink always having it's origin
     at the Scene center for scene zoom and MediaObject center for the mediobject
-    zoom as at the same time individual mediaobject can also strecth 
-    or shrink. The fixed window can then move on the 2d plane bringing objects 
+    zoom as at the same time individual mediaobject can also strecth
+    or shrink. The fixed window can then move on the 2d plane bringing objects
     into view.
 
     World::
@@ -50,24 +50,24 @@ class MediaObject(PhysicalObject) :
          --------------------------------------->
         |   Scene
         |  @ ------------------------------+--->
-        |  |  ViewPort        MediaObj     |                 
-        |  |  (Screen View)   *-------+--> |       
-        |  |                  |   &   |    |   
-        |  |               %  +-------"    |      
+        |  |  ViewPort        MediaObj     |
+        |  |  (Screen View)   *-------+--> |
+        |  |                  |   &   |    |
+        |  |               %  +-------"    |
         |  |                  |            |
         |  |                  ∨            |
-        |  |                               | 
+        |  |                               |
         |  +-------------------------------#
         |  |
         |  ∨
-        ∨  
+        ∨
 
     Legend::
 
         (All attributes are relative to screen view)
         * -> MediaObject.topleft()
         " -> MediaObject.bottomright()
-        & -> MediaObject.center() 
+        & -> MediaObject.center()
         # -> Scene.viewport_size()
         % -> Scene.center()
         @ -> Scene.origin()
@@ -76,7 +76,7 @@ class MediaObject(PhysicalObject) :
 
         MediaObject.topleft[0-1] = self._scene.origin[0-1] + self.pos[0-1] * (2 ** self._scene.zoomlevel)
 
-    Where *self.pos[0-1]* it's MediaObject position relative to Scene reference 
+    Where *self.pos[0-1]* it's MediaObject position relative to Scene reference
     system wich get's scaled by 2** of scene zoom level
 
     MediaObject centre coordinates relative to screen view are given firstly by
@@ -85,17 +85,17 @@ class MediaObject(PhysicalObject) :
         C_s[0-1] = self.pos[0-1] + self._centre[0-1] * 2**self._z
 
     Where *self._centre[0-1]* are center coordinates relative to the mediaobject
-    frame of reference and *self._z* it's MediaObject reference frame scaling 
+    frame of reference and *self._z* it's MediaObject reference frame scaling
     (zoom).
 
-    Take note that self.pos[0-1] dosen't get to be scaled by self._z as that 
+    Take note that self.pos[0-1] dosen't get to be scaled by self._z as that
     position it's relative to Scene reference frame.
 
     Then we can calculate MediaObject centre coordinates relative to screen view as::
 
         MediaObject.centre[0-1] = self._scene.origin[0] + C_s[0-1] * 2**self._scene.zoomlevel
 
-    
+
     """
     def __init__(self, media_id: str, scene: Any) -> None:
         """
@@ -116,8 +116,8 @@ class MediaObject(PhysicalObject) :
         #initialize mediobject centre, position and velocity
         PhysicalObject.__init__(self)
 
-        self._media_id = media_id
-        self._scene = scene
+        self._media_id: str = media_id
+        self._scene: Any = scene
 
     def render(self, painter: Any, mode: int) -> None:
         """
@@ -150,7 +150,7 @@ class MediaObject(PhysicalObject) :
         an on-screen distance.
         """
 
-        #self._x and self._y correspond to self.pos[0] and self.pos[1], but 
+        #self._x and self._y correspond to self.pos[0] and self.pos[1], but
         #mediaobject.pos dosen't support += operation
         self._x += dx * (2 ** -self._scene.zoomlevel)
         self._y += dy * (2 ** -self._scene.zoomlevel)
@@ -186,9 +186,11 @@ class MediaObject(PhysicalObject) :
         # C_sx = (Px - self._scene.origin[0]) * 2**-self._scene.zoomlevel
         # C_sy = (Py - self._scene.origin[1]) * 2**-self._scene.zoomlevel
 
+        C_ix: float
+        C_iy: float
         C_ix, C_iy = self._centre
-        C_sx = self._x + C_ix * 2**self._z
-        C_sy = self._y + C_iy * 2**self._z
+        C_sx: float = self._x + C_ix * 2**self._z
+        C_sy: float = self._y + C_iy * 2**self._z
 
         self._x = C_sx - (C_sx - self._x) * 2**amount
         self._y = C_sy - (C_sy - self._y) * 2**amount
@@ -210,9 +212,13 @@ class MediaObject(PhysicalObject) :
             ## nothing can be hidden behind a transparent object
             return False
 
-        viewport_size = self._scene.viewport_size
+        viewport_size: Tuple[float, float] = self._scene.viewport_size
 
+        s_left: float
+        s_top: float
         s_left, s_top = self.topleft
+        s_right: float
+        s_bottom: float
         s_right, s_bottom = self.bottomright
         ## clamp values
         s_left =   max(0, min(s_left,   viewport_size[0]))
@@ -220,7 +226,11 @@ class MediaObject(PhysicalObject) :
         s_right =  max(0, min(s_right,  viewport_size[0]))
         s_bottom = max(0, min(s_bottom, viewport_size[1]))
 
+        o_left: float
+        o_top: float
         o_left, o_top = other.topleft
+        o_right: float
+        o_bottom: float
         o_right, o_bottom = other.bottomright
         ## clamp values
         o_left =   max(0, min(o_left,   viewport_size[0]))
@@ -244,15 +254,24 @@ class MediaObject(PhysicalObject) :
         whilst fitting inside and centred in the onscreen bounding box `bbox`
         (x1,y1,x2,y2).
         """
-        
+
+        box_x: float
+        box_y: float
+        box_x2: float
+        box_y2: float
         box_x, box_y, box_x2, box_y2 = list(map(float, bbox))
-        box_w = box_x2 - box_x
+        box_w: float = box_x2 - box_x
         #print('box_x, box_x2',box_x, box_x2)
-        box_h = box_y2 - box_y
+        box_h: float = box_y2 - box_y
         #print('box_y',box_y)
 
+        w: float
+        h: float
         w, h = self.onscreen_size
         #print('MEDIA',w,h)
+        scale: float
+        target_x: float
+        target_y: float
         if w/h > box_w/box_h:
             ## need to fit width
             scale = box_w / w
@@ -342,9 +361,9 @@ class MediaObject(PhysicalObject) :
         here self.pos() is mediaobject
         """
 
-        x = self._scene.origin[0] + self.pos[0] * (2 ** self._scene.zoomlevel)
-        y = self._scene.origin[1] + self.pos[1] * (2 ** self._scene.zoomlevel)
-        return (x,y)
+        x: float = self._scene.origin[0] + self.pos[0] * (2 ** self._scene.zoomlevel)
+        y: float = self._scene.origin[1] + self.pos[1] * (2 ** self._scene.zoomlevel)
+        return (x, y)
 
     @property
     def onscreen_size(self) -> Tuple[float, float]:
@@ -374,11 +393,11 @@ class MediaObject(PhysicalObject) :
 
         The on-screen position of the bottom-right corner of the image.
         """
-        o = self.topleft
-        s = self.onscreen_size
-        x = o[0] + s[0]
-        y = o[1] + s[1]
-        return (x,y)
+        o: Tuple[float, float] = self.topleft
+        s: Tuple[float, float] = self.onscreen_size
+        x: float = o[0] + s[0]
+        y: float = o[1] + s[1]
+        return (x, y)
 
     @property
     def onscreen_area(self) -> float:
@@ -392,9 +411,11 @@ class MediaObject(PhysicalObject) :
 
         The number of pixels the image occupies on the screen.
         """
-        w,h = self.onscreen_size
+        w: float
+        h: float
+        w, h = self.onscreen_size
         return w * h
-    
+
     def __get_pos(self) -> Tuple[float, float]:
         """
         Method :
@@ -422,7 +443,7 @@ class MediaObject(PhysicalObject) :
         self._x, self._y = pos
 
     pos = property(__get_pos, __set_pos)
-    """Creating MediaObject.pos property with __get_pos as 
+    """Creating MediaObject.pos property with __get_pos as
     getter and __set_pos as setter"""
 
     def __get_centre(self) -> Tuple[float, float]:
@@ -449,7 +470,7 @@ class MediaObject(PhysicalObject) :
 
         #This are the image coordinates relative to scene coordinates.
 
-        C_s = (self.pos[0] + self._centre[0] * 2**self._z,
+        C_s: Tuple[float, float] = (self.pos[0] + self._centre[0] * 2**self._z,
                self.pos[1] + self._centre[1] * 2**self._z)
 
         #
@@ -479,7 +500,7 @@ class MediaObject(PhysicalObject) :
         ##     => C_s = (P - scene.origin) * 2**-zoomlevel_s
         ## C_s = self.pos  + C_i * 2**zoomlevel_i
         ##     => C_i = (C_s - self.pos) * 2**-zoomlevel_i
-        C_s = ((centre[0] - self._scene.origin[0]) * 2**-self._scene.zoomlevel,
+        C_s: Tuple[float, float] = ((centre[0] - self._scene.origin[0]) * 2**-self._scene.zoomlevel,
                (centre[1] - self._scene.origin[1]) * 2**-self._scene.zoomlevel)
         self._centre = ((C_s[0] - self._x) * 2**-self._z,
                         (C_s[1] - self._y) * 2**-self._z)
@@ -545,7 +566,6 @@ class RenderMode:
         HighQuality : int = 2
             MediaObject should be rendered in high quality mode
     """
-    Invisible = 0
-    Draft = 1
-    HighQuality = 2
-
+    Invisible: int = 0
+    Draft: int = 1
+    HighQuality: int = 2

@@ -54,17 +54,34 @@ class SVGMediaObject(MediaObject):
         Stores the default width and height of the SVG image for rendering
         calculations.
         """
+        # Initialize the parent MediaObject with media_id and scene reference
+        # This sets up self._media_id, self._scene, and PhysicalObject attributes
         MediaObject.__init__(self, media_id, scene)
 
-        self.__renderer = QtSvg.QSvgRenderer()
+        # Create a QSvgRenderer instance to parse and render SVG content
+        # QSvgRenderer handles SVG parsing, animation, and rendering onto QPainter
+        self.__renderer: QtSvg.QSvgRenderer = QtSvg.QSvgRenderer()
+
+        # Attempt to load the SVG file from the path stored in self._media_id
+        # load() returns True on success, False if the file cannot be parsed
         if not self.__renderer.load(self._media_id):
             raise LoadError("unable to parse SVG file")
 
-        size = self.__renderer.defaultSize()
-        self.__width = size.width()
-        self.__height = size.height()
+        # Get the default (intrinsic) size of the SVG image as a QSize object
+        # defaultSize() returns the size specified in the SVG's width/height attributes
+        size: QtCore.QSize = self.__renderer.defaultSize()
 
-    transparent = True
+        # Extract the width in pixels from the QSize object
+        # This is the SVG's native width before any scaling is applied
+        self.__width: int = size.width()
+
+        # Extract the height in pixels from the QSize object
+        # This is the SVG's native height before any scaling is applied
+        self.__height: int = size.height()
+
+    # Class variable: indicates this media object supports transparency
+    # SVG images can have transparent backgrounds, so they cannot hide objects behind them
+    transparent: bool = True
 
     def render(self, painter: Any, mode: int) -> None:
         """
@@ -78,15 +95,31 @@ class SVGMediaObject(MediaObject):
 
         Render the SVG image using the given painter and render mode.
         """
+        # Visibility check: only render if the SVG is appropriately sized for the viewport
+        # self._scene.viewport_size is a tuple (viewport_width, viewport_height)
+        # Checks: image not too small (>viewport_min/44) AND not too large (<viewport_max/1.3) AND not invisible
         if min(self.onscreen_size) > int((min(self._scene.viewport_size))/44) and \
         max(self.onscreen_size) < int((max(self._scene.viewport_size))/1.3) and mode \
         != RenderMode.Invisible:
             ## don't bother rendering if the string is too
             ## small to be seen, or invisible mode is set
 
-            x,y = self.topleft
-            w,h = self.onscreen_size
-            self.__renderer.render(painter, QtCore.QRectF(x,y,w,h))
+            # Get top-left corner position of the SVG object on screen
+            # self.topleft is a property that returns tuple (x, y) in screen coordinates
+            x: float
+            y: float
+            x, y = self.topleft
+
+            # Get the on-screen dimensions of the SVG at current scale
+            # onscreen_size returns (width, height) scaled by the current zoom level
+            w: float
+            h: float
+            w, h = self.onscreen_size
+
+            # Render the SVG into a floating-point rectangle on the painter
+            # QtCore.QRectF(x, y, width, height) defines the target rendering area
+            # QSvgRenderer.render() scales the SVG vector graphics to fit the rectangle
+            self.__renderer.render(painter, QtCore.QRectF(x, y, w, h))
 
     @property
     def onscreen_size(self) -> Tuple[float, float]:
@@ -99,5 +132,13 @@ class SVGMediaObject(MediaObject):
         SVGMediaObject.onscreen_size --> Tuple[float, float]
 
         Return the on-screen size of the SVG image.
+
+        Multiplies the SVG's native width and height by the current scale factor.
+        The scale factor is derived from the combined scene and object zoom levels.
         """
-        return (self.__width * self.scale, self.__height * self.scale)
+        # Calculate on-screen dimensions by multiplying native pixel size by scale
+        # self.scale returns 2^(scene.zoomlevel + object.zoomlevel)
+        # self.__width and self.__height are the SVG's intrinsic dimensions
+        w: float = self.__width * self.scale
+        h: float = self.__height * self.scale
+        return (w, h)

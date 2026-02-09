@@ -22,21 +22,21 @@ from typing import Optional, Tuple
 
 class PhysicalObject(): #removed object from class argument and Thread
     """
-    Constructor : 
+    Constructor :
         PhysicalObject()
     Parameters :
         None
 
     PhysicalObject() --> None
 
-    Physicalobject objects are sets of declarations and methods that are used 
-    to represent anything that has a 3-dimensional position and velocity, 
-    where the z-dimension represents a zoomlevel. 
+    Physicalobject objects are sets of declarations and methods that are used
+    to represent anything that has a 3-dimensional position and velocity,
+    where the z-dimension represents a zoomlevel.
 
-    PhysicalObject gets declared on MediaObject and Scene initializations, 
+    PhysicalObject gets declared on MediaObject and Scene initializations,
     giving them the necessary attributes, (position, zoomlevel, damp factor
     zoomlevel, eccetera).
-    
+
     """
     def __init__(self) -> None:
         """
@@ -81,19 +81,19 @@ class PhysicalObject(): #removed object from class argument and Thread
                    • Thread-safe operations
         """
 
-        self._x = 0.0
-        self._y = 0.0
-        self._z = 0.0
+        self._x: float = 0.0
+        self._y: float = 0.0
+        self._z: float = 0.0
 
-        self.vx = 0.0
-        self.vy = 0.0
-        self.vz = 0.0
+        self.vx: float = 0.0
+        self.vy: float = 0.0
+        self.vz: float = 0.0
 
-        self._centre = (0,0)
+        self._centre: Tuple[float, float] = (0, 0)
 
-    """the velocity is damped at each frame such that each second it is 
+    """the velocity is damped at each frame such that each second it is
     reduced by a factor of damping_factor: v = u * damping_factor**-t"""
-    damping_factor = 512 #256
+    damping_factor: int = 512 #256
 
     def __damp(self, velocity: float, t: float) -> float:
         """
@@ -202,11 +202,13 @@ class PhysicalObject(): #removed object from class argument and Thread
         ## solving for P = P' yields:
         ##   pos' = P - (P - pos) * 2**amount
 
+        Px: float
+        Py: float
         Px, Py = self.centre
         self._x = Px - (Px - self._x) * 2**amount
         self._y = Py - (Py - self._y) * 2**amount
         self._z += amount
-    
+
 
     def aim(self, v: str, s: float, t: Optional[float] = None) -> None:
         """Calculate the initial velocity such that at time `t` the relative
@@ -227,6 +229,7 @@ class PhysicalObject(): #removed object from class argument and Thread
 
         Precondition: `v` is either 'x', 'y', or 'z'
         """
+        u: float
         if t:
             ## s(t) = (u / log(d)) * (1 - d**-t)
             ## => u = (s(t) * log(d)) / (1 - d**-t)
@@ -382,4 +385,3 @@ class PhysicalObject(): #removed object from class argument and Thread
     centre = property(__get_centre, __set_centre)
     """Creating PhysicalObject.centre property with __get_centre as
     getter and __set_centre as setter"""
-
