@@ -16,7 +16,7 @@
 
 """QWidget for displaying the ZUI."""
 
-from typing import Optional, Any
+from typing import Optional, Any, Tuple
 from PySide6 import QtCore, QtGui, QtWidgets
 from threading import Thread
 
@@ -60,21 +60,22 @@ class QZUI(QtWidgets.QWidget, Thread) :
         QtWidgets.QWidget.__init__(self, parent)
 
         Thread.__init__(self)
-        self.__scene = Scene.new()
+        self.__scene: 'Scene.Scene' = Scene.new()
         
-        self.__mouse_right_down = False
-        self.__mouse_left_down = False
-        self.__mousepos = None
-        self.__shift_held = False
-        self.__alt_held = False
-        self.__dropped_frames = 0
-        self.__draft = True
+        self.__mouse_right_down: bool = False
+        self.__mouse_left_down: bool = False
+        self.__mousepos: Optional[Tuple[int, int]] = None
+        self.__shift_held: bool = False
+        self.__alt_held: bool = False
+        self.__dropped_frames: int = 0
+        self.__draft: bool = True
 
-        self.__timer = QtCore.QBasicTimer()
+        self.__timer: QtCore.QBasicTimer = QtCore.QBasicTimer()
+        self.__framerate: int
 
-        self.zoom_sensitivity = zoom_sensitivity
+        self.zoom_sensitivity: int = zoom_sensitivity
+        self.reduced_framerate: int = 3
         self.framerate = framerate
-        self.reduced_framerate = 3
 
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.setMouseTracking(True)
@@ -241,6 +242,8 @@ class QZUI(QtWidgets.QWidget, Thread) :
         Handle mouse move events for dragging objects.
         """
         if (event.buttons()&QtCore.Qt.LeftButton) and self.__mouse_left_down:
+            if self.__mousepos is None:
+                return
             mx = int(event.position().x()) - self.__mousepos[0]
             my = int(event.position().y()) - self.__mousepos[1]
 

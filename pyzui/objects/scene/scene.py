@@ -19,7 +19,8 @@
 from threading import RLock
 import urllib.request, urllib.parse, urllib.error
 import math
-from typing import Optional, Tuple, List
+import logging
+from typing import Optional, Tuple, List, cast
 
 from PySide6 import QtCore
 from PySide6.QtGui import QColor, QPainter
@@ -51,7 +52,7 @@ class Scene(PhysicalObject):
     """
 
     #: an arbitrary size that is common to all scenes upon creation `scene size`
-    standard_viewport_size = (1280,720)
+    standard_viewport_size: Tuple[int, int] = (1280,720)
 
     def __init__(self):
 
@@ -106,14 +107,14 @@ class Scene(PhysicalObject):
         #initialize mediobject centre, position and velocity    
         PhysicalObject.__init__(self)        
 
-        self.__objects = []
-        self.__objects_lock = RLock()
-        self.__viewport_size = self.standard_viewport_size
+        self.__objects: List['MediaObject.MediaObject'] = []
+        self.__objects_lock: RLock = RLock()
+        self.__viewport_size: Tuple[int, int] = self.standard_viewport_size
 
-        self.selection = None
-        self.right_selection = None
+        self.selection: Optional['MediaObject.MediaObject'] = None
+        self.right_selection: Optional['MediaObject.MediaObject'] = None
         
-        self.__logger = get_logger("Scene")
+        self.__logger: logging.Logger = get_logger("Scene")
 
     def save(self, filename: str) -> None:
         """
@@ -435,6 +436,7 @@ class Scene(PhysicalObject):
                 
 
             if self.right_selection :
+                assert self.right_selection is not None
                 #using mediaobject.topleft mediaobject.toptight attributes
                 x1, y1 = self.right_selection.topleft
                 x2, y2 = self.right_selection.bottomright
@@ -449,11 +451,12 @@ class Scene(PhysicalObject):
                 painter.drawRect(x1, y1, x2-x1, y2-y1)
 
             if type(self.right_selection).__name__ == 'StringMediaObject' :
+                right_selection_obj = cast('MediaObject.MediaObject', self.right_selection)
 
                 for i in range(len(self.__objects)) :
 
                     if self.__objects[i]._media_id[14:] ==\
-                      self.right_selection._media_id[14:] :                        
+                      right_selection_obj._media_id[14:] :                        
                         
                         dialog = DialogWindows.modify_string_input_dialog(\
                             self.__objects[i]._media_id)
@@ -462,7 +465,9 @@ class Scene(PhysicalObject):
 
                         except Exception:
                             ok = False
-                            media_id = False      
+                            media_id = False
+                            string_color = ""
+                            edited_text = ""
                         if ok and media_id: 
                             
                             lines = []
@@ -488,11 +493,12 @@ class Scene(PhysicalObject):
                         break
 
             if type(self.right_selection).__name__ == 'TiledMediaObject' :
+                right_selection_obj = cast('MediaObject.MediaObject', self.right_selection)
 
                 for i in range(len(self.__objects)) :
 
                     if self.__objects[i]._media_id ==\
-                      self.right_selection._media_id :
+                      right_selection_obj._media_id :
 
                         dialog = DialogWindows.modify_tiled_media_object_dialog(\
                             self.__objects[i])
@@ -771,11 +777,11 @@ def load_scene(filename: str) -> Scene:
                     media_id, scene)
 
             #mediaobjects are zoomed by the level read in the loaded scene file
-            mediaobject.zoomlevel = float(zoomlevel)
+            mediaobject.zoomlevel = float(zoomlevel)  # type: ignore
             #mediaobjects are placed in the position read in the loaded scene file
-            mediaobject.pos = (float(x), float(y))
+            mediaobject.pos = (float(x), float(y))  # type: ignore
             #mediaobjects are added to the scene
-            scene.add(mediaobject)
+            scene.add(mediaobject)  # type: ignore
         else:
             ## ignore instances of any other class
             pass
