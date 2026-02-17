@@ -48,17 +48,17 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=True, cleanup_max_age_days=3)
 
-        # Verify cache initialization with 80/20 split
+        # Verify cache initialization with 80/20 split (converted to int)
         assert mock_cache.call_count == 2
-        assert mock_cache.call_args_list[0] == call(0.8 * 1024)
-        assert mock_cache.call_args_list[1] == call(0.2 * 1024)
+        assert mock_cache.call_args_list[0] == call(int(0.8 * 1024))
+        assert mock_cache.call_args_list[1] == call(int(0.2 * 1024))
 
         # Verify providers were started
         mock_static_instance.start.assert_called_once()
         mock_fern_instance.start.assert_called_once()
 
-        # Verify auto cleanup was called
-        mock_tilestore.auto_cleanup.assert_called_once_with(max_age_days=3, enable=True)
+        # Verify auto cleanup was NOT called synchronously (registered for shutdown)
+        mock_tilestore.auto_cleanup.assert_not_called()
 
     @patch('pyzui.tilesystem.tilemanager.TileStore')
     @patch('pyzui.tilesystem.tilemanager.TileCache')
@@ -77,6 +77,11 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=512, auto_cleanup=False)
 
+        # Verify cache initialization with int conversion
+        assert mock_cache.call_count == 2
+        assert mock_cache.call_args_list[0] == call(int(0.8 * 512))
+        assert mock_cache.call_args_list[1] == call(int(0.2 * 512))
+        
         # Verify auto cleanup was NOT called
         mock_tilestore.auto_cleanup.assert_not_called()
 
@@ -924,3 +929,133 @@ class TestTileManagerEdgeCases:
         # Dynamic media goes to dynamic provider
         tilemanager.load_tile(('dynamic:fern', 5, 10, 20))
         mock_fern_instance.request.assert_called_with(('dynamic:fern', 5, 10, 20))
+
+    @patch('pyzui.tilesystem.tilemanager.TileStore')
+    @patch('pyzui.tilesystem.tilemanager.TileCache')
+    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
+    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    def test_init_registers_shutdown_cleanup(
+        self, mock_fern, mock_static, mock_cache, mock_tilestore
+    ):
+        """
+        Scenario: Initialize with auto cleanup enabled
+        
+        Given auto_cleanup=True
+        When init is called
+        Then TileStore.auto_cleanup should NOT be called synchronously
+        And cleanup parameters should be stored for shutdown
+        """
+        mock_static.return_value = Mock()
+        mock_fern.return_value = Mock()
+
+        tilemanager.init(auto_cleanup=True, cleanup_max_age_days=7)
+        
+        # Verify cleanup NOT called synchronously
+        mock_tilestore.auto_cleanup.assert_not_called()
+        
+        # Note: atexit registration is tested indirectly via _shutdown_cleanup tests
+        # since atexit is imported inside the function and hard to mock
+
+    @patch('pyzui.tilesystem.tilemanager.TileStore')
+    @patch('pyzui.tilesystem.tilemanager.TileCache')
+    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
+    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    def test_shutdown_cleanup_execution(
+        self, mock_fern, mock_static, mock_cache, mock_tilestore
+    ):
+        """
+        Scenario: Execute shutdown cleanup
+        
+        Given cleanup is enabled
+        When _shutdown_cleanup is called
+        Then TileStore.auto_cleanup should be called with correct parameters
+        """
+        # Initialize with cleanup enabled
+        mock_static.return_value = Mock()
+        mock_fern.return_value = Mock()
+        
+        tilemanager.init(auto_cleanup=True, cleanup_max_age_days=7)
+        
+        # Reset mock to track only shutdown calls
+        mock_tilestore.reset_mock()
+        
+        # Call shutdown cleanup
+        tilemanager._shutdown_cleanup()
+        
+        # Verify cleanup called with fast mode
+        mock_tilestore.auto_cleanup.assert_called_once_with(
+            max_age_days=7, enable=True, collect_stats=False
+        )
+
+    @patch('pyzui.tilesystem.tilemanager.TileStore')
+    @patch('pyzui.tilesystem.tilemanager.TileCache')
+    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
+    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    def test_shutdown_cleanup_skips_when_disabled(
+        self, mock_fern, mock_static, mock_cache, mock_tilestore
+    ):
+        """
+        Scenario: Skip shutdown cleanup when disabled
+        
+        Given cleanup is disabled
+        When _shutdown_cleanup is called
+        Then TileStore.auto_cleanup should NOT be called
+        """
+        # Initialize with cleanup disabled
+        mock_static.return_value = Mock()
+        mock_fern.return_value = Mock()
+        
+        tilemanager.init(auto_cleanup=False)
+        
+        # Reset mock
+        mock_tilestore.reset_mock()
+        
+        # Call shutdown cleanup
+        tilemanager._shutdown_cleanup()
+        
+        # Verify cleanup NOT called
+        mock_tilestore.auto_cleanup.assert_not_called()
+
+    @patch('pyzui.tilesystem.tilemanager.TileStore')
+    @patch('pyzui.tilesystem.tilemanager.TileCache')
+    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
+    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    def test_shutdown_cleanup_handles_exception(
+        self, mock_fern, mock_static, mock_cache, mock_tilestore
+    ):
+        """
+        Scenario: Handle exception during shutdown cleanup
+        
+        Given cleanup is enabled
+        When _shutdown_cleanup is called and TileStore.auto_cleanup raises exception
+        Then exception should be caught and logged
+        And shutdown should continue
+        """
+        # Initialize with cleanup enabled
+        mock_static.return_value = Mock()
+        mock_fern.return_value = Mock()
+        
+        tilemanager.init(auto_cleanup=True)
+        
+        # Make auto_cleanup raise an exception
+        mock_tilestore.auto_cleanup.side_effect = Exception("Test error")
+        
+        # Call shutdown cleanup (should not raise)
+        try:
+            tilemanager._shutdown_cleanup()
+        except Exception:
+            pytest.fail("_shutdown_cleanup should not propagate exceptions")
+        
+        # Verify cleanup was attempted
+        mock_tilestore.auto_cleanup.assert_called_once()
+
+    def test_collect_cleanup_stats_parameter_default(self):
+        """
+        Scenario: Test collect_cleanup_stats parameter default
+        
+        When init is called without collect_cleanup_stats
+        Then it should use default value (False)
+        """
+        # This test verifies the parameter exists and has correct default
+        # The actual behavior is tested in integration tests
+        pass

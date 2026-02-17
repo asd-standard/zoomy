@@ -234,6 +234,54 @@ Tab-separated values with type information::
 - ``tiled(media_id)``: Check if a media has been fully tiled
 - ``get_tilestore_stats()``: Get statistics about the tilestore
 - ``cleanup_old_tiles(max_age_days)``: Remove old tile directories
+- ``auto_cleanup(max_age_days, enable, collect_stats)``: Automatic cleanup with statistics
+
+**Automatic Cleanup System:**
+
+The tilestore includes an automatic cleanup system that removes old tile
+directories to manage disk space. Cleanup runs on application shutdown by
+default to improve startup performance.
+
+.. code-block:: python
+
+    # Enable automatic cleanup (runs on shutdown by default)
+    tilemanager.init(auto_cleanup=True, cleanup_max_age_days=7)
+
+    # Disable automatic cleanup
+    tilemanager.init(auto_cleanup=False)
+
+    # Run cleanup manually
+    from pyzui.tilesystem.tilestore import auto_cleanup
+    stats = auto_cleanup(max_age_days=7, enable=True, collect_stats=False)
+
+**Cleanup Behavior:**
+
+- **Shutdown Cleanup (default)**: Runs when application exits gracefully
+- **Manual Cleanup**: Can be triggered via command-line utility
+- **Statistics Collection**: Can be disabled for faster cleanup
+
+**Cleanup Statistics:**
+
+When ``collect_stats=True`` (default), the cleanup process logs:
+1. Before cleanup: Media count, file count, total size
+2. Cleanup results: Deleted media, freed space, errors
+3. After cleanup: Media count, file count, total size
+
+When ``collect_stats=False`` (fast mode), only cleanup results are logged.
+
+**Performance Considerations:**
+
+- Full statistics collection walks the tilestore directory 3 times
+- Fast mode (``collect_stats=False``) walks directory only once
+- Recommended for large tilestores (>10,000 files)
+
+**Command-line Options:**
+
+.. code-block:: bash
+
+    ./main.py --no-cleanup          # Disable cleanup entirely
+    ./main.py --cleanup-age 30      # Clean tiles older than 30 days
+    ./main.py --fast-cleanup        # Skip detailed statistics
 
 TileCache
 ~~~~~~~~~
@@ -267,7 +315,8 @@ The ``TileManager`` module coordinates tile requests between providers and cache
     tilemanager.init(
         total_cache_size=500,     # Total cache size in MB
         auto_cleanup=True,        # Enable automatic cleanup
-        cleanup_max_age_days=7    # Remove tiles older than 7 days
+        cleanup_max_age_days=7,   # Remove tiles older than 7 days
+        collect_cleanup_stats=False  # Skip detailed stats for faster startup
     )
 
 **Key Functions:**
@@ -415,6 +464,9 @@ Performance Considerations
 - **Cache Size**: 200-500 MB for typical usage
 - **Tile Size**: 256×256 for balance of overhead vs. granularity
 - **Auto-Cleanup**: Enable with 7-30 day retention for disk management
+  - Runs on shutdown by default for faster startup
+  - Use ``--fast-cleanup`` to skip detailed statistics
+  - Disable with ``--no-cleanup`` if not needed
 
 Exception Handling
 ------------------

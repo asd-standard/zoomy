@@ -22,7 +22,7 @@ It is also responsible for creating new tiles from available ones when
 no tiles of the requested resolution are available.
 """
 
-from typing import Optional, Tuple, Any
+from typing import Optional, Tuple, Any, Dict, TYPE_CHECKING
 
 from . import tilestore as TileStore
 from .tilestore import TileCache
@@ -32,17 +32,32 @@ from .tileproviders import (
 )
 from pyzui.logger import get_logger
 
-# Module-level global variables (initialized by init())
-__tilecache = None
-__temptilecache = None
-__tp_static = None
-__tp_dynamic = {}
-__logger = None
+if TYPE_CHECKING:
+    from logging import Logger
+    from .tileproviders import StaticTileProvider, FernTileProvider
+    from .tilestore import TileCache
 
-def init(total_cache_size: int = 1024, auto_cleanup: bool = True, cleanup_max_age_days: int = 3) -> None:
+# Module-level global variables (initialized by init())
+__tilecache: Optional["TileCache"] = None
+__temptilecache: Optional["TileCache"] = None
+__tp_static: Optional["StaticTileProvider"] = None
+__tp_dynamic: Dict[str, "FernTileProvider"] = {}
+__logger: Optional["Logger"] = None
+
+# Cleanup parameters for shutdown execution
+__cleanup_enabled: bool = False
+__cleanup_max_age_days: int = 3
+__cleanup_executed: bool = False
+
+def init(
+    total_cache_size: int = 1024, 
+    auto_cleanup: bool = True, 
+    cleanup_max_age_days: int = 3,
+    collect_cleanup_stats: bool = False
+) -> None:
     """
     Function :
-        init(total_cache_size, auto_cleanup, cleanup_max_age_days)
+        init(total_cache_size, auto_cleanup, cleanup_max_age_days, collect_cleanup_stats)
     Parameters :
         total_cache_size : int
             - Total cache size: number of total cached tiles (default: 1024)
@@ -50,8 +65,11 @@ def init(total_cache_size: int = 1024, auto_cleanup: bool = True, cleanup_max_ag
             - Enable automatic cleanup of old tiles (default: True)
         cleanup_max_age_days : int
             - Maximum age in days for tiles (default: 3)
+        collect_cleanup_stats : bool
+            - Collect detailed before/after cleanup statistics (default: False)
+            - Setting to False improves startup performance on large tilestores
 
-    init(total_cache_size, auto_cleanup, cleanup_max_age_days) --> None
+    init(total_cache_size, auto_cleanup, cleanup_max_age_days, collect_cleanup_stats) --> None
 
     Initialise the TileManager. This **must** be called before any other
     functions are called.
@@ -66,12 +84,18 @@ def init(total_cache_size: int = 1024, auto_cleanup: bool = True, cleanup_max_ag
     """
 
     global __tilecache, __temptilecache, __tp_static, __tp_dynamic, __logger
+    global __cleanup_enabled, __cleanup_max_age_days, __cleanup_executed
+
+    # Store cleanup parameters for shutdown execution
+    __cleanup_enabled = auto_cleanup
+    __cleanup_max_age_days = cleanup_max_age_days
+    __cleanup_executed = False
 
     #tile cache reserved for static tile provider.
-    __tilecache =     TileCache(0.8 * total_cache_size)
+    __tilecache =     TileCache(int(0.8 * total_cache_size))
     
     #tile cache reserved for dynamic tile provider
-    __temptilecache = TileCache(0.2 * total_cache_size)
+    __temptilecache = TileCache(int(0.2 * total_cache_size))
 
     #creates a tileproviders.tileprovider(tilecache: Any) thread instance 
     #and starts it
@@ -89,12 +113,50 @@ def init(total_cache_size: int = 1024, auto_cleanup: bool = True, cleanup_max_ag
     #set up TileManager logger
     __logger = get_logger("TileManager")
 
-    # Run automatic cleanup if enabled
+    # Register shutdown cleanup if enabled
     if auto_cleanup:
-        __logger.info('Running tilestore cleanup on startup')
-        TileStore.auto_cleanup(max_age_days=cleanup_max_age_days, enable=True)
+        import atexit
+        atexit.register(_shutdown_cleanup)
+        __logger.info('Tilestore cleanup registered for shutdown execution')
     else:
         __logger.debug('Tilestore auto cleanup disabled')
+
+def _shutdown_cleanup() -> None:
+    """
+    Function :
+        _shutdown_cleanup()
+    Parameters :
+        None
+
+    _shutdown_cleanup() --> None
+
+    Execute tilestore cleanup on application shutdown.
+    
+    This function is registered with atexit and connected to Qt's
+    aboutToQuit signal. It runs cleanup with stored parameters
+    and prevents duplicate execution.
+    """
+    global __cleanup_executed, __cleanup_enabled, __cleanup_max_age_days, __logger
+    
+    # Check if cleanup should run and hasn't already run
+    if __cleanup_enabled and not __cleanup_executed:
+        __cleanup_executed = True  # Prevent duplicate execution
+        
+        if __logger:
+            __logger.info('Running tilestore cleanup on shutdown')
+        
+        try:
+            # Run cleanup with fast mode (skip detailed statistics)
+            TileStore.auto_cleanup(
+                max_age_days=__cleanup_max_age_days, 
+                enable=True,
+                collect_stats=False  # Skip detailed stats for faster cleanup
+            )
+        except Exception as e:
+            if __logger:
+                __logger.error(f'Error during shutdown cleanup: {e}')
+            # Don't propagate exception - cleanup shouldn't prevent shutdown
+
 
 def load_tile(tile_id: Tuple[str, int, int, int]) -> None:
     """

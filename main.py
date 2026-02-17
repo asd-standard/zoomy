@@ -49,7 +49,8 @@ def load_config(config_file=None):
         'tilestore': {
             'auto_cleanup': True,
             'max_age_days': 3,
-            'cleanup_on_startup': True
+            'cleanup_on_startup': True,
+            'collect_cleanup_stats': True
         }
     }
 
@@ -152,6 +153,12 @@ Examples:
         help='Maximum age in days for tilestore cleanup (default: 3)'
     )
 
+    parser.add_argument(
+        '--fast-cleanup',
+        action='store_true',
+        help='Use fast cleanup mode (skips detailed statistics for faster startup)'
+    )
+
     return parser.parse_args()
 
 def main():
@@ -182,6 +189,8 @@ def main():
         config['tilestore']['auto_cleanup'] = False
     if args.cleanup_age:
         config['tilestore']['max_age_days'] = args.cleanup_age
+    if args.fast_cleanup:
+        config['tilestore']['collect_cleanup_stats'] = False
 
     # Set working directory
     if os.path.dirname(__file__):
@@ -202,14 +211,21 @@ def main():
     logger.debug(f'Working directory: {os.getcwd()}')
     logger.debug(f'Python version: {sys.version}')
 
-    # Initialize TileManager (includes automatic cleanup if enabled)
+    # Initialize TileManager (cleanup registered for shutdown execution)
     TileManager.init(
         auto_cleanup=config['tilestore']['auto_cleanup'],
-        cleanup_max_age_days=config['tilestore']['max_age_days']
+        cleanup_max_age_days=config['tilestore']['max_age_days'],
+        collect_cleanup_stats=config['tilestore']['collect_cleanup_stats']
     )
 
     # Create Qt application
     app = QtWidgets.QApplication(sys.argv)
+    
+    # Connect Qt shutdown signal for cleanup
+    if config['tilestore']['auto_cleanup']:
+        app.aboutToQuit.connect(lambda: TileManager._shutdown_cleanup())
+        logger.debug('Qt shutdown cleanup hook registered')
+    
     icon_path = os.path.join("data", "icon.png")
     if os.path.exists(icon_path):
         app.setWindowIcon(QtGui.QIcon(icon_path))

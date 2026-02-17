@@ -23,8 +23,11 @@ import hashlib
 import time
 import shutil
 from threading import RLock
-from typing import Optional, Tuple, Any, Dict
+from typing import Optional, Tuple, Any, Dict, TYPE_CHECKING
 from logger import get_logger
+
+if TYPE_CHECKING:
+    from logging import Logger
 
 ## set the default tilestore directory, this can be overridden if required
 if 'APPDATA' in os.environ:
@@ -38,8 +41,8 @@ else:
 ## acquire this lock first to reduce stress on the disk
 disk_lock = RLock()
 
-__metadata = {}
-__logger = None
+__metadata: Dict[str, Dict[str, Any]] = {}
+__logger: Optional["Logger"] = None
 
 def _get_logger() -> Any:
     """
@@ -421,15 +424,24 @@ def cleanup_old_tiles(max_age_days: int = 3, dry_run: bool = False) -> Dict[str,
 
     return stats
 
-def auto_cleanup(max_age_days: int = 3, enable: bool = True) -> Optional[Dict[str, Any]]:
+def auto_cleanup(
+    max_age_days: int = 3, 
+    enable: bool = True, 
+    collect_stats: bool = True
+) -> Optional[Dict[str, Any]]:
     """
     Function :
-        auto_cleanup(max_age_days, enable)
+        auto_cleanup(max_age_days, enable, collect_stats)
     Parameters :
         max_age_days : int
+            - Maximum age in days for tiles (default: 3)
         enable : bool
+            - Enable automatic cleanup (default: True)
+        collect_stats : bool
+            - Collect detailed before/after cleanup statistics (default: True)
+            - Setting to False improves performance on large tilestores
 
-    auto_cleanup(max_age_days, enable) --> Optional[Dict[str, Any]]
+    auto_cleanup(max_age_days, enable, collect_stats) --> Optional[Dict[str, Any]]
 
     Automatically clean up old tiles if enabled.
 
@@ -442,26 +454,34 @@ def auto_cleanup(max_age_days: int = 3, enable: bool = True) -> Optional[Dict[st
         logger.debug('Auto cleanup disabled')
         return None
 
-    logger.info('Running automatic tilestore cleanup')
+    if collect_stats:
+        logger.info('Running automatic tilestore cleanup (detailed mode)')
+        
+        # Get stats before cleanup
+        before_stats = get_tilestore_stats()
+        logger.info(
+            f'Tilestore before cleanup: {before_stats["media_count"]} media directories, '
+            f'{before_stats["file_count"]} files, '
+            f'{before_stats["total_size_mb"]:.2f} MB'
+        )
 
-    # Get stats before cleanup
-    before_stats = get_tilestore_stats()
-    logger.info(
-        f'Tilestore before cleanup: {before_stats["media_count"]} media directories, '
-        f'{before_stats["file_count"]} files, '
-        f'{before_stats["total_size_mb"]:.2f} MB'
-    )
+        # Run cleanup
+        cleanup_stats = cleanup_old_tiles(max_age_days=max_age_days, dry_run=False)
 
-    # Run cleanup
-    cleanup_stats = cleanup_old_tiles(max_age_days=max_age_days, dry_run=False)
-
-    # Get stats after cleanup
-    after_stats = get_tilestore_stats()
-    logger.info(
-        f'Tilestore after cleanup: {after_stats["media_count"]} media directories, '
-        f'{after_stats["file_count"]} files, '
-        f'{after_stats["total_size_mb"]:.2f} MB'
-    )
+        # Get stats after cleanup
+        after_stats = get_tilestore_stats()
+        logger.info(
+            f'Tilestore after cleanup: {after_stats["media_count"]} media directories, '
+            f'{after_stats["file_count"]} files, '
+            f'{after_stats["total_size_mb"]:.2f} MB'
+        )
+    else:
+        logger.info('Running automatic tilestore cleanup (fast mode)')
+        
+        # Run cleanup without before/after statistics
+        cleanup_stats = cleanup_old_tiles(max_age_days=max_age_days, dry_run=False)
+        
+        # cleanup_old_tiles() already logs its own summary
 
     return cleanup_stats
 
