@@ -667,4 +667,4 @@ Before using your new provider in production:
 - [ ] Test integration with actual PyZUI application
 - [ ] Document provider-specific configuration in docstrings
 
-**Your provider is ready when all tests pass! 🎉**
+**Your provider is ready when all tests pass! **
