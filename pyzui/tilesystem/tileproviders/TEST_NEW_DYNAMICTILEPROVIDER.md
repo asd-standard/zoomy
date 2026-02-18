@@ -2,7 +2,7 @@
 
 This guide explains how to test new dynamic tile providers in PyZUI using the provided test template.
 
-## 🎯 Quick Info: Automatic Testing
+## Quick Info: Automatic Testing
 
 **All `*dynamictileprovider.py` files are automatically tested!**
 
@@ -40,10 +40,10 @@ A **Dynamic Tile Provider** generates or fetches tiles on-demand rather than loa
 ### Why Test?
 
 Testing ensures your provider:
-1. ✅ Integrates correctly with PyZUI's tile system
-2. ✅ Handles edge cases (invalid coordinates, boundary conditions)
-3. ✅ Generates tiles with correct dimensions and format
-4. ✅ Follows the expected API contract
+1.  Integrates correctly with PyZUI's tile system
+2.  Handles edge cases (invalid coordinates, boundary conditions)
+3.  Generates tiles with correct dimensions and format
+4.  Follows the expected API contract
 
 ---
 
@@ -116,7 +116,7 @@ Additional tests for performance, content validation, etc.
 
 These tests **MUST PASS** for any dynamic tile provider:
 
-### ✅ 1. Initialization Test
+###  1. Initialization Test
 
 ```python
 def test_init(self):
@@ -129,7 +129,7 @@ def test_init(self):
 
 ---
 
-### ✅ 2. Inheritance Test
+###  2. Inheritance Test
 
 ```python
 def test_inherits_from_dynamictileprovider(self):
@@ -143,7 +143,7 @@ def test_inherits_from_dynamictileprovider(self):
 
 ---
 
-### ✅ 3. Class Attribute Tests
+###  3. Class Attribute Tests
 
 ```python
 def test_filext_attribute(self):
@@ -160,7 +160,7 @@ def test_aspect_ratio_attribute(self):
 
 ---
 
-### ✅ 4. Boundary Condition Tests
+###  4. Boundary Condition Tests
 
 ```python
 def test_load_dynamic_negative_row(self):
@@ -201,7 +201,7 @@ def _load_dynamic(self, tile_id, outfile):
 
 ---
 
-### ✅ 5. Valid Tile Generation Test
+### 5. Valid Tile Generation Test
 
 ```python
 @patch('PIL.Image.new')
@@ -522,7 +522,7 @@ For a given `tilelevel`, valid coordinates are:
 
 ## Best Practices
 
-### ✅ DO:
+###  DO:
 
 1. **Always validate coordinates** in `_load_dynamic()`
 2. **Use class attributes** for configuration (filext, tilesize, etc.)
@@ -530,7 +530,7 @@ For a given `tilelevel`, valid coordinates are:
 4. **Mock external dependencies** (file I/O, network requests)
 5. **Add provider-specific tests** for unique algorithms
 
-### ❌ DON'T:
+###  DON'T:
 
 1. **Don't skip boundary tests** - they prevent crashes
 2. **Don't hardcode paths** - use the provided `outfile` parameter
@@ -573,10 +573,10 @@ PyZUI includes an **automatic test discovery system** that finds and tests all d
 **Location:** `test/unittest/test_all_dynamictileproviders.py`
 
 This test file:
-1. 🔍 **Automatically discovers** all `*dynamictileprovider.py` files
-2. 🧪 **Runs standard tests** on each discovered provider
-3. ✅ **Ensures consistency** across all providers
-4. 🚀 **No configuration needed** - just follow the naming convention
+1.  **Automatically discovers** all `*dynamictileprovider.py` files
+2.  **Runs standard tests** on each discovered provider
+3.  **Ensures consistency** across all providers
+4.  **No configuration needed** - just follow the naming convention
 
 ### How It Works
 
@@ -618,15 +618,15 @@ pytest test/unittest/test_all_dynamictileproviders.py::TestProviderDiscovery -v
 
 For **EACH** discovered provider, the automatic test suite verifies:
 
-- ✅ Initialization with tilecache
-- ✅ Inherits from DynamicTileProvider
-- ✅ Has required attributes (filext, tilesize, aspect_ratio)
-- ✅ Handles negative row coordinates
-- ✅ Handles negative col coordinates
-- ✅ Handles row out of valid range
-- ✅ Handles col out of valid range
-- ✅ Handles both coords out of range
-- ✅ Generates and saves valid tiles
+-  Initialization with tilecache
+-  Inherits from DynamicTileProvider
+-  Has required attributes (filext, tilesize, aspect_ratio)
+-  Handles negative row coordinates
+-  Handles negative col coordinates
+-  Handles row out of valid range
+-  Handles col out of valid range
+-  Handles both coords out of range
+-  Generates and saves valid tiles
 
 ### Naming Convention Requirement
 
