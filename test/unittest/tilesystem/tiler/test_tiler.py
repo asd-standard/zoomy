@@ -134,11 +134,11 @@ class TestTiler:
 
         Given a Tiler instance
         When the _scanline method is called
-        Then it should return None as it is abstract
+        Then it should return empty string as it is abstract
         """
         tiler = Tiler("input.jpg")
         result = tiler._scanline()
-        assert result is None
+        assert result == ""
 
     def test_init_default_filext(self):
         """

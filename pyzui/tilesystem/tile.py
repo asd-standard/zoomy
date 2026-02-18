@@ -16,9 +16,15 @@
 
 """Class for representing image tiles."""
 
-from typing import Optional, Tuple, Any
+from typing import Optional, Tuple, Any, TYPE_CHECKING
 from PIL import Image, ImageQt
 from PySide6 import QtCore, QtGui
+
+if TYPE_CHECKING:
+    from PySide6.QtGui import QPainter, QImage
+    from PIL.Image import Image as PILImage
+
+TileID = Tuple[str, int, int, int]
 
 class Tile(object):
     """
@@ -34,7 +40,7 @@ class Tile(object):
         - merged() - Combines 4 tiles into one (2×2 grid layout)
 
     """
-    def __init__(self, image: Any) -> None:
+    def __init__(self, image: Any) -> None:  # type: ignore[no-untyped-def]
         """
         Constructor:
             Tile(image)
@@ -75,7 +81,7 @@ class Tile(object):
         w = x2 - x
         h = y2 - y
         
-        return Tile(self.__image.copy(int(x), int(y), int(w), int(h)))
+        return Tile(self.__image.copy(int(x), int(y), int(w), int(h)))  # type: ignore[no-untyped-call]
 
     def resize(self, width: int, height: int) -> 'Tile':
         """
@@ -90,8 +96,8 @@ class Tile(object):
         Return a resized copy of the tile by calling ImageQt.scaled() method.
         """
         return Tile(self.__image.scaled(int(width), int(height),
-            QtCore.Qt.IgnoreAspectRatio,
-            QtCore.Qt.FastTransformation))
+            QtCore.Qt.AspectRatioMode.IgnoreAspectRatio,
+            QtCore.Qt.TransformationMode.FastTransformation))
 
     def save(self, filename: str) -> None:
         """
@@ -107,7 +113,7 @@ class Tile(object):
         """
         self.__image.save(filename)
 
-    def draw(self, painter: 'QtGui.QPainter', x: int, y: int) -> None:
+    def draw(self, painter: 'QPainter', x: int, y: int) -> None:
         """
         Method :
             Tile.draw(painter, x, y)
@@ -149,7 +155,7 @@ def new(width: int, height: int) -> Tile:
 
     Create a new tile with the given dimensions calling QtGui.QImage() istance.
     """
-    return Tile(QtGui.QImage(width, height, QtGui.QImage.Format_RGB32))
+    return Tile(QtGui.QImage(width, height, QtGui.QImage.Format.Format_RGB32))
 
 def fromstring(string: str, width: int, height: int) -> Tile:
     """
@@ -168,7 +174,7 @@ def fromstring(string: str, width: int, height: int) -> Tile:
       
     return Tile(Image.frombytes('RGB', (width, height), string.encode('latin-1')))
 
-def merged(t1: Tile, t2: Optional[Tile], t3: Optional[Tile], t4: Optional[Tile]) -> Tile:
+def merged(t1: 'Tile', t2: Optional['Tile'], t3: Optional['Tile'], t4: Optional['Tile']) -> 'Tile':
     """
     Function :
         merged(t1, t2, t3, t4)
@@ -200,7 +206,7 @@ def merged(t1: Tile, t2: Optional[Tile], t3: Optional[Tile], t4: Optional[Tile])
     if t3: tileheight += t3.size[1]
 
     painter = QtGui.QPainter()
-    image = QtGui.QImage(tilewidth, tileheight, QtGui.QImage.Format_RGB32)
+    image = QtGui.QImage(tilewidth, tileheight, QtGui.QImage.Format.Format_RGB32)
     painter.begin(image)
 
     if t1: t1.draw(painter, 0,          0         )

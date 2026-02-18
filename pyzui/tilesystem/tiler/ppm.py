@@ -16,8 +16,11 @@
 
 """Module for reading PPM images."""
 
-from typing import Optional, Tuple, Any
+from typing import Optional, Tuple, Any, TYPE_CHECKING
 from .tiler import Tiler
+
+if TYPE_CHECKING:
+    from .tiler import Tiler as TilerType
 
 def read_ppm_header(f: Any) -> Tuple[int, int]:
     """

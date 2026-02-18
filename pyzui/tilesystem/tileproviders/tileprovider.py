@@ -16,13 +16,19 @@
 
 """Threaded class for loading tiles into memory (abstract base class)."""
 
-from typing import Optional, Tuple, Any
+from typing import Optional, Tuple, Any, TYPE_CHECKING
 
 from threading import Thread, Condition, Event
 from collections import deque
 
 from pyzui.tilesystem.tile import Tile
 from pyzui.logger import get_logger
+
+if TYPE_CHECKING:
+    from pyzui.tilesystem.tilestore.tilecache import TileCache
+    from pyzui.tilesystem.tile import Tile as TileType
+
+TileID = Tuple[str, int, int, int]
 
 class TileProvider(Thread):
     """
@@ -41,7 +47,7 @@ class TileProvider(Thread):
 
     Requests are processed in LIFO (Last In First Out) order.
     """
-    def __init__(self, tilecache: Any) -> None:
+    def __init__(self, tilecache: 'TileCache') -> None:
         """
         Method :
             TileProvider.__init__(tilecache)
@@ -69,7 +75,7 @@ class TileProvider(Thread):
 
         self._logger = get_logger(str(self))
 
-    def request(self, tile_id: Tuple[str, int, int, int]) -> None:
+    def request(self, tile_id: TileID) -> None:
         """
         Method :
             TileProvider.request(tile_id)
@@ -91,7 +97,7 @@ class TileProvider(Thread):
         self.__tasks_available.notify()
         self.__tasks_available.release()
 
-    def _load(self, tile_id: Tuple[str, int, int, int]) -> Optional[Any]:
+    def _load(self, tile_id: TileID) -> Optional[Any]:
         """
         Method :
             TileProvider._load(tile_id)

@@ -16,10 +16,15 @@
 
 """Thread-safe Least Recently Used (LRU) cache for storing tiles."""
 
-from typing import Tuple, Any
+from typing import Tuple, Any, TYPE_CHECKING
 from threading import RLock, Thread
 from collections import deque
 import time
+
+if TYPE_CHECKING:
+    from ..tile import Tile
+
+TileID = Tuple[str, int, int, int]
 
 class TileCache(object):
     """
@@ -73,7 +78,7 @@ class TileCache(object):
         self.__periodic_clean_thread.daemon = True
         self.__periodic_clean_thread.start()
 
-    def insert(self, tile_id: Tuple[str, int, int, int], tile: Any, maxaccesses: int = 0) -> None:
+    def insert(self, tile_id: TileID, tile: 'Tile', maxaccesses: int = 0) -> None:
         """
         Method :
             TileCache.insert(tile_id, tile, maxaccesses)
@@ -116,7 +121,7 @@ class TileCache(object):
     #     """
     #     return tile_id in self.__maxaccesses
 
-    def __mortal(self, tile_id: Tuple[str, int, int, int], tile: Any) -> bool:
+    def __mortal(self, tile_id: TileID, tile: 'Tile') -> bool:
         """
         Method :
             __mortal(tile_id, tile)
@@ -134,7 +139,7 @@ class TileCache(object):
         """
         return tile is not None and tile_id[1] != 0
 
-    def __getitem__(self, tile_id: Tuple[str, int, int, int]) -> Any:
+    def __getitem__(self, tile_id: TileID) -> 'Tile':
         """
         Method :
             TileCache.__getitem__(tile_id)
@@ -205,7 +210,7 @@ class TileCache(object):
                 tile_id = self.__discard_queue[0]
                 del self[tile_id]
 
-    def __setitem__(self, tile_id: Tuple[str, int, int, int], tile: Any) -> None:
+    def __setitem__(self, tile_id: TileID, tile: 'Tile') -> None:
         """
         Method :
             TileCache.__setitem__(tile_id, tile)
@@ -239,7 +244,7 @@ class TileCache(object):
             elif tile_id not in self.__d:
                 self.__d[tile_id] = None
 
-    def __delitem__(self, tile_id: Tuple[str, int, int, int]) -> None:
+    def __delitem__(self, tile_id: TileID) -> None:
         """
         Method :
             TileCache.__delitem__(tile_id)
@@ -263,7 +268,7 @@ class TileCache(object):
 
             del self.__d[tile_id]
 
-    def __contains__(self, tile_id: Tuple[str, int, int, int]) -> bool:
+    def __contains__(self, tile_id: TileID) -> bool:
         """
         Method :
             TileCache.__contains__(tile_id)

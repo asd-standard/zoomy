@@ -36,6 +36,9 @@ if TYPE_CHECKING:
     from logging import Logger
     from .tileproviders import StaticTileProvider, FernTileProvider
     from .tilestore import TileCache
+    from .tile import Tile
+
+TileID = Tuple[str, int, int, int]
 
 # Module-level global variables (initialized by init())
 __tilecache: Optional["TileCache"] = None
@@ -158,7 +161,7 @@ def _shutdown_cleanup() -> None:
             # Don't propagate exception - cleanup shouldn't prevent shutdown
 
 
-def load_tile(tile_id: Tuple[str, int, int, int]) -> None:
+def load_tile(tile_id: TileID) -> None:
     """
     Function :
         load_tile(tile_id)
@@ -176,9 +179,10 @@ def load_tile(tile_id: Tuple[str, int, int, int]) -> None:
     if media_id in __tp_dynamic:
         __tp_dynamic[media_id].request(tile_id)
     else:
-        __tp_static.request(tile_id)
+        if __tp_static:
+            __tp_static.request(tile_id)
 
-def get_tile(tile_id: Tuple[str, int, int, int]) -> Any:
+def get_tile(tile_id: TileID) -> 'Tile':
     """
     Function :
         get_tile(tile_id)
@@ -198,6 +202,8 @@ def get_tile(tile_id: Tuple[str, int, int, int]) -> Any:
         raise TileNotAvailable
 
     try:
+        if __tilecache is None:
+            raise KeyError
         tile = __tilecache[tile_id]
     except KeyError:
         media_id = tile_id[0]
@@ -212,7 +218,7 @@ def get_tile(tile_id: Tuple[str, int, int, int]) -> Any:
     else:
         raise TileNotAvailable
 
-def cut_tile(tile_id: Tuple[str, int, int, int], tempcache: int = 0) -> Tuple[Any, bool]:
+def cut_tile(tile_id: TileID, tempcache: int = 0) -> Tuple['Tile', bool]:
     """
     Function :
         cut_tile(tile_id, tempcache)
@@ -239,14 +245,20 @@ def cut_tile(tile_id: Tuple[str, int, int, int], tempcache: int = 0) -> Tuple[An
     """
 
     media_id, tilelevel, row, col = tile_id
-    tilesize = get_metadata(media_id, 'tilesize')
+    tilesize_val = get_metadata(media_id, 'tilesize')
+    if tilesize_val is None:
+        raise ValueError(f"Tilesize not found for media_id: {media_id}")
+    tilesize = int(tilesize_val)
 
     if tempcache <= 0:
         ## purge temporary tiles
-        __temptilecache.purge()
+        if __temptilecache:
+            __temptilecache.purge()
 
     if tilelevel < 0:
         ## resize the (0,0,0) tile
+        if __tilecache is None:
+            raise KeyError
         tile000 = __tilecache[media_id,0,0,0]
         scale = 2**tilelevel
         tile = tile000.resize(
@@ -260,6 +272,8 @@ def cut_tile(tile_id: Tuple[str, int, int, int], tempcache: int = 0) -> Tuple[An
             final = False
             try:
                 ## check if there is a temporary cut tile in the cache
+                if __temptilecache is None:
+                    raise KeyError
                 return __temptilecache[tile_id], False
             except KeyError:
                 ## don't worry if there isn't
@@ -270,29 +284,31 @@ def cut_tile(tile_id: Tuple[str, int, int, int], tempcache: int = 0) -> Tuple[An
 
         if col % 2 == 0:
             x1 = 0
-            x2 = min(tilesize/2, big_tile.size[0])
+            x2 = min(tilesize // 2, big_tile.size[0])
         else:
-            x1 = tilesize/2
+            x1 = tilesize // 2
             x2 = big_tile.size[0]
 
         if row % 2 == 0:
             y1 = 0
-            y2 = min(tilesize/2, big_tile.size[1])
+            y2 = min(tilesize // 2, big_tile.size[1])
         else:
-            y1 = tilesize/2
+            y1 = tilesize // 2
             y2 = big_tile.size[1]
 
         tile = big_tile.crop((x1, y1, x2, y2))
         tile = tile.resize(2*tile.size[0], 2*tile.size[1])
 
     if final:
-        __tilecache[tile_id] = tile
+        if __tilecache:
+            __tilecache[tile_id] = tile
     elif tempcache > 0:
-        __temptilecache.insert(tile_id, tile, tempcache)
+        if __temptilecache:
+            __temptilecache.insert(tile_id, tile, tempcache)
 
     return tile, final
 
-def get_tile_robust(tile_id: Tuple[str, int, int, int]) -> Any:
+def get_tile_robust(tile_id: TileID) -> 'Tile':
     """
     Function :
         get_tile_robust(tile_id)
@@ -369,7 +385,8 @@ def purge(media_id: Optional[str] = None) -> None:
     Precondition: the media to be purged should not be active (i.e. no
     *MediaObjects* for the media should exist).
     """
-    __tp_static.purge(media_id)
+    if __tp_static:
+        __tp_static.purge(media_id)
     for tp in list(__tp_dynamic.values()):
         tp.purge(media_id)
 

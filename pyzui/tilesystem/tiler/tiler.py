@@ -16,7 +16,7 @@
 
 """Threaded image tiler (abstract base class)."""
 
-from typing import Optional, List, Any
+from typing import Optional, List, Any, TYPE_CHECKING, Tuple
 from threading import Thread
 import math
 import shutil
@@ -25,6 +25,11 @@ import traceback
 from .. import tilestore as TileStore
 from .. import tile as Tile
 from pyzui.logger import get_logger
+
+if TYPE_CHECKING:
+    from ..tile import Tile as TileType
+
+TileID = Tuple[str, int, int, int]
 
 #Thread
 class Tiler(Thread):
@@ -115,10 +120,10 @@ class Tiler(Thread):
 
         Return string containing pixels of the next row.
         """
-        pass
+        return ""
     
 
-    def __savetile(self, tile: Any, tilelevel: int, row: int, col: int) -> None:
+    def __savetile(self, tile: 'TileType', tilelevel: int, row: int, col: int) -> None:
         """
         Method :
             __savetile(tile, tilelevel, row, col)
@@ -142,7 +147,7 @@ class Tiler(Thread):
         self.__progress += 1.0/self.__numtiles
         self.__logger.info("%3d%% tiled", int(self.__progress*100))
 
-    def __load_row_from_file(self, row: int) -> Optional[List[Any]]:
+    def __load_row_from_file(self, row: int) -> Optional[List['TileType']]:
         """
         Method :
             __load_row_from_file(row)
@@ -209,7 +214,7 @@ class Tiler(Thread):
         
         return tiles
 
-    def __mergerows(self, row_a: Optional[List[Any]], row_b: Optional[List[Any]] = None) -> Optional[List[Any]]:
+    def __mergerows(self, row_a: Optional[List['TileType']], row_b: Optional[List['TileType']] = None) -> Optional[List['TileType']]:
         """
         Method :
             __mergerows(row_a, row_b)
@@ -242,7 +247,7 @@ class Tiler(Thread):
 
         return tiles
 
-    def __tiles(self, tilelevel: int = 0, row: int = 0) -> Optional[List[Any]]:
+    def __tiles(self, tilelevel: int = 0, row: int = 0) -> Optional[List['TileType']]:
         """
         Method :
             __tiles(tilelevel, row)
@@ -297,7 +302,7 @@ class Tiler(Thread):
             #tiles[i]._Tile__image
             try :
                 self.__savetile(tiles[i], tilelevel, row, i)
-                tiles[i] = tiles[i].resize(tiles[i].size[0]/2, tiles[i].size[1]/2)
+                tiles[i] = tiles[i].resize(tiles[i].size[0]//2, tiles[i].size[1]//2)
             except Exception as e :
                 self.error = str(e)
                 outpath = TileStore.get_media_path(self.__media_id)

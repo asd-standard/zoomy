@@ -29,6 +29,8 @@ from logger import get_logger
 if TYPE_CHECKING:
     from logging import Logger
 
+TileID = Tuple[str, int, int, int]
+
 ## set the default tilestore directory, this can be overridden if required
 if 'APPDATA' in os.environ:
     ## Windows
@@ -80,7 +82,7 @@ def get_media_path(media_id: str) -> str:
     media_dir = os.path.join(tile_dir, media_hash)
     return media_dir
 
-def get_tile_path(tile_id: Tuple[str, int, int, int], mkdirp: bool = False, prefix: Optional[str] = None, filext: Optional[str] = None) -> str:
+def get_tile_path(tile_id: TileID, mkdirp: bool = False, prefix: Optional[str] = None, filext: Optional[str] = None) -> str:
     """
     Function :
         get_tile_path(tile_id, mkdirp, prefix, filext)

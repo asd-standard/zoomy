@@ -16,12 +16,18 @@
 
 """Dynamic tile provider for Barnsley's fern."""
 
-from typing import Tuple, Any
+from typing import Tuple, Any, TYPE_CHECKING
 import random
 
 from PIL import Image
 
 from .dynamictileprovider import DynamicTileProvider
+
+if TYPE_CHECKING:
+    from PIL.Image import Image as PILImage
+    from .dynamictileprovider import TileID
+
+TileID = Tuple[str, int, int, int]
 
 class FernTileProvider(DynamicTileProvider):
     """
@@ -52,7 +58,7 @@ class FernTileProvider(DynamicTileProvider):
         - Tiles are 256x256 pixels saved as PNG
         - Color is RGB (100, 170, 0) for a green fern appearance
     """
-    def __init__(self, tilecache: Any) -> None:
+    def __init__(self, tilecache: Any) -> None:  # type: ignore[no-untyped-def]
         """
         Constructor :
             FernTileProvider(tilecache)
@@ -125,12 +131,14 @@ class FernTileProvider(DynamicTileProvider):
             - Returns 6-tuple: (a, b, c, d, e, f) for affine transform
         """
         n = random.uniform(0,1)
+        chosen_transformation = self.transformations[0][1]  # default to first
         for probability, transformation in self.transformations:
             if n <= probability:
+                chosen_transformation = transformation
                 break
             else:
                 n -= probability
-        return transformation
+        return chosen_transformation
 
     def __transform(self, x: float, y: float) -> Tuple[float, float]:
         """
@@ -160,7 +168,7 @@ class FernTileProvider(DynamicTileProvider):
         y_new = t[3]*x + t[4]*y + t[5]
         return (x_new,y_new)
 
-    def __draw_point(self, tile: Any, x: float, y: float, tilesize_units: float) -> None:
+    def __draw_point(self, tile: 'PILImage', x: float, y: float, tilesize_units: float) -> None:
         """
         Method :
             FernTileProvider.__draw_point(tile, x, y, tilesize_units)
@@ -198,7 +206,7 @@ class FernTileProvider(DynamicTileProvider):
 
         tile.putpixel((x,y), self.color)
 
-    def _load_dynamic(self, tile_id: Tuple[str, int, int, int], outfile: str) -> None:
+    def _load_dynamic(self, tile_id: TileID, outfile: str) -> None:
         """
         Method :
             FernTileProvider._load_dynamic(tile_id, outfile)

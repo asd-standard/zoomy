@@ -17,13 +17,19 @@
 """Class for loading tiles into memory from somewhere other than the local
 filesystem (abstract base class)."""
 
-from typing import Optional, Tuple, Any
+from typing import Optional, Tuple, Any, TYPE_CHECKING
 import os
 
 from PySide6 import QtGui
 
 from .tileprovider import TileProvider
 from .. import tilestore as TileStore
+
+if TYPE_CHECKING:
+    from PySide6.QtGui import QImage
+    from .tileprovider import TileID
+
+TileID = Tuple[str, int, int, int]
 
 class DynamicTileProvider(TileProvider):
     """
@@ -84,7 +90,7 @@ class DynamicTileProvider(TileProvider):
                                                   |    └─────────────────────────┘
 
     """
-    def __init__(self, tilecache: Any) -> None:
+    def __init__(self, tilecache: Any) -> None:  # type: ignore[no-untyped-def]
         """
         Constructor :
             DynamicTileProvider(tilecache)
@@ -105,7 +111,7 @@ class DynamicTileProvider(TileProvider):
     tilesize = 256
     aspect_ratio = 1.0 ## width / height
 
-    def _load_dynamic(self, tile_id: Tuple[str, int, int, int], outfile: str) -> None:
+    def _load_dynamic(self, tile_id: TileID, outfile: str) -> None:
         """
         Method :
             DynamicTileProvider._load_dynamic(tile_id, outfile)
@@ -120,7 +126,7 @@ class DynamicTileProvider(TileProvider):
         """
         pass
 
-    def _load(self, tile_id: Tuple[str, int, int, int]) -> Optional[Any]:
+    def _load(self, tile_id: TileID) -> Optional['QImage']:
         """
         Method :
             DynamicTileProvider._load(tile_id)
