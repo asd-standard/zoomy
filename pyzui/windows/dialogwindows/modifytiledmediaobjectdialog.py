@@ -16,7 +16,7 @@
 
 """Tiled media object editing dialog with image manipulation options."""
 
-from typing import Optional, Tuple, Literal
+from typing import TYPE_CHECKING, Optional, Tuple, Literal
 import os
 import tempfile
 
@@ -33,6 +33,13 @@ from pyzui.logger import get_logger
 from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject
 from pyzui.converters.vipsconverter import VipsConverter
 
+if TYPE_CHECKING:
+    from logging import Logger
+    from pyzui.objects.scene.scene import Scene as SceneType
+
+# Type aliases
+DialogResult = Tuple[bool, Optional[str]]
+
 
 class ModifyTiledMediaObjectDialog:
     """
@@ -47,7 +54,7 @@ class ModifyTiledMediaObjectDialog:
     Shows the top tile of the tiled media object and provides buttons
     for image manipulation (rotate, invert colors, black and white).
     """
-    def __init__(self, mediaobject) -> None:
+    def __init__(self, mediaobject: TiledMediaObject) -> None:
         """
         Method :
             ModifyTiledMediaObjectDialog.__init__(mediaobject)
@@ -59,15 +66,16 @@ class ModifyTiledMediaObjectDialog:
         Initialize the dialog with the given mediaobject.
         Loads the top tile (0,0,0) of the tiled media object.
         """
-        self.mediaobject = mediaobject
-        self.media_id = mediaobject._media_id if mediaobject else None
-        self.tile_image = None
+        self.mediaobject: TiledMediaObject = mediaobject
+        self.media_id: Optional[str] = mediaobject._media_id if mediaobject else None
+        self.tile_image: Optional[QImage] = None
         self.current_rotation: Literal[0, 90, 180, 270] = 0  # Track rotation angle in degrees
         self.invert_colors: bool = False  # Track invert colors state
         self.black_and_white: bool = False  # Track black and white state
+        self.image_label: QLabel
 
         # Initialize logger
-        self.__logger = get_logger('ModifyTiledMediaObjectDialog')
+        self.__logger: "Logger" = get_logger('ModifyTiledMediaObjectDialog')
 
         # Try to load the top tile
         if self.media_id:
@@ -101,19 +109,19 @@ class ModifyTiledMediaObjectDialog:
 
         # Create buttons for image manipulation
         rotate_left_btn = QPushButton("Rotate Left")
-        rotate_left_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        rotate_left_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         rotate_left_btn.clicked.connect(self._on_rotate_left)
 
         rotate_right_btn = QPushButton("Rotate Right")
-        rotate_right_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        rotate_right_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         rotate_right_btn.clicked.connect(self._on_rotate_right)
 
         invert_colors_btn = QPushButton("Invert Colors")
-        invert_colors_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        invert_colors_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         invert_colors_btn.clicked.connect(self._on_invert_colors)
 
         black_white_btn = QPushButton("Black and White")
-        black_white_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        black_white_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         black_white_btn.clicked.connect(self._on_black_white)
 
         # Add buttons to layout
@@ -144,20 +152,20 @@ class ModifyTiledMediaObjectDialog:
 
         # Create label to display the tile image
         self.image_label = QLabel()
-        self.image_label.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        self.image_label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
 
         if self.tile_image:
             # Convert QImage to QPixmap and display
             pixmap = QPixmap.fromImage(self.tile_image)
             # Scale the image to fit nicely in the dialog
-            scaled_pixmap = pixmap.scaled(400, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            scaled_pixmap = pixmap.scaled(400, 400, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
             self.image_label.setPixmap(scaled_pixmap)
         else:
             self.image_label.setText("No image available")
             self.image_label.setStyleSheet("QLabel { background-color: #ddd; padding: 20px; }")
             self.image_label.setMinimumSize(200, 100)
 
-        layout.addWidget(self.image_label, alignment=Qt.AlignTop | Qt.AlignHCenter)
+        layout.addWidget(self.image_label, alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
         layout.addStretch()
         image_panel.setLayout(layout)
         return image_panel
@@ -175,7 +183,7 @@ class ModifyTiledMediaObjectDialog:
         """
         dialog = QDialog()
         dialog.setWindowTitle("Tiled Media Object Options")
-        dialog.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        dialog.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         # Create main layout
         main_layout = QHBoxLayout(dialog)
@@ -195,8 +203,8 @@ class ModifyTiledMediaObjectDialog:
         button_layout = QVBoxLayout()
         button_layout.addStretch()
 
-        buttons = QDialogButtonBox(QDialogButtonBox.Apply | QDialogButtonBox.Cancel, dialog)
-        buttons.button(QDialogButtonBox.Apply).clicked.connect(dialog.accept)
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Apply | QDialogButtonBox.StandardButton.Cancel, dialog)
+        buttons.button(QDialogButtonBox.StandardButton.Apply).clicked.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)
 
         # Create a container for the main content and buttons
@@ -234,7 +242,7 @@ class ModifyTiledMediaObjectDialog:
         dialog = self._main_dialog()
 
         # Run dialog and get result
-        if dialog.exec() == QDialog.Accepted:
+        if dialog.exec() == QDialog.DialogCode.Accepted:
             # Check if any transformation was applied
             has_transformations = (
                 self.current_rotation != 0 or
@@ -297,9 +305,9 @@ class ModifyTiledMediaObjectDialog:
 
             # Apply black and white (grayscale) if enabled
             if self.black_and_white:
-                image = image.convertToFormat(QImage.Format_Grayscale8)
+                image = image.convertToFormat(QImage.Format.Format_Grayscale8)
                 # Convert back to RGB for further processing
-                image = image.convertToFormat(QImage.Format_RGB32)
+                image = image.convertToFormat(QImage.Format.Format_RGB32)
 
             # Apply color inversion if enabled
             if self.invert_colors:
@@ -312,10 +320,10 @@ class ModifyTiledMediaObjectDialog:
             if self.current_rotation != 0:
                 transform = QTransform()
                 transform.rotate(self.current_rotation)
-                pixmap = pixmap.transformed(transform, Qt.SmoothTransformation)
+                pixmap = pixmap.transformed(transform, Qt.TransformationMode.SmoothTransformation)
 
             # Scale the image to fit nicely in the dialog
-            scaled_pixmap = pixmap.scaled(400, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            scaled_pixmap = pixmap.scaled(400, 400, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
             self.image_label.setPixmap(scaled_pixmap)
 
 

@@ -18,7 +18,7 @@
 
 import math
 import os
-from typing import Optional, Any
+from typing import TYPE_CHECKING, Optional, Any, Dict, Tuple
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -28,7 +28,6 @@ from PySide6.QtWidgets import (
 
 from pyzui import __init__ as PyZUI
 from pyzui.objects.scene import scene as Scene
-from pyzui.tilesystem import tilemanager as TileManager
 from pyzui.objects.scene.qzui import QZUI
 from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject
 from pyzui.objects.mediaobjects.stringmediaobject import StringMediaObject
@@ -36,6 +35,16 @@ from pyzui.objects.mediaobjects.svgmediaobject import SVGMediaObject
 
 from pyzui.windows.dialogwindows.dialogwindows import DialogWindows
 from pyzui.logger import get_logger
+
+if TYPE_CHECKING:
+    from pyzui.objects.scene.scene import Scene as SceneType
+    from pyzui.objects.scene.qzui import QZUI as QZUIType
+    from logging import Logger
+
+# Type aliases
+ActionKey = str
+MenuKey = str
+MediaID = str
 
 class MainWindow(QtWidgets.QMainWindow):
     """
@@ -60,9 +69,11 @@ class MainWindow(QtWidgets.QMainWindow):
         
         QtWidgets.QMainWindow.__init__(self)
 
-        self.__logger = get_logger("MainWindow")
-
-        self.__prev_dir = ''
+        self.__logger: "Logger" = get_logger("MainWindow")
+        self.__prev_dir: str = ''
+        self.zui: "QZUIType"
+        self.__action: Dict[ActionKey, QtGui.QAction] = {}
+        self.__menu: Dict[MenuKey, QtWidgets.QMenu] = {}
         
         self.setWindowTitle("PyZUI")
 
@@ -122,7 +133,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.setIcon(QtWidgets.QMessageBox.Warning)
         dialog.exec()
 
-    def __create_action(self, key: str, text: str, callback: Optional[Any] = None,
+    def __create_action(self, key: ActionKey, text: str, callback: Optional[Any] = None,
                         shortcut: Optional[str] = None, checkable: bool = False) -> None:
         """
         Method :
@@ -282,7 +293,7 @@ class MainWindow(QtWidgets.QMainWindow):
             w = self.zui.width()
             h = self.zui.height()
             try :
-                mediaobject.fit((w/4, h/4, w*3/4, h*3/4))
+                mediaobject.fit((w//4, h//4, w*3//4, h*3//4))
                 self.zui.scene.add(mediaobject)
             except Exception as e:
                 self.__show_error("Error in opening media in __open_media \n", e)
@@ -387,11 +398,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
             cells_per_side = int(math.ceil(math.sqrt(len(media))))
             cellsize = float(min(self.zui.width(),
-                                 self.zui.height())) / cells_per_side
+                                 self.zui.height())) // cells_per_side
             innersize = 0.9 * cellsize
-            centre = (self.zui.width()/2, self.zui.height()/2)
-            bbox = (centre[0] - innersize/2, centre[1] - innersize/2,
-                    centre[0] + innersize/2, centre[1] + innersize/2)
+            centre = (self.zui.width()//2, self.zui.height()//2)
+            bbox = (centre[0] - innersize//2, centre[1] - innersize//2,
+                    centre[0] + innersize//2, centre[1] + innersize//2)
             grid_centre = 0.5 * cells_per_side
 
             for y in range(cells_per_side):
@@ -420,7 +431,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         Set the framerate to the value specified in act.
         """
-        self.zui.framerate = int(act.fps/2)
+        self.zui.framerate = int(act.fps//2)
 
     def __action_fullscreen(self) -> None:
         """
@@ -433,7 +444,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         Toggles fullscreen mode.
         """
-        self.setWindowState(self.windowState() ^ QtCore.Qt.WindowFullScreen)
+        self.setWindowState(self.windowState() ^ QtCore.Qt.WindowState.WindowFullScreen)
 
     def __action_about(self) -> None:
         """
@@ -535,7 +546,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         Set the zoom sensitivity for the ZUI.
         """
-        ok_pressed, text_input = DialogWindows._open_zoom_sensitivity_input_dialog(self.zui.zoom_sensitivity)
+        ok_pressed, text_input = DialogWindows.open_zoom_sensitivity_input_dialog(self.zui.zoom_sensitivity)
 
         '''
         dialog = QInputDialog()
@@ -553,7 +564,7 @@ class MainWindow(QtWidgets.QMainWindow):
             elif int(text_input) == 0 :
                 self.zui.zoom_sensitivity = 1000
             else :
-                self.zui.zoom_sensitivity = int(1000 / int(text_input)) 
+                self.zui.zoom_sensitivity = int(1000 // int(text_input)) 
             
 
     def __create_actions(self) -> None:
@@ -653,4 +664,4 @@ class MainWindow(QtWidgets.QMainWindow):
         Handle show event by focusing the QZUI widget.
         """
         ## focus the QZUI widget whenever this window is shown
-        self.zui.setFocus(QtCore.Qt.OtherFocusReason)
+        self.zui.setFocus(QtCore.Qt.FocusReason.OtherFocusReason)

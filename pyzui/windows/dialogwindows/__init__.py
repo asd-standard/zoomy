@@ -20,7 +20,7 @@ from .dialogwindows import (
     OpenNewStringInputDialog,
     ModifyStringInputDialog,
     ModifyTiledMediaObjectDialog,
-    open_zoom_sensitivity_input_dialog
+    OpenZoomSensitivityInputDialog
 )
 
 __all__ = [
@@ -28,5 +28,5 @@ __all__ = [
     'OpenNewStringInputDialog',
     'ModifyStringInputDialog',
     'ModifyTiledMediaObjectDialog',
-    'open_zoom_sensitivity_input_dialog'
+    'OpenZoomSensitivityInputDialog'
 ]

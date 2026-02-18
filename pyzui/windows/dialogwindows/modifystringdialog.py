@@ -16,7 +16,7 @@
 
 """Modify string dialog with color selection."""
 
-from typing import Optional, Tuple, Any
+from typing import TYPE_CHECKING, Optional, Tuple, Any, Deque
 import os
 from collections import deque
 
@@ -26,6 +26,14 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QColor, QPainter
+
+if TYPE_CHECKING:
+    from PySide6.QtWidgets import QTextEdit, QLineEdit
+    from PySide6.QtGui import QPaintEvent
+
+# Type aliases
+ColorCode = str
+DialogResult = Tuple[bool, str, str, str]
 
 class ModifyStringInputDialog:
     """
@@ -54,10 +62,12 @@ class ModifyStringInputDialog:
         If media_id is provided, the dialog is pre-populated with the existing color
         and text. Loads previously used colors from the color store file.
         """
-        self.start_string = ''
-        self.string_color = ''
-        self.passed_color = ''
-        self.color_codes = deque(maxlen=24)
+        self.start_string: str = ''
+        self.string_color: str = ''
+        self.passed_color: str = ''
+        self.color_codes: Deque[ColorCode] = deque(maxlen=24)
+        self.text_edit: "QTextEdit"
+        self.custom_color_input: "QLineEdit"
         
         if media_id == None:
             pass
@@ -105,7 +115,7 @@ class ModifyStringInputDialog:
                 f.write('0000ff\n')
                 f.close()
 
-    def _color_square(self, color_code: str) -> QWidget:
+    def _color_square(self, color_code: ColorCode) -> QWidget:
         """
         Method :
             ModifyStringInputDialog._color_square(color_code)
@@ -120,7 +130,7 @@ class ModifyStringInputDialog:
         color = QColor('#' + str(color_code))
         color_square.setFixedSize(20, 20)
 
-        def paintEvent(event: Any) -> None:
+        def paintEvent(event: "QPaintEvent") -> None:
             painter = QPainter(color_square)
             painter.fillRect(color_square.rect(), color)
 
@@ -128,7 +138,7 @@ class ModifyStringInputDialog:
 
         return color_square
 
-    def _color_button_click(self, color: str) -> None:
+    def _color_button_click(self, color: ColorCode) -> None:
         """
         Method :
             ModifyStringInputDialog._color_button_click(color)
@@ -141,7 +151,7 @@ class ModifyStringInputDialog:
         """
         self.string_color = color
 
-    def _color_button(self, color_code: str) -> QWidget:
+    def _color_button(self, color_code: ColorCode) -> QWidget:
         """
         Method :
             ModifyStringInputDialog._color_button(color_code)
@@ -164,7 +174,7 @@ class ModifyStringInputDialog:
         # Create a QPushButton but use a QWidget wrapper to hold square + label
         button = QPushButton()
         button.setLayout(layout)
-        button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         # Add widget and label to the layout inside the button
         layout.addWidget(color_square)
@@ -204,14 +214,14 @@ class ModifyStringInputDialog:
 
         self.text_edit.setPlainText(self.start_string)
         # Align text to top-left (horizontal only by default)
-        self.text_edit.setAlignment(Qt.AlignLeft)
+        self.text_edit.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         # Create a text input field for custom color entry
         self.custom_color_input = QLineEdit(dialog)  # Color code it's going to be typed here
         self.custom_color_input.setPlaceholderText("Enter custom color (e.g., #ff5733)")
 
         # Create OK/Cancel buttons
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, dialog)
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel, dialog)
         buttons.accepted.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)
 
@@ -238,7 +248,7 @@ class ModifyStringInputDialog:
 
         return dialog
 
-    def _run_dialog(self) -> Tuple[bool, str, str, str]:
+    def _run_dialog(self) -> DialogResult:
         """
         Method :
             ModifyStringInputDialog._run_dialog()
@@ -252,7 +262,8 @@ class ModifyStringInputDialog:
         """
         dialog = self._main_dialog()
         # Run dialog and get result
-        if dialog.exec() == QDialog.Accepted:
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            media_id = ""
             
             if len(self.custom_color_input.text()) == 6 or \
             len(self.custom_color_input.text()) == 7:
@@ -285,8 +296,7 @@ class ModifyStringInputDialog:
             except Exception as e:
                 print('Error', e)
             ok = True
+            return ok, media_id, self.string_color, self.text_edit.toPlainText()
         else:
             ok = False
-
-        if ok and media_id:
-            return ok, media_id, self.string_color, self.text_edit.toPlainText()
+            return ok, "", "", ""

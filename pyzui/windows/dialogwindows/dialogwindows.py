@@ -17,7 +17,7 @@
 """PyZui DialogWindows - Main dialog module that aggregates all dialog components."""
 
 # Import all dialog components from their respective modules
-from .zoomsensitivitydialog import open_zoom_sensitivity_input_dialog
+from .zoomsensitivitydialog import OpenZoomSensitivityInputDialog
 from .stringinputdialog import OpenNewStringInputDialog
 from .modifystringdialog import ModifyStringInputDialog
 from .modifytiledmediaobjectdialog import ModifyTiledMediaObjectDialog
@@ -37,10 +37,8 @@ class DialogWindows:
     The actual dialogs are implemented in separate modules.
     """
 
-    # Static method for zoom sensitivity
-    _open_zoom_sensitivity_input_dialog = staticmethod(open_zoom_sensitivity_input_dialog)
-
     # Nested classes for backward compatibility
+    open_zoom_sensitivity_input_dialog = OpenZoomSensitivityInputDialog
     open_new_string_input_dialog = OpenNewStringInputDialog
     modify_string_input_dialog = ModifyStringInputDialog
     modify_tiled_media_object_dialog = ModifyTiledMediaObjectDialog
@@ -48,7 +46,7 @@ class DialogWindows:
 # Also expose at module level for direct imports
 __all__ = [
     'DialogWindows',
-    'open_zoom_sensitivity_input_dialog',
+    'OpenZoomSensitivityInputDialog',
     'OpenNewStringInputDialog',
     'ModifyStringInputDialog',
     'ModifyTiledMediaObjectDialog',

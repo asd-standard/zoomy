@@ -17,16 +17,19 @@
 """Zoom sensitivity input dialog."""
 
 from typing import Tuple
-from PySide6.QtWidgets import QInputDialog
+from PySide6.QtWidgets import QInputDialog, QDialog
 
-def open_zoom_sensitivity_input_dialog(current_sensitivity: float) -> Tuple[bool, str]:
+# Type alias
+DialogResult = Tuple[bool, str]
+
+def OpenZoomSensitivityInputDialog(current_sensitivity: float) -> DialogResult:
     """
     Function :
-        open_zoom_sensitivity_input_dialog(current_sensitivity)
+        OpenZoomSensitivityInputDialog(current_sensitivity)
     Parameters :
         current_sensitivity : float
 
-    open_zoom_sensitivity_input_dialog(current_sensitivity) --> Tuple[bool, str]
+    OpenZoomSensitivityInputDialog(current_sensitivity) --> Tuple[bool, str]
 
     Opens a dialog to set zoom sensitivity.
     Returns (ok_pressed, text_input) tuple.
@@ -39,4 +42,4 @@ def open_zoom_sensitivity_input_dialog(current_sensitivity: float) -> Tuple[bool
     ok_pressed = dialog.exec()
     text_input = dialog.textValue()
 
-    return ok_pressed, text_input
+    return ok_pressed == QDialog.DialogCode.Accepted, str(text_input)

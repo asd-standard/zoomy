@@ -16,7 +16,7 @@
 
 """String input dialog with color selection."""
 
-from typing import Tuple, Any
+from typing import TYPE_CHECKING, Tuple, Any, Optional, Deque
 import os
 from collections import deque
 
@@ -26,6 +26,14 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QColor, QPainter
+
+if TYPE_CHECKING:
+    from PySide6.QtWidgets import QTextEdit, QLineEdit
+    from PySide6.QtGui import QPaintEvent
+
+# Type aliases
+ColorCode = str
+DialogResult = Tuple[bool, str]
 
 class OpenNewStringInputDialog:
     """
@@ -54,9 +62,11 @@ class OpenNewStringInputDialog:
         from the color store file, or creates default colors (red, green, blue) if
         no color history exists.
         """
-        self.string_color = ''
-        self.passed_color = ''
-        self.color_codes = deque(maxlen=24)
+        self.string_color: str = ''
+        self.passed_color: str = ''
+        self.color_codes: Deque[ColorCode] = deque(maxlen=24)
+        self.text_edit: "QTextEdit"
+        self.custom_color_input: "QLineEdit"
 
         ## set the default tilestore directory, this can be overridden if required
         if 'APPDATA' in os.environ:
@@ -96,7 +106,7 @@ class OpenNewStringInputDialog:
                 f.write('0000ff\n')
                 f.close()
 
-    def _color_square(self, color_code: str) -> QWidget:
+    def _color_square(self, color_code: ColorCode) -> QWidget:
         """
         Method :
             OpenNewStringInputDialog._color_square(color_code)
@@ -111,7 +121,7 @@ class OpenNewStringInputDialog:
         color = QColor('#' + str(color_code))
         color_square.setFixedSize(20, 20)
 
-        def paintEvent(event: Any) -> None:
+        def paintEvent(event: "QPaintEvent") -> None:
             painter = QPainter(color_square)
             painter.fillRect(color_square.rect(), color)
 
@@ -119,7 +129,7 @@ class OpenNewStringInputDialog:
 
         return color_square
 
-    def _color_button_click(self, color: str) -> None:
+    def _color_button_click(self, color: ColorCode) -> None:
         """
         Method :
             OpenNewStringInputDialog._color_button_click(color)
@@ -132,7 +142,7 @@ class OpenNewStringInputDialog:
         """
         self.string_color = color
 
-    def _color_button(self, color_code: str) -> QWidget:
+    def _color_button(self, color_code: ColorCode) -> QWidget:
         """
         Method :
             OpenNewStringInputDialog._color_button(color_code)
@@ -155,7 +165,7 @@ class OpenNewStringInputDialog:
         # Create a QPushButton but use a QWidget wrapper to hold square + label
         button = QPushButton()
         button.setLayout(layout)
-        button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         # Add widget and label to the layout inside the button
         layout.addWidget(color_square)
@@ -194,14 +204,14 @@ class OpenNewStringInputDialog:
         self.text_edit.setFont(font)
 
         # Align text to top-left (horizontal only by default)
-        self.text_edit.setAlignment(Qt.AlignLeft)
+        self.text_edit.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         # Create a text input field for custom color entry
         self.custom_color_input = QLineEdit(dialog)  # Color code it's going to be typed here
         self.custom_color_input.setPlaceholderText("Enter custom color (e.g., #ff5733)")
 
         # Create OK/Cancel buttons
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, dialog)
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel, dialog)
         buttons.accepted.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)
 
@@ -228,7 +238,7 @@ class OpenNewStringInputDialog:
 
         return dialog
 
-    def _run_dialog(self) -> Tuple[bool, str]:
+    def _run_dialog(self) -> DialogResult:
         """
         Method :
             OpenNewStringInputDialog._run_dialog()
@@ -242,25 +252,30 @@ class OpenNewStringInputDialog:
         """
         dialog = self._main_dialog()
         # Run dialog and get result
-        if dialog.exec() == QDialog.Accepted:
+        if dialog.exec() == QDialog.DialogCode.Accepted:
             if len(self.string_color) != 6:
-                self.string_color = self.custom_color_input.text()
-                
-                if self.string_color[0]=="#" :
-                    self.string_color = self.string_color[1:]
-                
-                self.color_codes.append(self.string_color)
-                f = open(self.color_dir+'/color_list.txt', 'w')
-                for i in self.color_codes:
-                    f.write(str(i)+'\n')
-                f.close()
+                if self.custom_color_input:
+                    color_text = self.custom_color_input.text()
+                    if color_text:
+                        self.string_color = color_text
+                        
+                        if self.string_color and self.string_color[0]=="#" :
+                            self.string_color = self.string_color[1:]
+                        
+                        self.color_codes.append(self.string_color)
+                        f = open(self.color_dir+'/color_list.txt', 'w')
+                        for i in self.color_codes:
+                            f.write(str(i)+'\n')
+                        f.close()
 
             elif len(self.string_color) != 6:
                 print('Error')
-            uri = 'string:'+str(self.string_color)+str(':') + str(self.text_edit.toPlainText())
+            if self.text_edit:
+                uri = 'string:'+str(self.string_color)+str(':') + str(self.text_edit.toPlainText())
+            else:
+                uri = 'string:'+str(self.string_color)+str(':')
             ok = True
+            return ok, uri
         else:
             ok = False
-
-        if ok and uri:
-            return ok, uri
+            return ok, ""
