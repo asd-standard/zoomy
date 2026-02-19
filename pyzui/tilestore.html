@@ -197,15 +197,28 @@ dry_run : bool</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.tilesystem.tilestore.tilestore.auto_cleanup">
-<span class="sig-prename descclassname"><span class="pre">pyzui.tilesystem.tilestore.tilestore.</span></span><span class="sig-name descname"><span class="pre">auto_cleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_age_days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tilestore/tilestore.html#auto_cleanup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tilestore.tilestore.auto_cleanup" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pyzui.tilesystem.tilestore.tilestore.</span></span><span class="sig-name descname"><span class="pre">auto_cleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_age_days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collect_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tilestore/tilestore.html#auto_cleanup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tilestore.tilestore.auto_cleanup" title="Link to this definition">¶</a></dt>
 <dd><dl class="simple">
-<dt>Function :</dt><dd><p>auto_cleanup(max_age_days, enable)</p>
+<dt>Function :</dt><dd><p>auto_cleanup(max_age_days, enable, collect_stats)</p>
 </dd>
-<dt>Parameters :</dt><dd><p>max_age_days : int
-enable : bool</p>
+<dt>Parameters :</dt><dd><dl class="simple">
+<dt>max_age_days<span class="classifier">int</span></dt><dd><ul class="simple">
+<li><p>Maximum age in days for tiles (default: 3)</p></li>
+</ul>
+</dd>
+<dt>enable<span class="classifier">bool</span></dt><dd><ul class="simple">
+<li><p>Enable automatic cleanup (default: True)</p></li>
+</ul>
+</dd>
+<dt>collect_stats<span class="classifier">bool</span></dt><dd><ul class="simple">
+<li><p>Collect detailed before/after cleanup statistics (default: True)</p></li>
+<li><p>Setting to False improves performance on large tilestores</p></li>
+</ul>
 </dd>
 </dl>
-<p>auto_cleanup(max_age_days, enable) –&gt; Optional[Dict[str, Any]]</p>
+</dd>
+</dl>
+<p>auto_cleanup(max_age_days, enable, collect_stats) –&gt; Optional[Dict[str, Any]]</p>
 <p>Automatically clean up old tiles if enabled.</p>
 <p>This function is designed to be called on startup or periodically.
 Returns cleanup statistics or None if disabled.</p>
@@ -265,7 +278,7 @@ Returns cleanup statistics or None if disabled.</p>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributionguidelines/contributionguidelines.html">Contribution Guidelines</a></li>
 </ul>
 
 <div class="relations">

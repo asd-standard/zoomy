@@ -40,9 +40,9 @@ to do so.</p>
 no tiles of the requested resolution are available.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.tilesystem.tilemanager.init">
-<span class="sig-prename descclassname"><span class="pre">pyzui.tilesystem.tilemanager.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_cleanup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup_max_age_days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tilemanager.html#init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tilemanager.init" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pyzui.tilesystem.tilemanager.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_cleanup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup_max_age_days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collect_cleanup_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tilemanager.html#init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tilemanager.init" title="Link to this definition">¶</a></dt>
 <dd><dl class="simple">
-<dt>Function :</dt><dd><p>init(total_cache_size, auto_cleanup, cleanup_max_age_days)</p>
+<dt>Function :</dt><dd><p>init(total_cache_size, auto_cleanup, cleanup_max_age_days, collect_cleanup_stats)</p>
 </dd>
 <dt>Parameters :</dt><dd><dl class="simple">
 <dt>total_cache_size<span class="classifier">int</span></dt><dd><ul class="simple">
@@ -57,10 +57,15 @@ no tiles of the requested resolution are available.</p>
 <li><p>Maximum age in days for tiles (default: 3)</p></li>
 </ul>
 </dd>
+<dt>collect_cleanup_stats<span class="classifier">bool</span></dt><dd><ul class="simple">
+<li><p>Collect detailed before/after cleanup statistics (default: False)</p></li>
+<li><p>Setting to False improves startup performance on large tilestores</p></li>
+</ul>
+</dd>
 </dl>
 </dd>
 </dl>
-<p>init(total_cache_size, auto_cleanup, cleanup_max_age_days) –&gt; None</p>
+<p>init(total_cache_size, auto_cleanup, cleanup_max_age_days, collect_cleanup_stats) –&gt; None</p>
 <p>Initialise the TileManager. This <strong>must</strong> be called before any other
 functions are called.</p>
 <dl class="simple">
@@ -72,6 +77,22 @@ functions are called.</p>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tilemanager._shutdown_cleanup">
+<span class="sig-prename descclassname"><span class="pre">pyzui.tilesystem.tilemanager.</span></span><span class="sig-name descname"><span class="pre">_shutdown_cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tilemanager.html#_shutdown_cleanup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tilemanager._shutdown_cleanup" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>_shutdown_cleanup()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>_shutdown_cleanup() –&gt; None</p>
+<p>Execute tilestore cleanup on application shutdown.</p>
+<p>This function is registered with atexit and connected to Qt’s
+aboutToQuit signal. It runs cleanup with stored parameters
+and prevents duplicate execution.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -295,7 +316,7 @@ failed.</p>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributionguidelines/contributionguidelines.html">Contribution Guidelines</a></li>
 </ul>
 
 <div class="relations">

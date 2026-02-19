@@ -52,7 +52,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">RLock</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span><span class="o">,</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="o">,</span><span class="w"> </span><span class="nn">urllib.error</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QPainter</span>
@@ -86,7 +87,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">#: an arbitrary size that is common to all scenes upon creation `scene size`</span>
-    <span class="n">standard_viewport_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1280</span><span class="p">,</span><span class="mi">720</span><span class="p">)</span>
+    <span class="n">standard_viewport_size</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1280</span><span class="p">,</span><span class="mi">720</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -141,14 +142,14 @@
         <span class="c1">#initialize mediobject centre, position and velocity    </span>
         <span class="n">PhysicalObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>        
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__objects_lock</span> <span class="o">=</span> <span class="n">RLock</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__viewport_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_viewport_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="s1">&#39;MediaObject.MediaObject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__objects_lock</span><span class="p">:</span> <span class="n">RLock</span> <span class="o">=</span> <span class="n">RLock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__viewport_size</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_viewport_size</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">selection</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selection</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;MediaObject.MediaObject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;MediaObject.MediaObject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;Scene&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;Scene&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Scene.save">
 <a class="viewcode-back" href="../../../../pyzui/scene.html#pyzui.objects.scene.scene.Scene.save">[docs]</a>
@@ -487,6 +488,7 @@
                 
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span> <span class="p">:</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                 <span class="c1">#using mediaobject.topleft mediaobject.toptight attributes</span>
                 <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="o">.</span><span class="n">topleft</span>
                 <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="o">.</span><span class="n">bottomright</span>
@@ -501,11 +503,12 @@
                 <span class="n">painter</span><span class="o">.</span><span class="n">drawRect</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="o">-</span><span class="n">x1</span><span class="p">,</span> <span class="n">y2</span><span class="o">-</span><span class="n">y1</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;StringMediaObject&#39;</span> <span class="p">:</span>
+                <span class="n">right_selection_obj</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;MediaObject.MediaObject&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="p">)</span>
 
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">))</span> <span class="p">:</span>
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_media_id</span><span class="p">[</span><span class="mi">14</span><span class="p">:]</span> <span class="o">==</span>\
-                      <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="o">.</span><span class="n">_media_id</span><span class="p">[</span><span class="mi">14</span><span class="p">:]</span> <span class="p">:</span>                        
+                      <span class="n">right_selection_obj</span><span class="o">.</span><span class="n">_media_id</span><span class="p">[</span><span class="mi">14</span><span class="p">:]</span> <span class="p">:</span>                        
                         
                         <span class="n">dialog</span> <span class="o">=</span> <span class="n">DialogWindows</span><span class="o">.</span><span class="n">modify_string_input_dialog</span><span class="p">(</span>\
                             <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_media_id</span><span class="p">)</span>
@@ -514,7 +517,9 @@
 
                         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                             <span class="n">ok</span> <span class="o">=</span> <span class="kc">False</span>
-                            <span class="n">media_id</span> <span class="o">=</span> <span class="kc">False</span>      
+                            <span class="n">media_id</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="n">string_color</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                            <span class="n">edited_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
                         <span class="k">if</span> <span class="n">ok</span> <span class="ow">and</span> <span class="n">media_id</span><span class="p">:</span> 
                             
                             <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
@@ -540,11 +545,12 @@
                         <span class="k">break</span>
 
             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;TiledMediaObject&#39;</span> <span class="p">:</span>
+                <span class="n">right_selection_obj</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;MediaObject.MediaObject&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="p">)</span>
 
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">))</span> <span class="p">:</span>
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_media_id</span> <span class="o">==</span>\
-                      <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span><span class="o">.</span><span class="n">_media_id</span> <span class="p">:</span>
+                      <span class="n">right_selection_obj</span><span class="o">.</span><span class="n">_media_id</span> <span class="p">:</span>
 
                         <span class="n">dialog</span> <span class="o">=</span> <span class="n">DialogWindows</span><span class="o">.</span><span class="n">modify_tiled_media_object_dialog</span><span class="p">(</span>\
                             <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
@@ -833,11 +839,11 @@
                     <span class="n">media_id</span><span class="p">,</span> <span class="n">scene</span><span class="p">)</span>
 
             <span class="c1">#mediaobjects are zoomed by the level read in the loaded scene file</span>
-            <span class="n">mediaobject</span><span class="o">.</span><span class="n">zoomlevel</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">zoomlevel</span><span class="p">)</span>
+            <span class="n">mediaobject</span><span class="o">.</span><span class="n">zoomlevel</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">zoomlevel</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
             <span class="c1">#mediaobjects are placed in the position read in the loaded scene file</span>
-            <span class="n">mediaobject</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+            <span class="n">mediaobject</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
             <span class="c1">#mediaobjects are added to the scene</span>
-            <span class="n">scene</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mediaobject</span><span class="p">)</span>
+            <span class="n">scene</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mediaobject</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1">## ignore instances of any other class</span>
             <span class="k">pass</span>
@@ -899,7 +905,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributionguidelines/contributionguidelines.html">Contribution Guidelines</a></li>
 </ul>
 
 <div class="relations">

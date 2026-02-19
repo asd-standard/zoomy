@@ -365,6 +365,106 @@ pytest<span class="w"> </span>test/integrationtest/
 <p>Push your changes and create a pull request against the main branch.</p>
 </li>
 </ol>
+<section id="code-style">
+<h3>Code Style<a class="headerlink" href="#code-style" title="Link to this heading">¶</a></h3>
+<p>The project follows these code style conventions:</p>
+<p><strong>Indentation:</strong></p>
+<ul class="simple">
+<li><p>Use 4 spaces for indentation (no tabs)</p></li>
+</ul>
+<p><strong>Line Length:</strong></p>
+<ul class="simple">
+<li><p>Keep lines reasonably short, preferably under 80-100 characters</p></li>
+<li><p>Use line continuation with backslash (<code class="docutils literal notranslate"><span class="pre">\</span></code>) or parentheses for long lines</p></li>
+</ul>
+<p><strong>Imports:</strong></p>
+<ul>
+<li><p>Group imports in the following order:</p>
+<ol class="arabic simple">
+<li><p>Standard library imports</p></li>
+<li><p>Third-party imports (PySide6, PIL, etc.)</p></li>
+<li><p>Local application imports</p></li>
+</ol>
+</li>
+<li><p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.tileprovider</span><span class="w"> </span><span class="kn">import</span> <span class="n">TileProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilestore</span> <span class="k">as</span> <span class="n">TileStore</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p><strong>Blank Lines:</strong></p>
+<ul class="simple">
+<li><p>Two blank lines between top-level definitions (classes, functions)</p></li>
+<li><p>One blank line between method definitions within a class</p></li>
+<li><p>Use blank lines sparingly within functions to separate logical sections</p></li>
+</ul>
+</section>
+<section id="naming-conventions">
+<h3>Naming Conventions<a class="headerlink" href="#naming-conventions" title="Link to this heading">¶</a></h3>
+<p><strong>Modules:</strong></p>
+<ul class="simple">
+<li><p>Use concatenated lowercase words with no separators (e.g., <code class="docutils literal notranslate"><span class="pre">tileprovider.py</span></code>, <code class="docutils literal notranslate"><span class="pre">dynamictileprovider.py</span></code>, <code class="docutils literal notranslate"><span class="pre">converterrunner.py</span></code>)</p></li>
+</ul>
+<p><strong>Classes:</strong></p>
+<ul class="simple">
+<li><p>Use PascalCase (e.g., <code class="docutils literal notranslate"><span class="pre">TileManager</span></code>, <code class="docutils literal notranslate"><span class="pre">PhysicalObject</span></code>, <code class="docutils literal notranslate"><span class="pre">StaticTileProvider</span></code>)</p></li>
+</ul>
+<p><strong>Functions and Methods:</strong></p>
+<ul class="simple">
+<li><p>Use snake_case (e.g., <code class="docutils literal notranslate"><span class="pre">get_tile</span></code>, <code class="docutils literal notranslate"><span class="pre">load_tile</span></code>, <code class="docutils literal notranslate"><span class="pre">cut_tile</span></code>)</p></li>
+<li><p>Private methods use double underscore prefix (e.g., <code class="docutils literal notranslate"><span class="pre">__damp</span></code>, <code class="docutils literal notranslate"><span class="pre">__displacement</span></code>)</p></li>
+<li><p>Protected methods use single underscore prefix (e.g., <code class="docutils literal notranslate"><span class="pre">_load</span></code>, <code class="docutils literal notranslate"><span class="pre">_scanchunk</span></code>)</p></li>
+</ul>
+<p><strong>Variables:</strong></p>
+<ul class="simple">
+<li><p>Use snake_case (e.g., <code class="docutils literal notranslate"><span class="pre">tile_id</span></code>, <code class="docutils literal notranslate"><span class="pre">media_id</span></code>, <code class="docutils literal notranslate"><span class="pre">tile_path</span></code>)</p></li>
+<li><p>Private instance variables use underscore prefix (e.g., <code class="docutils literal notranslate"><span class="pre">self._x</span></code>, <code class="docutils literal notranslate"><span class="pre">self._progress</span></code>)</p></li>
+<li><p>Module-level private variables use double underscore (e.g., <code class="docutils literal notranslate"><span class="pre">__tilecache</span></code>)</p></li>
+</ul>
+<p><strong>Constants:</strong></p>
+<ul class="simple">
+<li><p>Use UPPER_SNAKE_CASE for constants (e.g., <code class="docutils literal notranslate"><span class="pre">damping_factor</span></code> is an exception
+as a class attribute)</p></li>
+</ul>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p>Use descriptive names that indicate purpose (e.g., <code class="docutils literal notranslate"><span class="pre">tile_id</span></code>, <code class="docutils literal notranslate"><span class="pre">media_id</span></code>,
+<code class="docutils literal notranslate"><span class="pre">filename</span></code>, <code class="docutils literal notranslate"><span class="pre">bbox</span></code>)</p></li>
+</ul>
+</section>
+<section id="formatting-requirements">
+<h3>Formatting Requirements<a class="headerlink" href="#formatting-requirements" title="Link to this heading">¶</a></h3>
+<p><strong>File Headers:</strong></p>
+<p>All source files in <code class="docutils literal notranslate"><span class="pre">./pyzui</span></code> should include the GPL license header:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## PyZUI 0.1 - Python Zooming User Interface</span>
+<span class="c1">## Copyright (C) 2009  David Roberts &lt;d@vidr.cc&gt;</span>
+<span class="c1">##</span>
+<span class="c1">## This program is free software; you can redistribute it and/or</span>
+<span class="c1">## modify it under the terms of the GNU General Public License</span>
+<span class="c1">## ...</span>
+</pre></div>
+</div>
+<p><strong>Module Docstrings:</strong></p>
+<p>Each module should have a docstring at the top (after the license header)
+describing its purpose:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;A threaded media converter (abstract base class).&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p><strong>Comments:</strong></p>
+<ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">##</span></code> for inline comments explaining formulas or complex logic</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">#</span></code> for standard code comments</p></li>
+<li><p>Write comments that explain <em>why</em>, not <em>what</em></p></li>
+</ul>
+</section>
 </section>
 <section id="coding-conventions">
 <h2>Coding Conventions<a class="headerlink" href="#coding-conventions" title="Link to this heading">¶</a></h2>
@@ -489,101 +589,126 @@ must have:</strong></p>
 <li><p>Class definitions</p></li>
 </ul>
 </section>
-<section id="code-style">
-<h3>Code Style<a class="headerlink" href="#code-style" title="Link to this heading">¶</a></h3>
-<p>The project follows these code style conventions:</p>
-<p><strong>Indentation:</strong></p>
-<ul class="simple">
-<li><p>Use 4 spaces for indentation (no tabs)</p></li>
-</ul>
-<p><strong>Line Length:</strong></p>
-<ul class="simple">
-<li><p>Keep lines reasonably short, preferably under 80-100 characters</p></li>
-<li><p>Use line continuation with backslash (<code class="docutils literal notranslate"><span class="pre">\</span></code>) or parentheses for long lines</p></li>
-</ul>
-<p><strong>Imports:</strong></p>
-<ul>
-<li><p>Group imports in the following order:</p>
+<section id="variable-type-annotations">
+<h3>Variable Type Annotations<a class="headerlink" href="#variable-type-annotations" title="Link to this heading">¶</a></h3>
+<p><strong>All variables must include type annotations.</strong></p>
+<p>This applies to:
+- Module-level variables (global to the module)
+- Class attributes (instance variables)
+- Local variables when their type is not obvious from context</p>
+<p><strong>When to use Optional:</strong></p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">Optional[Type]</span></code> when a variable can legitimately be <code class="docutils literal notranslate"><span class="pre">None</span></code>:
+- Variables initialized as <code class="docutils literal notranslate"><span class="pre">None</span></code> that will be assigned later
+- Function parameters with default value <code class="docutils literal notranslate"><span class="pre">None</span></code>
+- Return values that may be <code class="docutils literal notranslate"><span class="pre">None</span></code> to indicate absence of result</p>
+<p><strong>Example from tilemanager.py (lines 44-53):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Module-level variables with Optional type annotations</span>
+<span class="n">__tilecache</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;TileCache&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">__temptilecache</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;TileCache&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">__tp_static</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;StaticTileProvider&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">__logger</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;Logger&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1"># Non-optional variables with specific types</span>
+<span class="n">__tp_dynamic</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;FernTileProvider&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">__cleanup_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">__cleanup_max_age_days</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">__cleanup_executed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<p><strong>When to use Any:</strong></p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">Any</span></code> sparingly and only when:
+- The variable can legitimately be any type (e.g., accepts multiple image formats)
+- Working with dynamically typed data or third-party libraries
+- As a temporary measure during refactoring (with a <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">TODO</span></code> comment)</p>
+<p><strong>Avoid ``Any`` when:</strong>
+- The type is known or can be inferred
+- Using union types (<code class="docutils literal notranslate"><span class="pre">Union[Type1,</span> <span class="pre">Type2]</span></code>) would be more precise
+- The variable has a specific, known type</p>
+<p><strong>Example from tile.py (line 43):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Accepts any image type (PIL Image, QImage, ImageQt, etc.)</span>
+<span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructor:</span>
+<span class="sd">        Tile(image)</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        image : Any</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">image</span><span class="o">.</span><span class="vm">__class__</span> <span class="ow">is</span> <span class="n">ImageQt</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> <span class="ow">is</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="o">=</span> <span class="n">image</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="o">=</span> <span class="n">ImageQt</span><span class="o">.</span><span class="n">ImageQt</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Instance Variable Type Annotations:</strong></p>
+<p>Annotate instance variables in <code class="docutils literal notranslate"><span class="pre">__init__</span></code> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># From mainwindow.py (lines 72-76)</span>
+<span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__logger</span><span class="p">:</span> <span class="s2">&quot;Logger&quot;</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;MainWindow&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__prev_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__action</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">ActionKey</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__menu</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">MenuKey</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMenu</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+</pre></div>
+</div>
+<p><strong>Guidelines:</strong></p>
 <ol class="arabic simple">
-<li><p>Standard library imports</p></li>
-<li><p>Third-party imports (PySide6, PIL, etc.)</p></li>
-<li><p>Local application imports</p></li>
+<li><p><strong>Annotate at declaration</strong>: Add type annotations when variables are declared</p></li>
+<li><p><strong>Be specific</strong>: Use the most precise type possible (avoid <code class="docutils literal notranslate"><span class="pre">Any</span></code> when possible)</p></li>
+<li><p><strong>Match initialization</strong>: Ensure initial value matches the type annotation</p></li>
+<li><p><strong>Use forward references</strong>: For types imported under TYPE_CHECKING, use string literals</p></li>
+<li><p><strong>Document with comments</strong>: Use comments to explain complex type annotations if needed</p></li>
 </ol>
-</li>
-<li><p>Example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Thread</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">.tileprovider</span><span class="w"> </span><span class="kn">import</span> <span class="n">TileProvider</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilestore</span> <span class="k">as</span> <span class="n">TileStore</span>
-</pre></div>
-</div>
-</li>
-</ul>
-<p><strong>Blank Lines:</strong></p>
-<ul class="simple">
-<li><p>Two blank lines between top-level definitions (classes, functions)</p></li>
-<li><p>One blank line between method definitions within a class</p></li>
-<li><p>Use blank lines sparingly within functions to separate logical sections</p></li>
-</ul>
 </section>
-<section id="naming-conventions">
-<h3>Naming Conventions<a class="headerlink" href="#naming-conventions" title="Link to this heading">¶</a></h3>
-<p><strong>Classes:</strong></p>
+<section id="type-checking-for-type-only-imports">
+<h3>TYPE_CHECKING for Type-Only Imports:<a class="headerlink" href="#type-checking-for-type-only-imports" title="Link to this heading">¶</a></h3>
+<p>When type annotations require imports that would create circular dependencies
+or are only needed for type checking (not at runtime), use the <code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code>
+constant with forward references:</p>
+<ol class="arabic simple">
+<li><p>Import <code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code> from the <code class="docutils literal notranslate"><span class="pre">typing</span></code> module</p></li>
+<li><p>Place type-only imports under <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code> blocks</p></li>
+<li><p>Use forward references (quoted type names) in annotations</p></li>
+<li><p>Keep runtime imports outside the <code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code> block</p></li>
+</ol>
+<p><strong>When to use TYPE_CHECKING vs forward references:</strong></p>
 <ul class="simple">
-<li><p>Use PascalCase (e.g., <code class="docutils literal notranslate"><span class="pre">TileManager</span></code>, <code class="docutils literal notranslate"><span class="pre">PhysicalObject</span></code>, <code class="docutils literal notranslate"><span class="pre">StaticTileProvider</span></code>)</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code> imports + forward references for:
+* Types from modules that would cause circular imports
+* External library types only used in annotations
+* Cross-module class references</p></li>
+<li><p>Use simple forward references (without TYPE_CHECKING) for:
+* Self-references within the same class definition</p></li>
 </ul>
-<p><strong>Functions and Methods:</strong></p>
-<ul class="simple">
-<li><p>Use snake_case (e.g., <code class="docutils literal notranslate"><span class="pre">get_tile</span></code>, <code class="docutils literal notranslate"><span class="pre">load_tile</span></code>, <code class="docutils literal notranslate"><span class="pre">cut_tile</span></code>)</p></li>
-<li><p>Private methods use double underscore prefix (e.g., <code class="docutils literal notranslate"><span class="pre">__damp</span></code>, <code class="docutils literal notranslate"><span class="pre">__displacement</span></code>)</p></li>
-<li><p>Protected methods use single underscore prefix (e.g., <code class="docutils literal notranslate"><span class="pre">_load</span></code>, <code class="docutils literal notranslate"><span class="pre">_scanchunk</span></code>)</p></li>
-</ul>
-<p><strong>Variables:</strong></p>
-<ul class="simple">
-<li><p>Use snake_case (e.g., <code class="docutils literal notranslate"><span class="pre">tile_id</span></code>, <code class="docutils literal notranslate"><span class="pre">media_id</span></code>, <code class="docutils literal notranslate"><span class="pre">tile_path</span></code>)</p></li>
-<li><p>Private instance variables use underscore prefix (e.g., <code class="docutils literal notranslate"><span class="pre">self._x</span></code>, <code class="docutils literal notranslate"><span class="pre">self._progress</span></code>)</p></li>
-<li><p>Module-level private variables use double underscore (e.g., <code class="docutils literal notranslate"><span class="pre">__tilecache</span></code>)</p></li>
-</ul>
-<p><strong>Constants:</strong></p>
-<ul class="simple">
-<li><p>Use UPPER_SNAKE_CASE for constants (e.g., <code class="docutils literal notranslate"><span class="pre">damping_factor</span></code> is an exception
-as a class attribute)</p></li>
-</ul>
-<p><strong>Parameters:</strong></p>
-<ul class="simple">
-<li><p>Use descriptive names that indicate purpose (e.g., <code class="docutils literal notranslate"><span class="pre">tile_id</span></code>, <code class="docutils literal notranslate"><span class="pre">media_id</span></code>,
-<code class="docutils literal notranslate"><span class="pre">filename</span></code>, <code class="docutils literal notranslate"><span class="pre">bbox</span></code>)</p></li>
-</ul>
-</section>
-<section id="formatting-requirements">
-<h3>Formatting Requirements<a class="headerlink" href="#formatting-requirements" title="Link to this heading">¶</a></h3>
-<p><strong>File Headers:</strong></p>
-<p>All source files in <code class="docutils literal notranslate"><span class="pre">./pyzui</span></code> should include the GPL license header:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## PyZUI 0.1 - Python Zooming User Interface</span>
-<span class="c1">## Copyright (C) 2009  David Roberts &lt;d@vidr.cc&gt;</span>
-<span class="c1">##</span>
-<span class="c1">## This program is free software; you can redistribute it and/or</span>
-<span class="c1">## modify it under the terms of the GNU General Public License</span>
-<span class="c1">## ...</span>
+<p><strong>Example from the codebase:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># File: pyzui/tilesystem/tileproviders/dynamictileprovider.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtGui</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QImage</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.tileprovider</span><span class="w"> </span><span class="kn">import</span> <span class="n">TileID</span>
+
+<span class="n">TileID</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DynamicTileProvider</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tile_id</span><span class="p">:</span> <span class="n">TileID</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;QImage&#39;</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a tile, returning QImage or None.</span>
+
+<span class="sd">        Uses forward reference &#39;QImage&#39; in annotation while</span>
+<span class="sd">        QImage import is under TYPE_CHECKING for IDE support.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Runtime code uses QtGui.QImage, not the TYPE_CHECKING import</span>
+        <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
 </pre></div>
 </div>
-<p><strong>Module Docstrings:</strong></p>
-<p>Each module should have a docstring at the top (after the license header)
-describing its purpose:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;A threaded media converter (abstract base class).&quot;&quot;&quot;</span>
-</pre></div>
-</div>
-<p><strong>Comments:</strong></p>
-<ul class="simple">
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">##</span></code> for inline comments explaining formulas or complex logic</p></li>
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">#</span></code> for standard code comments</p></li>
-<li><p>Write comments that explain <em>why</em>, not <em>what</em></p></li>
-</ul>
+<p><strong>Guidelines:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>TYPE_CHECKING block placement</strong>: Immediately after imports, before any code</p></li>
+<li><p><strong>Indentation</strong>: 4 spaces for the <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code> block</p></li>
+<li><p><strong>Import grouping</strong>: Group related TYPE_CHECKING imports logically</p></li>
+<li><p><strong>Forward references</strong>: Always use quotes for types imported under TYPE_CHECKING</p></li>
+<li><p><strong>Runtime code</strong>: Use fully qualified names (e.g., <code class="docutils literal notranslate"><span class="pre">QtGui.QImage</span></code>) not TYPE_CHECKING imports</p></li>
+</ol>
 </section>
 </section>
 <section id="testing-requirements">
@@ -815,7 +940,7 @@ interactions:</p>
 <span class="sd">    The tiling system converts large images into pyramidal tile structures</span>
 <span class="sd">    that enable efficient zooming and panning. This test suite validates</span>
 <span class="sd">    the complete pipeline from image input to tile retrieval.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">     &quot;&quot;&quot;</span>
 </pre></div>
 </div>
 </li>
@@ -831,6 +956,172 @@ interactions:</p>
 <li><p>Be responsive to feedback during the review process</p></li>
 </ol>
 <p>Thank you for contributing to PyZUI!</p>
+</section>
+<section id="contributing-to-documentation">
+<h2>Contributing to Documentation<a class="headerlink" href="#contributing-to-documentation" title="Link to this heading">¶</a></h2>
+<p>Documentation is a critical part of PyZUI that helps users understand and
+effectively use the software. This section covers guidelines for contributing
+to the Sphinx-based documentation in the <code class="docutils literal notranslate"><span class="pre">./docs/</span></code> directory.</p>
+<p><strong>Documentation Structure:</strong></p>
+<ul class="simple">
+<li><p><strong>Source files</strong>: RST (<code class="docutils literal notranslate"><span class="pre">.rst</span></code>) files in <code class="docutils literal notranslate"><span class="pre">docs/source/</span></code> directory</p></li>
+<li><p><strong>Configuration</strong>: <code class="docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code> for Sphinx settings</p></li>
+<li><p><strong>Build output</strong>: HTML files in <code class="docutils literal notranslate"><span class="pre">docs/build/html/</span></code></p></li>
+<li><p><strong>Auto-generated API docs</strong>: Created from Python docstrings using Sphinx extensions</p></li>
+</ul>
+<p><strong>Sphinx Extensions Used:</strong></p>
+<p>PyZUI documentation uses the following Sphinx extensions:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sphinx.ext.autodoc</span></code>: Automatically documents Python docstrings</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sphinx.ext.autosummary</span></code>: Creates summary tables for modules</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sphinx.ext.napoleon</span></code>: Supports Google/NumPy-style docstrings</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sphinx.ext.viewcode</span></code>: Adds links to highlighted source code</p></li>
+</ul>
+<p>These extensions automatically generate API documentation from Python docstrings
+following the formats described in the “Docstring Format” section above.</p>
+<section id="documentation-quality-standards">
+<h3>Documentation Quality Standards<a class="headerlink" href="#documentation-quality-standards" title="Link to this heading">¶</a></h3>
+<p><strong>Clarity and Completeness:</strong></p>
+<ul class="simple">
+<li><p>Write for the target audience (users, developers, or contributors)</p></li>
+<li><p>Cover all relevant aspects without assuming prior knowledge</p></li>
+<li><p>Use simple, direct language avoiding unnecessary jargon</p></li>
+<li><p>Include practical examples for complex concepts</p></li>
+</ul>
+<p><strong>Examples and Use Cases:</strong></p>
+<ul class="simple">
+<li><p>Provide real-world examples from the PyZUI codebase</p></li>
+<li><p>Include complete, tested code snippets</p></li>
+<li><p>Document edge cases and common pitfalls</p></li>
+<li><p>Show before/after comparisons when demonstrating improvements</p></li>
+</ul>
+<p><strong>Consistency with Existing Documentation:</strong></p>
+<ul class="simple">
+<li><p>Follow established patterns in existing documentation files</p></li>
+<li><p>Use consistent terminology (e.g., “tile” not “image chunk”)</p></li>
+<li><p>Maintain the same heading hierarchy and formatting style</p></li>
+<li><p>Cross-reference related documentation sections appropriately</p></li>
+</ul>
+<p><strong>Proper RST Formatting:</strong></p>
+<ul class="simple">
+<li><p>Use RST directives correctly (<code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">code-block::</span></code>, <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">note::</span></code>, <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">warning::</span></code>)</p></li>
+<li><p>Ensure heading underline lengths match title length exactly</p></li>
+<li><p>Use consistent indentation (3 spaces for directives, 4 spaces for code blocks)</p></li>
+<li><p>Include descriptive alt text for images and diagrams</p></li>
+<li><p>Use backticks for inline code references</p></li>
+</ul>
+<p><strong>Accuracy and Verification:</strong></p>
+<ul class="simple">
+<li><p>Ensure documentation matches actual code behavior</p></li>
+<li><p>Test code examples before including them</p></li>
+<li><p>Verify command-line instructions work as described</p></li>
+<li><p>Update documentation when related code changes</p></li>
+</ul>
+<p><strong>Accessibility and Navigation:</strong></p>
+<ul class="simple">
+<li><p>Use meaningful section titles that describe content</p></li>
+<li><p>Include table of contents for longer documents</p></li>
+<li><p>Add cross-references (<code class="docutils literal notranslate"><span class="pre">:doc:</span></code>, <code class="docutils literal notranslate"><span class="pre">:ref:</span></code>) to related content</p></li>
+<li><p>Ensure documentation builds without warnings</p></li>
+</ul>
+</section>
+<section id="documentation-workflow">
+<h3>Documentation Workflow<a class="headerlink" href="#documentation-workflow" title="Link to this heading">¶</a></h3>
+<p><strong>1. Set Up Documentation Environment:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Navigate to documentation directory</span>
+<span class="nb">cd</span><span class="w"> </span>docs/
+
+<span class="c1"># Install Sphinx via conda (recommended)</span>
+conda<span class="w"> </span>install<span class="w"> </span>sphinx
+
+<span class="c1"># Alternatively install via pip</span>
+<span class="c1"># pip install sphinx</span>
+
+<span class="c1"># Build documentation locally to verify current state</span>
+make<span class="w"> </span>clean
+make<span class="w"> </span>html
+</pre></div>
+</div>
+<p><strong>2. Make Documentation Changes:</strong></p>
+<ul class="simple">
+<li><p>Edit RST (<code class="docutils literal notranslate"><span class="pre">.rst</span></code>) files in <code class="docutils literal notranslate"><span class="pre">docs/source/</span></code> directory</p></li>
+<li><p>Follow RST syntax and project conventions</p></li>
+<li><p>Use existing documentation as reference for style</p></li>
+<li><p>Keep changes focused and manageable</p></li>
+</ul>
+<p><strong>3. Build and Test Documentation:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build HTML documentation</span>
+make<span class="w"> </span>html
+
+<span class="c1"># Check for warnings or errors in the output</span>
+<span class="c1"># Address any Sphinx warnings before submitting</span>
+
+<span class="c1"># Open built documentation in browser to verify</span>
+<span class="c1"># Linux:</span>
+xdg-open<span class="w"> </span>build/html/index.html
+
+<span class="c1"># macOS:</span>
+open<span class="w"> </span>build/html/index.html
+
+<span class="c1"># Windows:</span>
+start<span class="w"> </span>build/html/index.html
+</pre></div>
+</div>
+<p><strong>4. Verify Build Quality:</strong></p>
+<ul class="simple">
+<li><p>[ ] Documentation builds without warnings</p></li>
+<li><p>[ ] All internal links work correctly</p></li>
+<li><p>[ ] Code examples are accurate and tested</p></li>
+<li><p>[ ] Formatting is consistent with existing docs</p></li>
+<li><p>[ ] Cross-references are properly linked</p></li>
+<li><p>[ ] Images and diagrams display correctly</p></li>
+</ul>
+<p><strong>5. Deploy to GitHub Pages (Optional):</strong></p>
+<p>For maintainers or those with push access, documentation can be deployed to
+GitHub Pages using <code class="docutils literal notranslate"><span class="pre">ghp-import</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install ghp-import</span>
+conda<span class="w"> </span>install<span class="w"> </span>ghp-import
+
+<span class="c1"># Build documentation</span>
+make<span class="w"> </span>clean
+make<span class="w"> </span>html
+
+<span class="c1"># Deploy to gh-pages branch</span>
+ghp-import<span class="w"> </span>-n<span class="w"> </span>-p<span class="w"> </span>-f<span class="w"> </span>build/html
+
+<span class="c1"># The documentation will be available at:</span>
+<span class="c1"># https://[username].github.io/pyzui/</span>
+</pre></div>
+</div>
+<p><strong>Note:</strong> GitHub Pages deployment requires appropriate repository permissions
+and is typically handled by project maintainers.</p>
+<p><strong>6. Types of Documentation Contributions:</strong></p>
+<p><strong>Minor Improvements:</strong>
+- Fix typos, grammar, or formatting issues
+- Update outdated information
+- Improve clarity of existing content
+- Fix broken links or references</p>
+<p><strong>Moderate Enhancements:</strong>
+- Add missing documentation for existing features
+- Improve examples or add new ones
+- Reorganize content for better flow
+- Add diagrams or visual aids</p>
+<p><strong>Major Contributions:</strong>
+- Create new documentation sections or tutorials
+- Implement documentation automation
+- Improve documentation infrastructure
+- Add comprehensive API documentation</p>
+<p><strong>7. Submission Process:</strong></p>
+<p>Documentation contributions follow the same submission process as code
+contributions (fork, branch, pull request). Ensure your documentation:</p>
+<ul class="simple">
+<li><p>Builds successfully with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span></code></p></li>
+<li><p>Follows the quality standards above</p></li>
+<li><p>Maintains consistency with existing documentation</p></li>
+<li><p>Includes appropriate examples and cross-references</p></li>
+</ul>
+<p>Thank you for contributing to PyZUI!</p>
+</section>
 </section>
 </section>
 
@@ -927,7 +1218,7 @@ interactions:</p>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
-      <a href="../_sources/contributionguidelines/contributiongiudelines.rst.txt"
+      <a href="../_sources/contributionguidelines/contributionguidelines.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

@@ -84,7 +84,8 @@
         <span class="s1">&#39;tilestore&#39;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s1">&#39;auto_cleanup&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s1">&#39;max_age_days&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-            <span class="s1">&#39;cleanup_on_startup&#39;</span><span class="p">:</span> <span class="kc">True</span>
+            <span class="s1">&#39;cleanup_on_startup&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;collect_cleanup_stats&#39;</span><span class="p">:</span> <span class="kc">True</span>
         <span class="p">}</span>
     <span class="p">}</span>
 
@@ -190,6 +191,12 @@
         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Maximum age in days for tilestore cleanup (default: 3)&#39;</span>
     <span class="p">)</span>
 
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s1">&#39;--fast-cleanup&#39;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Use fast cleanup mode (skips detailed statistics for faster startup)&#39;</span>
+    <span class="p">)</span>
+
     <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span></div>
 
 
@@ -223,6 +230,8 @@
         <span class="n">config</span><span class="p">[</span><span class="s1">&#39;tilestore&#39;</span><span class="p">][</span><span class="s1">&#39;auto_cleanup&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">cleanup_age</span><span class="p">:</span>
         <span class="n">config</span><span class="p">[</span><span class="s1">&#39;tilestore&#39;</span><span class="p">][</span><span class="s1">&#39;max_age_days&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">cleanup_age</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">fast_cleanup</span><span class="p">:</span>
+        <span class="n">config</span><span class="p">[</span><span class="s1">&#39;tilestore&#39;</span><span class="p">][</span><span class="s1">&#39;collect_cleanup_stats&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># Set working directory</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">):</span>
@@ -243,14 +252,21 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Working directory: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Python version: </span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="c1"># Initialize TileManager (includes automatic cleanup if enabled)</span>
+    <span class="c1"># Initialize TileManager (cleanup registered for shutdown execution)</span>
     <span class="n">TileManager</span><span class="o">.</span><span class="n">init</span><span class="p">(</span>
         <span class="n">auto_cleanup</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;tilestore&#39;</span><span class="p">][</span><span class="s1">&#39;auto_cleanup&#39;</span><span class="p">],</span>
-        <span class="n">cleanup_max_age_days</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;tilestore&#39;</span><span class="p">][</span><span class="s1">&#39;max_age_days&#39;</span><span class="p">]</span>
+        <span class="n">cleanup_max_age_days</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;tilestore&#39;</span><span class="p">][</span><span class="s1">&#39;max_age_days&#39;</span><span class="p">],</span>
+        <span class="n">collect_cleanup_stats</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;tilestore&#39;</span><span class="p">][</span><span class="s1">&#39;collect_cleanup_stats&#39;</span><span class="p">]</span>
     <span class="p">)</span>
 
     <span class="c1"># Create Qt application</span>
     <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    
+    <span class="c1"># Connect Qt shutdown signal for cleanup</span>
+    <span class="k">if</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;tilestore&#39;</span><span class="p">][</span><span class="s1">&#39;auto_cleanup&#39;</span><span class="p">]:</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">aboutToQuit</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">TileManager</span><span class="o">.</span><span class="n">_shutdown_cleanup</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Qt shutdown cleanup hook registered&#39;</span><span class="p">)</span>
+    
     <span class="n">icon_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;icon.png&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">icon_path</span><span class="p">):</span>
         <span class="n">app</span><span class="o">.</span><span class="n">setWindowIcon</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">icon_path</span><span class="p">))</span>
@@ -327,7 +343,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributionguidelines/contributionguidelines.html">Contribution Guidelines</a></li>
 </ul>
 
 <div class="relations">

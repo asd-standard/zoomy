@@ -810,6 +810,6 @@ Use logging to identify performance bottlenecks:
 See Also
 ========
 
-* :doc:`../contributionguidelines/contributiongiudelines` - Guidelines for contributing to PyZUI
+* :doc:`../contributionguidelines/contributionguidelines` - Guidelines for contributing to PyZUI
 * :doc:`../gettingstarted/installation` - Installation instructions
 * :doc:`../main` - Main documentation

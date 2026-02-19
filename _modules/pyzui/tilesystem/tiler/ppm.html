@@ -49,8 +49,11 @@
 
 <span class="sd">&quot;&quot;&quot;Module for reading PPM images.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.tiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tiler</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.tiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tiler</span> <span class="k">as</span> <span class="n">TilerType</span>
 
 <div class="viewcode-block" id="read_ppm_header">
 <a class="viewcode-back" href="../../../../pyzui/ppm.html#pyzui.tilesystem.tiler.ppm.read_ppm_header">[docs]</a>
@@ -246,7 +249,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributionguidelines/contributionguidelines.html">Contribution Guidelines</a></li>
 </ul>
 
 <div class="relations">

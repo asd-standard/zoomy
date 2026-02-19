@@ -246,7 +246,47 @@ Total: 1 + 4 + 16 = 21 tiles
 <li><p><code class="docutils literal notranslate"><span class="pre">tiled(media_id)</span></code>: Check if a media has been fully tiled</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">get_tilestore_stats()</span></code>: Get statistics about the tilestore</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">cleanup_old_tiles(max_age_days)</span></code>: Remove old tile directories</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">auto_cleanup(max_age_days,</span> <span class="pre">enable,</span> <span class="pre">collect_stats)</span></code>: Automatic cleanup with statistics</p></li>
 </ul>
+<p><strong>Automatic Cleanup System:</strong></p>
+<p>The tilestore includes an automatic cleanup system that removes old tile
+directories to manage disk space. Cleanup runs on application shutdown by
+default to improve startup performance.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enable automatic cleanup (runs on shutdown by default)</span>
+<span class="n">tilemanager</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">auto_cleanup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cleanup_max_age_days</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+
+<span class="c1"># Disable automatic cleanup</span>
+<span class="n">tilemanager</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">auto_cleanup</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Run cleanup manually</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem.tilestore</span><span class="w"> </span><span class="kn">import</span> <span class="n">auto_cleanup</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">auto_cleanup</span><span class="p">(</span><span class="n">max_age_days</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">collect_stats</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Cleanup Behavior:</strong></p>
+<ul class="simple">
+<li><p><strong>Shutdown Cleanup (default)</strong>: Runs when application exits gracefully</p></li>
+<li><p><strong>Manual Cleanup</strong>: Can be triggered via command-line utility</p></li>
+<li><p><strong>Statistics Collection</strong>: Can be disabled for faster cleanup</p></li>
+</ul>
+<p><strong>Cleanup Statistics:</strong></p>
+<p>When <code class="docutils literal notranslate"><span class="pre">collect_stats=True</span></code> (default), the cleanup process logs:
+1. Before cleanup: Media count, file count, total size
+2. Cleanup results: Deleted media, freed space, errors
+3. After cleanup: Media count, file count, total size</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">collect_stats=False</span></code> (fast mode), only cleanup results are logged.</p>
+<p><strong>Performance Considerations:</strong></p>
+<ul class="simple">
+<li><p>Full statistics collection walks the tilestore directory 3 times</p></li>
+<li><p>Fast mode (<code class="docutils literal notranslate"><span class="pre">collect_stats=False</span></code>) walks directory only once</p></li>
+<li><p>Recommended for large tilestores (&gt;10,000 files)</p></li>
+</ul>
+<p><strong>Command-line Options:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./main.py<span class="w"> </span>--no-cleanup<span class="w">          </span><span class="c1"># Disable cleanup entirely</span>
+./main.py<span class="w"> </span>--cleanup-age<span class="w"> </span><span class="m">30</span><span class="w">      </span><span class="c1"># Clean tiles older than 30 days</span>
+./main.py<span class="w"> </span>--fast-cleanup<span class="w">        </span><span class="c1"># Skip detailed statistics</span>
+</pre></div>
+</div>
 </section>
 <section id="tilecache">
 <h3>TileCache<a class="headerlink" href="#tilecache" title="Link to this heading">¶</a></h3>
@@ -273,7 +313,8 @@ Total: 1 + 4 + 16 = 21 tiles
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tilemanager</span><span class="o">.</span><span class="n">init</span><span class="p">(</span>
     <span class="n">total_cache_size</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>     <span class="c1"># Total cache size in MB</span>
     <span class="n">auto_cleanup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>        <span class="c1"># Enable automatic cleanup</span>
-    <span class="n">cleanup_max_age_days</span><span class="o">=</span><span class="mi">7</span>    <span class="c1"># Remove tiles older than 7 days</span>
+    <span class="n">cleanup_max_age_days</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>   <span class="c1"># Remove tiles older than 7 days</span>
+    <span class="n">collect_cleanup_stats</span><span class="o">=</span><span class="kc">False</span>  <span class="c1"># Skip detailed stats for faster startup</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -410,7 +451,10 @@ attempts to synthesize it from parent tiles via <code class="docutils literal no
 <ul class="simple">
 <li><p><strong>Cache Size</strong>: 200-500 MB for typical usage</p></li>
 <li><p><strong>Tile Size</strong>: 256×256 for balance of overhead vs. granularity</p></li>
-<li><p><strong>Auto-Cleanup</strong>: Enable with 7-30 day retention for disk management</p></li>
+<li><p><strong>Auto-Cleanup</strong>: Enable with 7-30 day retention for disk management
+- Runs on shutdown by default for faster startup
+- Use <code class="docutils literal notranslate"><span class="pre">--fast-cleanup</span></code> to skip detailed statistics
+- Disable with <code class="docutils literal notranslate"><span class="pre">--no-cleanup</span></code> if not needed</p></li>
 </ul>
 </section>
 <section id="exception-handling">
@@ -565,7 +609,7 @@ attempts to synthesize it from parent tiles via <code class="docutils literal no
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contribution Guidelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../contributionguidelines/contributiongiudelines.html">Contribution Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributionguidelines/contributionguidelines.html">Contribution Guidelines</a></li>
 </ul>
 
 <div class="relations">

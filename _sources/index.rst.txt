@@ -91,7 +91,7 @@ be under COPYING.txt on project root, otherwise visit `gnu.org <https://www.gnu.
    :titlesonly:
    :caption: Contribution Guidelines
 
-   contributionguidelines/contributiongiudelines
+   contributionguidelines/contributionguidelines
 
 
 
