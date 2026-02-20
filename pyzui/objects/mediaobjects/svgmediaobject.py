@@ -16,7 +16,7 @@
 
 """SVG objects to be displayed in the ZUI."""
 
-from typing import Tuple, Any
+from typing import Tuple, Any, Optional
 
 from PySide6 import QtCore, QtSvg
 
@@ -79,6 +79,15 @@ class SVGMediaObject(MediaObject):
         # This is the SVG's native height before any scaling is applied
         self.__height: int = size.height()
 
+        # Initialize private variables for caching optimizations
+        # These start as None and store computed values when first accessed
+
+        # Stores the scale value (2^(scene.zoomlevel + object.zoomlevel))
+        self.__cached_scale: Optional[float] = None
+
+        # Stores the calculated (width, height) tuple for this SVG at current scale
+        self.__cached_onscreen_size: Optional[Tuple[float, float]] = None
+
     # Class variable: indicates this media object supports transparency
     # SVG images can have transparent backgrounds, so they cannot hide objects behind them
     transparent: bool = True
@@ -135,10 +144,22 @@ class SVGMediaObject(MediaObject):
 
         Multiplies the SVG's native width and height by the current scale factor.
         The scale factor is derived from the combined scene and object zoom levels.
+
+        Uses caching to avoid recalculating size on every access.
         """
+        current_scale: float = self.scale
+
+        # Return cached size if scale hasn't changed
+        if self.__cached_scale == current_scale and self.__cached_onscreen_size is not None:
+            return self.__cached_onscreen_size
+
         # Calculate on-screen dimensions by multiplying native pixel size by scale
         # self.scale returns 2^(scene.zoomlevel + object.zoomlevel)
         # self.__width and self.__height are the SVG's intrinsic dimensions
-        w: float = self.__width * self.scale
-        h: float = self.__height * self.scale
+        w: float = self.__width * current_scale
+        h: float = self.__height * current_scale
+
+        # Update cache
+        self.__cached_scale = current_scale
+        self.__cached_onscreen_size = (w, h)
         return (w, h)
