@@ -16,6 +16,7 @@
 
 """Strings to be displayed in the ZUI."""
 
+import math
 from typing import Optional, Tuple, Any
 
 from PySide6 import QtCore, QtGui
@@ -32,33 +33,39 @@ class StringMediaObject(MediaObject): #, Thread
 
     StringMediaObject(media_id, scene) --> None
 
-    StringMediaObject objects are used to represent strings that can be
-    rendered in the ZUI.
+    StringMediaObject implements a hybrid rendering system for 
+    text displayin the ZUI.
 
     `StringMediaObject.media_id` should be of the form 'string:rrggbb:foobar',
     where 'rrggbb' is a string of three two-digit hexadecimal numbers
     representing the colour of the text, and 'foobar' is the string to be
     displayed.
+    
+    Overview:
+
+       - render Dual-mode triggered by scene.vzmoving (zoom velocity)
+       - moving mode: Direct QPainter.drawText() rendering for smooth zoom/pan operations
+       - static mode: Cached QImage rendering for optimal quality when stationary
+       - Automatic cache invalidation when movement starts to ensure fresh rendering
+    
+    From "foobar" string QImage gets generated, from form 'string:rrggbb:foobar' hash get's 
+    generated for cache invalidation in case string color of text content changes.
+    Also Qfont, QFontMetrics, text dimension (width, height), and scale are cached.
+
+    QImage cached image gets invalidated if relative_scale_diff > 1% or if 
+    self__scene_vzmoving returns True 
+
+    For direct text rendering : 
+       - longest line index gets Pre-calculated for efficient multi-line rendering
+       - Font creation only when point size ≥ 1 (visible text)
+       - Visibility culling based on viewport size ratios
+       - Automatic cache validation with comprehensive invalidation triggers
+    
     """
     def __init__(self, media_id: str, scene: Any) -> None:
         """
-        Constructor :
-            StringMediaObject(media_id, scene)
-        Parameters :
-            media_id : str
-            scene : Scene
-
-        StringMediaObject(media_id, scene) --> None
-
         Initialize a new StringMediaObject from the media identified by media_id,
         and the parent Scene referenced by scene.
-
-        The media_id should be of the form 'string:rrggbb:foobar', where
-        'rrggbb' is a string of three two-digit hexadecimal numbers representing
-        the color of the text, and 'foobar' is the string to be displayed.
-
-        Parses the media_id to extract color and text content, then processes
-        the text to handle multi-line strings by splitting on newline characters.
         """
         MediaObject.__init__(self, media_id, scene)
 
@@ -105,13 +112,194 @@ class StringMediaObject(MediaObject): #, Thread
         # Stores the calculated (width, height) tuple for this string at current scale
         self.__cached_onscreen_size: Optional[Tuple[float, float]] = None
         
+        # Text image caching variables
+        # Stores the rendered text as QImage for faster rendering at high zoom
+        self.__cached_text_image: Optional[QtGui.QImage] = None
         
+        # Stores the scale at which the text image was rendered
+        self.__cached_image_scale: Optional[float] = None
+        
+        # Stores the render mode used for the cached image
+        self.__cached_image_mode: Optional[int] = None
+        
+        # Stores hash of text content and color for cache invalidation
+        self.__cached_text_hash: Optional[int] = None
+        
+        # Track if we were previously static to detect when movement starts
+        self.__was_static: bool = True
 
     # Class variable: indicates this media object supports transparency
     transparent: bool = True
 
     # Class variable: point size of the font when the scale is 100%
     base_pointsize: float = 24.0
+
+    def __compute_text_hash(self) -> int:
+        """
+        Method :
+            StringMediaObject.__compute_text_hash()
+        Parameters :
+            None
+
+        StringMediaObject.__compute_text_hash() --> int
+
+        Compute hash of text content and color for cache invalidation.
+        Returns a combined hash of all text lines and the color RGB value.
+        """
+        # Combine all lines into a single string for hashing
+        text_content: str = ''.join(self.lines)
+        color_rgb: int = self.__color.rgb()
+        return hash((text_content, color_rgb))
+
+    def __is_image_cache_valid(self, current_scale: float, mode: int) -> bool:
+        """
+        Method :
+            StringMediaObject.__is_image_cache_valid(current_scale, mode)
+        Parameters :
+            current_scale : float
+            mode : int
+
+        StringMediaObject.__is_image_cache_valid(current_scale, mode) --> bool
+
+        Check if cached text image is valid for current scale and render mode.
+        Returns True if cache is valid, False otherwise.
+        """
+        if self.__cached_text_image is None:
+            return False
+        if self.__cached_image_scale is None or self.__cached_image_mode is None:
+            return False
+        
+        # Check scale - text rendering is very sensitive to scale changes
+        # We need exact scale match for text rendering
+        # Use relative difference to handle floating point precision
+        if self.__cached_image_scale == 0 or current_scale == 0:
+            return False
+        
+        relative_scale_diff: float = abs(current_scale - self.__cached_image_scale) / self.__cached_image_scale
+        if relative_scale_diff > 0.01:  # 1% tolerance
+            return False
+        
+        # Check render mode
+        if mode != self.__cached_image_mode:
+            return False
+        
+        # Check text/color hasn't changed
+        current_hash: int = self.__compute_text_hash()
+        if current_hash != self.__cached_text_hash:
+            return False
+        
+        return True
+
+    def __render_text_direct(self, painter: Any, x: float, y: float, mode: int) -> None:
+        """
+        Method :
+            StringMediaObject.__render_text_direct(painter, x, y, mode)
+        Parameters :
+            painter : QPainter
+            x : float - x position to render at
+            y : float - y position to render at
+            mode : int
+
+        StringMediaObject.__render_text_direct(painter, x, y, mode) --> None
+
+        Render text directly using QPainter.drawText().
+        This is the original rendering method used before caching was implemented.
+        """
+        # Get dimensions
+        onscreen_w: float
+        onscreen_h: float
+        onscreen_w, onscreen_h = self.onscreen_size
+        if onscreen_w <= 0 or onscreen_h <= 0:
+            return
+        
+        # Set pen color for text
+        painter.setPen(self.__color)
+        
+        # Get font
+        font: Optional[QtGui.QFont] = self.__font
+        if not font:
+            return
+        
+        painter.setFont(font)
+        
+        # Get font metrics
+        fontmetrics: Optional[QtGui.QFontMetrics] = self.__cached_font_metrics
+        if fontmetrics is None:
+            return
+        
+        fontmetrics_nonnull: QtGui.QFontMetrics = fontmetrics
+        hl: int = fontmetrics_nonnull.height()
+        
+        # Render multiline or single line text
+        if len(self.lines) > 1:
+            yr: float = y
+            line: str
+            for line in self.lines:
+                rect: QtCore.QRectF = QtCore.QRectF(int(x), int(yr), int(onscreen_w), int(hl))
+                painter.drawText(rect, line)
+                yr += hl
+        else:
+            rect: QtCore.QRectF = QtCore.QRectF(int(x), int(y), int(onscreen_w), int(hl))
+            painter.drawText(rect, self.lines[0])
+
+    def __render_text_to_image(self, mode: int) -> QtGui.QImage:
+        """
+        Method :
+            StringMediaObject.__render_text_to_image(mode)
+        Parameters :
+            mode : int
+
+        StringMediaObject.__render_text_to_image(mode) --> QImage
+
+        Render text to QImage for caching.
+        Creates a transparent image with the text rendered at current scale.
+        """
+        # Get dimensions
+        onscreen_w: float
+        onscreen_h: float
+        onscreen_w, onscreen_h = self.onscreen_size
+        if onscreen_w <= 0 or onscreen_h <= 0:
+            return QtGui.QImage()
+        
+        # Create transparent image with appropriate size
+        image: QtGui.QImage = QtGui.QImage(
+            int(onscreen_w), 
+            int(onscreen_h), 
+            QtGui.QImage.Format.Format_ARGB8565_Premultiplied #Format_ARGB32_Premultiplied
+        )
+        image.fill(QtCore.Qt.GlobalColor.transparent)
+        
+        # Create painter for image
+        painter: QtGui.QPainter = QtGui.QPainter(image)
+        painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+        painter.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing)
+        
+        # Render text to image using direct rendering logic at position (0, 0)
+        self.__render_text_direct(painter, 0, 0, mode)
+        
+        painter.end()
+        
+        return image
+    
+
+
+
+    def invalidate_cache(self) -> None:
+        """
+        Method :
+            StringMediaObject.invalidate_cache()
+        Parameters :
+            None
+
+        StringMediaObject.invalidate_cache() --> None
+
+        Invalidate text image cache.
+        Clears all cached image data to force re-rendering on next render call.
+        """
+        self.__cached_text_image = None
+        self.__cached_image_scale = None
+        self.__cached_image_mode = None
+        self.__cached_text_hash = None
 
     def render(self, painter: Any, mode: int) -> None:
         """
@@ -128,7 +316,6 @@ class StringMediaObject(MediaObject): #, Thread
         """
 
         # Call onscreen_size property once and unpack into two variables
-        # Tuple unpacking: (w, h) -> onscreen_w=w, onscreen_h=h
         onscreen_w: float
         onscreen_h: float
         onscreen_w, onscreen_h = self.onscreen_size
@@ -141,74 +328,37 @@ class StringMediaObject(MediaObject): #, Thread
         max(onscreen_w, onscreen_h) < int((max(self._scene.viewport_size))/1.3) and mode \
         != RenderMode.Invisible:
     
-
-            # painter.setPen() sets the color for subsequent drawing operations
-            # Uses the QColor object we created in __init__ from the hex color code
-            painter.setPen(self.__color)
-
-            # Accessing self.__font property triggers the getter which checks cache first
-            # Get cached font from property (returns cached value if scale unchanged)
-            # Returns QFont object or None if pointsize < 1
-            font: Optional[QtGui.QFont] = self.__font
-
-            # Early return if font is None (text too small to render)
-            # return exits the method immediately, skipping all drawing code below
-            if not font:
-                return
-
-            # painter.setFont() configures the painter to use this font for text rendering
-            # QFont object contains typeface, size, weight, and other font properties
-            painter.setFont(font)
-
-            # Get top-left corner position of the text object on screen
-            # self.topleft is a property that returns tuple (x, y) in screen coordinates
+            # Get top-left corner position of the text object on scremoen
             x: float
             y: float
             x, y = self.topleft
 
-            # Access the cached QFontMetrics object created in __font property
-            fontmetrics: QtGui.QFontMetrics = self.__cached_font_metrics
-
-            # fontmetrics.height() returns the vertical spacing for a line of text in pixels
-            # Includes ascent (above baseline) + descent (below baseline) + leading (line spacing)
-            # Used to calculate y-position for each subsequent line
-            hl: int = fontmetrics.height()
-                     
-            
-            # Check if we have multiple lines (multiline text)
-            if len(self.lines) > 1 :
-                # yr (y-rendering) tracks the current y-position as we draw each line
-                # Start at the top y position
-                yr: float = y
-
-                # for loop iterates through each string in self.lines
-                line: str
-                for line in self.lines:
-                    # QtCore.QRectF creates a floating-point rectangle for text rendering
-                    # Parameters: (x, y, width, height) - all converted to integers
-                    rect: QtCore.QRectF = QtCore.QRectF(int(x), int(yr), int(onscreen_w), int(hl))
-
-                    # painter.drawText() renders the text string within the rectangle
-                    # Uses the font and color set earlier with setFont() and setPen()
-                    painter.drawText(rect, line)
-
-                    # Move y-position down by one line height for next line
-                    # += adds hl to yr (yr = yr + hl)
-                    yr += hl 
- 
+            # Hybrid rendering: use direct rendering while scene is moving, cached images when static
+            if self._scene.vzmoving:
+                # Scene is zooming - use direct rendering for smoothness
+                # Invalidate cache when zooming starts to ensure fresh cache when movement stops
+                if self.__was_static:
+                    self.invalidate_cache()
+                    self.__was_static = False
+                self.__render_text_direct(painter, x, y, mode)
             else:
-                # Single line rendering
-                # Create a single rectangle for the entire text
-                # QtCore.QRectF(x, y, width, height) as above
-                rect: QtCore.QRectF = QtCore.QRectF(int(x), int(y), int(onscreen_w), int(hl))
-
-                # Draw the first (and only) line
-                # self.lines[0] accesses the first element (index 0) of lines list
-                painter.drawText(rect, self.lines[0])
-
-           
-            
-
+                # Scene is static - use cached images for optimal rendering quality
+                self.__was_static = True
+                current_scale: float = self.scale
+                if self.__is_image_cache_valid(current_scale, mode):
+                    # Draw cached image
+                    painter.drawImage(int(x), int(y), self.__cached_text_image)
+                else:
+                    # Render text to image, cache it, then draw
+                    self.__cached_text_image = self.__render_text_to_image(mode)
+                    self.__cached_image_scale = current_scale
+                    self.__cached_image_mode = mode
+                    self.__cached_text_hash = self.__compute_text_hash()
+                    
+                    # Draw the newly cached image
+                    if self.__cached_text_image and not self.__cached_text_image.isNull():
+                        painter.drawImage(int(x), int(y), self.__cached_text_image)
+                            
     @property
     def __pointsize(self) -> float:
         """
@@ -291,18 +441,25 @@ class StringMediaObject(MediaObject): #, Thread
 
         if font:
             # Use cached font metrics instead of creating new ones
-            fontmetrics: QtGui.QFontMetrics = self.__cached_font_metrics
+            fontmetrics: Optional[QtGui.QFontMetrics] = self.__cached_font_metrics
+
+            if fontmetrics is None:
+                self.__cached_onscreen_size = (0, 0)
+                return (0, 0)
+
+            # Type assertion: fontmetrics is not None after the check above
+            fontmetrics_nonnull: QtGui.QFontMetrics = fontmetrics
 
             w: float
             h: float
             if len(self.lines) > 1:
                 # Use cached longest line index instead of sorting every time
                 longest_line: str = self.lines[self.__longest_line_idx]
-                w = fontmetrics.horizontalAdvance(longest_line + '-------')
-                h = fontmetrics.height() * len(self.lines)
+                w = fontmetrics_nonnull.horizontalAdvance(longest_line + '-------')
+                h = fontmetrics_nonnull.height() * len(self.lines)
             else:
-                w = fontmetrics.horizontalAdvance(self.__str + '-')
-                h = fontmetrics.height()
+                w = fontmetrics_nonnull.horizontalAdvance(self.__str + '-')
+                h = fontmetrics_nonnull.height()
 
             self.__cached_onscreen_size = (w, h)
             return (w, h)

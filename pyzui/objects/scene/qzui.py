@@ -142,13 +142,14 @@ class QZUI(QtWidgets.QWidget, Thread) :
             painter.fillRect(
                     0, 0, self.width(), self.height(), QtCore.Qt.black)
 
+            errors = []
             ## render scene
-            self.scene.render(painter, self.__draft) #errors = 
+            errors = self.scene.render(painter, self.__draft) # 
             
             ## show errors
-            #for mediaobject in errors:
+            for mediaobject in errors:
                 
-            #    self.error.emit("Error loading %s" + str(mediaobject))
+                self.error.emit("Error loading %s" + str(mediaobject))
 
         finally:
             painter.end()

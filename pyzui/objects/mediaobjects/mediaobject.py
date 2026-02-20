@@ -99,14 +99,6 @@ class MediaObject(PhysicalObject) :
     """
     def __init__(self, media_id: str, scene: Any) -> None:
         """
-        Constructor :
-            MediaObject(media_id, scene)
-        Parameters :
-            media_id : str
-            scene : Scene
-
-        MediaObject(media_id, scene) --> None
-
         Create a new MediaObject from the media identified by media_id,
         and the parent Scene referenced by scene.
 

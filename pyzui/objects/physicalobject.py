@@ -276,6 +276,23 @@ class PhysicalObject(): #removed object from class argument and Thread
         if self.vz:
             self.zoom(self.__displacement(t, self.vz))
             self.vz = self.__damp(self.vz, t)
+    
+    @property
+    def vzmoving(self) -> bool:
+        """
+        Property :
+            PhysicalObject.moving
+        Parameters :
+            None
+
+        PhysicalObject.moving --> bool
+
+        Boolean value indicating whether the object has z non-zero velocity.
+
+        Returns True if vz is non-zero.
+        Returns False if all velocity components are zero.
+        """
+        return not (self.vz == 0)
 
     @property
     def moving(self) -> bool:

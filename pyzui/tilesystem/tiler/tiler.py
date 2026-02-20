@@ -413,7 +413,7 @@ class Tiler(Thread):
         try:
             with TileStore.disk_lock:
               
-                    ## recursively tile the image
+                ## recursively tile the image
                 self.__tiles()
           
         except Exception as e:       

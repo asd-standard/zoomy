@@ -344,6 +344,112 @@ Getting Started with Contributing
 
    Push your changes and create a pull request against the main branch.
 
+Code Style
+^^^^^^^^^^
+
+The project follows these code style conventions:
+
+**Indentation:**
+
+- Use 4 spaces for indentation (no tabs)
+
+**Line Length:**
+
+- Keep lines reasonably short, preferably under 80-100 characters
+- Use line continuation with backslash (``\``) or parentheses for long lines
+
+**Imports:**
+
+- Group imports in the following order:
+
+  1. Standard library imports
+  2. Third-party imports (PySide6, PIL, etc.)
+  3. Local application imports
+
+- Example:
+
+  .. code-block:: python
+
+      import math
+      from threading import Thread
+      from typing import Optional, Tuple, Any
+
+      from PIL import Image
+      from PySide6 import QtCore, QtGui
+
+      from .tileprovider import TileProvider
+      from .. import tilestore as TileStore
+
+**Blank Lines:**
+
+- Two blank lines between top-level definitions (classes, functions)
+- One blank line between method definitions within a class
+- Use blank lines sparingly within functions to separate logical sections
+
+Naming Conventions
+^^^^^^^^^^^^^^^^^^
+
+**Modules:**
+
+- Use concatenated lowercase words with no separators (e.g., ``tileprovider.py``, ``dynamictileprovider.py``, ``converterrunner.py``)
+
+**Classes:**
+
+- Use PascalCase (e.g., ``TileManager``, ``PhysicalObject``, ``StaticTileProvider``)
+
+**Functions and Methods:**
+
+- Use snake_case (e.g., ``get_tile``, ``load_tile``, ``cut_tile``)
+- Private methods use double underscore prefix (e.g., ``__damp``, ``__displacement``)
+- Protected methods use single underscore prefix (e.g., ``_load``, ``_scanchunk``)
+
+**Variables:**
+
+- Use snake_case (e.g., ``tile_id``, ``media_id``, ``tile_path``)
+- Private instance variables use underscore prefix (e.g., ``self._x``, ``self._progress``)
+- Module-level private variables use double underscore (e.g., ``__tilecache``)
+
+**Constants:**
+
+- Use UPPER_SNAKE_CASE for constants (e.g., ``damping_factor`` is an exception
+  as a class attribute)
+
+**Parameters:**
+
+- Use descriptive names that indicate purpose (e.g., ``tile_id``, ``media_id``,
+  ``filename``, ``bbox``)
+
+Formatting Requirements
+^^^^^^^^^^^^^^^^^^^^^^^
+
+**File Headers:**
+
+All source files in ``./pyzui`` should include the GPL license header:
+
+.. code-block:: python
+
+    ## PyZUI 0.1 - Python Zooming User Interface
+    ## Copyright (C) 2009  David Roberts <d@vidr.cc>
+    ##
+    ## This program is free software; you can redistribute it and/or
+    ## modify it under the terms of the GNU General Public License
+    ## ...
+
+**Module Docstrings:**
+
+Each module should have a docstring at the top (after the license header)
+describing its purpose:
+
+.. code-block:: python
+
+    """A threaded media converter (abstract base class)."""
+
+**Comments:**
+
+- Use ``##`` for inline comments explaining formulas or complex logic
+- Use ``#`` for standard code comments
+- Write comments that explain *why*, not *what*
+
 Coding Conventions
 ------------------
 
@@ -478,107 +584,144 @@ This applies to:
 - Module-level functions (e.g., ``init``, ``merged``)
 - Class definitions
 
-Code Style
-^^^^^^^^^^
+Variable Type Annotations
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The project follows these code style conventions:
+**All variables must include type annotations.**
 
-**Indentation:**
+This applies to:
+- Module-level variables (global to the module)
+- Class attributes (instance variables)
+- Local variables when their type is not obvious from context
 
-- Use 4 spaces for indentation (no tabs)
+**When to use Optional:**
 
-**Line Length:**
+Use ``Optional[Type]`` when a variable can legitimately be ``None``:
+- Variables initialized as ``None`` that will be assigned later
+- Function parameters with default value ``None``
+- Return values that may be ``None`` to indicate absence of result
 
-- Keep lines reasonably short, preferably under 80-100 characters
-- Use line continuation with backslash (``\``) or parentheses for long lines
-
-**Imports:**
-
-- Group imports in the following order:
-
-  1. Standard library imports
-  2. Third-party imports (PySide6, PIL, etc.)
-  3. Local application imports
-
-- Example:
-
-  .. code-block:: python
-
-      import math
-      from threading import Thread
-      from typing import Optional, Tuple, Any
-
-      from PIL import Image
-      from PySide6 import QtCore, QtGui
-
-      from .tileprovider import TileProvider
-      from .. import tilestore as TileStore
-
-**Blank Lines:**
-
-- Two blank lines between top-level definitions (classes, functions)
-- One blank line between method definitions within a class
-- Use blank lines sparingly within functions to separate logical sections
-
-Naming Conventions
-^^^^^^^^^^^^^^^^^^
-
-**Classes:**
-
-- Use PascalCase (e.g., ``TileManager``, ``PhysicalObject``, ``StaticTileProvider``)
-
-**Functions and Methods:**
-
-- Use snake_case (e.g., ``get_tile``, ``load_tile``, ``cut_tile``)
-- Private methods use double underscore prefix (e.g., ``__damp``, ``__displacement``)
-- Protected methods use single underscore prefix (e.g., ``_load``, ``_scanchunk``)
-
-**Variables:**
-
-- Use snake_case (e.g., ``tile_id``, ``media_id``, ``tile_path``)
-- Private instance variables use underscore prefix (e.g., ``self._x``, ``self._progress``)
-- Module-level private variables use double underscore (e.g., ``__tilecache``)
-
-**Constants:**
-
-- Use UPPER_SNAKE_CASE for constants (e.g., ``damping_factor`` is an exception
-  as a class attribute)
-
-**Parameters:**
-
-- Use descriptive names that indicate purpose (e.g., ``tile_id``, ``media_id``,
-  ``filename``, ``bbox``)
-
-Formatting Requirements
-^^^^^^^^^^^^^^^^^^^^^^^
-
-**File Headers:**
-
-All source files in ``./pyzui`` should include the GPL license header:
+**Example from tilemanager.py (lines 44-53):**
 
 .. code-block:: python
 
-    ## PyZUI 0.1 - Python Zooming User Interface
-    ## Copyright (C) 2009  David Roberts <d@vidr.cc>
-    ##
-    ## This program is free software; you can redistribute it and/or
-    ## modify it under the terms of the GNU General Public License
-    ## ...
+    # Module-level variables with Optional type annotations
+    __tilecache: Optional["TileCache"] = None
+    __temptilecache: Optional["TileCache"] = None
+    __tp_static: Optional["StaticTileProvider"] = None
+    __logger: Optional["Logger"] = None
+    
+    # Non-optional variables with specific types
+    __tp_dynamic: Dict[str, "FernTileProvider"] = {}
+    __cleanup_enabled: bool = False
+    __cleanup_max_age_days: int = 3
+    __cleanup_executed: bool = False
 
-**Module Docstrings:**
+**When to use Any:**
 
-Each module should have a docstring at the top (after the license header)
-describing its purpose:
+Use ``Any`` sparingly and only when:
+- The variable can legitimately be any type (e.g., accepts multiple image formats)
+- Working with dynamically typed data or third-party libraries
+- As a temporary measure during refactoring (with a ``# TODO`` comment)
+
+**Avoid ``Any`` when:**
+- The type is known or can be inferred
+- Using union types (``Union[Type1, Type2]``) would be more precise
+- The variable has a specific, known type
+
+**Example from tile.py (line 43):**
 
 .. code-block:: python
 
-    """A threaded media converter (abstract base class)."""
+    # Accepts any image type (PIL Image, QImage, ImageQt, etc.)
+    def __init__(self, image: Any) -> None:  # type: ignore[no-untyped-def]
+        """
+        Constructor:
+            Tile(image)
+        Parameters:
+            image : Any
+        """
+        if image.__class__ is ImageQt or type(image) is QtGui.QImage:
+            self.__image = image
+        elif isinstance(image, Image.Image):
+            self.__image = ImageQt.ImageQt(image)
 
-**Comments:**
+**Instance Variable Type Annotations:**
 
-- Use ``##`` for inline comments explaining formulas or complex logic
-- Use ``#`` for standard code comments
-- Write comments that explain *why*, not *what*
+Annotate instance variables in ``__init__`` method:
+
+.. code-block:: python
+
+    # From mainwindow.py (lines 72-76)
+    def __init__(self):
+        self.__logger: "Logger" = get_logger("MainWindow")
+        self.__prev_dir: str = ''
+        self.__action: Dict[ActionKey, QtGui.QAction] = {}
+        self.__menu: Dict[MenuKey, QtWidgets.QMenu] = {}
+
+**Guidelines:**
+
+1. **Annotate at declaration**: Add type annotations when variables are declared
+2. **Be specific**: Use the most precise type possible (avoid ``Any`` when possible)
+3. **Match initialization**: Ensure initial value matches the type annotation
+4. **Use forward references**: For types imported under TYPE_CHECKING, use string literals
+5. **Document with comments**: Use comments to explain complex type annotations if needed
+
+TYPE_CHECKING for Type-Only Imports:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When type annotations require imports that would create circular dependencies
+or are only needed for type checking (not at runtime), use the ``TYPE_CHECKING``
+constant with forward references:
+
+1. Import ``TYPE_CHECKING`` from the ``typing`` module
+2. Place type-only imports under ``if TYPE_CHECKING:`` blocks
+3. Use forward references (quoted type names) in annotations
+4. Keep runtime imports outside the ``TYPE_CHECKING`` block
+
+**When to use TYPE_CHECKING vs forward references:**
+
+- Use ``TYPE_CHECKING`` imports + forward references for:
+  * Types from modules that would cause circular imports
+  * External library types only used in annotations
+  * Cross-module class references
+
+- Use simple forward references (without TYPE_CHECKING) for:
+  * Self-references within the same class definition
+
+**Example from the codebase:**
+
+.. code-block:: python
+
+    # File: pyzui/tilesystem/tileproviders/dynamictileprovider.py
+    from typing import TYPE_CHECKING, Optional, Tuple, Any
+    from PySide6 import QtGui
+    
+    if TYPE_CHECKING:
+        from PySide6.QtGui import QImage
+        from .tileprovider import TileID
+    
+    TileID = Tuple[str, int, int, int]
+    
+    class DynamicTileProvider:
+        def _load(self, tile_id: TileID) -> Optional['QImage']:
+            """
+            Load a tile, returning QImage or None.
+            
+            Uses forward reference 'QImage' in annotation while
+            QImage import is under TYPE_CHECKING for IDE support.
+            """
+            # Runtime code uses QtGui.QImage, not the TYPE_CHECKING import
+            return QtGui.QImage(filename) if os.path.exists(filename) else None
+
+**Guidelines:**
+
+1. **TYPE_CHECKING block placement**: Immediately after imports, before any code
+2. **Indentation**: 4 spaces for the ``if TYPE_CHECKING:`` block
+3. **Import grouping**: Group related TYPE_CHECKING imports logically
+4. **Forward references**: Always use quotes for types imported under TYPE_CHECKING
+5. **Runtime code**: Use fully qualified names (e.g., ``QtGui.QImage``) not TYPE_CHECKING imports
+
 
 Testing Requirements
 --------------------
@@ -824,7 +967,7 @@ When contributing tests, please follow these guidelines:
            The tiling system converts large images into pyramidal tile structures
            that enable efficient zooming and panning. This test suite validates
            the complete pipeline from image input to tile retrieval.
-           """
+            """
 
 Submitting Your Contribution
 ----------------------------
@@ -834,5 +977,188 @@ Submitting Your Contribution
 3. Ensure all new code has docstrings and type hints
 4. Create a pull request with a clear description of your changes
 5. Be responsive to feedback during the review process
+
+Thank you for contributing to PyZUI!
+
+Contributing to Documentation
+-----------------------------
+
+Documentation is a critical part of PyZUI that helps users understand and
+effectively use the software. This section covers guidelines for contributing
+to the Sphinx-based documentation in the ``./docs/`` directory.
+
+**Documentation Structure:**
+
+- **Source files**: RST (``.rst``) files in ``docs/source/`` directory
+- **Configuration**: ``docs/source/conf.py`` for Sphinx settings
+- **Build output**: HTML files in ``docs/build/html/``
+- **Auto-generated API docs**: Created from Python docstrings using Sphinx extensions
+
+**Sphinx Extensions Used:**
+
+PyZUI documentation uses the following Sphinx extensions:
+
+- ``sphinx.ext.autodoc``: Automatically documents Python docstrings
+- ``sphinx.ext.autosummary``: Creates summary tables for modules
+- ``sphinx.ext.napoleon``: Supports Google/NumPy-style docstrings
+- ``sphinx.ext.viewcode``: Adds links to highlighted source code
+
+These extensions automatically generate API documentation from Python docstrings
+following the formats described in the "Docstring Format" section above.
+
+Documentation Quality Standards
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Clarity and Completeness:**
+
+- Write for the target audience (users, developers, or contributors)
+- Cover all relevant aspects without assuming prior knowledge
+- Use simple, direct language avoiding unnecessary jargon
+- Include practical examples for complex concepts
+
+**Examples and Use Cases:**
+
+- Provide real-world examples from the PyZUI codebase
+- Include complete, tested code snippets
+- Document edge cases and common pitfalls
+- Show before/after comparisons when demonstrating improvements
+
+**Consistency with Existing Documentation:**
+
+- Follow established patterns in existing documentation files
+- Use consistent terminology (e.g., "tile" not "image chunk")
+- Maintain the same heading hierarchy and formatting style
+- Cross-reference related documentation sections appropriately
+
+**Proper RST Formatting:**
+
+- Use RST directives correctly (``.. code-block::``, ``.. note::``, ``.. warning::``)
+- Ensure heading underline lengths match title length exactly
+- Use consistent indentation (3 spaces for directives, 4 spaces for code blocks)
+- Include descriptive alt text for images and diagrams
+- Use backticks for inline code references
+
+**Accuracy and Verification:**
+
+- Ensure documentation matches actual code behavior
+- Test code examples before including them
+- Verify command-line instructions work as described
+- Update documentation when related code changes
+
+**Accessibility and Navigation:**
+
+- Use meaningful section titles that describe content
+- Include table of contents for longer documents
+- Add cross-references (``:doc:``, ``:ref:``) to related content
+- Ensure documentation builds without warnings
+
+Documentation Workflow
+^^^^^^^^^^^^^^^^^^^^^^^
+
+**1. Set Up Documentation Environment:**
+
+.. code-block:: bash
+
+   # Navigate to documentation directory
+   cd docs/
+   
+   # Install Sphinx via conda (recommended)
+   conda install sphinx
+   
+   # Alternatively install via pip
+   # pip install sphinx
+   
+   # Build documentation locally to verify current state
+   make clean
+   make html
+
+**2. Make Documentation Changes:**
+
+- Edit RST (``.rst``) files in ``docs/source/`` directory
+- Follow RST syntax and project conventions
+- Use existing documentation as reference for style
+- Keep changes focused and manageable
+
+**3. Build and Test Documentation:**
+
+.. code-block:: bash
+
+   # Build HTML documentation
+   make html
+   
+   # Check for warnings or errors in the output
+   # Address any Sphinx warnings before submitting
+   
+   # Open built documentation in browser to verify
+   # Linux:
+   xdg-open build/html/index.html
+   
+   # macOS:
+   open build/html/index.html
+   
+   # Windows:
+   start build/html/index.html
+
+**4. Verify Build Quality:**
+
+- [ ] Documentation builds without warnings
+- [ ] All internal links work correctly
+- [ ] Code examples are accurate and tested
+- [ ] Formatting is consistent with existing docs
+- [ ] Cross-references are properly linked
+- [ ] Images and diagrams display correctly
+
+**5. Deploy to GitHub Pages (Optional):**
+
+For maintainers or those with push access, documentation can be deployed to
+GitHub Pages using ``ghp-import``:
+
+.. code-block:: bash
+
+   # Install ghp-import
+   conda install ghp-import
+   
+   # Build documentation
+   make clean
+   make html
+   
+   # Deploy to gh-pages branch
+   ghp-import -n -p -f build/html
+   
+   # The documentation will be available at:
+   # https://[username].github.io/pyzui/
+
+**Note:** GitHub Pages deployment requires appropriate repository permissions
+and is typically handled by project maintainers.
+
+**6. Types of Documentation Contributions:**
+
+**Minor Improvements:**
+- Fix typos, grammar, or formatting issues
+- Update outdated information
+- Improve clarity of existing content
+- Fix broken links or references
+
+**Moderate Enhancements:**
+- Add missing documentation for existing features
+- Improve examples or add new ones
+- Reorganize content for better flow
+- Add diagrams or visual aids
+
+**Major Contributions:**
+- Create new documentation sections or tutorials
+- Implement documentation automation
+- Improve documentation infrastructure
+- Add comprehensive API documentation
+
+**7. Submission Process:**
+
+Documentation contributions follow the same submission process as code
+contributions (fork, branch, pull request). Ensure your documentation:
+
+- Builds successfully with ``make html``
+- Follows the quality standards above
+- Maintains consistency with existing documentation
+- Includes appropriate examples and cross-references
 
 Thank you for contributing to PyZUI!

@@ -488,6 +488,9 @@ class Scene(PhysicalObject):
                             self.__objects[i]._StringMediaObject__str = edited_text
                             self.__objects[i]._StringMediaObject__color =\
                                 QColor('#'+string_color)
+                            # Invalidate text image cache after text modification
+                            if hasattr(self.__objects[i], 'invalidate_cache'):
+                                self.__objects[i].invalidate_cache()
                             #print(self.__objects[i].__dict__)
                         self.right_selection = None
                         break
@@ -542,6 +545,36 @@ class Scene(PhysicalObject):
             for mediaobject in self.__objects:
                 mediaobject.step(t)
             PhysicalObject.step(self, t)
+
+    @property
+    def vzmoving(self) -> bool:
+        """
+        Property :
+            Scene.moving
+        Parameters :
+            None
+
+        Scene.vzmoving --> bool
+
+        Boolean value indicating whether the scene or any contained
+        *MediaObjects* have a non-zero velocity.
+
+        Checks if the inherited, vx, vy and vz values from *PhysicalObject*
+        are not zero. If it is that means the scene is moving and True is
+        returned, If that's not the case it thread safely cycles through
+        mediaobjects in *__objects* checking if *mediaobject.moving* is
+        True. If it is True is returned. *mediaobject.moving* is also
+        inherited property of *PhysicalObject* class.
+
+        See : :class:`pyzui.objects.physicalobject.PhysicalObject` 
+        """
+        if not (self.vz == 0):
+            return True
+        else:
+            with self.__objects_lock :
+                for mediaobject in self.__objects:
+                    if mediaobject.vzmoving:
+                        return True
 
     @property
     def moving(self) -> bool:
