@@ -258,6 +258,27 @@ them call <a class="reference internal" href="physicalobject.html#pyzui.objects.
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="pyzui.objects.scene.scene.Scene.vzmoving">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vzmoving</span></span><a class="headerlink" href="#pyzui.objects.scene.scene.Scene.vzmoving" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Property:</dt><dd><p>Scene.moving</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>Scene.vzmoving –&gt; bool</p>
+<p>Boolean value indicating whether the scene or any contained
+<em>MediaObjects</em> have a non-zero velocity.</p>
+<p>Checks if the inherited, vx, vy and vz values from <em>PhysicalObject</em>
+are not zero. If it is that means the scene is moving and True is
+returned, If that’s not the case it thread safely cycles through
+mediaobjects in <em>__objects</em> checking if <em>mediaobject.moving</em> is
+True. If it is True is returned. <em>mediaobject.moving</em> is also
+inherited property of <em>PhysicalObject</em> class.</p>
+<p>See : <a class="reference internal" href="physicalobject.html#pyzui.objects.physicalobject.PhysicalObject" title="pyzui.objects.physicalobject.PhysicalObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyzui.objects.physicalobject.PhysicalObject</span></code></a></p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="pyzui.objects.scene.scene.Scene.moving">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">moving</span></span><a class="headerlink" href="#pyzui.objects.scene.scene.Scene.moving" title="Link to this definition">¶</a></dt>
 <dd><dl class="simple">

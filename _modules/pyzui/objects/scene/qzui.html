@@ -179,13 +179,14 @@
             <span class="n">painter</span><span class="o">.</span><span class="n">fillRect</span><span class="p">(</span>
                     <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">black</span><span class="p">)</span>
 
+            <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="c1">## render scene</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__draft</span><span class="p">)</span> <span class="c1">#errors = </span>
+            <span class="n">errors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__draft</span><span class="p">)</span> <span class="c1"># </span>
             
             <span class="c1">## show errors</span>
-            <span class="c1">#for mediaobject in errors:</span>
+            <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
                 
-            <span class="c1">#    self.error.emit(&quot;Error loading %s&quot; + str(mediaobject))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Error loading </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">mediaobject</span><span class="p">))</span>
 
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">painter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>

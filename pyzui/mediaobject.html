@@ -104,14 +104,6 @@ position it’s relative to Scene reference frame.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MediaObject</span><span class="o">.</span><span class="n">centre</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">origin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">C_s</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">zoomlevel</span>
 </pre></div>
 </div>
-<dl class="simple">
-<dt>Constructor :</dt><dd><p>MediaObject(media_id, scene)</p>
-</dd>
-<dt>Parameters :</dt><dd><p>media_id : str
-scene : Scene</p>
-</dd>
-</dl>
-<p>MediaObject(media_id, scene) –&gt; None</p>
 <p>Create a new MediaObject from the media identified by media_id,
 and the parent Scene referenced by scene.</p>
 <p>Initializes PhysicalObject center, position and velocity attributes,

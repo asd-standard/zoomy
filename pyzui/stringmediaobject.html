@@ -46,27 +46,37 @@ scene : Scene</p>
 </dd>
 </dl>
 <p>StringMediaObject(media_id, scene) –&gt; None</p>
-<p>StringMediaObject objects are used to represent strings that can be
-rendered in the ZUI.</p>
+<p>StringMediaObject implements a hybrid rendering system for
+text displayin the ZUI.</p>
 <p><cite>StringMediaObject.media_id</cite> should be of the form ‘string:rrggbb:foobar’,
 where ‘rrggbb’ is a string of three two-digit hexadecimal numbers
 representing the colour of the text, and ‘foobar’ is the string to be
 displayed.</p>
+<p>Overview:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>render Dual-mode triggered by scene.vzmoving (zoom velocity)</p></li>
+<li><p>moving mode: Direct QPainter.drawText() rendering for smooth zoom/pan operations</p></li>
+<li><p>static mode: Cached QImage rendering for optimal quality when stationary</p></li>
+<li><p>Automatic cache invalidation when movement starts to ensure fresh rendering</p></li>
+</ul>
+</div></blockquote>
+<p>From “foobar” string QImage gets generated, from form ‘string:rrggbb:foobar’ hash get’s
+generated for cache invalidation in case string color of text content changes.
+Also Qfont, QFontMetrics, text dimension (width, height), and scale are cached.</p>
+<p>QImage cached image gets invalidated if relative_scale_diff &gt; 1% or if
+self__scene_vzmoving returns True</p>
 <dl class="simple">
-<dt>Constructor :</dt><dd><p>StringMediaObject(media_id, scene)</p>
-</dd>
-<dt>Parameters :</dt><dd><p>media_id : str
-scene : Scene</p>
+<dt>For direct text rendering :</dt><dd><ul class="simple">
+<li><p>longest line index gets Pre-calculated for efficient multi-line rendering</p></li>
+<li><p>Font creation only when point size ≥ 1 (visible text)</p></li>
+<li><p>Visibility culling based on viewport size ratios</p></li>
+<li><p>Automatic cache validation with comprehensive invalidation triggers</p></li>
+</ul>
 </dd>
 </dl>
-<p>StringMediaObject(media_id, scene) –&gt; None</p>
 <p>Initialize a new StringMediaObject from the media identified by media_id,
 and the parent Scene referenced by scene.</p>
-<p>The media_id should be of the form ‘string:rrggbb:foobar’, where
-‘rrggbb’ is a string of three two-digit hexadecimal numbers representing
-the color of the text, and ‘foobar’ is the string to be displayed.</p>
-<p>Parses the media_id to extract color and text content, then processes
-the text to handle multi-line strings by splitting on newline characters.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.transparent">
 <span class="sig-name descname"><span class="pre">transparent</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.transparent" title="Link to this definition">¶</a></dt>
@@ -76,6 +86,80 @@ the text to handle multi-line strings by splitting on newline characters.</p>
 <dt class="sig sig-object py" id="pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.base_pointsize">
 <span class="sig-name descname"><span class="pre">base_pointsize</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24.0</span></em><a class="headerlink" href="#pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.base_pointsize" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.__compute_text_hash">
+<span class="sig-name descname"><span class="pre">__compute_text_hash</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.__compute_text_hash" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>StringMediaObject.__compute_text_hash()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>StringMediaObject.__compute_text_hash() –&gt; int</p>
+<p>Compute hash of text content and color for cache invalidation.
+Returns a combined hash of all text lines and the color RGB value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.__is_image_cache_valid">
+<span class="sig-name descname"><span class="pre">__is_image_cache_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.__is_image_cache_valid" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>StringMediaObject.__is_image_cache_valid(current_scale, mode)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>current_scale : float
+mode : int</p>
+</dd>
+</dl>
+<p>StringMediaObject.__is_image_cache_valid(current_scale, mode) –&gt; bool</p>
+<p>Check if cached text image is valid for current scale and render mode.
+Returns True if cache is valid, False otherwise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.__render_text_direct">
+<span class="sig-name descname"><span class="pre">__render_text_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">painter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.__render_text_direct" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>StringMediaObject.__render_text_direct(painter, x, y, mode)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>painter : QPainter
+x : float - x position to render at
+y : float - y position to render at
+mode : int</p>
+</dd>
+</dl>
+<p>StringMediaObject.__render_text_direct(painter, x, y, mode) –&gt; None</p>
+<p>Render text directly using QPainter.drawText().
+This is the original rendering method used before caching was implemented.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.__render_text_to_image">
+<span class="sig-name descname"><span class="pre">__render_text_to_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.__render_text_to_image" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>StringMediaObject.__render_text_to_image(mode)</p>
+</dd>
+<dt>Parameters :</dt><dd><p>mode : int</p>
+</dd>
+</dl>
+<p>StringMediaObject.__render_text_to_image(mode) –&gt; QImage</p>
+<p>Render text to QImage for caching.
+Creates a transparent image with the text rendered at current scale.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.invalidate_cache">
+<span class="sig-name descname"><span class="pre">invalidate_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/objects/mediaobjects/stringmediaobject.html#StringMediaObject.invalidate_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.invalidate_cache" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p>StringMediaObject.invalidate_cache()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>StringMediaObject.invalidate_cache() –&gt; None</p>
+<p>Invalidate text image cache.
+Clears all cached image data to force re-rendering on next render call.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyzui.objects.mediaobjects.stringmediaobject.StringMediaObject.render">

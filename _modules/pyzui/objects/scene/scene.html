@@ -540,6 +540,9 @@
                             <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_StringMediaObject__str</span> <span class="o">=</span> <span class="n">edited_text</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_StringMediaObject__color</span> <span class="o">=</span>\
                                 <span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="o">+</span><span class="n">string_color</span><span class="p">)</span>
+                            <span class="c1"># Invalidate text image cache after text modification</span>
+                            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s1">&#39;invalidate_cache&#39;</span><span class="p">):</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">invalidate_cache</span><span class="p">()</span>
                             <span class="c1">#print(self.__objects[i].__dict__)</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">right_selection</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="k">break</span>
@@ -598,6 +601,36 @@
                 <span class="n">mediaobject</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
             <span class="n">PhysicalObject</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span></div>
 
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">vzmoving</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property :</span>
+<span class="sd">            Scene.moving</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Scene.vzmoving --&gt; bool</span>
+
+<span class="sd">        Boolean value indicating whether the scene or any contained</span>
+<span class="sd">        *MediaObjects* have a non-zero velocity.</span>
+
+<span class="sd">        Checks if the inherited, vx, vy and vz values from *PhysicalObject*</span>
+<span class="sd">        are not zero. If it is that means the scene is moving and True is</span>
+<span class="sd">        returned, If that&#39;s not the case it thread safely cycles through</span>
+<span class="sd">        mediaobjects in *__objects* checking if *mediaobject.moving* is</span>
+<span class="sd">        True. If it is True is returned. *mediaobject.moving* is also</span>
+<span class="sd">        inherited property of *PhysicalObject* class.</span>
+
+<span class="sd">        See : :class:`pyzui.objects.physicalobject.PhysicalObject` </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vz</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects_lock</span> <span class="p">:</span>
+                <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__objects</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">mediaobject</span><span class="o">.</span><span class="n">vzmoving</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">moving</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>

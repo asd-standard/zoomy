@@ -323,6 +323,23 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__displacement</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vz</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">vz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__damp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vz</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span></div>
 
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">vzmoving</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property :</span>
+<span class="sd">            PhysicalObject.moving</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            None</span>
+
+<span class="sd">        PhysicalObject.moving --&gt; bool</span>
+
+<span class="sd">        Boolean value indicating whether the object has z non-zero velocity.</span>
+
+<span class="sd">        Returns True if vz is non-zero.</span>
+<span class="sd">        Returns False if all velocity components are zero.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vz</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">moving</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
