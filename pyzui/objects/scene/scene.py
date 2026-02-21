@@ -469,10 +469,10 @@ class Scene(PhysicalObject):
                             string_color = ""
                             edited_text = ""
                         if ok and media_id: 
-                            
+                            '''
                             lines = []
                             lines.append([])
-
+                            
                             j=0
                             for k in list(edited_text) :  
                                     # If a \n char is encountered a new sublist is appended to self.lines              
@@ -482,7 +482,9 @@ class Scene(PhysicalObject):
                                     else :
                                     # Otherwise the char is appended to the currend self.lines sublist
                                         lines[j] += str(k)
-                            
+                            '''
+                            lines: list[str] = edited_text.split('\n')
+
                             self.__objects[i].lines = lines
                             self.__objects[i]._media_id = media_id
                             self.__objects[i]._StringMediaObject__str = edited_text
