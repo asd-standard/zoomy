@@ -87,15 +87,15 @@ class StringMediaObject(MediaObject): #, Thread
         self.__str: str = self._media_id[len('string:rrggbb:'):]
 
         # Returns a list of strings, e.g., 'Hello\nWorld' -> ['Hello', 'World']
-        self.lines: list[str] = self.__str.split('\n')
+        self.__lines: list[str] = self.__str.split('\n')
 
         # Pre-calculate which line is longest to avoid sorting on every render
-        # max() finds the maximum value from range(len(self.lines)) using a custom key function
-        # range(len(self.lines)) generates indices: 0, 1, 2, ... for each line
-        # key=lambda i: len(self.lines[i]) tells max() to compare lines by their length
+        # max() finds the maximum value from range(len(self.__lines)) using a custom key function
+        # range(len(self.__lines)) generates indices: 0, 1, 2, ... for each line
+        # key=lambda i: len(self.__lines[i]) tells max() to compare lines by their length
         # Returns the INDEX of the longest line, not the line itself
         # Example: if lines = ['Hi', 'Hello', 'Hey'], this returns 1 (index of 'Hello')
-        self.__longest_line_idx: int = max(range(len(self.lines)), key=lambda i: len(self.lines[i]))
+        self.__longest_line_idx: int = max(range(len(self.__lines)), key=lambda i: len(self.__lines[i]))
 
         # Initialize private variables that will be used for caching optimizations                                                                             
         # These start as None and will store computed values when first accessed
@@ -147,7 +147,7 @@ class StringMediaObject(MediaObject): #, Thread
         Returns a combined hash of all text lines and the color RGB value.
         """
         # Combine all lines into a single string for hashing
-        text_content: str = ''.join(self.lines)
+        text_content: str = ''.join(self.__lines)
         color_rgb: int = self.__color.rgb()
         return hash((text_content, color_rgb))
 
@@ -231,16 +231,16 @@ class StringMediaObject(MediaObject): #, Thread
         hl: int = fontmetrics_nonnull.height()
         
         # Render multiline or single line text
-        if len(self.lines) > 1:
+        if len(self.__lines) > 1:
             yr: float = y
             line: str
-            for line in self.lines:
+            for line in self.__lines:
                 rect: QtCore.QRectF = QtCore.QRectF(int(x), int(yr), int(onscreen_w), int(hl))
                 painter.drawText(rect, line)
                 yr += hl
         else:
             rect: QtCore.QRectF = QtCore.QRectF(int(x), int(y), int(onscreen_w), int(hl))
-            painter.drawText(rect, self.lines[0])
+            painter.drawText(rect, self.__lines[0])
 
     def __render_text_to_image(self, mode: int) -> QtGui.QImage:
         """
@@ -300,6 +300,7 @@ class StringMediaObject(MediaObject): #, Thread
         self.__cached_image_scale = None
         self.__cached_image_mode = None
         self.__cached_text_hash = None
+        self.__cached_onscreen_size = None
 
     def render(self, painter: Any, mode: int) -> None:
         """
@@ -452,11 +453,11 @@ class StringMediaObject(MediaObject): #, Thread
 
             w: float
             h: float
-            if len(self.lines) > 1:
+            if len(self.__lines) > 1:
                 # Use cached longest line index instead of sorting every time
-                longest_line: str = self.lines[self.__longest_line_idx]
+                longest_line: str = self.__lines[self.__longest_line_idx]
                 w = fontmetrics_nonnull.horizontalAdvance(longest_line + '-------')
-                h = fontmetrics_nonnull.height() * len(self.lines)
+                h = fontmetrics_nonnull.height() * len(self.__lines)
             else:
                 w = fontmetrics_nonnull.horizontalAdvance(self.__str + '-')
                 h = fontmetrics_nonnull.height()
@@ -466,4 +467,40 @@ class StringMediaObject(MediaObject): #, Thread
         else:
             self.__cached_onscreen_size = (0, 0)
             return (0, 0)
+
+    @property
+    def lines(self) -> list[str]:
+        """
+        Property :
+            lines
+        Parameters :
+            None
+
+        lines --> list[str]
+
+        Get the list of text lines.
+        """
+        return self.__lines
+
+    @lines.setter
+    def lines(self, new_lines: list[str]) -> None:
+        """
+        Setter :
+            lines
+        Parameters :
+            new_lines : list[str]
+
+        lines = new_lines --> None
+
+        Set new text lines and update internal state.
+        Updates the longest line index and invalidates caches.
+        """
+        self.__lines = new_lines
+        # Update longest line index
+        if self.__lines:
+            self.__longest_line_idx = max(range(len(self.__lines)), key=lambda i: len(self.__lines[i]))
+        else:
+            self.__longest_line_idx = 0
+        # Invalidate caches since text content changed
+        self.invalidate_cache()
 
