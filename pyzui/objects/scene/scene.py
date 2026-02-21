@@ -468,28 +468,17 @@ class Scene(PhysicalObject):
                             media_id = False
                             string_color = ""
                             edited_text = ""
+                        
                         if ok and media_id: 
-                            '''
-                            lines = []
-                            lines.append([])
-                            
-                            j=0
-                            for k in list(edited_text) :  
-                                    # If a \n char is encountered a new sublist is appended to self.lines              
-                                    if k == '\n' :                    
-                                        lines.append([])
-                                        j += 1
-                                    else :
-                                    # Otherwise the char is appended to the currend self.lines sublist
-                                        lines[j] += str(k)
-                            '''
+                            #Get lines from input string
                             lines: list[str] = edited_text.split('\n')
-
+                            #Update object props
                             self.__objects[i].lines = lines
                             self.__objects[i]._media_id = media_id
                             self.__objects[i]._StringMediaObject__str = edited_text
                             self.__objects[i]._StringMediaObject__color =\
                                 QColor('#'+string_color)
+
                             # Invalidate text image cache after text modification
                             if hasattr(self.__objects[i], 'invalidate_cache'):
                                 self.__objects[i].invalidate_cache()

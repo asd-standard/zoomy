@@ -42,7 +42,7 @@ def load_config(config_file=None):
             'debug': False,
             'verbose': False,
             'log_to_file': True,
-            'log_to_console': False,
+            'log_to_console': True,
             'colored_output': True,
             'log_dir': 'logs'
         },
@@ -80,10 +80,10 @@ def parse_arguments():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                      # Run with default settings (logs to file only)
-  %(prog)s --console            # Enable console output
-  %(prog)s --debug --console    # Run in debug mode with console output
-  %(prog)s --verbose --console  # Run with verbose logging to console
+  %(prog)s                      # Run with default settings (logs to console and file)
+  %(prog)s --no-console         # Disable console output (file only)
+  %(prog)s --debug              # Run in debug mode with console output
+  %(prog)s --verbose            # Run with verbose logging to console
   %(prog)s --config pyzui.json  # Load settings from config file
   %(prog)s --no-file            # Log to console only (disable file logging)
   %(prog)s --log-dir /tmp/logs  # Use custom log directory
@@ -119,13 +119,13 @@ Examples:
     parser.add_argument(
         '--console',
         action='store_true',
-        help='Enable console logging (default: disabled)'
+        help='Enable console logging (default: enabled)'
     )
 
     parser.add_argument(
         '--no-console',
         action='store_true',
-        help='Disable console logging'
+        help='Disable console logging (default: enabled)'
     )
 
     parser.add_argument(

@@ -20,6 +20,7 @@ import logging
 import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from typing import cast
 
 class LoggerConfig:
     """
@@ -59,7 +60,7 @@ class LoggerConfig:
 
     @classmethod
     def initialize(cls, debug: bool = False, log_to_file: bool = True, log_to_console: bool = True,
-                   log_dir: str = None, colored_output: bool = True, verbose: bool = False) -> None:
+                   log_dir: str | None = None, colored_output: bool = True, verbose: bool = False) -> None:
         """
         Method :
             LoggerConfig.initialize(debug, log_to_file, log_to_console, log_dir, colored_output, verbose)
@@ -140,8 +141,9 @@ class LoggerConfig:
 
         # Add file handler with rotation
         if log_to_file:
+            # _log_file is guaranteed to be set when log_to_file is True
             file_handler = RotatingFileHandler(
-                cls._log_file,
+                cast(Path, cls._log_file),
                 maxBytes=10 * 1024 * 1024,  # 10 MB
                 backupCount=5
             )
@@ -191,7 +193,7 @@ class LoggerConfig:
         return cls._loggers[name]
 
     @classmethod
-    def set_level(cls, level: int, module: str = None) -> None:
+    def set_level(cls, level: int, module: str | None = None) -> None:
         """
         Method :
             LoggerConfig.set_level(level, module)
@@ -215,8 +217,8 @@ class LoggerConfig:
             cls._console_level = level
             root_logger = logging.getLogger()
             for handler in root_logger.handlers:
-                if isinstance(handler, logging.StreamHandler) and not isinstance(handler, RotatingFileHandler):
-                    handler.setLevel(level)
+                # Update both console and file handlers
+                handler.setLevel(level)
 
     @classmethod
     def enable_debug(cls) -> None:
@@ -251,7 +253,7 @@ class LoggerConfig:
         logger.info('Debug mode disabled')
 
     @classmethod
-    def get_log_file_path(cls) -> Path:
+    def get_log_file_path(cls) -> Path | None:
         """
         Method :
             LoggerConfig.get_log_file_path()
