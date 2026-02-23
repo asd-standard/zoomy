@@ -559,12 +559,18 @@ class MainWindow(QtWidgets.QMainWindow):
         '''
            
         if ok_pressed and text_input :
-            if int(text_input) < 0 or int(text_input) > 100 :
-                self.__show_error("Sensitivity input must range from 0 to 100, current")
-            elif int(text_input) == 0 :
+            try:
+                value = int(text_input)
+            except ValueError:
+                self.__show_error("Sensitivity input must be an integer", "")
+                return
+            current_sens = int(1000 / self.zui.zoom_sensitivity) if self.zui.zoom_sensitivity != 0 else 0
+            if value < 0 or value > 100:
+                self.__show_error(f"Sensitivity input must range from 0 to 100, current: {current_sens}", "")
+            elif value == 0:
                 self.zui.zoom_sensitivity = 1000
-            else :
-                self.zui.zoom_sensitivity = int(1000 // int(text_input)) 
+            else:
+                self.zui.zoom_sensitivity = int(1000 // value) 
             
 
     def __create_actions(self) -> None:

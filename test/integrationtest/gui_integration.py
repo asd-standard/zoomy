@@ -73,7 +73,7 @@ os.chdir(PROJECT_ROOT)
 from PySide6 import QtCore, QtGui
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QApplication, QFileDialog
+from PySide6.QtWidgets import QApplication, QFileDialog, QDialog
 
 from pyzui.logger import LoggerConfig, get_logger
 from pyzui.windows.mainwindow import MainWindow
@@ -83,11 +83,11 @@ import pyzui.tilesystem.tilemanager as TileManager
 # TIMING CONFIGURATION - Adjust these for slower/faster testing
 # =============================================================================
 SHORT_DELAY_MS = 2000       # Short pauses (2 seconds)
-DEFAULT_DELAY_MS = 3500     # Standard delay between actions (3.5 seconds)
-LONG_DELAY_MS = 5000        # Long delay for loading/rendering (5 seconds)
-IMAGE_LOAD_DELAY_MS = 10000 # Extra time for images to fully load/tile (10 seconds)
-ZOOM_STEP_DELAY_MS = 800    # Delay between zoom steps (0.8 seconds)
-MOVE_STEP_DELAY_MS = 500    # Delay between movement steps (0.5 seconds)
+DEFAULT_DELAY_MS = 150     # Standard delay between actions (0.15 seconds)
+LONG_DELAY_MS = 200        # Long delay for loading/rendering (0.2 seconds)
+IMAGE_LOAD_DELAY_MS = 500 # Extra time for images to fully load/tile (0.5 seconds)
+ZOOM_STEP_DELAY_MS = 50    # Delay between zoom steps (0.05 seconds)
+MOVE_STEP_DELAY_MS = 30    # Delay between movement steps (0.03 seconds)
 
 # =============================================================================
 # IMAGE CREATION UTILITIES
@@ -296,9 +296,11 @@ class GUIIntegrationTest:
             (5, "File Menu - Save Screenshot", self.step_save_screenshot),
             (6, "File Menu - Save Scene", self.step_save_scene),
             (7, "File Menu - Open Saved Scene", self.step_open_scene),
+            (8, "File Menu - Open New String Dialog", self.step_new_string_dialog),
             (10, "View Menu - Set Framerate", self.step_set_framerate),
             (11, "View Menu - Adjust Sensitivity", self.step_adjust_sensitivity),
             (12, "View Menu - Fullscreen Toggle", self.step_fullscreen),
+            (13, "View Menu - Adjust Sensitivity Dialog", self.step_sensitivity_dialog),
             (20, "Help Menu - About", self.step_about),
             (21, "Help Menu - About Qt", self.step_about_qt),
             (30, "Mouse - Left Click Select", self.step_mouse_click_select),
@@ -309,6 +311,8 @@ class GUIIntegrationTest:
             (42, "Keyboard - Arrow Keys Move", self.step_keyboard_arrows),
             (43, "Keyboard - Space Center", self.step_keyboard_space),
             (44, "Keyboard - Delete Media", self.step_keyboard_delete),
+            (45, "Mouse Right-Click - String Modification Dialog", self.step_right_click_string_dialog),
+            (46, "Mouse Right-Click - Image Modification Dialog", self.step_right_click_image_dialog),
             (90, "Complete Workflow", self.step_complete_workflow),
             (99, "File Menu - Quit", self.step_quit),
         ]
@@ -443,6 +447,20 @@ class GUIIntegrationTest:
             self.log.success("Test string added")
         except Exception as e:
             self.log.warning(f"Error adding string: {e}")
+
+    def close_open_dialog(self) -> None:
+        """Close any open modal dialog by sending Escape key."""
+        # Schedule escape key press after a short delay
+        QtCore.QTimer.singleShot(SHORT_DELAY_MS // 2, self._send_escape_to_dialog)
+
+    def _send_escape_to_dialog(self) -> None:
+        """Find and close any open QDialog by simulating Escape key."""
+        for widget in QApplication.topLevelWidgets():
+            if isinstance(widget, QDialog) and widget.isVisible():
+                self.log.detail(f"Closing dialog: {widget.windowTitle()}")
+                QTest.keyClick(widget, Qt.Key_Escape)
+                self.app.processEvents()
+                break
 
     def ensure_test_scene_loaded(self) -> None:
         """Ensure the test scene with images and string is loaded."""
@@ -664,6 +682,17 @@ class GUIIntegrationTest:
         self.wait(DEFAULT_DELAY_MS, "Observe: Saved scene restored")
         self.log.success("Scene loaded")
 
+    def step_new_string_dialog(self) -> None:
+        """Step 8: File > Open New String Dialog."""
+        self.log.section("FILE MENU - OPEN NEW STRING DIALOG")
+        self.ensure_test_scene_loaded()
+
+        self.log.action("Opening new string input dialog")
+        self.close_open_dialog()  # Schedule dialog close
+        self.trigger_action('open_media_string')
+        self.wait(SHORT_DELAY_MS, "Wait for new string dialog to appear and close")
+        self.log.success("New string dialog opened and closed")
+
     def step_set_framerate(self) -> None:
         """Step 10: View > Set Framerate."""
         self.log.section("VIEW MENU - SET FRAMERATE")
@@ -704,6 +733,17 @@ class GUIIntegrationTest:
         self.trigger_action('fullscreen')
         self.wait(DEFAULT_DELAY_MS, "Observe: Normal window")
         self.log.success("Fullscreen exited")
+
+    def step_sensitivity_dialog(self) -> None:
+        """Step 13: View > Adjust Sensitivity Dialog."""
+        self.log.section("VIEW MENU - ADJUST SENSITIVITY DIALOG")
+        self.ensure_test_scene_loaded()
+
+        self.log.action("Opening zoom sensitivity dialog")
+        self.close_open_dialog()  # Schedule dialog close
+        self.trigger_action('set_zoom_sensitivity')
+        self.wait(SHORT_DELAY_MS, "Wait for sensitivity dialog to appear and close")
+        self.log.success("Sensitivity dialog opened and closed")
 
     def step_about(self) -> None:
         """Step 20: Help > About."""
@@ -923,6 +963,36 @@ class GUIIntegrationTest:
         self.wait(DEFAULT_DELAY_MS, "Full view of all images + string")
 
         self.log.section("WORKFLOW COMPLETED SUCCESSFULLY")
+
+    def step_right_click_string_dialog(self) -> None:
+        """Step 45: Right-click string to open modify string dialog."""
+        self.log.section("MOUSE RIGHT-CLICK - STRING MODIFICATION DIALOG")
+        self.ensure_test_scene_loaded()
+
+        zui = self.window.zui
+        w, h = zui.width(), zui.height()
+        # String region: (0.1w, 0.75h) to (0.9w, 0.95h)
+        string_center = QPoint(int(w * 0.5), int(h * 0.85))
+
+        self.log.action("Right-click on test string to open modify dialog")
+        self.close_open_dialog()  # Schedule dialog close
+        self.simulate_mouse_click(string_center, Qt.RightButton)
+        self.wait(SHORT_DELAY_MS, "Wait for modify string dialog to appear and close")
+        self.log.success("String modification dialog opened and closed")
+
+    def step_right_click_image_dialog(self) -> None:
+        """Step 46: Right-click image to open modify image dialog."""
+        self.log.section("MOUSE RIGHT-CLICK - IMAGE MODIFICATION DIALOG")
+        self.ensure_test_scene_loaded()
+
+        zui = self.window.zui
+        center = QPoint(zui.width() // 2, zui.height() // 2)
+
+        self.log.action("Right-click on image to open modify dialog")
+        self.close_open_dialog()  # Schedule dialog close
+        self.simulate_mouse_click(center, Qt.RightButton)
+        self.wait(SHORT_DELAY_MS, "Wait for modify image dialog to appear and close")
+        self.log.success("Image modification dialog opened and closed")
 
     def step_quit(self) -> None:
         """Step 99: Quit (skip actual quit)."""

@@ -253,23 +253,28 @@ class OpenNewStringInputDialog:
         dialog = self._main_dialog()
         # Run dialog and get result
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            if len(self.string_color) != 6:
+            # Determine final color
+            final_color = self.string_color
+            if len(final_color) != 6:
+                # Try custom color input
                 if self.custom_color_input:
-                    color_text = self.custom_color_input.text()
+                    color_text = self.custom_color_input.text().strip()
                     if color_text:
-                        self.string_color = color_text
-                        
-                        if self.string_color and self.string_color[0]=="#" :
-                            self.string_color = self.string_color[1:]
-                        
-                        self.color_codes.append(self.string_color)
-                        f = open(self.color_dir+'/color_list.txt', 'w')
-                        for i in self.color_codes:
-                            f.write(str(i)+'\n')
-                        f.close()
-
-            elif len(self.string_color) != 6:
-                print('Error')
+                        if color_text.startswith('#'):
+                            color_text = color_text[1:]
+                        if len(color_text) == 6:
+                            final_color = color_text
+            # If still no valid color, default to black
+            if len(final_color) != 6:
+                final_color = '000000'
+            # Append to history if not already present
+            if final_color not in self.color_codes:
+                self.color_codes.append(final_color)
+                # Save color list
+                with open(self.color_dir + '/color_list.txt', 'w') as f:
+                    for code in self.color_codes:
+                        f.write(str(code) + '\n')
+            self.string_color = final_color
             if self.text_edit:
                 uri = 'string:'+str(self.string_color)+str(':') + str(self.text_edit.toPlainText())
             else:

@@ -505,9 +505,8 @@ class Scene(PhysicalObject):
                             media_id = None
 
                         if ok and media_id:
-                            # For now, the dialog is just a mockup
-                            # In the future, this would handle actual transformations
-                            # self.__objects[i]._media_id = media_id
+                            # Dialog already handles transformations (rotations, invert, grayscale)
+                            # media_id is the path to transformed image (if any)
                             pass
 
                         self.right_selection = None
