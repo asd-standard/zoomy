@@ -71,6 +71,8 @@ The test suite is organized into numbered steps grouped by functionality:
 | 30 | Mouse - Left Click Select |
 | 31 | Mouse - Click and Drag |
 | 32 | Mouse - Scroll Wheel Zoom |
+| 35 | Mouse - Control+Click Rectangle Drawing Selection |
+| 36 | Mouse - Shift+Click No Selection Change |
 | **Keyboard Interactions** | |
 | 40 | Keyboard - Escape Deselect |
 | 41 | Keyboard - Page Up/Down Zoom |

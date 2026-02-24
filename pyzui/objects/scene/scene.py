@@ -20,7 +20,7 @@ from threading import RLock
 import urllib.request, urllib.parse, urllib.error
 import math
 import logging
-from typing import Optional, Tuple, List, cast
+from typing import Optional, Tuple, List, cast, Union
 
 from PySide6 import QtCore
 from PySide6.QtGui import QColor, QPainter
@@ -111,8 +111,8 @@ class Scene(PhysicalObject):
         self.__objects_lock: RLock = RLock()
         self.__viewport_size: Tuple[int, int] = self.standard_viewport_size
 
-        self.selection: Optional['MediaObject.MediaObject'] = None
-        self.right_selection: Optional['MediaObject.MediaObject'] = None
+        self.selection: Optional[list['MediaObject.MediaObject']] = None
+        self.right_selection: Optional[list['MediaObject.MediaObject']] = None
         
         self.__logger: logging.Logger = get_logger("Scene")
 
@@ -239,44 +239,29 @@ class Scene(PhysicalObject):
 
                 if not media_active:
                     TileManager.purge(media_id)
-
-    def __sort_objects(self) -> None:
-        """
-        Method :
-            `internal method` self.__sort_objects()
-        Parameters :
-            None
-
-        __sort_objects() --> None
-
-        Sort self.__objects from largest to smallest area using
-        mediaobject.onscreen_area attribute which returns mediaobject
-        current onscreen area.
-
-        See :  :attr:`pyzui.objects.mediaobjects.mediaobject.MediaObject.onscreen_area` 
-
-        """
-        with self.__objects_lock:
-            self.__objects.sort(key=lambda mediaobject: \
-                mediaobject.onscreen_area)
             
 
-    def get(self, pos: Tuple[float, float]) -> Optional['MediaObject.MediaObject']:
+    def get(self, topleft: Tuple[float, float], bottomright: Optional[Tuple[float, float]] = None)\
+     -> Union[Optional['MediaObject.MediaObject'], List['MediaObject.MediaObject']]:
         """
         Method :
-            Scene.get(pos)
+            Scene.get(topleft, bottomright=None)
         Parameters :
-            pos : Tuple[float, float]
+            topleft : Tuple[float, float]
+            bottomright : Optional[Tuple[float, float]] = None
 
-        Scene.get(pos) --> MediaObject or None
+        Scene.get(topleft) --> MediaObject or None
+        Scene.get(topleft, bottomright) --> List[MediaObject]
 
-        Return the foremost visible *MediaObject* which overlaps the
-        on-screen point *pos*. *pos* is the mouse position at the last
-        left or right click mouse event.
+        If only `topleft` is provided, return the foremost visible *MediaObject* 
+        which overlaps the on-screen point *topleft*.
+        
+        If both `topleft` and `bottomright` are provided, return a list of all
+        *MediaObjects* that intersect the rectangle defined by these two points,
+        sorted from smallest to largest (foremost to rearmost).
 
-        Return None if there are no *MediaObjects* overlapping the point.
-
-        get(tuple[float,float]) --> MediaObject or None
+        Return None or empty list if there are no *MediaObjects* overlapping
+        the point or rectangle.
 
         Mouse click event is caught by: :meth:`pyzui.qzui.QZUI.mousePressEvent`
         which returns mouse position *pos*
@@ -285,16 +270,41 @@ class Scene(PhysicalObject):
         *pos* is within mediaobject area. Since smaller objects are rendered on
         top, we return the first (smallest) matching object.
         """
+
         with self.__objects_lock:
             self.__sort_objects()
-            for mediaobject in self.__objects:
-                left, top = mediaobject.topleft
-                right, bottom = mediaobject.bottomright
-                if pos[0] >= left  and pos[1] >= top and \
-                   pos[0] <= right and pos[1] <= bottom:
-                    return mediaobject
-
-        return None
+            
+            if bottomright is None:
+                # Point selection - return single object
+                for mediaobject in self.__objects:
+                    left, top = mediaobject.topleft
+                    right, bottom = mediaobject.bottomright
+                    if topleft[0] >= left  and topleft[1] >= top and \
+                       topleft[0] <= right and topleft[1] <= bottom:
+                        return mediaobject
+                return None
+            else:
+                # Rectangle selection - return list of intersecting objects
+                result: List['MediaObject.MediaObject'] = []
+                
+                # Normalize rectangle coordinates
+                rect_left = min(topleft[0], bottomright[0])
+                rect_top = min(topleft[1], bottomright[1])
+                rect_right = max(topleft[0], bottomright[0])
+                rect_bottom = max(topleft[1], bottomright[1])
+                
+                for mediaobject in self.__objects:
+                    obj_left, obj_top = mediaobject.topleft
+                    obj_right, obj_bottom = mediaobject.bottomright
+                    
+                    # Check for rectangle intersection
+                    if not (obj_right < rect_left or 
+                            obj_left > rect_right or 
+                            obj_bottom < rect_top or 
+                            obj_top > rect_bottom):
+                        result.append(mediaobject)
+                
+                return result
 
     def zoom(self, amount: float) -> None:
         """Zoom by the given `amount` with the centre maintaining its position
@@ -321,6 +331,45 @@ class Scene(PhysicalObject):
         self._y = Py - (Py - self._y) * 2**amount
         self._z += amount
     
+    def __sort_objects(self) -> None:
+        """
+        Method :
+            `internal method` self.__sort_objects()
+        Parameters :
+            None
+
+        __sort_objects() --> None
+
+        Sort self.__objects from largest to smallest area using
+        mediaobject.onscreen_area attribute which returns mediaobject
+        current onscreen area.
+
+        See :  :attr:`pyzui.objects.mediaobjects.mediaobject.MediaObject.onscreen_area` 
+
+        """
+        with self.__objects_lock:
+            self.__objects.sort(key=lambda mediaobject: \
+                mediaobject.onscreen_area)
+
+    def action_draw_rect(self, topleft: Tuple[float, float], bottomright: Tuple[float, float],\
+     painter: QPainter, color: QtCore.Qt) -> None:
+        '''
+
+        Draws a colored rectangle around selected mediaobject
+        '''
+        #using mediaobject.topleft mediaobject.topright attributes
+        x1, y1 = topleft[0], topleft[1]
+        x2, y2 = bottomright[0], bottomright[1]
+
+        ## clamp values
+        x1 = max(0, min(int(x1), self.viewport_size[0] - 1))
+        y1 = max(0, min(int(y1), self.viewport_size[1] - 1))
+        x2 = max(0, min(int(x2), self.viewport_size[0] - 1))
+        y2 = max(0, min(int(y2), self.viewport_size[1] - 1))
+        #Draing border using QtGui.QPainter attributes
+        painter.setPen(color)
+        painter.drawRect(x1, y1, x2-x1, y2-y1)        
+
 
     def render(self, painter: QPainter, draft: bool) -> List['MediaObject.MediaObject']:
         """
@@ -419,37 +468,21 @@ class Scene(PhysicalObject):
             If selection or right_selection isn't None a colored border gets drawn 
             around selected of right_selected mediaobject using QtGui.QPainter 
             `painter`"""
+    
+            if type(self.selection) == list :
 
-            if self.selection :
-                #using mediaobject.topleft mediaobject.topright attributes
-                x1, y1 = self.selection.topleft
-                x2, y2 = self.selection.bottomright
-
-                ## clamp values
-                x1 = max(0, min(int(x1), self.viewport_size[0] - 1))
-                y1 = max(0, min(int(y1), self.viewport_size[1] - 1))
-                x2 = max(0, min(int(x2), self.viewport_size[0] - 1))
-                y2 = max(0, min(int(y2), self.viewport_size[1] - 1))
-                #Draing border using QtGui.QPainter attributes
-                painter.setPen(QtCore.Qt.green)
-                painter.drawRect(x1, y1, x2-x1, y2-y1)
-                
+                for selection in self.selection :
+                    self.action_draw_rect(selection.topleft, selection.bottomright,\
+                        painter, QtCore.Qt.green)
+                    
+            elif self.selection :
+                self.action_draw_rect(self.selection.topleft, self.selection.bottomright,\
+                 painter, QtCore.Qt.green)          
 
             if self.right_selection :
-                assert self.right_selection is not None
-                #using mediaobject.topleft mediaobject.toptight attributes
-                x1, y1 = self.right_selection.topleft
-                x2, y2 = self.right_selection.bottomright
-
-                ## clamp values
-                x1 = max(0, min(int(x1), self.viewport_size[0] - 1))
-                y1 = max(0, min(int(y1), self.viewport_size[1] - 1))
-                x2 = max(0, min(int(x2), self.viewport_size[0] - 1))
-                y2 = max(0, min(int(y2), self.viewport_size[1] - 1))
-                #Draing border using QtGui.QPainter attributes
-                painter.setPen(QtCore.Qt.blue)
-                painter.drawRect(x1, y1, x2-x1, y2-y1)
-
+                self.action_draw_rect(self.right_selection.topleft,\
+                 self.right_selection.bottomright, painter, QtCore.Qt.blue)
+            
             if type(self.right_selection).__name__ == 'StringMediaObject' :
                 right_selection_obj = cast('MediaObject.MediaObject', self.right_selection)
 
@@ -511,7 +544,7 @@ class Scene(PhysicalObject):
 
                         self.right_selection = None
                         break
-
+            
         #returning MediaObject.LoadError
         return errors
 

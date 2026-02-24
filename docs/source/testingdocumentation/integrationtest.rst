@@ -1233,12 +1233,14 @@ GUI tests validate the complete application through visual verification:
       21. About Qt Dialog
 
     Mouse Interactions:
-      30. Left Click Select
-      31. Click and Drag
-      32. Scroll Wheel Zoom
+       30. Left Click Select
+       31. Click and Drag
+       32. Scroll Wheel Zoom
+       35. Control+Click Rectangle Drawing Selection
+       36. Shift+Click No Selection Change
 
     Keyboard Interactions:
-      40. Escape Deselect
+       40. Escape Deselect
       41. Page Up/Down Zoom
       42. Arrow Keys Move
       43. Space Center

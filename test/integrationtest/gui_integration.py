@@ -48,9 +48,9 @@ Actions tested (from userinterface.rst):
              Open Local Media, Open new String, Open Media Directory, Quit
 - View menu: Set Framerate, Adjust Sensitivity, Fullscreen
 - Help menu: About, About Qt
-- Mouse: Left-click (select), Click'n'drag, Scrollwheel (zoom)
+- Mouse: Left-click (select), Click'n'drag, Scrollwheel (zoom), Control+click rectangle selection
 - Keyboard: Esc (deselect), PgUp/PgDn (zoom), Arrow keys (move),
-            Space bar (centre), Del (delete), Shift/Alt modifiers
+            Space bar (centre), Del (delete), Shift/Alt/Control modifiers
 """
 
 import sys
@@ -306,6 +306,8 @@ class GUIIntegrationTest:
             (30, "Mouse - Left Click Select", self.step_mouse_click_select),
             (31, "Mouse - Click and Drag", self.step_mouse_drag),
             (32, "Mouse - Scroll Wheel Zoom", self.step_mouse_wheel_zoom),
+            (35, "Mouse - Control+Click Rectangle Drawing and Move", self.step_control_click_rectangle_drawing),
+            (36, "Mouse - Shift+Click No Selection Change", self.step_shift_click_no_selection_change),
             (40, "Keyboard - Escape Deselect", self.step_keyboard_escape),
             (41, "Keyboard - Page Up/Down Zoom", self.step_keyboard_page_zoom),
             (42, "Keyboard - Arrow Keys Move", self.step_keyboard_arrows),
@@ -371,20 +373,34 @@ class GUIIntegrationTest:
         self.log.detail(f"Simulating key press: {key}")
         QTest.keyClick(self.window.zui, key, modifiers)
         self.app.processEvents()
+    
+    def simulate_key_press(self, key: Qt.Key, modifiers: Qt.KeyboardModifier = Qt.NoModifier) -> None:
+        """Simulate a key press (without release)."""
+        self.log.detail(f"Simulating key press (hold): {key}")
+        QTest.keyPress(self.window.zui, key, modifiers)
+        self.app.processEvents()
+    
+    def simulate_key_release(self, key: Qt.Key, modifiers: Qt.KeyboardModifier = Qt.NoModifier) -> None:
+        """Simulate a key release."""
+        self.log.detail(f"Simulating key release: {key}")
+        QTest.keyRelease(self.window.zui, key, modifiers)
+        self.app.processEvents()
 
-    def simulate_mouse_click(self, pos: QPoint, button: Qt.MouseButton = Qt.LeftButton) -> None:
+    def simulate_mouse_click(self, pos: QPoint, button: Qt.MouseButton = Qt.LeftButton, 
+                            modifiers: Qt.KeyboardModifier = Qt.NoModifier) -> None:
         """Simulate a mouse click."""
-        self.log.detail(f"Simulating mouse click at ({pos.x()}, {pos.y()})")
-        QTest.mouseClick(self.window.zui, button, Qt.NoModifier, pos)
+        self.log.detail(f"Simulating mouse click at ({pos.x()}, {pos.y()}) with modifiers {modifiers}")
+        QTest.mouseClick(self.window.zui, button, modifiers, pos)
         self.app.processEvents()
 
     def simulate_mouse_drag(self, start: QPoint, end: QPoint,
-                            button: Qt.MouseButton = Qt.LeftButton) -> None:
+                            button: Qt.MouseButton = Qt.LeftButton,
+                            modifiers: Qt.KeyboardModifier = Qt.NoModifier) -> None:
         """Simulate a mouse drag operation."""
-        self.log.detail(f"Simulating drag from ({start.x()}, {start.y()}) to ({end.x()}, {end.y()})")
+        self.log.detail(f"Simulating drag from ({start.x()}, {start.y()}) to ({end.x()}, {end.y()}) with modifiers {modifiers}")
         zui = self.window.zui
 
-        QTest.mousePress(zui, button, Qt.NoModifier, start)
+        QTest.mousePress(zui, button, modifiers, start)
         QTest.qWait(100)
 
         steps = 20
@@ -396,12 +412,12 @@ class GUIIntegrationTest:
                 QtCore.QPointF(x, y),
                 button,
                 button,
-                Qt.NoModifier
+                modifiers
             )
             QApplication.postEvent(zui, event)
             QTest.qWait(50)
 
-        QTest.mouseRelease(zui, button, Qt.NoModifier, end)
+        QTest.mouseRelease(zui, button, modifiers, end)
         self.app.processEvents()
 
     def simulate_wheel(self, pos: QPoint, delta: int) -> None:
@@ -822,6 +838,116 @@ class GUIIntegrationTest:
         self.wait(DEFAULT_DELAY_MS, "Observe: Images ZOOMED OUT - all visible")
 
         self.log.success("Wheel zoom completed")
+
+    def step_control_click_rectangle_drawing(self) -> None:
+        """Step 35: Control+click rectangle drawing selection and move."""
+        self.log.section("MOUSE - CONTROL+CLICK RECTANGLE DRAWING SELECTION AND MOVE")
+        
+        self.ensure_test_scene_loaded()
+        
+        zui = self.window.zui
+        center = QPoint(zui.width() // 2, zui.height() // 2)
+        
+        # First, clear any existing selection
+        self.log.action("Clearing any existing selection")
+        self.simulate_key(Qt.Key_Escape)
+        self.wait(DEFAULT_DELAY_MS)
+        
+        # Zoom out a little (2 wheel scrolls)
+        self.log.action("Zooming out slightly (2 wheel scrolls)")
+        for _ in range(2):
+            self.simulate_wheel(center, -120)  # Negative delta zooms out
+            self.wait(ZOOM_STEP_DELAY_MS)
+        self.wait(DEFAULT_DELAY_MS, "Observe: Scene zoomed out slightly")
+        
+        # Define rectangle covering half the scene (left half)
+        w, h = zui.width(), zui.height()
+        rect_start = QPoint(50, h // 4)  # Start near left edge, 25% from top
+        rect_end = QPoint(w // 2, 3 * h // 4)  # End at middle horizontally, 75% from top
+        # Rectangle covers left half of scene vertically from 25% to 75%
+        
+        self.log.action(f"Rectangle covers left half: ({rect_start.x()},{rect_start.y()}) to ({rect_end.x()},{rect_end.y()})")
+        self.log.action("Should select objects in left half of scene")
+        
+        # Press and hold Control key
+        self.log.action("Pressing and holding Control key")
+        self.simulate_key_press(Qt.Key_Control)
+        self.wait(DEFAULT_DELAY_MS)
+        
+        # Simulate Control+click drag to draw rectangle
+        self.log.action("Control+click drag to draw selection rectangle")
+        self.simulate_mouse_drag(rect_start, rect_end, Qt.LeftButton, Qt.ControlModifier)
+        self.wait(SHORT_DELAY_MS, "Observe: Green rectangle drawn during drag")
+        
+        # Release Control key
+        self.log.action("Releasing Control key")
+        self.simulate_key_release(Qt.Key_Control)
+        
+        self.wait(DEFAULT_DELAY_MS, "Observe: Rectangle completed, objects in left half selected")
+        
+        # Now move the selected objects - drag from center of first test image to left
+        self.log.action("Moving selected objects from center of first test image to left")
+        # First test image is likely positioned in top-left quadrant after rectangle selection
+        # Estimate position: first image would be roughly at (w//4, h//3) in left half
+        first_image_center = QPoint(w // 4, h // 3)
+        # Move a quarter of scene length to the left
+        move_start = first_image_center
+        move_end = QPoint(max(50, first_image_center.x() - w // 4), first_image_center.y())
+        self.simulate_mouse_drag(move_start, move_end, Qt.LeftButton, Qt.NoModifier)
+        self.wait(DEFAULT_DELAY_MS, "Observe: Selected objects moved to the left")
+        
+        # Verify selection and movement
+        self.log.success("Control+click rectangle drawing completed - selected left half objects and moved them to the left")
+        
+        # Clean up: deselect and reset position
+        self.log.action("Clearing selection")
+        self.simulate_key(Qt.Key_Escape)
+        self.wait(DEFAULT_DELAY_MS)
+
+    def step_shift_click_no_selection_change(self) -> None:
+        """Step 36: Shift+click doesn't change selection."""
+        self.log.section("MOUSE - SHIFT+CLICK NO SELECTION CHANGE")
+        
+        self.ensure_test_scene_loaded()
+        
+        zui = self.window.zui
+        center = QPoint(zui.width() // 2, zui.height() // 2)
+        corner = QPoint(50, 50)
+        
+        # First, clear any existing selection
+        self.log.action("Clearing any existing selection")
+        self.simulate_key(Qt.Key_Escape)
+        self.wait(DEFAULT_DELAY_MS)
+        
+        # Click center to select an image
+        self.log.action("Click center to select an image")
+        self.simulate_mouse_click(center)
+        self.wait(DEFAULT_DELAY_MS, "Image SELECTED")
+        
+        # Press and hold Shift
+        self.log.action("Pressing and holding Shift key")
+        self.simulate_key_press(Qt.Key_Shift)
+        self.wait(DEFAULT_DELAY_MS)
+        
+        # Shift+click on corner - selection should NOT change
+        self.log.action("Shift+click on corner (selection should NOT change)")
+        self.simulate_mouse_click(corner, Qt.LeftButton, Qt.ShiftModifier)
+        self.wait(DEFAULT_DELAY_MS, "Observe: Selection UNCHANGED (still original image)")
+        
+        # Release Shift
+        self.log.action("Releasing Shift key")
+        self.simulate_key_release(Qt.Key_Shift)
+        
+        # Now click without Shift - selection should change
+        self.log.action("Click corner without Shift (selection SHOULD change)")
+        self.simulate_mouse_click(corner)
+        self.wait(DEFAULT_DELAY_MS, "Observe: Selection CHANGED to corner image")
+        
+        self.log.success("Shift+click selection behavior verified")
+        
+        # Clean up: deselect
+        self.simulate_key(Qt.Key_Escape)
+        self.wait(DEFAULT_DELAY_MS)
 
     def step_keyboard_escape(self) -> None:
         """Step 40: Keyboard Escape deselect on test scene."""

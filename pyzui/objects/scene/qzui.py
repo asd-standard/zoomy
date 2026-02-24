@@ -67,8 +67,14 @@ class QZUI(QtWidgets.QWidget, Thread) :
         self.__mousepos: Optional[Tuple[int, int]] = None
         self.__shift_held: bool = False
         self.__alt_held: bool = False
+        self.__control_held: bool = False
         self.__dropped_frames: int = 0
         self.__draft: bool = True
+        
+        # Rectangle drawing state
+        self.__drawing_rect: bool = False
+        self.__rect_start: Optional[Tuple[int, int]] = None
+        self.__rect_end: Optional[Tuple[int, int]] = None
 
         self.__timer: QtCore.QBasicTimer = QtCore.QBasicTimer()
         self.__framerate: int
@@ -150,12 +156,20 @@ class QZUI(QtWidgets.QWidget, Thread) :
             for mediaobject in errors:
                 
                 self.error.emit("Error loading %s" + str(mediaobject))
+            
+            ## Draw selection rectangle if currently drawing
+            if self.__drawing_rect and self.__rect_start and self.__rect_end:
+                self.scene.action_draw_rect(self.__rect_start, self.__rect_end, painter, QtCore.Qt.green)
 
         finally:
             painter.end()
 
         if self.__mouse_left_down:
-            self.__active_object.vx = self.__active_object.vy = 0.0
+            if type(self.__active_object) == list :
+                for active_object in self.__active_object :
+                    active_object.vx = active_object.vy = 0.0
+            else :
+                self.__active_object.vx = self.__active_object.vy = 0.0
 
     def timerEvent(self, event: QtCore.QTimerEvent) -> None:
         """
@@ -220,9 +234,41 @@ class QZUI(QtWidgets.QWidget, Thread) :
         if event.button() == QtCore.Qt.LeftButton:
             self.__mouse_left_down = True
             self.__mousepos = (int(event.position().x()), int(event.position().y()))
-            if not self.__shift_held:
+            if self.__control_held:
+                # Start rectangle drawing
+                self.__drawing_rect = True
+                self.__rect_start = self.__mousepos
+                self.__rect_end = self.__mousepos
+                # Don't change selection when drawing rectangle
+            
+            elif not self.__shift_held:
                 ## shift-click won't change the selection
-                self.scene.selection = self.scene.get(self.__mousepos)
+                # Only change selection if clicking on a non-selected object
+                clicked_object = self.scene.get(self.__mousepos)
+                
+                # If we have a selection and click empty space, KEEP selection for dragging
+                if clicked_object is None and self.scene.selection is not None:
+                    # Don't change selection, allow dragging of existing selection
+                    pass
+                # Check if we're clicking on an already-selected object
+                elif isinstance(self.scene.selection, list):
+                    # Multiple selection - check if clicked object is in the list
+                    if clicked_object in self.scene.selection:
+                        # Don't change selection, allow dragging
+                        pass
+                    else:
+                        self.scene.selection = clicked_object
+                elif self.scene.selection is not None and clicked_object == self.scene.selection:
+                    # Don't change selection, allow dragging
+                    pass
+                else:
+                    self.scene.selection = clicked_object
+
+            else :
+                self.__drawing_rect = False
+                self.__rect_start = None
+                self.__rect_end = None
+
 
         if event.button() == QtCore.Qt.RightButton:
             self.__mouse_right_down = True
@@ -245,12 +291,27 @@ class QZUI(QtWidgets.QWidget, Thread) :
         if (event.buttons()&QtCore.Qt.LeftButton) and self.__mouse_left_down:
             if self.__mousepos is None:
                 return
-            mx = int(event.position().x()) - self.__mousepos[0]
-            my = int(event.position().y()) - self.__mousepos[1]
+            
+            if self.__drawing_rect:
+                # Update rectangle end position for drawing
+                self.__rect_end = (int(event.position().x()), int(event.position().y()))
+                # Trigger repaint to show updated rectangle
+                self.update()
+            else:
+                # Original object dragging logic
+                mx = int(event.position().x()) - self.__mousepos[0]
+                my = int(event.position().y()) - self.__mousepos[1]
 
-            t = 1.0 / self.framerate
-            self.__active_object.aim('x', mx, t)
-            self.__active_object.aim('y', my, t)
+                t = 1.0 / self.framerate
+
+                if type(self.__active_object) == list :
+                    for active_object in self.__active_object : 
+                        active_object.aim('y', my, t)
+                        active_object.aim('x', mx, t)
+
+                else:
+                    self.__active_object.aim('y', my, t)
+                    self.__active_object.aim('x', mx, t)
 
         self.__mousepos = (int(event.position().x()), int(event.position().y()))
 
@@ -267,6 +328,25 @@ class QZUI(QtWidgets.QWidget, Thread) :
         """
         if event.button() == QtCore.Qt.LeftButton and self.__mouse_left_down:
             self.__mouse_left_down = False
+            
+            if self.__drawing_rect:
+                # Finish rectangle drawing
+                self.__drawing_rect = False
+                
+                # If we have valid rectangle coordinates, select objects within it
+                if self.__rect_start and self.__rect_end:
+                    # Get objects within the rectangle
+                    selected_objects = self.scene.get(self.__rect_start, self.__rect_end)
+                    if selected_objects:
+                        self.scene.selection = selected_objects
+                
+                # Clear rectangle coordinates
+                self.__rect_start = None
+                self.__rect_end = None
+                # Trigger repaint to remove rectangle
+                self.update()
+
+
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         """
@@ -303,6 +383,8 @@ class QZUI(QtWidgets.QWidget, Thread) :
             self.__shift_held = True
         elif key == QtCore.Qt.Key_Alt:
             self.__alt_held = True
+        elif key == QtCore.Qt.Key_Control:
+            self.__control_held = True
         elif key == QtCore.Qt.Key_Space:
             self.__centre()
         elif key == QtCore.Qt.Key_Delete:
@@ -328,6 +410,8 @@ class QZUI(QtWidgets.QWidget, Thread) :
             self.__shift_held = False
         elif key == QtCore.Qt.Key_Alt:
             self.__alt_held = False
+        elif key == QtCore.Qt.Key_Control:
+            self.__control_held = False
         else:
             QtWidgets.QWidget.keyPressEvent(self, event)
 
@@ -421,6 +505,21 @@ class QZUI(QtWidgets.QWidget, Thread) :
         TileManager.purge()
         self.__scene = scene
         self.__scene.viewport_size = (self.width(), self.height())
+
+        ## Reset mouse/keyboard and rectangle selection state when loading new scene
+        self.__mouse_right_down = False
+        self.__mouse_left_down = False
+        self.__mousepos = None
+        self.__shift_held = False
+        self.__alt_held = False
+        self.__control_held = False
+        self.__dropped_frames = 0
+        self.__draft = True
+        
+        # Reset rectangle drawing state
+        self.__drawing_rect = False
+        self.__rect_start = None
+        self.__rect_end = None
 
         ## zoom into scene
         self.__scene.centre = (self.width()/2, self.height()/2)

@@ -73,6 +73,15 @@ Mouse/Keyboard actions:
     - if the Shift key is currently being held then no change will be made
       to the current selection and the entire scene will be moved
 
+- **Control+Left-click drag** Draw a selection rectangle to select multiple media objects:
+    - Hold the Control key
+    - Click and drag with left mouse button to draw a green rectangle
+    - Release to select all objects within the rectangle
+    - Visual feedback: A green rectangle is drawn during the drag operation
+    - Multiple selection: All selected objects are highlighted with green borders
+    - Moving multiple objects: After rectangle selection, drag any selected object to move all selected objects together
+    - Clicking between selected objects maintains the selection for dragging
+
 - **Esc** Deselect the currently selected media
 
 - **PgUp/PgDn or Scrollwheel** Zoom the currently selected media
