@@ -77,7 +77,7 @@
             <span class="s1">&#39;debug&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s1">&#39;verbose&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s1">&#39;log_to_file&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s1">&#39;log_to_console&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;log_to_console&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s1">&#39;colored_output&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s1">&#39;log_dir&#39;</span><span class="p">:</span> <span class="s1">&#39;logs&#39;</span>
         <span class="p">},</span>
@@ -118,10 +118,10 @@
         <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span>
         <span class="n">epilog</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">Examples:</span>
-<span class="s2">  </span><span class="si">%(prog)s</span><span class="s2">                      # Run with default settings (logs to file only)</span>
-<span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> --console            # Enable console output</span>
-<span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> --debug --console    # Run in debug mode with console output</span>
-<span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> --verbose --console  # Run with verbose logging to console</span>
+<span class="s2">  </span><span class="si">%(prog)s</span><span class="s2">                      # Run with default settings (logs to console and file)</span>
+<span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> --no-console         # Disable console output (file only)</span>
+<span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> --debug              # Run in debug mode with console output</span>
+<span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> --verbose            # Run with verbose logging to console</span>
 <span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> --config pyzui.json  # Load settings from config file</span>
 <span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> --no-file            # Log to console only (disable file logging)</span>
 <span class="s2">  </span><span class="si">%(prog)s</span><span class="s2"> --log-dir /tmp/logs  # Use custom log directory</span>
@@ -157,13 +157,13 @@
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
         <span class="s1">&#39;--console&#39;</span><span class="p">,</span>
         <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Enable console logging (default: disabled)&#39;</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Enable console logging (default: enabled)&#39;</span>
     <span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
         <span class="s1">&#39;--no-console&#39;</span><span class="p">,</span>
         <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Disable console logging&#39;</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Disable console logging (default: enabled)&#39;</span>
     <span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>

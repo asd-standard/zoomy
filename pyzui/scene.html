@@ -168,36 +168,24 @@ gets purged from the TileManager.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pyzui.objects.scene.scene.Scene.__sort_objects">
-<span class="sig-name descname"><span class="pre">__sort_objects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.objects.scene.scene.Scene.__sort_objects" title="Link to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Method :</dt><dd><p><cite>internal method</cite> self.__sort_objects()</p>
-</dd>
-<dt>Parameters :</dt><dd><p>None</p>
-</dd>
-</dl>
-<p>__sort_objects() –&gt; None</p>
-<p>Sort self.__objects from largest to smallest area using
-mediaobject.onscreen_area attribute which returns mediaobject
-current onscreen area.</p>
-<p>See :  <a class="reference internal" href="mediaobject.html#pyzui.objects.mediaobjects.mediaobject.MediaObject.onscreen_area" title="pyzui.objects.mediaobjects.mediaobject.MediaObject.onscreen_area"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pyzui.objects.mediaobjects.mediaobject.MediaObject.onscreen_area</span></code></a></p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pyzui.objects.scene.scene.Scene.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/objects/scene/scene.html#Scene.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.scene.scene.Scene.get" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topleft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bottomright</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/objects/scene/scene.html#Scene.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.scene.scene.Scene.get" title="Link to this definition">¶</a></dt>
 <dd><dl class="simple">
-<dt>Method :</dt><dd><p>Scene.get(pos)</p>
+<dt>Method :</dt><dd><p>Scene.get(topleft, bottomright=None)</p>
 </dd>
-<dt>Parameters :</dt><dd><p>pos : Tuple[float, float]</p>
+<dt>Parameters :</dt><dd><p>topleft : Tuple[float, float]
+bottomright : Optional[Tuple[float, float]] = None</p>
 </dd>
 </dl>
-<p>Scene.get(pos) –&gt; MediaObject or None</p>
-<p>Return the foremost visible <em>MediaObject</em> which overlaps the
-on-screen point <em>pos</em>. <em>pos</em> is the mouse position at the last
-left or right click mouse event.</p>
-<p>Return None if there are no <em>MediaObjects</em> overlapping the point.</p>
-<p>get(tuple[float,float]) –&gt; MediaObject or None</p>
+<p>Scene.get(topleft) –&gt; MediaObject or None
+Scene.get(topleft, bottomright) –&gt; List[MediaObject]</p>
+<p>If only <cite>topleft</cite> is provided, return the foremost visible <em>MediaObject</em>
+which overlaps the on-screen point <em>topleft</em>.</p>
+<p>If both <cite>topleft</cite> and <cite>bottomright</cite> are provided, return a list of all
+<em>MediaObjects</em> that intersect the rectangle defined by these two points,
+sorted from smallest to largest (foremost to rearmost).</p>
+<p>Return None or empty list if there are no <em>MediaObjects</em> overlapping
+the point or rectangle.</p>
 <p>Mouse click event is caught by: <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyzui.qzui.QZUI.mousePressEvent()</span></code>
 which returns mouse position <em>pos</em></p>
 <p>Thread safely cycle through <em>__objects</em>. For each mediaobject checks if
@@ -215,6 +203,28 @@ on the screen.</p>
 </dd>
 </dl>
 <p>zoom(float) -&gt; None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.scene.Scene.__sort_objects">
+<span class="sig-name descname"><span class="pre">__sort_objects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyzui.objects.scene.scene.Scene.__sort_objects" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Method :</dt><dd><p><cite>internal method</cite> self.__sort_objects()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>__sort_objects() –&gt; None</p>
+<p>Sort self.__objects from largest to smallest area using
+mediaobject.onscreen_area attribute which returns mediaobject
+current onscreen area.</p>
+<p>See :  <a class="reference internal" href="mediaobject.html#pyzui.objects.mediaobjects.mediaobject.MediaObject.onscreen_area" title="pyzui.objects.mediaobjects.mediaobject.MediaObject.onscreen_area"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pyzui.objects.mediaobjects.mediaobject.MediaObject.onscreen_area</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.objects.scene.scene.Scene.action_draw_rect">
+<span class="sig-name descname"><span class="pre">action_draw_rect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topleft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bottomright</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">painter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/objects/scene/scene.html#Scene.action_draw_rect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.objects.scene.scene.Scene.action_draw_rect" title="Link to this definition">¶</a></dt>
+<dd><p>Draws a colored rectangle around selected mediaobject</p>
 </dd></dl>
 
 <dl class="py method">

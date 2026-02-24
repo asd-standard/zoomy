@@ -102,8 +102,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__shift_held</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__alt_held</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__control_held</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__dropped_frames</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__draft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+        
+        <span class="c1"># Rectangle drawing state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__drawing_rect</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rect_start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rect_end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__timer</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QBasicTimer</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QBasicTimer</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__framerate</span><span class="p">:</span> <span class="nb">int</span>
@@ -132,8 +138,13 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">vz</span> <span class="o">+=</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">num_steps</span>
+        <span class="k">if</span> <span class="nb">type</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">active_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="p">:</span>
+                <span class="n">active_object</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span>
+                <span class="n">active_object</span><span class="o">.</span><span class="n">vz</span> <span class="o">+=</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">num_steps</span>     
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">vz</span> <span class="o">+=</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">num_steps</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__centre</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -187,12 +198,20 @@
             <span class="k">for</span> <span class="n">mediaobject</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
                 
                 <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Error loading </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">mediaobject</span><span class="p">))</span>
+            
+            <span class="c1">## Draw selection rectangle if currently drawing</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__drawing_rect</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rect_start</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rect_end</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">action_draw_rect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__rect_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rect_end</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">green</span><span class="p">)</span>
 
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">painter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mouse_left_down</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">vx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">vy</span> <span class="o">=</span> <span class="mf">0.0</span></div>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span> <span class="p">:</span>
+                <span class="k">for</span> <span class="n">active_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span> <span class="p">:</span>
+                    <span class="n">active_object</span><span class="o">.</span><span class="n">vx</span> <span class="o">=</span> <span class="n">active_object</span><span class="o">.</span><span class="n">vy</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">vx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">vy</span> <span class="o">=</span> <span class="mf">0.0</span></div>
 
 
 <div class="viewcode-block" id="QZUI.timerEvent">
@@ -266,9 +285,45 @@
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__mouse_left_down</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()),</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()))</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__shift_held</span><span class="p">:</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__control_held</span><span class="p">:</span>
+                <span class="c1"># Start rectangle drawing</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__drawing_rect</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__rect_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__rect_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span>
+                <span class="c1"># Don&#39;t change selection when drawing rectangle</span>
+            
+            <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__shift_held</span><span class="p">:</span>
                 <span class="c1">## shift-click won&#39;t change the selection</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">selection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span><span class="p">)</span>
+                <span class="c1"># Only change selection if clicking on a non-selected object</span>
+                <span class="n">clicked_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span><span class="p">)</span>
+<span class="w">                </span>
+<span class="w">                </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">                # If we have a selection and click empty space, KEEP selection for dragging</span>
+<span class="sd">                if clicked_object is None and self.scene.selection is not None:</span>
+<span class="sd">                    # Don&#39;t change selection, allow dragging of existing selection</span>
+<span class="sd">                    pass</span>
+<span class="sd">                &#39;&#39;&#39;</span>
+                
+                <span class="c1"># Check if we&#39;re clicking on an already-selected object</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">selection</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="c1"># Multiple selection - check if clicked object is in the list</span>
+                    <span class="k">if</span> <span class="n">clicked_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">selection</span><span class="p">:</span>
+                        <span class="c1"># Don&#39;t change selection, allow dragging</span>
+                        <span class="k">pass</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">selection</span> <span class="o">=</span> <span class="n">clicked_object</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">selection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">clicked_object</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">selection</span><span class="p">:</span>
+                    <span class="c1"># Don&#39;t change selection, allow dragging</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">selection</span> <span class="o">=</span> <span class="n">clicked_object</span>
+
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__drawing_rect</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__rect_start</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__rect_end</span> <span class="o">=</span> <span class="kc">None</span>
+
 
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__mouse_right_down</span> <span class="o">=</span> <span class="kc">True</span>
@@ -294,12 +349,27 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">buttons</span><span class="p">()</span><span class="o">&amp;</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mouse_left_down</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span>
-            <span class="n">mx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">())</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">my</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">())</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__drawing_rect</span><span class="p">:</span>
+                <span class="c1"># Update rectangle end position for drawing</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__rect_end</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()),</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()))</span>
+                <span class="c1"># Trigger repaint to show updated rectangle</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Original object dragging logic</span>
+                <span class="n">mx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">())</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">my</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">())</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-            <span class="n">t</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">framerate</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">aim</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">aim</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">framerate</span>
+
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span> <span class="p">:</span>
+                    <span class="k">for</span> <span class="n">active_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span> <span class="p">:</span> 
+                        <span class="n">active_object</span><span class="o">.</span><span class="n">aim</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+                        <span class="n">active_object</span><span class="o">.</span><span class="n">aim</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">aim</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__active_object</span><span class="o">.</span><span class="n">aim</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()),</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()))</span></div>
 
@@ -318,7 +388,26 @@
 <span class="sd">        Handle mouse release events.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mouse_left_down</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__mouse_left_down</span> <span class="o">=</span> <span class="kc">False</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__mouse_left_down</span> <span class="o">=</span> <span class="kc">False</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__drawing_rect</span><span class="p">:</span>
+                <span class="c1"># Finish rectangle drawing</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__drawing_rect</span> <span class="o">=</span> <span class="kc">False</span>
+                
+                <span class="c1"># If we have valid rectangle coordinates, select objects within it</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rect_start</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rect_end</span><span class="p">:</span>
+                    <span class="c1"># Get objects within the rectangle</span>
+                    <span class="n">selected_objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__rect_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rect_end</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">selected_objects</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">selection</span> <span class="o">=</span> <span class="n">selected_objects</span>
+                
+                <span class="c1"># Clear rectangle coordinates</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__rect_start</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__rect_end</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="c1"># Trigger repaint to remove rectangle</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
+
+
 
 
 <div class="viewcode-block" id="QZUI.keyPressEvent">
@@ -358,6 +447,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">__shift_held</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Alt</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__alt_held</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Control</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__control_held</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Space</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__centre</span><span class="p">()</span>
         <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Delete</span><span class="p">:</span>
@@ -386,6 +477,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">__shift_held</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Alt</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__alt_held</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Control</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__control_held</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
 
@@ -483,6 +576,21 @@
         <span class="n">TileManager</span><span class="o">.</span><span class="n">purge</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__scene</span> <span class="o">=</span> <span class="n">scene</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__scene</span><span class="o">.</span><span class="n">viewport_size</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+
+        <span class="c1">## Reset mouse/keyboard and rectangle selection state when loading new scene</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mouse_right_down</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mouse_left_down</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mousepos</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__shift_held</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__alt_held</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__control_held</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dropped_frames</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__draft</span> <span class="o">=</span> <span class="kc">True</span>
+        
+        <span class="c1"># Reset rectangle drawing state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__drawing_rect</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rect_start</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rect_end</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1">## zoom into scene</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__scene</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
