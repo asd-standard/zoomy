@@ -420,6 +420,13 @@ class QZUI(QtWidgets.QWidget, Thread) :
         elif key == QtCore.Qt.Key_Alt:
             self.__alt_held = False
         elif key == QtCore.Qt.Key_Control:
+            # Clear rectangle drawing state when Control key is released
+            if self.__drawing_rect:
+                self.__drawing_rect = False
+                self.__rect_start = None
+                self.__rect_end = None
+                # Trigger repaint to clear drawn rectangle
+                self.update()
             self.__control_held = False
         else:
             QtWidgets.QWidget.keyPressEvent(self, event)
@@ -436,6 +443,33 @@ class QZUI(QtWidgets.QWidget, Thread) :
         Handle resize events to update the viewport size.
         """
         self.__scene.viewport_size = (self.width(), self.height())
+
+    def focusOutEvent(self, event: QtGui.QFocusEvent) -> None:
+        """
+        Method :
+            focusOutEvent(event)
+        Parameters :
+            event : QtGui.QFocusEvent
+
+        focusOutEvent(event) --> None
+
+        Handle focus out events to reset keyboard modifiers and rectangle drawing state.
+        This prevents rectangle drawing from persisting when widget loses focus (e.g., during save dialog).
+        """
+        # Reset all keyboard modifiers
+        self.__shift_held = False
+        self.__alt_held = False
+        self.__control_held = False
+        
+        # Reset rectangle drawing state
+        self.__drawing_rect = False
+        self.__rect_start = None
+        self.__rect_end = None
+        
+        # Trigger repaint to clear any drawn rectangle
+        self.update()
+        
+        QtWidgets.QWidget.focusOutEvent(self, event)
 
     @property
     def __active_object(self) -> Any:
@@ -497,6 +531,7 @@ class QZUI(QtWidgets.QWidget, Thread) :
 
         Return the scene currently being viewed.
         """
+
         return self.__scene
 
     def __set_scene(self, scene: 'Scene.Scene') -> None:
