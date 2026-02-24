@@ -103,8 +103,13 @@ class QZUI(QtWidgets.QWidget, Thread) :
         else:
             scale = 1.0
 
-        self.__active_object.centre = self.__mousepos
-        self.__active_object.vz += scale * num_steps
+        if type(self.__active_object) == list:
+            for active_object in self.__active_object:
+                active_object.centre = self.__mousepos
+                active_object.vz += scale * num_steps     
+        else:
+            self.__active_object.centre = self.__mousepos
+            self.__active_object.vz += scale * num_steps
 
     def __centre(self) -> None:
         """
@@ -234,6 +239,7 @@ class QZUI(QtWidgets.QWidget, Thread) :
         if event.button() == QtCore.Qt.LeftButton:
             self.__mouse_left_down = True
             self.__mousepos = (int(event.position().x()), int(event.position().y()))
+            
             if self.__control_held:
                 # Start rectangle drawing
                 self.__drawing_rect = True
@@ -246,12 +252,15 @@ class QZUI(QtWidgets.QWidget, Thread) :
                 # Only change selection if clicking on a non-selected object
                 clicked_object = self.scene.get(self.__mousepos)
                 
+                '''
                 # If we have a selection and click empty space, KEEP selection for dragging
                 if clicked_object is None and self.scene.selection is not None:
                     # Don't change selection, allow dragging of existing selection
                     pass
+                '''
+                
                 # Check if we're clicking on an already-selected object
-                elif isinstance(self.scene.selection, list):
+                if isinstance(self.scene.selection, list):
                     # Multiple selection - check if clicked object is in the list
                     if clicked_object in self.scene.selection:
                         # Don't change selection, allow dragging
