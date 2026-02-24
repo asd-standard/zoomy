@@ -103,7 +103,7 @@ class QZUI(QtWidgets.QWidget, Thread) :
         else:
             scale = 1.0
 
-        if type(self.__active_object) == list:
+        if type (self.__active_object) == list:
             for active_object in self.__active_object:
                 active_object.centre = self.__mousepos
                 active_object.vz += scale * num_steps     

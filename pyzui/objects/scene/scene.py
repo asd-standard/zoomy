@@ -474,8 +474,9 @@ class Scene(PhysicalObject):
                 for selection in self.selection :
                     self.action_draw_rect(selection.topleft, selection.bottomright,\
                         painter, QtCore.Qt.green)
-                    
-            elif self.selection :
+
+            elif isinstance(self.selection, MediaObject.MediaObject) :
+
                 self.action_draw_rect(self.selection.topleft, self.selection.bottomright,\
                  painter, QtCore.Qt.green)          
 
