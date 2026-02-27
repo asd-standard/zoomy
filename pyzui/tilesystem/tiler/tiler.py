@@ -21,6 +21,10 @@ from threading import Thread
 import math
 import shutil
 import traceback
+import multiprocessing
+import threading
+import os
+from concurrent.futures import ProcessPoolExecutor
 
 from .. import tilestore as TileStore
 from .. import tile as Tile
@@ -30,6 +34,24 @@ if TYPE_CHECKING:
     from ..tile import Tile as TileType
 
 TileID = Tuple[str, int, int, int]
+
+def _get_safe_context():
+    """
+    Get a multiprocessing context that's safe for the current thread state.
+    Returns 'fork' if only the main thread is running (fast, clean shutdown).
+    Returns 'spawn' if other threads exist (avoids fork-after-threads issues).
+    """
+    env_context = os.environ.get('PYZUI_MP_CONTEXT')
+    if env_context:
+        return multiprocessing.get_context(env_context)
+    if threading.active_count() > 1:
+        return multiprocessing.get_context('spawn')
+    return multiprocessing.get_context('fork')
+
+def _make_tile(args):
+    """Worker function for parallel tile creation."""
+    string, width, height = args
+    return Tile.fromstring(string, width, height)
 
 #Thread
 class Tiler(Thread):
@@ -106,7 +128,7 @@ class Tiler(Thread):
         self.__logger = get_logger(f'Tiler.{self.__media_id}')
 
         self.error = None
-
+        self.__executor = None
         
 
     def _scanline(self) -> str:
@@ -201,15 +223,30 @@ class Tiler(Thread):
                     #print(tiles[i],'\n')
         
 
-        for i in range(self.__numtiles_across_total):
-            if i == self.__numtiles_across_total-1:
-                ## last tile in row
-                tiles[i] = Tile.fromstring(tiles[i],
-                    self.__right_tiles_width, tileheight)
-                
-            else:
-                tiles[i] = Tile.fromstring(tiles[i],
-                    self.__tilesize, tileheight)
+        # Parallel tile creation using process pool
+        if self.__executor is not None:
+            # Build argument list for each tile
+            args = []
+            for i in range(self.__numtiles_across_total):
+                if i == self.__numtiles_across_total-1:
+                    width = self.__right_tiles_width
+                else:
+                    width = self.__tilesize
+                args.append((tiles[i], width, tileheight))
+            # Process tiles in parallel
+            results = list(self.__executor.map(_make_tile, args))
+            # Assign results back in order
+            for i, tile in enumerate(results):
+                tiles[i] = tile
+        else:
+            # Fallback sequential processing
+            for i in range(self.__numtiles_across_total):
+                if i == self.__numtiles_across_total-1:
+                    tiles[i] = Tile.fromstring(tiles[i],
+                        self.__right_tiles_width, tileheight)
+                else:
+                    tiles[i] = Tile.fromstring(tiles[i],
+                        self.__tilesize, tileheight)
                 
         
         return tiles
@@ -411,16 +448,28 @@ class Tiler(Thread):
         #print(self.__bottom_tiles_height, self.__right_tiles_width) 
 
         try:
-            with TileStore.disk_lock:
-              
+            # Create process pool executor for parallel tile creation
+            if self.__numtiles_across_total > 1:
+                max_workers = min(self.__numtiles_across_total, os.cpu_count() or 1)
+                self.__executor = ProcessPoolExecutor(
+                    max_workers=max_workers,
+                    mp_context=_get_safe_context()
+                )
+                self.__logger.debug(f"created ProcessPoolExecutor with {max_workers} workers")
+            else:
+                self.__executor = None
+                self.__logger.debug("skipping ProcessPoolExecutor (single tile per row)")
+            
+            #with TileStore.disk_lock:
+               
                 ## recursively tile the image
-                self.__tiles()
-          
+            self.__tiles()
+           
         except Exception as e:       
             self.error = str(e)
             outpath = TileStore.get_media_path(self.__media_id)
             shutil.rmtree(outpath, ignore_errors=True)
-               
+                
         else:
             
             TileStore.write_metadata(self.__media_id,
@@ -432,6 +481,11 @@ class Tiler(Thread):
                 width=self._width,
                 height=self._height,
             )
+        finally:
+            if self.__executor is not None:
+                self.__executor.shutdown(wait=True)
+                self.__executor = None
+                self.__logger.debug("ProcessPoolExecutor shut down")
         
         self.__progress = 1.0
         self.__logger.debug("tiling complete")

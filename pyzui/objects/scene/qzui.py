@@ -18,12 +18,11 @@
 
 from typing import Optional, Any, Tuple
 from PySide6 import QtCore, QtGui, QtWidgets
-from threading import Thread
 
 from pyzui.objects.scene import scene as Scene
 from pyzui.tilesystem import tilemanager as TileManager
 
-class QZUI(QtWidgets.QWidget, Thread) :
+class QZUI(QtWidgets.QWidget) :
     """
     Constructor :
         QZUI(parent, framerate, zoom_sensitivity)
@@ -59,7 +58,6 @@ class QZUI(QtWidgets.QWidget, Thread) :
         """
         QtWidgets.QWidget.__init__(self, parent)
 
-        Thread.__init__(self)
         self.__scene: 'Scene.Scene' = Scene.new()
         
         self.__mouse_right_down: bool = False
