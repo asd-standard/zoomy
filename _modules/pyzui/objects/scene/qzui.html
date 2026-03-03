@@ -51,14 +51,13 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Thread</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.objects.scene</span><span class="w"> </span><span class="kn">import</span> <span class="n">scene</span> <span class="k">as</span> <span class="n">Scene</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilemanager</span> <span class="k">as</span> <span class="n">TileManager</span>
 
 <div class="viewcode-block" id="QZUI">
 <a class="viewcode-back" href="../../../../pyzui/qzui.html#pyzui.objects.scene.qzui.QZUI">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">QZUI</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Thread</span><span class="p">)</span> <span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">QZUI</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">)</span> <span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor :</span>
 <span class="sd">        QZUI(parent, framerate, zoom_sensitivity)</span>
@@ -94,7 +93,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
 
-        <span class="n">Thread</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__scene</span><span class="p">:</span> <span class="s1">&#39;Scene.Scene&#39;</span> <span class="o">=</span> <span class="n">Scene</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">__mouse_right_down</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
@@ -478,6 +476,13 @@
         <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Alt</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__alt_held</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Control</span><span class="p">:</span>
+            <span class="c1"># Clear rectangle drawing state when Control key is released</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__drawing_rect</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__drawing_rect</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__rect_start</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__rect_end</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="c1"># Trigger repaint to clear drawn rectangle</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__control_held</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
@@ -497,6 +502,36 @@
 <span class="sd">        Handle resize events to update the viewport size.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__scene</span><span class="o">.</span><span class="n">viewport_size</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="QZUI.focusOutEvent">
+<a class="viewcode-back" href="../../../../pyzui/qzui.html#pyzui.objects.scene.qzui.QZUI.focusOutEvent">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">focusOutEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFocusEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method :</span>
+<span class="sd">            focusOutEvent(event)</span>
+<span class="sd">        Parameters :</span>
+<span class="sd">            event : QtGui.QFocusEvent</span>
+
+<span class="sd">        focusOutEvent(event) --&gt; None</span>
+
+<span class="sd">        Handle focus out events to reset keyboard modifiers and rectangle drawing state.</span>
+<span class="sd">        This prevents rectangle drawing from persisting when widget loses focus (e.g., during save dialog).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Reset all keyboard modifiers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__shift_held</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__alt_held</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__control_held</span> <span class="o">=</span> <span class="kc">False</span>
+        
+        <span class="c1"># Reset rectangle drawing state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__drawing_rect</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rect_start</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rect_end</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="c1"># Trigger repaint to clear any drawn rectangle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        
+        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">focusOutEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
@@ -559,6 +594,7 @@
 
 <span class="sd">        Return the scene currently being viewed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scene</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__set_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="p">:</span> <span class="s1">&#39;Scene.Scene&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>

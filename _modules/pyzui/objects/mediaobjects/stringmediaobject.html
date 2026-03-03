@@ -306,8 +306,8 @@
         
         <span class="c1"># Create painter for image</span>
         <span class="n">painter</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
-        <span class="n">painter</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="o">.</span><span class="n">RenderHint</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">)</span>
-        <span class="n">painter</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="o">.</span><span class="n">RenderHint</span><span class="o">.</span><span class="n">TextAntialiasing</span><span class="p">)</span>
+        <span class="c1">#painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)</span>
+        <span class="c1">#painter.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing)</span>
         
         <span class="c1"># Render text to image using direct rendering logic at position (0, 0)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__render_text_direct</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>

@@ -135,9 +135,10 @@
 
 <span class="sd">        Return a resized copy of the tile by calling ImageQt.scaled() method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Use shortcut enum values for compatibility with PySide6 versions</span>
         <span class="k">return</span> <span class="n">Tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">scaled</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">width</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">height</span><span class="p">),</span>
-            <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AspectRatioMode</span><span class="o">.</span><span class="n">IgnoreAspectRatio</span><span class="p">,</span>
-            <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">TransformationMode</span><span class="o">.</span><span class="n">FastTransformation</span><span class="p">))</span></div>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">IgnoreAspectRatio</span><span class="p">,</span>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">FastTransformation</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="Tile.save">

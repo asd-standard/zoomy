@@ -205,6 +205,97 @@ Total: 1 + 4 + 16 = 21 tiles
 <li><p><code class="docutils literal notranslate"><span class="pre">PPMTiler</span></code>: Reads PPM/PGM format images</p></li>
 </ul>
 </section>
+<section id="process-based-tiling-tilerrunner">
+<h3>Process-Based Tiling (tilerrunner)<a class="headerlink" href="#process-based-tiling-tilerrunner" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">tilerrunner</span></code> module provides process-based tiling execution for parallel
+image tiling, avoiding threading conflicts between pyvips, TileManager threads,
+and Qt.</p>
+<p><strong>Architecture:</strong></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">tilerrunner</span></code> module uses <code class="docutils literal notranslate"><span class="pre">ProcessPoolExecutor</span></code> with automatic context
+selection:</p>
+<ul class="simple">
+<li><p><strong>‘fork’ context</strong>: Used when no other threads are running (fast, clean shutdown)</p></li>
+<li><p><strong>‘spawn’ context</strong>: Used when other threads exist (avoids fork-after-threads issues)</p></li>
+</ul>
+<p>The context can be overridden via <code class="docutils literal notranslate"><span class="pre">PYZUI_MP_CONTEXT</span></code> environment variable.</p>
+<p><strong>Key Functions:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem.tiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilerrunner</span>
+
+<span class="c1"># Initialize process pool (optional, auto-initialized on first use)</span>
+<span class="n">tilerrunner</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="c1"># Submit tiling job</span>
+<span class="n">future</span> <span class="o">=</span> <span class="n">tilerrunner</span><span class="o">.</span><span class="n">submit_tiling</span><span class="p">(</span>
+    <span class="n">infile</span><span class="o">=</span><span class="s1">&#39;image.ppm&#39;</span><span class="p">,</span>
+    <span class="n">media_id</span><span class="o">=</span><span class="s1">&#39;my_image&#39;</span><span class="p">,</span>
+    <span class="n">filext</span><span class="o">=</span><span class="s1">&#39;jpg&#39;</span><span class="p">,</span>
+    <span class="n">tilesize</span><span class="o">=</span><span class="mi">256</span>
+<span class="p">)</span>
+
+<span class="c1"># Create handle for tracking</span>
+<span class="n">handle</span> <span class="o">=</span> <span class="n">tilerrunner</span><span class="o">.</span><span class="n">TilingHandle</span><span class="p">(</span><span class="n">future</span><span class="p">,</span> <span class="s1">&#39;image.ppm&#39;</span><span class="p">,</span> <span class="s1">&#39;my_image&#39;</span><span class="p">)</span>
+
+<span class="c1"># Check progress</span>
+<span class="k">if</span> <span class="n">handle</span><span class="o">.</span><span class="n">progress</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">handle</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tiling failed: </span><span class="si">{</span><span class="n">handle</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tiling complete!&quot;</span><span class="p">)</span>
+
+<span class="c1"># Shutdown pool when done</span>
+<span class="n">tilerrunner</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>TilingHandle Class:</strong></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">TilingHandle</span></code> wraps a <code class="docutils literal notranslate"><span class="pre">Future</span></code> and provides a compatible interface
+with the thread-based <code class="docutils literal notranslate"><span class="pre">Tiler</span></code> class:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">progress</span></code>: Returns 0.0 while running and 1.0 when done</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">error</span></code>: Error message if tiling failed, None otherwise</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">is_alive()</span></code>: Returns True if tiling is still running</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">join(timeout)</span></code>: Wait for tiling to complete</p></li>
+</ul>
+<p><strong>Process Isolation:</strong></p>
+<p>Tilers run in separate processes via <code class="docutils literal notranslate"><span class="pre">ProcessPoolExecutor</span></code>, providing complete isolation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem.tiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">tilerrunner</span>
+
+<span class="c1"># Submit tiling to process pool</span>
+<span class="n">future</span> <span class="o">=</span> <span class="n">tilerrunner</span><span class="o">.</span><span class="n">submit_tiling</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">media_id</span><span class="p">)</span>
+
+<span class="c1"># Track via TilingHandle</span>
+<span class="n">handle</span> <span class="o">=</span> <span class="n">tilerrunner</span><span class="o">.</span><span class="n">TilingHandle</span><span class="p">(</span><span class="n">future</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">media_id</span><span class="p">)</span>
+
+<span class="c1"># Check progress/completion</span>
+<span class="k">if</span> <span class="n">handle</span><span class="o">.</span><span class="n">progress</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">handle</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed: </span><span class="si">{</span><span class="n">handle</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This ensures:</p>
+<ol class="arabic simple">
+<li><p>No threading conflicts with TileManager threads</p></li>
+<li><p>Each pyvips instance runs in its own memory space</p></li>
+<li><p>True parallel tiling (multiple images can be tiled simultaneously)</p></li>
+<li><p>No deadlocks from pyvips internal threading</p></li>
+</ol>
+<p><strong>Integration with TiledMediaObject:</strong></p>
+<p>TiledMediaObject automatically uses process-based tiling via <code class="docutils literal notranslate"><span class="pre">tilerrunner</span></code>
+when converting and tiling media files. The conversion and tiling pipeline is:</p>
+<ol class="arabic simple">
+<li><p>Converter runs in separate process via <code class="docutils literal notranslate"><span class="pre">converterrunner</span></code></p></li>
+<li><p>Output PPM file is passed to <code class="docutils literal notranslate"><span class="pre">tilerrunner</span></code></p></li>
+<li><p>Tiling runs in separate process</p></li>
+<li><p>Progress is tracked across both conversion and tiling phases</p></li>
+</ol>
+<p><strong>Python 3.12+ Compatibility:</strong></p>
+<p>Python 3.12 emits a DeprecationWarning about <code class="docutils literal notranslate"><span class="pre">fork()</span></code> in multi-threaded
+processes. <code class="docutils literal notranslate"><span class="pre">tilerrunner</span></code> handles this by:</p>
+<ol class="arabic simple">
+<li><p>Selecting ‘spawn’ context when other threads are running</p></li>
+<li><p>Catching and ignoring the specific DeprecationWarning</p></li>
+<li><p>Ensuring worker processes are safe (fresh imports, no shared state)</p></li>
+</ol>
+</section>
 <section id="tilestore">
 <h3>TileStore<a class="headerlink" href="#tilestore" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">TileStore</span></code> module manages disk-based tile storage and metadata persistence.</p>

@@ -67,6 +67,9 @@
 <span class="c1"># Process-based conversion for parallel media conversion</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">converterrunner</span>
 
+<span class="c1"># Process-based tiling for parallel image tiling</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyzui.tilesystem.tiler.tilerrunner</span><span class="w"> </span><span class="kn">import</span> <span class="n">submit_tiling</span><span class="p">,</span> <span class="n">TilingHandle</span>
+
 <div class="viewcode-block" id="TiledMediaObject">
 <a class="viewcode-back" href="../../../../pyzui/tiledmediaobject.html#pyzui.objects.mediaobjects.tiledmediaobject.TiledMediaObject">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TiledMediaObject</span><span class="p">(</span><span class="n">MediaObject</span><span class="p">):</span>
@@ -135,9 +138,9 @@
         <span class="c1"># None if no conversion is needed (e.g., already tiled or is a .ppm file)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__converter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">converterrunner</span><span class="o">.</span><span class="n">ConversionHandle</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># Reference to the PPMTiler instance that subdivides PPM images into tiles</span>
+        <span class="c1"># Reference to the TilingHandle that manages process-based tiling</span>
         <span class="c1"># None until __run_tiler() is called after conversion completes</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PPMTiler</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TilingHandle</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># Logger instance for this specific TiledMediaObject, named with the media_id</span>
         <span class="c1"># Used for debug/info/error logging throughout the object&#39;s lifecycle</span>
@@ -770,13 +773,10 @@
             <span class="n">filext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;png&#39;</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># Create a PPMTiler to subdivide the PPM image into a tile hierarchy</span>
-            <span class="c1"># PPMTiler(ppmfile, media_id, format) reads the PPM and creates tiles</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span> <span class="o">=</span> <span class="n">PPMTiler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="n">filext</span><span class="p">)</span>
-
-            <span class="c1"># Start the tiling process (runs in a separate thread)</span>
-            <span class="c1"># Tiles are written to the TileManager&#39;s tile store as they are created</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="c1"># Submit tiling job to process pool for parallel tile creation</span>
+            <span class="c1"># submit_tiling returns a Future that will contain the tiling result</span>
+            <span class="n">future</span> <span class="o">=</span> <span class="n">submit_tiling</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">,</span> <span class="n">filext</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__tiler</span> <span class="o">=</span> <span class="n">TilingHandle</span><span class="p">(</span><span class="n">future</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ppmfile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_id</span><span class="p">)</span>
 
         <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
             <span class="c1"># IOError during tiler creation indicates a file read problem</span>

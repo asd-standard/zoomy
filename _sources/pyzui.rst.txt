@@ -26,6 +26,7 @@ Submodules
    pyzui/tilemanager
    pyzui/tileprovider
    pyzui/tiler
+   pyzui/tilerrunner
    pyzui/tilestore
    pyzui/vipsconverter
 

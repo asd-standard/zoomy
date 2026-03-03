@@ -114,25 +114,61 @@ level rather than letting it propagate to the user.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.converters.converterrunner.init">
-<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converterrunner.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner.init" title="Link to this definition">¶</a></dt>
-<dd><p>Initialize the converter runner with a process pool.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>max_workers</strong> – Maximum number of parallel conversion processes</p>
+<span class="sig-prename descclassname"><span class="pre">pyzui.converters.converterrunner.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner.init" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>init(max_workers)</p>
+</dd>
+<dt>Parameters :</dt><dd><dl class="simple">
+<dt>max_workers<span class="classifier">int</span></dt><dd><ul class="simple">
+<li><p>Maximum number of parallel conversion processes (default: 2)</p></li>
+</ul>
 </dd>
 </dl>
+</dd>
+</dl>
+<p>init(max_workers) –&gt; None</p>
+<p>Initialize the converter runner with a process pool.</p>
+<p>Thread-safe: This function uses a reentrant lock to ensure safe concurrent
+initialization and shutdown operations.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.converters.converterrunner.shutdown">
 <span class="sig-prename descclassname"><span class="pre">pyzui.converters.converterrunner.</span></span><span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner.shutdown" title="Link to this definition">¶</a></dt>
-<dd><p>Shutdown the process pool executor and terminate any lingering processes.</p>
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>shutdown()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>shutdown() –&gt; None</p>
+<p>Shutdown the process pool executor and terminate any lingering processes.</p>
+<p>Thread-safe: This function uses a reentrant lock to ensure safe concurrent
+initialization and shutdown operations.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyzui.converters.converterrunner._get_executor">
 <span class="sig-prename descclassname"><span class="pre">pyzui.converters.converterrunner.</span></span><span class="sig-name descname"><span class="pre">_get_executor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/converters/converterrunner.html#_get_executor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.converters.converterrunner._get_executor" title="Link to this definition">¶</a></dt>
-<dd><p>Get or create the process pool executor.</p>
+<dd><dl class="simple">
+<dt>Function :</dt><dd><p>_get_executor()</p>
+</dd>
+<dt>Parameters :</dt><dd><p>None</p>
+</dd>
+</dl>
+<p>_get_executor() –&gt; ProcessPoolExecutor</p>
+<p>Get or create the process pool executor.</p>
+<p>Thread-safe: This function uses a reentrant lock to ensure safe concurrent
+access to the global executor. The lock allows reentrancy for the
+init() -&gt; shutdown() -&gt; init() chain that may occur during context changes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The global process pool executor instance</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ProcessPoolExecutor</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

@@ -217,6 +217,76 @@ be set to a string describing the error.</p>
 
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tiler.submit_tiling">
+<span class="sig-prename descclassname"><span class="pre">pyzui.tilesystem.tiler.</span></span><span class="sig-name descname"><span class="pre">submit_tiling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">media_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jpg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tilesize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tiler/tilerrunner.html#submit_tiling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tiler.submit_tiling" title="Link to this definition">¶</a></dt>
+<dd><p>Submit a tiling job to run in a separate process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>infile</strong> – Path to the source PPM file</p></li>
+<li><p><strong>media_id</strong> – Media identifier for tile storage (defaults to infile)</p></li>
+<li><p><strong>filext</strong> – Tile file extension (‘jpg’ or ‘png’)</p></li>
+<li><p><strong>tilesize</strong> – Tile size in pixels</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Future object that will contain the tiling result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tiler.TilingHandle">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyzui.tilesystem.tiler.</span></span><span class="sig-name descname"><span class="pre">TilingHandle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">future</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">media_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tiler/tilerrunner.html#TilingHandle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tiler.TilingHandle" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A handle to a running or completed tiling process.</p>
+<p>This class wraps a Future and provides a similar interface to the
+thread-based Tiler class, with progress and error properties.</p>
+<p>Create a new TilingHandle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>future</strong> – The Future object from the process pool</p></li>
+<li><p><strong>infile</strong> – Path to the source file</p></li>
+<li><p><strong>media_id</strong> – Media identifier for tile storage</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tiler.TilingHandle._check_result">
+<span class="sig-name descname"><span class="pre">_check_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tiler/tilerrunner.html#TilingHandle._check_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tiler.TilingHandle._check_result" title="Link to this definition">¶</a></dt>
+<dd><p>Check the future result and update error status.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tiler.TilingHandle.error">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">error</span></span><a class="headerlink" href="#pyzui.tilesystem.tiler.TilingHandle.error" title="Link to this definition">¶</a></dt>
+<dd><p>Return the error message if tiling failed, None otherwise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tiler.TilingHandle.is_alive">
+<span class="sig-name descname"><span class="pre">is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tiler/tilerrunner.html#TilingHandle.is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tiler.TilingHandle.is_alive" title="Link to this definition">¶</a></dt>
+<dd><p>Return True if the tiling is still running.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tiler.TilingHandle.join">
+<span class="sig-name descname"><span class="pre">join</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyzui/tilesystem/tiler/tilerrunner.html#TilingHandle.join"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyzui.tilesystem.tiler.TilingHandle.join" title="Link to this definition">¶</a></dt>
+<dd><p>Wait for the tiling to complete.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyzui.tilesystem.tiler.TilingHandle.progress">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">progress</span></span><a class="headerlink" href="#pyzui.tilesystem.tiler.TilingHandle.progress" title="Link to this definition">¶</a></dt>
+<dd><p>Return the tiling progress.</p>
+<p>Since process-based tiling doesn’t support incremental progress,
+this returns 0.0 while running and 1.0 when done.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
