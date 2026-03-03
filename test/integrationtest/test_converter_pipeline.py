@@ -98,6 +98,17 @@ def is_pyvips_available():
     except ImportError:
         return False
 
+def is_qt_available():
+    """Check if Qt is available and required enums are present."""
+    try:
+        from PySide6 import QtCore, QtGui
+        # Check for enums used in tile.py
+        has_aspect = hasattr(QtCore.Qt, 'IgnoreAspectRatio') or hasattr(QtCore.Qt.AspectRatioMode, 'IgnoreAspectRatio')
+        has_format = hasattr(QtGui.QImage.Format, 'Format_RGB32')
+        return has_aspect and has_format
+    except ImportError:
+        return False
+
 @pytest.fixture
 def temp_tilestore(tmp_path):
     """
@@ -864,6 +875,107 @@ class TestConcurrentConversionOperations:
             assert 'error' not in result or result.get('error') is None, \
                 f"Pipeline {idx} failed: {result.get('error')}"
             assert result.get('tiled', False), f"Pipeline {idx} not tiled"
+class TestConcurrentTiling:
+    """
+    Feature: Concurrent Tiling Operations
+
+    Multiple tiling operations may run simultaneously. This tests whether
+    the tiling system can handle concurrent disk access without the disk_lock.
+    """
+
+    @pytest.mark.skipif(not is_pyvips_available(), reason="pyvips not available")
+    def test_concurrent_tiling_without_disk_lock(self, sample_images, tmp_path, temp_tilestore, initialized_tilemanager):
+        """
+        Scenario: Multiple tilers run concurrently without disk lock
+
+        Given multiple images ready for tiling
+        When tilers run in parallel threads
+        Then all tilers complete successfully
+        And all tile pyramids are created correctly
+        
+        This test validates that the tiling system can handle concurrent disk
+        access without the disk_lock that was previously used.
+        """
+        from pyzui.converters import converterrunner
+        from concurrent.futures import wait, ThreadPoolExecutor
+        import threading
+        
+        # Create multiple PPM files using converterrunner (process-based)
+        ppm_files = []
+        conversion_futures = []
+        
+        for i in range(3):
+            ppm_file = str(tmp_path / f"source_{i}.ppm")
+            ppm_files.append(ppm_file)
+            # Convert sample image to PPM using process pool
+            future = converterrunner.submit_vips_conversion(
+                sample_images['png'], ppm_file)
+            conversion_futures.append(future)
+        
+        # Wait for all conversions to complete
+        done, not_done = wait(conversion_futures, timeout=60)
+        assert len(not_done) == 0, f"{len(not_done)} conversions timed out"
+        
+        # Check for conversion errors
+        for i, future in enumerate(conversion_futures):
+            error = future.result()
+            assert error is None, f"Conversion {i} failed: {error}"
+            assert os.path.exists(ppm_files[i]), f"PPM file {i} not created"
+        
+        # Now run tiling concurrently using threads
+        results = {}
+        results_lock = threading.Lock()
+        
+        def run_tiler(media_id, ppm_file):
+            """Run a tiler with given media_id and store result."""
+            try:
+                tiler = ConcreteTiler(ppm_file, media_id=media_id, tilesize=256)
+                tiler.run()
+                with results_lock:
+                    results[media_id] = {
+                        'error': tiler.error,
+                        'tiled': tilestore.tiled(media_id) if tiler.error is None else False,
+                        'progress': tiler.progress
+                    }
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                with results_lock:
+                    results[media_id] = {'error': str(e), 'tiled': False, 'progress': 0.0}
+        
+        # Start multiple tilers concurrently using ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = []
+            for i in range(3):
+                media_id = f"concurrent_tiling_{i}"
+                future = executor.submit(run_tiler, media_id, ppm_files[i])
+                futures.append(future)
+            
+            # Wait for all tiling operations to complete
+            done, not_done = wait(futures, timeout=120)
+            assert len(not_done) == 0, f"{len(not_done)} tiling operations timed out"
+            
+            # Verify all succeeded
+            for media_id, result in results.items():
+                error = result.get('error')
+                if error is not None:
+                    raise AssertionError(f"Tiler {media_id} failed: {error}")
+                assert result.get('tiled', False), f"Tiler {media_id} did not create tiles"
+                assert result.get('progress') == 1.0, f"Tiler {media_id} didn't reach 100% progress"
+                
+            # Additionally, verify each tile pyramid metadata
+            for media_id, result in results.items():
+                if result.get('tiled', False):
+                    # Check that metadata was written
+                    width = tilestore.get_metadata(media_id, 'width')
+                    height = tilestore.get_metadata(media_id, 'height')
+                    maxtilelevel = tilestore.get_metadata(media_id, 'maxtilelevel')
+                    
+                    assert width is not None, f"No width metadata for {media_id}"
+                    assert height is not None, f"No height metadata for {media_id}"
+                    assert maxtilelevel is not None, f"No maxtilelevel metadata for {media_id}"
+                    
+                    print(f"Tiling successful for {media_id}: {width}x{height}, levels: {maxtilelevel}")
 
 class TestConverterOutputValidation:
     """

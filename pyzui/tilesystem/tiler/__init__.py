@@ -16,5 +16,6 @@
 """PyZUI Tiler System - Tile and Tile structure creation."""
 
 from .tiler import Tiler
+from .tilerrunner import submit_tiling, TilingHandle
 
-__all__ = ['Tiler']
+__all__ = ['Tiler', 'submit_tiling', 'TilingHandle']

@@ -148,8 +148,9 @@ def load_metadata(media_id: str) -> bool:
     except IOError:
         return False
 
-    __metadata[media_id] = {}
-
+    # Load into temporary dict first
+    temp_metadata = {}
+    
     for line in f:
         key, val, val_type = line.split()
 
@@ -161,9 +162,12 @@ def load_metadata(media_id: str) -> bool:
         except Exception:
             pass
         else:
-            __metadata[media_id][key] = val
+            temp_metadata[key] = val
             
     f.close()
+    
+    # Update global cache atomically
+    __metadata[media_id] = temp_metadata
 
     return True
 
@@ -180,9 +184,21 @@ def get_metadata(media_id: str, key: str) -> Optional[Any]:
     Return the value associated with the given metadata key, None if there
     is no such value.
     """
-    if media_id not in __metadata and not load_metadata(media_id):
-        return None
-    return __metadata[media_id].get(key)
+    # First check without lock (fast path)
+    if media_id in __metadata:
+        return __metadata[media_id].get(key)
+    
+    # Acquire lock for loading
+    with disk_lock:
+        # Double-check inside lock
+        if media_id in __metadata:
+            return __metadata[media_id].get(key)
+        
+        # Load metadata
+        if not load_metadata(media_id):
+            return None
+            
+        return __metadata[media_id].get(key)
 
 def write_metadata(media_id: str, **kwargs: Any) -> None:
     """
@@ -197,11 +213,20 @@ def write_metadata(media_id: str, **kwargs: Any) -> None:
     Write the metadata given in `kwargs` for the given `media_id`.
     """
     path = get_media_path(media_id)
-    f = open(os.path.join(path, "metadata"), 'w')
-    for key,val in list(kwargs.items()):
-        f.write("%s\t%s\t%s\n"
-            % (key, str(val), type(val).__name__))
-    f.close()
+    
+    with disk_lock:
+        f = open(os.path.join(path, "metadata"), 'w')
+        for key,val in list(kwargs.items()):
+            f.write("%s\t%s\t%s\n"
+                % (key, str(val), type(val).__name__))
+        f.close()
+        
+        # Update cache
+        if media_id not in __metadata:
+            __metadata[media_id] = {}
+        
+        for key, val in kwargs.items():
+            __metadata[media_id][key] = val
 
 def tiled(media_id: str) -> bool:
     """

@@ -78,7 +78,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("PyZUI")
 
         self.zui = QZUI(self, framerate, zoom_sensitivity)
-        self.zui.start()        
         self.setCentralWidget(self.zui)
 
         self.__create_actions()

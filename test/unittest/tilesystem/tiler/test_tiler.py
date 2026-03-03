@@ -653,3 +653,217 @@ class TestTilerLoadRow:
 
         # Can't fully test without _scanchunk, but we verify the method exists
         assert hasattr(tiler, '_Tiler__load_row_from_file')
+
+
+class TestTilerThreadPool:
+    """
+    Feature: Tiler Thread Pool Management
+
+    The Tiler class uses ThreadPoolExecutor for parallel tile creation when
+    multiple tiles are processed per row, optimizing performance for wide images.
+    """
+
+    @patch('pyzui.tilesystem.tiler.tiler.ThreadPoolExecutor')
+    @patch('pyzui.tilesystem.tiler.tiler.os.cpu_count')
+    def test_executor_creation_when_multiple_tiles_per_row(self, mock_cpu_count, mock_executor_class):
+        """
+        Scenario: ThreadPoolExecutor created when multiple tiles per row
+
+        Given an image with multiple tiles across (numtiles_across_total > 1)
+        When Tiler.run() is called
+        Then ThreadPoolExecutor should be created
+        And max_workers should be min(numtiles_across_total, cpu_count)
+        """
+        mock_cpu_count.return_value = 8
+        mock_executor = Mock()
+        mock_executor_class.return_value = mock_executor
+
+        tiler = Tiler("input.jpg", tilesize=256)
+        tiler._width = 1000  # 4 tiles across (1000/256 = 3.9 -> 4)
+        tiler._height = 256
+        
+        # Mock the run() method internals
+        tiler._Tiler__numtiles_across_total = 4
+        tiler._Tiler__numtiles_down_total = 1
+        tiler._Tiler__maxtilelevel = 0
+        tiler._Tiler__numtiles = 4
+        
+        # Mock disk_lock and other dependencies
+        with patch('pyzui.tilesystem.tilestore.disk_lock') as mock_disk_lock:
+            mock_disk_lock.__enter__ = Mock()
+            mock_disk_lock.__exit__ = Mock()
+            with patch.object(tiler, '_Tiler__tiles') as mock_tiles:
+                mock_tiles.return_value = None
+                with patch('pyzui.tilesystem.tilestore.write_metadata'):
+                    tiler.run()
+
+        # ThreadPoolExecutor should be created with max_workers = min(4, 8) = 4
+        mock_executor_class.assert_called_once_with(max_workers=4)
+        # The executor was created (verified by the call above)
+        # Even though it's set to None in finally block, we know it was created
+
+    @patch('pyzui.tilesystem.tiler.tiler.ThreadPoolExecutor')
+    def test_no_executor_when_single_tile_per_row(self, mock_executor_class):
+        """
+        Scenario: No ThreadPoolExecutor when single tile per row
+
+        Given an image with single tile across (numtiles_across_total = 1)
+        When Tiler.run() is called
+        Then ThreadPoolExecutor should NOT be created
+        And __executor should remain None
+        """
+        tiler = Tiler("input.jpg", tilesize=256)
+        tiler._width = 200  # 1 tile across (200/256 = 0.78 -> 1)
+        tiler._height = 256
+        
+        # Mock the run() method internals
+        tiler._Tiler__numtiles_across_total = 1
+        tiler._Tiler__numtiles_down_total = 1
+        tiler._Tiler__maxtilelevel = 0
+        tiler._Tiler__numtiles = 1
+        
+        # Mock disk_lock and other dependencies
+        with patch('pyzui.tilesystem.tilestore.disk_lock') as mock_disk_lock:
+            mock_disk_lock.__enter__ = Mock()
+            mock_disk_lock.__exit__ = Mock()
+            with patch.object(tiler, '_Tiler__tiles') as mock_tiles:
+                mock_tiles.return_value = None
+                with patch('pyzui.tilesystem.tilestore.write_metadata'):
+                    tiler.run()
+
+        # ThreadPoolExecutor should NOT be created
+        mock_executor_class.assert_not_called()
+        assert tiler._Tiler__executor is None
+
+    @patch('pyzui.tilesystem.tiler.tiler.ThreadPoolExecutor')
+    @patch('pyzui.tilesystem.tiler.tiler.os.cpu_count')
+    def test_max_workers_calculation(self, mock_cpu_count, mock_executor_class):
+        """
+        Scenario: Max workers calculation respects CPU count limit
+
+        Given an image with many tiles across
+        And limited CPU cores available
+        When ThreadPoolExecutor is created
+        Then max_workers should be limited to cpu_count
+        """
+        mock_cpu_count.return_value = 2  # Limited CPU cores
+        mock_executor = Mock()
+        mock_executor_class.return_value = mock_executor
+
+        tiler = Tiler("input.jpg", tilesize=256)
+        tiler._width = 2000  # 8 tiles across (2000/256 = 7.8 -> 8)
+        tiler._height = 256
+        
+        # Mock the run() method internals
+        tiler._Tiler__numtiles_across_total = 8
+        tiler._Tiler__numtiles_down_total = 1
+        tiler._Tiler__maxtilelevel = 0
+        tiler._Tiler__numtiles = 8
+        
+        # Mock disk_lock and other dependencies
+        with patch('pyzui.tilesystem.tilestore.disk_lock') as mock_disk_lock:
+            mock_disk_lock.__enter__ = Mock()
+            mock_disk_lock.__exit__ = Mock()
+            with patch.object(tiler, '_Tiler__tiles') as mock_tiles:
+                mock_tiles.return_value = None
+                with patch('pyzui.tilesystem.tilestore.write_metadata'):
+                    tiler.run()
+
+        # max_workers should be min(8, 2) = 2
+        mock_executor_class.assert_called_once_with(max_workers=2)
+
+    @patch('pyzui.tilesystem.tiler.tiler.ThreadPoolExecutor')
+    @patch('pyzui.tilesystem.tiler.tiler.os.cpu_count')
+    def test_executor_shutdown_in_finally_block(self, mock_cpu_count, mock_executor_class):
+        """
+        Scenario: Executor shutdown in finally block ensures cleanup
+
+        Given a Tiler with ThreadPoolExecutor created
+        When run() completes (success or error)
+        Then executor.shutdown() should be called in finally block
+        """
+        mock_cpu_count.return_value = 4
+        mock_executor = Mock()
+        mock_executor_class.return_value = mock_executor
+
+        tiler = Tiler("input.jpg", tilesize=256)
+        tiler._width = 1000
+        tiler._height = 256
+        
+        # Mock the run() method internals
+        tiler._Tiler__numtiles_across_total = 4
+        tiler._Tiler__numtiles_down_total = 1
+        tiler._Tiler__maxtilelevel = 0
+        tiler._Tiler__numtiles = 4
+        
+        # Mock disk_lock and other dependencies
+        with patch('pyzui.tilesystem.tilestore.disk_lock') as mock_disk_lock:
+            mock_disk_lock.__enter__ = Mock()
+            mock_disk_lock.__exit__ = Mock()
+            with patch.object(tiler, '_Tiler__tiles') as mock_tiles:
+                mock_tiles.return_value = None
+                with patch('pyzui.tilesystem.tilestore.write_metadata'):
+                    tiler.run()
+
+        # executor.shutdown should be called
+        mock_executor.shutdown.assert_called_once_with(wait=True)
+        assert tiler._Tiler__executor is None  # Should be set to None after shutdown
+
+    @patch('pyzui.tilesystem.tiler.tiler.ThreadPoolExecutor')
+    @patch('pyzui.tilesystem.tiler.tiler.os.cpu_count')
+    def test_executor_shutdown_on_exception(self, mock_cpu_count, mock_executor_class):
+        """
+        Scenario: Executor shutdown even when exception occurs
+
+        Given a Tiler with ThreadPoolExecutor created
+        When exception occurs during tiling
+        Then executor.shutdown() should still be called in finally block
+        """
+        mock_cpu_count.return_value = 4
+        mock_executor = Mock()
+        mock_executor_class.return_value = mock_executor
+
+        tiler = Tiler("input.jpg", tilesize=256)
+        tiler._width = 1000
+        tiler._height = 256
+        
+        # Mock the run() method internals
+        tiler._Tiler__numtiles_across_total = 4
+        tiler._Tiler__numtiles_down_total = 1
+        tiler._Tiler__maxtilelevel = 0
+        tiler._Tiler__numtiles = 4
+        
+        # Mock disk_lock to raise exception
+        with patch('pyzui.tilesystem.tilestore.disk_lock') as mock_disk_lock:
+            mock_disk_lock.__enter__ = Mock(side_effect=RuntimeError("Test error"))
+            mock_disk_lock.__exit__ = Mock(return_value=False)
+            
+            tiler.run()
+
+        # executor.shutdown should still be called despite exception
+        mock_executor.shutdown.assert_called_once_with(wait=True)
+        assert tiler._Tiler__executor is None  # Should be set to None after shutdown
+        assert tiler.error is not None  # Error should be set
+
+    def test_make_tile_helper_function(self):
+        """
+        Scenario: _make_tile helper function unpacks arguments correctly
+
+        Given a tuple of (string, width, height)
+        When _make_tile is called
+        Then it should call Tile.fromstring with unpacked arguments
+        """
+        from pyzui.tilesystem.tiler.tiler import _make_tile
+        
+        mock_string = "test_data"
+        mock_width = 256
+        mock_height = 256
+        
+        with patch('pyzui.tilesystem.tiler.tiler.Tile') as mock_tile_class:
+            mock_tile_instance = Mock()
+            mock_tile_class.fromstring.return_value = mock_tile_instance
+            
+            result = _make_tile((mock_string, mock_width, mock_height))
+            
+            mock_tile_class.fromstring.assert_called_once_with(mock_string, mock_width, mock_height)
+            assert result == mock_tile_instance

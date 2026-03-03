@@ -186,6 +186,108 @@ Concrete implementations must provide the ``_scanline(y)`` method to read image 
 - ``VIPSTiler``: Uses libvips for memory-efficient processing of large images
 - ``PPMTiler``: Reads PPM/PGM format images
 
+Process-Based Tiling (tilerrunner)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``tilerrunner`` module provides process-based tiling execution for parallel
+image tiling, avoiding threading conflicts between pyvips, TileManager threads,
+and Qt.
+
+**Architecture:**
+
+The ``tilerrunner`` module uses ``ProcessPoolExecutor`` with automatic context
+selection:
+
+- **'fork' context**: Used when no other threads are running (fast, clean shutdown)
+- **'spawn' context**: Used when other threads exist (avoids fork-after-threads issues)
+
+The context can be overridden via ``PYZUI_MP_CONTEXT`` environment variable.
+
+**Key Functions:**
+
+.. code-block:: python
+
+    from pyzui.tilesystem.tiler import tilerrunner
+
+    # Initialize process pool (optional, auto-initialized on first use)
+    tilerrunner.init(max_workers=4)
+
+    # Submit tiling job
+    future = tilerrunner.submit_tiling(
+        infile='image.ppm',
+        media_id='my_image',
+        filext='jpg',
+        tilesize=256
+    )
+
+    # Create handle for tracking
+    handle = tilerrunner.TilingHandle(future, 'image.ppm', 'my_image')
+
+    # Check progress
+    if handle.progress == 1.0:
+        if handle.error:
+            print(f"Tiling failed: {handle.error}")
+        else:
+            print("Tiling complete!")
+
+    # Shutdown pool when done
+    tilerrunner.shutdown()
+
+**TilingHandle Class:**
+
+The ``TilingHandle`` wraps a ``Future`` and provides a compatible interface
+with the thread-based ``Tiler`` class:
+
+- ``progress``: Returns 0.0 while running and 1.0 when done
+- ``error``: Error message if tiling failed, None otherwise
+- ``is_alive()``: Returns True if tiling is still running
+- ``join(timeout)``: Wait for tiling to complete
+
+**Process Isolation:**
+
+Tilers run in separate processes via ``ProcessPoolExecutor``, providing complete isolation:
+
+.. code-block:: python
+
+    from pyzui.tilesystem.tiler import tilerrunner
+
+    # Submit tiling to process pool
+    future = tilerrunner.submit_tiling(infile, media_id)
+
+    # Track via TilingHandle
+    handle = tilerrunner.TilingHandle(future, infile, media_id)
+
+    # Check progress/completion
+    if handle.progress == 1.0:
+        if handle.error:
+            print(f"Failed: {handle.error}")
+
+This ensures:
+
+1. No threading conflicts with TileManager threads
+2. Each pyvips instance runs in its own memory space
+3. True parallel tiling (multiple images can be tiled simultaneously)
+4. No deadlocks from pyvips internal threading
+
+**Integration with TiledMediaObject:**
+
+TiledMediaObject automatically uses process-based tiling via ``tilerrunner``
+when converting and tiling media files. The conversion and tiling pipeline is:
+
+1. Converter runs in separate process via ``converterrunner``
+2. Output PPM file is passed to ``tilerrunner``
+3. Tiling runs in separate process
+4. Progress is tracked across both conversion and tiling phases
+
+**Python 3.12+ Compatibility:**
+
+Python 3.12 emits a DeprecationWarning about ``fork()`` in multi-threaded
+processes. ``tilerrunner`` handles this by:
+
+1. Selecting 'spawn' context when other threads are running
+2. Catching and ignoring the specific DeprecationWarning
+3. Ensuring worker processes are safe (fresh imports, no shared state)
+
 TileStore
 ~~~~~~~~~
 

@@ -14,10 +14,10 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""Process-based converter execution for parallel media conversion.
+"""Process-based tiling execution for parallel image tiling.
 
-This module provides functions to run converters in separate processes,
-avoiding threading conflicts between pyvips and TileManager threads.
+This module provides functions to run tilers in separate processes,
+avoiding threading conflicts between pyvips, TileManager threads, and Qt.
 
 The multiprocessing context is chosen automatically:
 
@@ -59,9 +59,8 @@ def _get_safe_context():
        threads (e.g., Qt event loop, pytest-xdist workers).
 
     2. The forked worker processes are safe because they perform fresh imports
-       of VipsConverter/PDFConverter (see _run_vips_conversion and
-       _run_pdf_conversion) and do not inherit or interact with any shared
-       thread state, locks, or Qt objects from the parent process.
+       of PPMTiler/Tiler (see _run_tiling) and do not inherit or interact with
+       any shared thread state, locks, or Qt objects from the parent process.
 
     3. The alternative contexts ('spawn', 'forkserver') cause the process pool
        to hang during interpreter shutdown / pytest teardown, making them
@@ -83,54 +82,32 @@ def _get_safe_context():
         return multiprocessing.get_context('fork')
 
 
-def _run_vips_conversion(infile: str, outfile: str,
-                         rotation: int = 0,
-                         invert_colors: bool = False,
-                         black_and_white: bool = False) -> Optional[str]:
+def _run_tiling(infile: str, media_id: Optional[str] = None, 
+                filext: str = 'jpg', tilesize: int = 256) -> Optional[str]:
     """
-    Run VipsConverter in a separate process.
+    Run Tiler in a separate process.
 
     Parameters:
-        infile: Path to the source image file
-        outfile: Path where the converted PPM will be written
-        rotation: Rotation angle in degrees (0, 90, 180, or 270)
-        invert_colors: Enable color inversion when True
-        black_and_white: Enable grayscale conversion when True
+        infile: Path to the source PPM file
+        media_id: Media identifier for tile storage (defaults to infile)
+        filext: Tile file extension ('jpg' or 'png')
+        tilesize: Tile size in pixels
 
     Returns:
         None on success, error message string on failure
     """
     # Import here to avoid issues with multiprocessing
-    from pyzui.converters.vipsconverter import VipsConverter
-
-    converter = VipsConverter(infile, outfile, rotation, invert_colors, black_and_white)
-    converter.run()
-    return converter.error
-
-
-def _run_pdf_conversion(infile: str, outfile: str) -> Optional[str]:
-    """
-    Run PDFConverter in a separate process.
-
-    Parameters:
-        infile: Path to the source PDF file
-        outfile: Path where the rasterized PPM will be written
-
-    Returns:
-        None on success, error message string on failure
-    """
-    # Import here to avoid issues with multiprocessing
-    from pyzui.converters.pdfconverter import PDFConverter
-
-    converter = PDFConverter(infile, outfile)
-    converter.run()
-    return converter.error
+    from .ppm import PPMTiler
+    
+    tiler = PPMTiler(infile, media_id, filext, tilesize)
+    tiler.run()
+    return tiler.error
 
 
-# Global executor for process-based conversion
+# Global executor for process-based tiling
 _executor: Optional[ProcessPoolExecutor] = None
 _executor_context_name: Optional[str] = None
-_max_workers: int = 2
+_max_workers: int = 4
 _atexit_registered: bool = False
 
 # Thread safety lock for executor management
@@ -138,17 +115,17 @@ _atexit_registered: bool = False
 _executor_lock = threading.RLock()
 
 
-def init(max_workers: int = 2) -> None:
+def init(max_workers: int = 4) -> None:
     """
     Function :
         init(max_workers)
     Parameters :
         max_workers : int
-            - Maximum number of parallel conversion processes (default: 2)
+            - Maximum number of parallel tiling processes (default: 4)
 
     init(max_workers) --> None
 
-    Initialize the converter runner with a process pool.
+    Initialize the tiler runner with a process pool.
     
     Thread-safe: This function uses a reentrant lock to ensure safe concurrent
     initialization and shutdown operations.
@@ -246,22 +223,19 @@ def _get_executor() -> ProcessPoolExecutor:
         return _executor
 
 
-def submit_vips_conversion(infile: str, outfile: str,
-                           rotation: int = 0,
-                           invert_colors: bool = False,
-                           black_and_white: bool = False) -> Future:
+def submit_tiling(infile: str, media_id: Optional[str] = None,
+                  filext: str = 'jpg', tilesize: int = 256) -> Future:
     """
-    Submit a VipsConverter job to run in a separate process.
+    Submit a tiling job to run in a separate process.
 
     Parameters:
-        infile: Path to the source image file
-        outfile: Path where the converted PPM will be written
-        rotation: Rotation angle in degrees (0, 90, 180, or 270)
-        invert_colors: Enable color inversion when True
-        black_and_white: Enable grayscale conversion when True
+        infile: Path to the source PPM file
+        media_id: Media identifier for tile storage (defaults to infile)
+        filext: Tile file extension ('jpg' or 'png')
+        tilesize: Tile size in pixels
 
     Returns:
-        A Future object that will contain the conversion result
+        A Future object that will contain the tiling result
     """
     executor = _get_executor()
     # Catch the Python 3.12+ DeprecationWarning about fork() in multi-threaded
@@ -273,61 +247,38 @@ def submit_vips_conversion(infile: str, outfile: str,
             "ignore",
             message=".*multi-threaded.*use of fork\\(\\).*",
             category=DeprecationWarning)
-        return executor.submit(_run_vips_conversion, infile, outfile,
-                              rotation, invert_colors, black_and_white)
+        return executor.submit(_run_tiling, infile, media_id, filext, tilesize)
 
 
-def submit_pdf_conversion(infile: str, outfile: str) -> Future:
+class TilingHandle:
     """
-    Submit a PDFConverter job to run in a separate process.
-
-    Parameters:
-        infile: Path to the source PDF file
-        outfile: Path where the rasterized PPM will be written
-
-    Returns:
-        A Future object that will contain the conversion result
-    """
-    executor = _get_executor()
-    # Catch the Python 3.12+ DeprecationWarning about fork() in multi-threaded
-    # processes. See _get_safe_context() docstring and submit_vips_conversion().
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message=".*multi-threaded.*use of fork\\(\\).*",
-            category=DeprecationWarning)
-        return executor.submit(_run_pdf_conversion, infile, outfile)
-
-
-class ConversionHandle:
-    """
-    A handle to a running or completed conversion process.
+    A handle to a running or completed tiling process.
 
     This class wraps a Future and provides a similar interface to the
-    thread-based Converter class, with progress and error properties.
+    thread-based Tiler class, with progress and error properties.
     """
 
-    def __init__(self, future: Future, infile: str, outfile: str):
+    def __init__(self, future: Future, infile: str, media_id: Optional[str] = None):
         """
-        Create a new ConversionHandle.
+        Create a new TilingHandle.
 
         Parameters:
             future: The Future object from the process pool
             infile: Path to the source file
-            outfile: Path to the output file
+            media_id: Media identifier for tile storage
         """
         self._future = future
         self._infile = infile
-        self._outfile = outfile
+        self._media_id = media_id
         self._error: Optional[str] = None
         self._checked = False
 
     @property
     def progress(self) -> float:
         """
-        Return the conversion progress.
+        Return the tiling progress.
 
-        Since process-based conversion doesn't support incremental progress,
+        Since process-based tiling doesn't support incremental progress,
         this returns 0.0 while running and 1.0 when done.
         """
         if self._future.done():
@@ -337,7 +288,7 @@ class ConversionHandle:
 
     @property
     def error(self) -> Optional[str]:
-        """Return the error message if conversion failed, None otherwise."""
+        """Return the error message if tiling failed, None otherwise."""
         if self._future.done():
             self._check_result()
         return self._error
@@ -352,14 +303,14 @@ class ConversionHandle:
             if result is not None:
                 self._error = result
         except Exception as e:
-            self._error = f"conversion process error: {str(e)}"
+            self._error = f"tiling process error: {str(e)}"
 
     def is_alive(self) -> bool:
-        """Return True if the conversion is still running."""
+        """Return True if the tiling is still running."""
         return not self._future.done()
 
     def join(self, timeout: Optional[float] = None) -> None:
-        """Wait for the conversion to complete."""
+        """Wait for the tiling to complete."""
         try:
             self._future.result(timeout=timeout)
         except Exception:

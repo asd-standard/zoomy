@@ -887,13 +887,11 @@ class GUIIntegrationTest:
         
         # Now move the selected objects - drag from center of first test image to left
         self.log.action("Moving selected objects from center of first test image to left")
-        # First test image is likely positioned in top-left quadrant after rectangle selection
-        # Estimate position: first image would be roughly at (w//4, h//3) in left half
-        first_image_center = QPoint(w // 4, h // 3)
+        
         # Move a quarter of scene length to the left
-        move_start = first_image_center
-        move_end = QPoint(max(50, first_image_center.x() - w // 4), first_image_center.y())
-        self.simulate_mouse_drag(move_start, move_end, Qt.LeftButton, Qt.NoModifier)
+        center = QPoint(zui.width() // 2, zui.height() // 2)
+        drag_end = QPoint(center.x() - 200, center.y() + 100)
+        self.simulate_mouse_drag(center, drag_end, Qt.LeftButton, Qt.NoModifier)
         self.wait(DEFAULT_DELAY_MS, "Observe: Selected objects moved to the left")
         
         # Verify selection and movement

@@ -271,8 +271,8 @@ class StringMediaObject(MediaObject): #, Thread
         
         # Create painter for image
         painter: QtGui.QPainter = QtGui.QPainter(image)
-        painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
-        painter.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing)
+        #painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+        #painter.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing)
         
         # Render text to image using direct rendering logic at position (0, 0)
         self.__render_text_direct(painter, 0, 0, mode)

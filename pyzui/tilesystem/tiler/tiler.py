@@ -21,35 +21,27 @@ from threading import Thread
 import math
 import shutil
 import traceback
-import multiprocessing
-import threading
 import os
-from concurrent.futures import ProcessPoolExecutor
 
+import time 
 from .. import tilestore as TileStore
 from .. import tile as Tile
 from pyzui.logger import get_logger
+
+from concurrent.futures import ThreadPoolExecutor
 
 if TYPE_CHECKING:
     from ..tile import Tile as TileType
 
 TileID = Tuple[str, int, int, int]
 
-def _get_safe_context():
-    """
-    Get a multiprocessing context that's safe for the current thread state.
-    Returns 'fork' if only the main thread is running (fast, clean shutdown).
-    Returns 'spawn' if other threads exist (avoids fork-after-threads issues).
-    """
-    env_context = os.environ.get('PYZUI_MP_CONTEXT')
-    if env_context:
-        return multiprocessing.get_context(env_context)
-    if threading.active_count() > 1:
-        return multiprocessing.get_context('spawn')
-    return multiprocessing.get_context('fork')
-
 def _make_tile(args):
-    """Worker function for parallel tile creation."""
+    """Worker function for parallel tile creation.
+    
+    Unpacks the tuple (string, width, height) and calls Tile.fromstring.
+    This function is designed to be used with ThreadPoolExecutor.map,
+    which expects a single‑argument callable.
+    """
     string, width, height = args
     return Tile.fromstring(string, width, height)
 
@@ -222,8 +214,16 @@ class Tiler(Thread):
                     tiles[i] += (scanchunk[p : p + self._bytes_per_pixel*self.__tilesize]).decode('latin-1')
                     #print(tiles[i],'\n')
         
-
-        # Parallel tile creation using process pool
+        '''
+        Each tile in the row is independent, so we can decode multiple tiles concurrently.
+        The thread pool is created in run() only when there is more than one tile per row.
+        Arguments for each tile (raw string, width, height) are built into a list,
+        then dispatched via executor.map(_make_tile, args). Results are collected
+        in the same order, preserving tile positions.
+        If the executor is not available (single‑tile rows), we fall back to sequential
+        processing. Tile.fromstring uses PIL's C‑code, which releases the GIL and allows
+        true parallelism across threads.
+        '''
         if self.__executor is not None:
             # Build argument list for each tile
             args = []
@@ -234,7 +234,11 @@ class Tiler(Thread):
                     width = self.__tilesize
                 args.append((tiles[i], width, tileheight))
             # Process tiles in parallel
-            results = list(self.__executor.map(_make_tile, args))
+            try:
+                results = list(self.__executor.map(_make_tile, args))
+            except Exception as e:
+                self.__logger.error("Parallel tile creation failed", exc_info=True)
+                raise
             # Assign results back in order
             for i, tile in enumerate(results):
                 tiles[i] = tile
@@ -247,8 +251,6 @@ class Tiler(Thread):
                 else:
                     tiles[i] = Tile.fromstring(tiles[i],
                         self.__tilesize, tileheight)
-                
-        
         return tiles
 
     def __mergerows(self, row_a: Optional[List['TileType']], row_b: Optional[List['TileType']] = None) -> Optional[List['TileType']]:
@@ -448,23 +450,23 @@ class Tiler(Thread):
         #print(self.__bottom_tiles_height, self.__right_tiles_width) 
 
         try:
-            # Create process pool executor for parallel tile creation
+            # Create thread pool executor for parallel tile creation.
+            # The executor is only created when there is more than one tile per row,
+            # avoiding overhead for single‑tile rows. Worker count is capped at the
+            # smaller of the number of tiles per row and the available CPU cores.
+            # See __load_row_from_file for where the executor is used.
             if self.__numtiles_across_total > 1:
                 max_workers = min(self.__numtiles_across_total, os.cpu_count() or 1)
-                self.__executor = ProcessPoolExecutor(
-                    max_workers=max_workers,
-                    mp_context=_get_safe_context()
-                )
-                self.__logger.debug(f"created ProcessPoolExecutor with {max_workers} workers")
+                self.__executor = ThreadPoolExecutor(max_workers=max_workers)
+                self.__logger.debug(f"created ThreadPoolExecutor with {max_workers} workers")
             else:
                 self.__executor = None
-                self.__logger.debug("skipping ProcessPoolExecutor (single tile per row)")
-            
-            #with TileStore.disk_lock:
-               
+                self.__logger.debug("skipping ThreadPoolExecutor (single tile per row)")
+              
+            with TileStore.disk_lock:
                 ## recursively tile the image
-            self.__tiles()
-           
+                self.__tiles()
+            
         except Exception as e:       
             self.error = str(e)
             outpath = TileStore.get_media_path(self.__media_id)
@@ -485,7 +487,7 @@ class Tiler(Thread):
             if self.__executor is not None:
                 self.__executor.shutdown(wait=True)
                 self.__executor = None
-                self.__logger.debug("ProcessPoolExecutor shut down")
+                self.__logger.debug("ThreadPoolExecutor shut down")
         
         self.__progress = 1.0
         self.__logger.debug("tiling complete")

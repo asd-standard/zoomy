@@ -34,6 +34,9 @@ from pyzui.tilesystem.tiler.ppm import PPMTiler
 # Process-based conversion for parallel media conversion
 from pyzui.converters import converterrunner
 
+# Process-based tiling for parallel image tiling
+from pyzui.tilesystem.tiler.tilerrunner import submit_tiling, TilingHandle
+
 class TiledMediaObject(MediaObject):
     """
     Constructor :
@@ -100,9 +103,9 @@ class TiledMediaObject(MediaObject):
         # None if no conversion is needed (e.g., already tiled or is a .ppm file)
         self.__converter: Optional[converterrunner.ConversionHandle] = None
 
-        # Reference to the PPMTiler instance that subdivides PPM images into tiles
+        # Reference to the TilingHandle that manages process-based tiling
         # None until __run_tiler() is called after conversion completes
-        self.__tiler: Optional[PPMTiler] = None
+        self.__tiler: Optional[TilingHandle] = None
 
         # Logger instance for this specific TiledMediaObject, named with the media_id
         # Used for debug/info/error logging throughout the object's lifecycle
@@ -735,13 +738,10 @@ class TiledMediaObject(MediaObject):
             filext: str = 'png'
 
         try:
-            # Create a PPMTiler to subdivide the PPM image into a tile hierarchy
-            # PPMTiler(ppmfile, media_id, format) reads the PPM and creates tiles
-            self.__tiler = PPMTiler(self.__ppmfile, self._media_id, filext)
-
-            # Start the tiling process (runs in a separate thread)
-            # Tiles are written to the TileManager's tile store as they are created
-            self.__tiler.start()
+            # Submit tiling job to process pool for parallel tile creation
+            # submit_tiling returns a Future that will contain the tiling result
+            future = submit_tiling(self.__ppmfile, self._media_id, filext)
+            self.__tiler = TilingHandle(future, self.__ppmfile, self._media_id)
 
         except IOError:
             # IOError during tiler creation indicates a file read problem

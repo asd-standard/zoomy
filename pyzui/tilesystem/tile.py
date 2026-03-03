@@ -95,9 +95,10 @@ class Tile(object):
 
         Return a resized copy of the tile by calling ImageQt.scaled() method.
         """
+        # Use shortcut enum values for compatibility with PySide6 versions
         return Tile(self.__image.scaled(int(width), int(height),
-            QtCore.Qt.AspectRatioMode.IgnoreAspectRatio,
-            QtCore.Qt.TransformationMode.FastTransformation))
+            QtCore.Qt.IgnoreAspectRatio,
+            QtCore.Qt.FastTransformation))
 
     def save(self, filename: str) -> None:
         """
