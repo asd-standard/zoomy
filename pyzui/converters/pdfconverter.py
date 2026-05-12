@@ -16,13 +16,15 @@
 
 """PDF rasterizer based upon either Xpdf or Poppler."""
 
-import subprocess
-import tempfile
 import os
 import shutil
+import subprocess
+import tempfile
+
+from pyzui.tilesystem.tiler.ppm import read_ppm_header
 
 from .converter import Converter
-from pyzui.tilesystem.tiler.ppm import read_ppm_header
+
 
 class PDFConverter(Converter):
     """
@@ -40,6 +42,7 @@ class PDFConverter(Converter):
     the output file. If another output format is required then :class:`PDFConverter`
     should be used in conjunction with :class:`VipsConverter`.
     """
+
     def __init__(self, infile: str, outfile: str) -> None:
         """
         Constructor :
@@ -78,7 +81,7 @@ class PDFConverter(Converter):
         self._logger.info("merging pages")
         self._progress = 0.5
 
-        #total_width = 0
+        # total_width = 0
         total_height = 0
 
         page_filename = {}
@@ -87,37 +90,33 @@ class PDFConverter(Converter):
             ## determine which files are for which page
             ## filename[5:-4] extracts '1234' from 'page-1234.ppm'
             page_filename[int(filename[5:-4])] = filename
-        
+
         num_pages = len(page_filename)
         f = []
 
         for i in range(num_pages):
             ## open files and process headers
-            wip_file = os.path.join(tmpdir, page_filename[i+1])
-            
-            f.append(open(wip_file, 'rb'))
+            wip_file = os.path.join(tmpdir, page_filename[i + 1])
+
+            f.append(open(wip_file, "rb"))
             try:
                 width, height = read_ppm_header(f[i])
-            
-            except IOError as e:
-                print("error loading PPM images ",\
-                    "produced by pdftoppm: %s" % e)
-                print("Truncating PDF")
-                        
+
+            except OSError as e:
+                self._logger.error(f"error loading PPM images produced by pdftoppm: {e}")
+                self._logger.warning("Truncating PDF")
 
             total_height += height
-            
 
-        fout = open(self._outfile, 'wb')
-        
-        fout.write(("P6\n" + str(width) + " " + str(total_height) + "\n255\n").encode('latin-1'))
+        fout = open(self._outfile, "wb")
+
+        fout.write(("P6\n" + str(width) + " " + str(total_height) + "\n255\n").encode("latin-1"))
 
         for i in range(num_pages):
             ## concatenate pixel data into output file
             shutil.copyfileobj(f[i], fout)
 
         fout.close()
-        
 
     #'-scale-to',str(1000),
     def run(self) -> None:
@@ -138,10 +137,11 @@ class PDFConverter(Converter):
         """
         tmpdir = tempfile.mkdtemp()
         self._logger.info("calling pdftoppm")
-        process = subprocess.Popen(['pdftoppm',
-            '-r', str(self.resolution),
-            self._infile, os.path.join(tmpdir, 'page')],
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(
+            ["pdftoppm", "-r", str(self.resolution), self._infile, os.path.join(tmpdir, "page")],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
         stdout = process.communicate()[0]
 
         if process.returncode == 0:
@@ -149,18 +149,16 @@ class PDFConverter(Converter):
                 self.__merge(tmpdir)
 
             except Exception as e:
-                self.error = 'Error in PDFConverter.__merge() \n' + str(e)
+                self.error = "Error in PDFConverter.__merge() \n" + str(e)  # type: ignore[assignment]
                 self._logger.error(self.error)
 
                 try:
                     os.unlink(self._outfile)
-                except:
-                    self.__logger.exception("unable to unlink temporary "
-                        "file '%s'" % self._outfile)
+                except Exception:
+                    self._logger.exception(f"unable to unlink temporary file '{self._outfile}'")
 
         else:
-            self.error = "conversion failed with return code %d:\n%s" % \
-                (process.returncode, stdout)
+            self.error = f"conversion failed with return code {process.returncode}:\n{stdout!r}"  # type: ignore[assignment]
             self._logger.error(self.error)
 
         shutil.rmtree(tmpdir, ignore_errors=True)
@@ -177,7 +175,7 @@ class PDFConverter(Converter):
 
         Return a human-readable string representation of the PDFConverter.
         """
-        return "PDFConverter(%s, %s)" % (self._infile, self._outfile)
+        return f"PDFConverter({self._infile}, {self._outfile})"
 
     def __repr__(self) -> str:
         """
@@ -190,6 +188,4 @@ class PDFConverter(Converter):
 
         Return a formal string representation of the PDFConverter.
         """
-        return "PDFConverter(%s, %s)" % \
-            (repr(self._infile), repr(self._outfile))
-
+        return f"PDFConverter({self._infile!r}, {self._outfile!r})"

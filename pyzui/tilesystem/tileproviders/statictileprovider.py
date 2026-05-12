@@ -16,18 +16,18 @@
 
 """Class for loading tiles from the local tilestore."""
 
-from typing import Optional, Tuple, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 from PIL import Image
 
-from .tileprovider import TileProvider
 from .. import tilestore as TileStore
+from .tileprovider import TileProvider
 
 if TYPE_CHECKING:
     from PIL.Image import Image as PILImage
-    from .tileprovider import TileID
 
-TileID = Tuple[str, int, int, int]
+TileID = tuple[str, int, int, int]  # type: ignore[misc]
+
 
 class StaticTileProvider(TileProvider):
     """
@@ -94,7 +94,8 @@ class StaticTileProvider(TileProvider):
                                                   |    └─────────────────────────┘
 
     """
-    def __init__(self, tilecache: Any) -> None:  # type: ignore[no-untyped-def]
+
+    def __init__(self, tilecache: Any) -> None:
         """
         Constructor :
             StaticTileProvider(tilecache)
@@ -110,7 +111,7 @@ class StaticTileProvider(TileProvider):
         """
         TileProvider.__init__(self, tilecache)
 
-    def _load(self, tile_id: TileID) -> Optional['PILImage']:
+    def _load(self, tile_id: TileID) -> Optional["PILImage"]:
         """
         Method :
             StaticTileProvider._load(tile_id)
@@ -134,17 +135,17 @@ class StaticTileProvider(TileProvider):
             - Returns None on IOError (file not found or unreadable)
         """
 
-        media_id, tilelevel, row, col = tile_id
-        
-        maxtilelevel = TileStore.get_metadata(media_id, 'maxtilelevel')
+        media_id, tilelevel, _row, _col = tile_id
+
+        maxtilelevel = TileStore.get_metadata(media_id, "maxtilelevel")
         if maxtilelevel is None or tilelevel > maxtilelevel:
             return None
-        
+
         filename = TileStore.get_tile_path(tile_id)
         try:
             tile = Image.open(filename)
             tile.load()
             return tile
-            
-        except IOError:
+
+        except OSError:
             return None

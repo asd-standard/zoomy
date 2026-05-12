@@ -15,18 +15,26 @@
 
 """PyZUI Dialog Windows - UI dialog components."""
 
+from .autosavesettingsdialog import AutosaveSettingsDialog
 from .dialogwindows import (
     DialogWindows,
-    OpenNewStringInputDialog,
     ModifyStringInputDialog,
+    ModifySVGInputDialog,
     ModifyTiledMediaObjectDialog,
-    OpenZoomSensitivityInputDialog
+    OpenNewStringInputDialog,
+    OpenSVGPickerInputDialog,
+    OpenZoomSensitivityInputDialog,
 )
+from .zoomsettingsdialog import ZoomSettingsDialog
 
 __all__ = [
-    'DialogWindows',
-    'OpenNewStringInputDialog',
-    'ModifyStringInputDialog',
-    'ModifyTiledMediaObjectDialog',
-    'OpenZoomSensitivityInputDialog'
+    "AutosaveSettingsDialog",
+    "DialogWindows",
+    "ModifySVGInputDialog",
+    "ModifyStringInputDialog",
+    "ModifyTiledMediaObjectDialog",
+    "OpenNewStringInputDialog",
+    "OpenSVGPickerInputDialog",
+    "OpenZoomSensitivityInputDialog",
+    "ZoomSettingsDialog",
 ]

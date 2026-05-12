@@ -1,0 +1,43 @@
+{
+  "logging": {
+    "debug": false,
+    "verbose": true,
+    "log_to_file": true,
+    "log_to_console": true,
+    "colored_output": true,
+    "log_dir": "logs"
+  },
+  "tilestore": {
+    "auto_cleanup": true,
+    "max_age_days": 3,
+    "cleanup_on_startup": true,
+    "collect_cleanup_stats": true
+  },
+  "parallel_rendering": {
+    "enabled": true,
+    "max_workers": 4,
+    "batch_size": 10,
+    "max_batches": 10,
+    "batch_timeout_ms": 1000,
+    "enable_profiling": false,
+    "priority_thresholds": {
+      "high": 100.0,
+      "medium": 500.0,
+      "low": 2000.0
+    },
+    "cache_max_age_ms": 1000,
+    "viewport_update_threshold": 10.0
+  },
+  "autosave": {
+    "enabled": true,
+    "interval": 300,
+    "max_backups": 20,
+    "backup_dir": "~/.pyzui/backups",
+    "expire_days": 7
+  },
+  "zoom": {
+    "min_zoomlevel": -10.0,
+    "max_zoomlevel": 12.0,
+    "clamp_enabled": true
+  }
+}

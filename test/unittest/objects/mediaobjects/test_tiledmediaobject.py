@@ -13,9 +13,10 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
+
 from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject
+
 
 class TestTiledMediaObject:
     """
@@ -26,8 +27,8 @@ class TestTiledMediaObject:
     on-demand loading of image tiles at different zoom levels.
     """
 
-    @patch('pyzui.objects.mediaobjects.tiledmediaobject.TileManager.tiled')
-    @patch('pyzui.objects.mediaobjects.tiledmediaobject.TileManager.load_tile')
+    @patch("pyzui.objects.mediaobjects.tiledmediaobject.TileManager.tiled")
+    @patch("pyzui.objects.mediaobjects.tiledmediaobject.TileManager.load_tile")
     def test_init_already_tiled(self, mock_load, mock_tiled):
         """
         Scenario: Initialize with pre-tiled media
@@ -42,9 +43,9 @@ class TestTiledMediaObject:
         obj = TiledMediaObject("test.jpg", scene)
         assert obj is not None
 
-    @patch('pyzui.objects.mediaobjects.tiledmediaobject.TileManager.tiled')
-    @patch('tempfile.mkstemp')
-    @patch('os.close')
+    @patch("pyzui.objects.mediaobjects.tiledmediaobject.TileManager.tiled")
+    @patch("tempfile.mkstemp")
+    @patch("os.close")
     def test_init_needs_tiling(self, mock_close, mock_mkstemp, mock_tiled):
         """
         Scenario: Initialize media that requires tiling
@@ -55,7 +56,7 @@ class TestTiledMediaObject:
         And the object should initialize successfully
         """
         mock_tiled.return_value = False
-        mock_mkstemp.return_value = (1, '/tmp/test.ppm')
+        mock_mkstemp.return_value = (1, "/tmp/test.ppm")
         scene = Mock()
         obj = TiledMediaObject("test.jpg", scene)
         assert obj is not None
@@ -90,7 +91,7 @@ class TestTiledMediaObject:
         """
         assert TiledMediaObject.tempcache == 5
 
-    @patch('pyzui.objects.mediaobjects.tiledmediaobject.TileManager.tiled')
+    @patch("pyzui.objects.mediaobjects.tiledmediaobject.TileManager.tiled")
     def test_inherits_from_mediaobject(self, mock_tiled):
         """
         Scenario: Verify inheritance from MediaObject
@@ -100,13 +101,14 @@ class TestTiledMediaObject:
         Then it should be an instance of MediaObject
         """
         from pyzui.objects.mediaobjects.mediaobject import MediaObject
+
         mock_tiled.return_value = True
-        with patch('pyzui.objects.mediaobjects.tiledmediaobject.TileManager.load_tile'):
+        with patch("pyzui.objects.mediaobjects.tiledmediaobject.TileManager.load_tile"):
             scene = Mock()
             obj = TiledMediaObject("test.jpg", scene)
             assert isinstance(obj, MediaObject)
 
-    @patch('pyzui.objects.mediaobjects.tiledmediaobject.TileManager.tiled')
+    @patch("pyzui.objects.mediaobjects.tiledmediaobject.TileManager.tiled")
     def test_onscreen_size_property(self, mock_tiled):
         """
         Scenario: Calculate on-screen size at zoom level
@@ -116,7 +118,7 @@ class TestTiledMediaObject:
         Then it should return a tuple with (width, height)
         """
         mock_tiled.return_value = True
-        with patch('pyzui.objects.mediaobjects.tiledmediaobject.TileManager.load_tile'):
+        with patch("pyzui.objects.mediaobjects.tiledmediaobject.TileManager.load_tile"):
             scene = Mock()
             scene.zoomlevel = 0
             obj = TiledMediaObject("test.jpg", scene)

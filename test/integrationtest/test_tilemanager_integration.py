@@ -31,28 +31,40 @@ The tests cover:
 - Exception handling (MediaNotTiled, TileNotLoaded, TileNotAvailable)
 - Provider purge operations through TileManager
 """
-import sys
-import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+
+import shutil
+import time
 
 import pytest
-import time
-import tempfile
-import shutil
-from pathlib import Path
 from PIL import Image
 
+from pyzui.tilesystem import tilemanager, tilestore
 from pyzui.tilesystem.tile import Tile
-from pyzui.tilesystem.tilestore import TileCache
-from pyzui.tilesystem import tilestore
-from pyzui.tilesystem import tilemanager
-from pyzui.tilesystem.tilemanager import (
-    MediaNotTiled,
-    TileNotLoaded,
-    TileNotAvailable
-)
+from pyzui.tilesystem.tilemanager import MediaNotTiled, TileNotAvailable, TileNotLoaded
 from pyzui.tilesystem.tiler import Tiler
+
+
+def wait_for_tile(tile_id, timeout=10.0):
+    """Poll tilemanager until tile is available, or timeout.
+
+    Replaces blind time.sleep() with a deterministic condition wait.
+    """
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            tile = tilemanager.get_tile(tile_id)
+            if tile is not None:
+                return tile
+        except (TileNotLoaded, TileNotAvailable):
+            pass
+        time.sleep(0.005)
+    raise TimeoutError(f"Tile {tile_id} not loaded after {timeout}s")
+
 
 class ConcreteTiler(Tiler):
     """
@@ -62,10 +74,10 @@ class ConcreteTiler(Tiler):
     enabling end-to-end testing of the tiling process.
     """
 
-    def __init__(self, infile, media_id=None, filext='jpg', tilesize=256):
+    def __init__(self, infile, media_id=None, filext="jpg", tilesize=256):
         """Initialize the tiler and open the source image."""
         super().__init__(infile, media_id, filext, tilesize)
-        self._image = Image.open(infile).convert('RGB')
+        self._image = Image.open(infile).convert("RGB")
         self._width, self._height = self._image.size
         self._bytes_per_pixel = 3
         self._current_row = 0
@@ -78,13 +90,14 @@ class ConcreteTiler(Tiler):
             bytes: Raw RGB pixel data for the next scanline.
         """
         if self._current_row >= self._height:
-            return b''
+            return b""
         row_data = []
         for x in range(self._width):
             pixel = self._image.getpixel((x, self._current_row))
             row_data.extend(pixel)
         self._current_row += 1
         return bytes(row_data)
+
 
 @pytest.fixture
 def temp_tilestore(tmp_path):
@@ -113,6 +126,7 @@ def temp_tilestore(tmp_path):
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
 
+
 @pytest.fixture
 def initialized_tilemanager(temp_tilestore):
     """
@@ -128,6 +142,7 @@ def initialized_tilemanager(temp_tilestore):
     yield
     tilemanager.purge()
 
+
 @pytest.fixture
 def sample_images(tmp_path):
     """
@@ -140,13 +155,13 @@ def sample_images(tmp_path):
     """
     images = {}
     test_cases = [
-        (256, 256, 'red'),
-        (512, 512, 'green'),
-        (1024, 1024, 'blue'),
+        (256, 256, "red"),
+        (512, 512, "green"),
+        (1024, 1024, "blue"),
     ]
 
     for width, height, color in test_cases:
-        img = Image.new('RGB', (width, height), color=color)
+        img = Image.new("RGB", (width, height), color=color)
         # Add gradient pattern for visual verification
         for y in range(height):
             for x in range(min(10, width)):
@@ -156,6 +171,7 @@ def sample_images(tmp_path):
         images[(width, height)] = str(path)
 
     yield images
+
 
 @pytest.fixture
 def tiled_media(temp_tilestore, sample_images, initialized_tilemanager):
@@ -175,6 +191,7 @@ def tiled_media(temp_tilestore, sample_images, initialized_tilemanager):
 
     assert tiler.error is None
     yield media_id
+
 
 class TestTileManagerInitialization:
     """
@@ -237,6 +254,7 @@ class TestTileManagerInitialization:
 
         tilemanager.purge()
 
+
 class TestTileRequestRouting:
     """
     Feature: Tile Request Routing
@@ -247,8 +265,7 @@ class TestTileRequestRouting:
     DynamicTileProvider.
     """
 
-    def test_static_media_routed_to_static_provider(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_static_media_routed_to_static_provider(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: Static media requests go to static provider
 
@@ -261,15 +278,14 @@ class TestTileRequestRouting:
 
         # Request tile load
         tilemanager.load_tile(tile_id)
-        time.sleep(0.3)
+        wait_for_tile(tile_id, timeout=10.0)
 
         # Should be loadable now
         tile = tilemanager.get_tile(tile_id)
         assert tile is not None
         assert isinstance(tile, Tile)
 
-    def test_dynamic_media_routed_to_dynamic_provider(
-            self, temp_tilestore, initialized_tilemanager):
+    def test_dynamic_media_routed_to_dynamic_provider(self, temp_tilestore, initialized_tilemanager):
         """
         Scenario: Dynamic media requests go to dynamic provider
 
@@ -282,7 +298,7 @@ class TestTileRequestRouting:
 
         # Request tile load
         tilemanager.load_tile(tile_id)
-        time.sleep(0.5)
+        wait_for_tile(tile_id, timeout=15.0)
 
         # Dynamic tile should be generated
         try:
@@ -292,8 +308,7 @@ class TestTileRequestRouting:
             # May still be loading - that's OK for this test
             pass
 
-    def test_unknown_dynamic_prefix_uses_static_provider(
-            self, temp_tilestore, initialized_tilemanager):
+    def test_unknown_dynamic_prefix_uses_static_provider(self, temp_tilestore, initialized_tilemanager):
         """
         Scenario: Unknown media uses static provider
 
@@ -307,6 +322,7 @@ class TestTileRequestRouting:
         with pytest.raises(MediaNotTiled):
             tilemanager.get_tile(tile_id)
 
+
 class TestGetTileBehavior:
     """
     Feature: get_tile Operation
@@ -316,8 +332,7 @@ class TestGetTileBehavior:
     untiled media, tiles not yet loaded, and permanently unavailable tiles.
     """
 
-    def test_get_tile_returns_cached_tile(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_get_tile_returns_cached_tile(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: get_tile returns tile from cache
 
@@ -330,15 +345,14 @@ class TestGetTileBehavior:
 
         # Load tile first
         tilemanager.load_tile(tile_id)
-        time.sleep(0.3)
+        wait_for_tile(tile_id, timeout=10.0)
 
         # Get should succeed
         tile = tilemanager.get_tile(tile_id)
         assert tile is not None
         assert isinstance(tile, Tile)
 
-    def test_get_tile_raises_media_not_tiled(
-            self, temp_tilestore, initialized_tilemanager):
+    def test_get_tile_raises_media_not_tiled(self, temp_tilestore, initialized_tilemanager):
         """
         Scenario: get_tile raises MediaNotTiled for untiled media
 
@@ -351,8 +365,7 @@ class TestGetTileBehavior:
         with pytest.raises(MediaNotTiled):
             tilemanager.get_tile(tile_id)
 
-    def test_get_tile_raises_tile_not_loaded(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_get_tile_raises_tile_not_loaded(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: get_tile raises TileNotLoaded for uncached tile
 
@@ -369,7 +382,8 @@ class TestGetTileBehavior:
             tilemanager.get_tile(tile_id)
 
     def test_get_tile_raises_tile_not_available_for_negative_level(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+        self, temp_tilestore, tiled_media, initialized_tilemanager
+    ):
         """
         Scenario: get_tile raises TileNotAvailable for negative levels
 
@@ -382,6 +396,7 @@ class TestGetTileBehavior:
         with pytest.raises(TileNotAvailable):
             tilemanager.get_tile(tile_id)
 
+
 class TestGetTileRobust:
     """
     Feature: get_tile_robust Operation
@@ -391,8 +406,7 @@ class TestGetTileRobust:
     It never raises TileNotLoaded or TileNotAvailable.
     """
 
-    def test_get_tile_robust_returns_cached_tile(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_get_tile_robust_returns_cached_tile(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: get_tile_robust returns cached tile when available
 
@@ -404,14 +418,13 @@ class TestGetTileRobust:
 
         # Load tile first
         tilemanager.load_tile(tile_id)
-        time.sleep(0.3)
+        wait_for_tile(tile_id, timeout=10.0)
 
         tile = tilemanager.get_tile_robust(tile_id)
         assert tile is not None
         assert isinstance(tile, Tile)
 
-    def test_get_tile_robust_synthesizes_missing_tile(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_get_tile_robust_synthesizes_missing_tile(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: get_tile_robust synthesizes tile from parent
 
@@ -424,7 +437,7 @@ class TestGetTileRobust:
         # First ensure level 0 is cached
         base_tile_id = (tiled_media, 0, 0, 0)
         tilemanager.load_tile(base_tile_id)
-        time.sleep(0.3)
+        wait_for_tile(base_tile_id, timeout=10.0)
 
         # Request a higher level tile that may not be cached
         tile_id = (tiled_media, 1, 0, 0)
@@ -432,8 +445,7 @@ class TestGetTileRobust:
         tile = tilemanager.get_tile_robust(tile_id)
         assert tile is not None
 
-    def test_get_tile_robust_raises_media_not_tiled(
-            self, temp_tilestore, initialized_tilemanager):
+    def test_get_tile_robust_raises_media_not_tiled(self, temp_tilestore, initialized_tilemanager):
         """
         Scenario: get_tile_robust still raises MediaNotTiled
 
@@ -447,8 +459,7 @@ class TestGetTileRobust:
         with pytest.raises(MediaNotTiled):
             tilemanager.get_tile_robust(tile_id)
 
-    def test_get_tile_robust_handles_negative_levels(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_get_tile_robust_handles_negative_levels(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: get_tile_robust handles negative tile levels
 
@@ -460,13 +471,14 @@ class TestGetTileRobust:
         # Ensure level 0 is cached
         base_tile_id = (tiled_media, 0, 0, 0)
         tilemanager.load_tile(base_tile_id)
-        time.sleep(0.3)
+        wait_for_tile(base_tile_id, timeout=10.0)
 
         # Request negative level
         tile_id = (tiled_media, -1, 0, 0)
 
         tile = tilemanager.get_tile_robust(tile_id)
         assert tile is not None
+
 
 class TestCutTileOperation:
     """
@@ -477,8 +489,7 @@ class TestCutTileOperation:
     negative levels (zoomed-out views).
     """
 
-    def test_cut_tile_synthesizes_from_parent(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_cut_tile_synthesizes_from_parent(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: cut_tile creates tile from parent
 
@@ -490,7 +501,7 @@ class TestCutTileOperation:
         # Ensure level 0 is cached
         base_tile_id = (tiled_media, 0, 0, 0)
         tilemanager.load_tile(base_tile_id)
-        time.sleep(0.3)
+        wait_for_tile(base_tile_id, timeout=10.0)
 
         # Cut a tile from level 1
         tile_id = (tiled_media, 1, 0, 0)
@@ -499,8 +510,7 @@ class TestCutTileOperation:
         assert tile is not None
         assert isinstance(final, bool)
 
-    def test_cut_tile_negative_level_resizes_base_tile(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_cut_tile_negative_level_resizes_base_tile(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: cut_tile handles negative levels by resizing
 
@@ -512,7 +522,7 @@ class TestCutTileOperation:
         # Ensure level 0 is cached
         base_tile_id = (tiled_media, 0, 0, 0)
         tilemanager.load_tile(base_tile_id)
-        time.sleep(0.3)
+        wait_for_tile(base_tile_id, timeout=10.0)
 
         # Cut at negative level
         tile_id = (tiled_media, -1, 0, 0)
@@ -524,8 +534,7 @@ class TestCutTileOperation:
         assert tile.size[0] <= 256
         assert tile.size[1] <= 256
 
-    def test_cut_tile_returns_final_true_for_available_tile(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_cut_tile_returns_final_true_for_available_tile(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: cut_tile returns final=True when tile is definitive
 
@@ -537,13 +546,12 @@ class TestCutTileOperation:
         # Ensure tiles are loaded
         tile_id = (tiled_media, 0, 0, 0)
         tilemanager.load_tile(tile_id)
-        time.sleep(0.3)
+        wait_for_tile(tile_id, timeout=10.0)
 
-        tile, final = tilemanager.cut_tile(tile_id)
+        _tile, final = tilemanager.cut_tile(tile_id)
         assert final is True
 
-    def test_cut_tile_with_tempcache_stores_intermediate(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_cut_tile_with_tempcache_stores_intermediate(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: cut_tile uses temporary cache for intermediate tiles
 
@@ -555,13 +563,14 @@ class TestCutTileOperation:
         # Ensure level 0 is cached
         base_tile_id = (tiled_media, 0, 0, 0)
         tilemanager.load_tile(base_tile_id)
-        time.sleep(0.3)
+        wait_for_tile(base_tile_id, timeout=10.0)
 
         # Request with tempcache enabled
         tile_id = (tiled_media, 1, 0, 0)
-        tile, final = tilemanager.cut_tile(tile_id, tempcache=5)
+        tile, _final = tilemanager.cut_tile(tile_id, tempcache=5)
 
         assert tile is not None
+
 
 class TestNegativeTileLevels:
     """
@@ -572,8 +581,7 @@ class TestNegativeTileLevels:
     created by resizing the base (0,0,0) tile.
     """
 
-    def test_negative_level_produces_smaller_tile(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_negative_level_produces_smaller_tile(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: Negative levels produce progressively smaller tiles
 
@@ -584,7 +592,7 @@ class TestNegativeTileLevels:
         # Ensure level 0 is cached
         base_tile_id = (tiled_media, 0, 0, 0)
         tilemanager.load_tile(base_tile_id)
-        time.sleep(0.3)
+        wait_for_tile(base_tile_id, timeout=10.0)
 
         base_tile = tilemanager.get_tile(base_tile_id)
         base_size = base_tile.size
@@ -599,8 +607,7 @@ class TestNegativeTileLevels:
         assert tile_neg2.size[0] == base_size[0] // 4
         assert tile_neg2.size[1] == base_size[1] // 4
 
-    def test_negative_levels_always_final(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_negative_levels_always_final(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: Negative level tiles are always marked as final
 
@@ -612,11 +619,12 @@ class TestNegativeTileLevels:
         # Ensure level 0 is cached
         base_tile_id = (tiled_media, 0, 0, 0)
         tilemanager.load_tile(base_tile_id)
-        time.sleep(0.3)
+        wait_for_tile(base_tile_id, timeout=10.0)
 
         for level in [-1, -2, -3]:
-            tile, final = tilemanager.cut_tile((tiled_media, level, 0, 0))
+            _tile, final = tilemanager.cut_tile((tiled_media, level, 0, 0))
             assert final is True, f"Level {level} should be final"
+
 
 class TestMetadataAccess:
     """
@@ -627,8 +635,7 @@ class TestMetadataAccess:
     TileStore, dynamic media has predefined defaults.
     """
 
-    def test_static_media_metadata_from_tilestore(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_static_media_metadata_from_tilestore(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: Static media metadata retrieved from TileStore
 
@@ -637,16 +644,15 @@ class TestMetadataAccess:
         Then values are retrieved from TileStore
         And match the original tiling parameters
         """
-        width = tilemanager.get_metadata(tiled_media, 'width')
-        height = tilemanager.get_metadata(tiled_media, 'height')
-        tilesize = tilemanager.get_metadata(tiled_media, 'tilesize')
+        width = tilemanager.get_metadata(tiled_media, "width")
+        height = tilemanager.get_metadata(tiled_media, "height")
+        tilesize = tilemanager.get_metadata(tiled_media, "tilesize")
 
         assert width == 512
         assert height == 512
         assert tilesize == 256
 
-    def test_dynamic_media_metadata_defaults(
-            self, temp_tilestore, initialized_tilemanager):
+    def test_dynamic_media_metadata_defaults(self, temp_tilestore, initialized_tilemanager):
         """
         Scenario: Dynamic media returns predefined metadata
 
@@ -657,16 +663,15 @@ class TestMetadataAccess:
         """
         media_id = "dynamic:fern"
 
-        tilesize = tilemanager.get_metadata(media_id, 'tilesize')
-        maxtilelevel = tilemanager.get_metadata(media_id, 'maxtilelevel')
-        filext = tilemanager.get_metadata(media_id, 'filext')
+        tilesize = tilemanager.get_metadata(media_id, "tilesize")
+        maxtilelevel = tilemanager.get_metadata(media_id, "maxtilelevel")
+        filext = tilemanager.get_metadata(media_id, "filext")
 
         assert tilesize is not None
         assert maxtilelevel is not None
         assert filext is not None
 
-    def test_unknown_metadata_key_returns_none(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_unknown_metadata_key_returns_none(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: Unknown metadata key returns None
 
@@ -675,8 +680,9 @@ class TestMetadataAccess:
         Then None is returned
         And no exception is raised
         """
-        result = tilemanager.get_metadata(tiled_media, 'nonexistent_key')
+        result = tilemanager.get_metadata(tiled_media, "nonexistent_key")
         assert result is None
+
 
 class TestTiledCheck:
     """
@@ -687,8 +693,7 @@ class TestTiledCheck:
     requires actual tiling to be complete.
     """
 
-    def test_tiled_returns_true_for_tiled_static_media(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_tiled_returns_true_for_tiled_static_media(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: tiled() returns True for tiled static media
 
@@ -698,8 +703,7 @@ class TestTiledCheck:
         """
         assert tilemanager.tiled(tiled_media) is True
 
-    def test_tiled_returns_false_for_untiled_static_media(
-            self, temp_tilestore, initialized_tilemanager):
+    def test_tiled_returns_false_for_untiled_static_media(self, temp_tilestore, initialized_tilemanager):
         """
         Scenario: tiled() returns False for untiled static media
 
@@ -709,8 +713,7 @@ class TestTiledCheck:
         """
         assert tilemanager.tiled("never_tiled.jpg") is False
 
-    def test_tiled_returns_true_for_dynamic_media(
-            self, temp_tilestore, initialized_tilemanager):
+    def test_tiled_returns_true_for_dynamic_media(self, temp_tilestore, initialized_tilemanager):
         """
         Scenario: tiled() always returns True for dynamic media
 
@@ -721,6 +724,7 @@ class TestTiledCheck:
         assert tilemanager.tiled("dynamic:fern") is True
         assert tilemanager.tiled("dynamic:unknown") is True
 
+
 class TestPurgeOperation:
     """
     Feature: Provider Purge Through TileManager
@@ -729,8 +733,7 @@ class TestPurgeOperation:
     enabling clean resource management when media is unloaded.
     """
 
-    def test_purge_all_clears_all_providers(
-            self, temp_tilestore, initialized_tilemanager):
+    def test_purge_all_clears_all_providers(self, temp_tilestore, initialized_tilemanager):
         """
         Scenario: purge() without arguments clears all providers
 
@@ -747,8 +750,7 @@ class TestPurgeOperation:
 
         # No assertion needed - just verify no crash
 
-    def test_purge_specific_media_clears_only_that_media(
-            self, temp_tilestore, initialized_tilemanager):
+    def test_purge_specific_media_clears_only_that_media(self, temp_tilestore, initialized_tilemanager):
         """
         Scenario: purge(media_id) only clears specific media
 
@@ -759,6 +761,7 @@ class TestPurgeOperation:
         # This is primarily a non-crash test
         tilemanager.purge("specific_media.jpg")
 
+
 class TestDualCacheCoordination:
     """
     Feature: Dual Cache Coordination
@@ -768,8 +771,7 @@ class TestDualCacheCoordination:
     This separation enables different eviction policies.
     """
 
-    def test_loaded_tiles_go_to_permanent_cache(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_loaded_tiles_go_to_permanent_cache(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: Loaded tiles stored in permanent cache
 
@@ -781,14 +783,13 @@ class TestDualCacheCoordination:
         tile_id = (tiled_media, 0, 0, 0)
 
         tilemanager.load_tile(tile_id)
-        time.sleep(0.3)
+        wait_for_tile(tile_id, timeout=10.0)
 
         # Should be in permanent cache
         tile = tilemanager.get_tile(tile_id)
         assert tile is not None
 
-    def test_synthesized_tiles_use_temporary_cache(
-            self, temp_tilestore, tiled_media, initialized_tilemanager):
+    def test_synthesized_tiles_use_temporary_cache(self, temp_tilestore, tiled_media, initialized_tilemanager):
         """
         Scenario: Synthesized non-final tiles use temporary cache
 
@@ -800,10 +801,10 @@ class TestDualCacheCoordination:
         # Ensure base tile is available
         base_tile_id = (tiled_media, 0, 0, 0)
         tilemanager.load_tile(base_tile_id)
-        time.sleep(0.3)
+        wait_for_tile(base_tile_id, timeout=10.0)
 
         # Synthesize with tempcache
         tile_id = (tiled_media, 1, 0, 0)
-        tile, final = tilemanager.cut_tile(tile_id, tempcache=3)
+        tile, _final = tilemanager.cut_tile(tile_id, tempcache=3)
 
         assert tile is not None

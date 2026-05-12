@@ -13,12 +13,12 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
-import threading
 import os
-from unittest.mock import Mock, patch, MagicMock, call
-from concurrent.futures import Future, ProcessPoolExecutor
-import multiprocessing
+import threading
+from concurrent.futures import Future
+from unittest.mock import Mock, patch
+
+import pytest
 
 from pyzui.tilesystem.tiler import tilerrunner
 
@@ -27,7 +27,7 @@ from pyzui.tilesystem.tiler import tilerrunner
 def reset_tilerrunner_state():
     """
     Fixture: Reset Tiler Runner State
-    
+
     Reset the global state of the tilerrunner module before each test
     to ensure test isolation.
     """
@@ -36,15 +36,28 @@ def reset_tilerrunner_state():
     original_context_name = tilerrunner._executor_context_name
     original_max_workers = tilerrunner._max_workers
     original_atexit_registered = tilerrunner._atexit_registered
-    
+
     # Reset to initial state
     tilerrunner._executor = None
     tilerrunner._executor_context_name = None
     tilerrunner._max_workers = 4
     tilerrunner._atexit_registered = False
-    
+
     yield
-    
+
+    # Unregister any atexit handler registered during the test.
+    # Tests mock ProcessPoolExecutor but atexit.register is stdlib
+    # and NOT mocked — init() calls register real handlers.  After
+    # @patch decorators are undone, those handlers fire on the real
+    # multiprocessing module (not the mock), hanging pytest during
+    # interpreter shutdown via the resource tracker.
+    import atexit
+
+    try:
+        atexit.unregister(tilerrunner.shutdown)
+    except ValueError:
+        pass
+
     # Restore original state (though tests should clean up)
     tilerrunner._executor = original_executor
     tilerrunner._executor_context_name = original_context_name
@@ -61,34 +74,34 @@ class TestTilerRunnerContextSelection:
     process creation for parallel tiling operations.
     """
 
-    @patch('pyzui.tilesystem.tiler.tilerrunner.threading.active_count')
-    @patch('pyzui.tilesystem.tiler.tilerrunner.multiprocessing.get_context')
-    def test_get_safe_context_single_thread(self, mock_get_context, mock_active_count):
+    @patch("pyzui.tilesystem.tiler.tilerrunner.threading.active_count")
+    @patch("pyzui.tilesystem.tiler.tilerrunner.multiprocessing.get_context")
+    def test_get_safe_context_returns_spawn_by_default(self, mock_get_context, mock_active_count):
         """
-        Scenario: Select fork context when only main thread is running
+        Scenario: Default context is spawn (single-threaded or not)
 
-        Given a single-threaded environment (only main thread)
-        When _get_safe_context is called
-        Then it should return 'fork' context
-        And multiprocessing.get_context should be called with 'fork'
+        Given any thread count (including only main thread)
+        When _get_safe_context is called without env override
+        Then it should return 'spawn' context
+        And multiprocessing.get_context should be called with 'spawn'
         """
         mock_active_count.return_value = 1
         mock_context = Mock()
         mock_get_context.return_value = mock_context
-        mock_context.get_start_method.return_value = 'fork'
+        mock_context.get_start_method.return_value = "spawn"
 
         # Clear environment variable to test default behavior
         with patch.dict(os.environ, {}, clear=True):
             result = tilerrunner._get_safe_context()
 
-        mock_get_context.assert_called_once_with('fork')
+        mock_get_context.assert_called_once_with("spawn")
         assert result == mock_context
 
-    @patch('pyzui.tilesystem.tiler.tilerrunner.threading.active_count')
-    @patch('pyzui.tilesystem.tiler.tilerrunner.multiprocessing.get_context')
-    def test_get_safe_context_multiple_threads(self, mock_get_context, mock_active_count):
+    @patch("pyzui.tilesystem.tiler.tilerrunner.threading.active_count")
+    @patch("pyzui.tilesystem.tiler.tilerrunner.multiprocessing.get_context")
+    def test_get_safe_context_spawn_with_threads(self, mock_get_context, mock_active_count):
         """
-        Scenario: Select spawn context when multiple threads are running
+        Scenario: Spawn context when multiple threads are running
 
         Given a multi-threaded environment (more than one thread)
         When _get_safe_context is called
@@ -98,16 +111,16 @@ class TestTilerRunnerContextSelection:
         mock_active_count.return_value = 3
         mock_context = Mock()
         mock_get_context.return_value = mock_context
-        mock_context.get_start_method.return_value = 'spawn'
+        mock_context.get_start_method.return_value = "spawn"
 
         with patch.dict(os.environ, {}, clear=True):
             result = tilerrunner._get_safe_context()
 
-        mock_get_context.assert_called_once_with('spawn')
+        mock_get_context.assert_called_once_with("spawn")
         assert result == mock_context
 
-    @patch('pyzui.tilesystem.tiler.tilerrunner.threading.active_count')
-    @patch('pyzui.tilesystem.tiler.tilerrunner.multiprocessing.get_context')
+    @patch("pyzui.tilesystem.tiler.tilerrunner.threading.active_count")
+    @patch("pyzui.tilesystem.tiler.tilerrunner.multiprocessing.get_context")
     def test_get_safe_context_env_override(self, mock_get_context, mock_active_count):
         """
         Scenario: Environment variable overrides context selection
@@ -119,12 +132,12 @@ class TestTilerRunnerContextSelection:
         """
         mock_context = Mock()
         mock_get_context.return_value = mock_context
-        mock_context.get_start_method.return_value = 'forkserver'
+        mock_context.get_start_method.return_value = "forkserver"
 
-        with patch.dict(os.environ, {'PYZUI_MP_CONTEXT': 'forkserver'}):
+        with patch.dict(os.environ, {"PYZUI_MP_CONTEXT": "forkserver"}):
             result = tilerrunner._get_safe_context()
 
-        mock_get_context.assert_called_once_with('forkserver')
+        mock_get_context.assert_called_once_with("forkserver")
         mock_active_count.assert_not_called()
         assert result == mock_context
 
@@ -138,9 +151,9 @@ class TestTilerRunnerLifecycle:
     for parallel tiling operations.
     """
 
-    @patch('pyzui.tilesystem.tiler.tilerrunner.ProcessPoolExecutor')
-    @patch('pyzui.tilesystem.tiler.tilerrunner._get_safe_context')
-    @patch('pyzui.tilesystem.tiler.tilerrunner.atexit.register')
+    @patch("pyzui.tilesystem.tiler.tilerrunner.ProcessPoolExecutor")
+    @patch("pyzui.tilesystem.tiler.tilerrunner._get_safe_context")
+    @patch("pyzui.tilesystem.tiler.tilerrunner.atexit.register")
     def test_init_creates_executor(self, mock_atexit, mock_get_context, mock_executor_class):
         """
         Scenario: Initialize creates process pool executor
@@ -151,7 +164,7 @@ class TestTilerRunnerLifecycle:
         And atexit handler should be registered
         """
         mock_context = Mock()
-        mock_context.get_start_method.return_value = 'fork'
+        mock_context.get_start_method.return_value = "spawn"
         mock_get_context.return_value = mock_context
         mock_executor = Mock()
         mock_executor_class.return_value = mock_executor
@@ -165,8 +178,8 @@ class TestTilerRunnerLifecycle:
         mock_executor_class.assert_called_once_with(max_workers=6, mp_context=mock_context)
         mock_atexit.assert_called_once_with(tilerrunner.shutdown)
 
-    @patch('pyzui.tilesystem.tiler.tilerrunner.ProcessPoolExecutor')
-    @patch('pyzui.tilesystem.tiler.tilerrunner._get_safe_context')
+    @patch("pyzui.tilesystem.tiler.tilerrunner.ProcessPoolExecutor")
+    @patch("pyzui.tilesystem.tiler.tilerrunner._get_safe_context")
     def test_shutdown_cleans_up(self, mock_get_context, mock_executor_class):
         """
         Scenario: Shutdown terminates executor and child processes
@@ -177,7 +190,7 @@ class TestTilerRunnerLifecycle:
         And child processes should be terminated
         """
         mock_context = Mock()
-        mock_context.get_start_method.return_value = 'fork'
+        mock_context.get_start_method.return_value = "spawn"
         mock_get_context.return_value = mock_context
         mock_executor = Mock()
         mock_executor_class.return_value = mock_executor
@@ -188,21 +201,21 @@ class TestTilerRunnerLifecycle:
         # Mock active_children
         mock_child1 = Mock()
         mock_child2 = Mock()
-        with patch('pyzui.tilesystem.tiler.tilerrunner.multiprocessing.active_children') as mock_active:
+        with patch("pyzui.tilesystem.tiler.tilerrunner.multiprocessing.active_children") as mock_active:
             mock_active.return_value = [mock_child1, mock_child2]
             tilerrunner.shutdown()
 
         # Verify executor shutdown
         mock_executor.shutdown.assert_called_once_with(wait=False, cancel_futures=True)
-        
+
         # Verify child process termination
         mock_child1.terminate.assert_called_once()
         mock_child1.join.assert_called_once_with(timeout=1)
         mock_child2.terminate.assert_called_once()
         mock_child2.join.assert_called_once_with(timeout=1)
 
-    @patch('pyzui.tilesystem.tiler.tilerrunner.ProcessPoolExecutor')
-    @patch('pyzui.tilesystem.tiler.tilerrunner._get_safe_context')
+    @patch("pyzui.tilesystem.tiler.tilerrunner.ProcessPoolExecutor")
+    @patch("pyzui.tilesystem.tiler.tilerrunner._get_safe_context")
     def test_get_executor_lazy_initialization(self, mock_get_context, mock_executor_class):
         """
         Scenario: Executor is lazily initialized on first use
@@ -213,56 +226,57 @@ class TestTilerRunnerLifecycle:
         And executor should be returned
         """
         mock_context = Mock()
-        mock_context.get_start_method.return_value = 'fork'
+        mock_context.get_start_method.return_value = "spawn"
         mock_get_context.return_value = mock_context
         mock_executor = Mock()
         mock_executor_class.return_value = mock_executor
 
         # Mock init to set our mock executor
-        with patch.object(tilerrunner, 'init') as mock_init:
+        with patch.object(tilerrunner, "init") as mock_init:
             # When init is called, it should set _executor
             def set_executor(*args, **kwargs):
                 tilerrunner._executor = mock_executor
-                tilerrunner._executor_context_name = 'fork'
+                tilerrunner._executor_context_name = "spawn"
+
             mock_init.side_effect = set_executor
-            
+
             result = tilerrunner._get_executor()
 
         mock_init.assert_called_once()
         assert result == mock_executor
 
-    @patch('pyzui.tilesystem.tiler.tilerrunner.ProcessPoolExecutor')
-    @patch('pyzui.tilesystem.tiler.tilerrunner._get_safe_context')
+    @patch("pyzui.tilesystem.tiler.tilerrunner.ProcessPoolExecutor")
+    @patch("pyzui.tilesystem.tiler.tilerrunner._get_safe_context")
     def test_context_change_recreates_executor(self, mock_get_context, mock_executor_class):
         """
         Scenario: Executor is recreated when context changes
 
-        Given an initialized executor with 'fork' context
-        When context changes to 'spawn' (simulated by different get_start_method)
+        Given an initialized executor with 'spawn' context
+        When context changes to 'fork' (e.g., via PYZUI_MP_CONTEXT override)
         Then shutdown should be called
         And new executor should be created with new context
         """
-        # First call: fork context
-        mock_context_fork = Mock()
-        mock_context_fork.get_start_method.return_value = 'fork'
-        
-        # Second call: spawn context (simulating thread creation)
+        # First call: spawn context (default)
         mock_context_spawn = Mock()
-        mock_context_spawn.get_start_method.return_value = 'spawn'
-        
-        mock_get_context.side_effect = [mock_context_fork, mock_context_spawn]
-        
+        mock_context_spawn.get_start_method.return_value = "spawn"
+
+        # Second call: fork context (simulating env override)
+        mock_context_fork = Mock()
+        mock_context_fork.get_start_method.return_value = "fork"
+
+        mock_get_context.side_effect = [mock_context_spawn, mock_context_fork]
+
         mock_executor1 = Mock()
         mock_executor2 = Mock()
         mock_executor_class.side_effect = [mock_executor1, mock_executor2]
 
-        # Initialize with fork context
+        # Initialize with spawn context
         tilerrunner.init(max_workers=4)
-        
+
         # Simulate context change by calling _get_executor which will detect change
-        with patch.object(tilerrunner, 'shutdown') as mock_shutdown:
+        with patch.object(tilerrunner, "shutdown") as mock_shutdown:
             tilerrunner._get_executor()
-            
+
             # shutdown should be called due to context change
             mock_shutdown.assert_called_once()
 
@@ -276,8 +290,8 @@ class TestTilerRunnerThreadSafety:
     tiling submission operations.
     """
 
-    @patch('pyzui.tilesystem.tiler.tilerrunner.ProcessPoolExecutor')
-    @patch('pyzui.tilesystem.tiler.tilerrunner._get_safe_context')
+    @patch("pyzui.tilesystem.tiler.tilerrunner.ProcessPoolExecutor")
+    @patch("pyzui.tilesystem.tiler.tilerrunner._get_safe_context")
     def test_concurrent_submit_operations(self, mock_get_context, mock_executor_class):
         """
         Scenario: Multiple threads can submit tiling jobs concurrently
@@ -288,11 +302,11 @@ class TestTilerRunnerThreadSafety:
         And executor.submit should be called for each submission
         """
         mock_context = Mock()
-        mock_context.get_start_method.return_value = 'fork'
+        mock_context.get_start_method.return_value = "spawn"
         mock_get_context.return_value = mock_context
         mock_executor = Mock()
         mock_executor_class.return_value = mock_executor
-        
+
         # Mock Future objects
         mock_future1 = Mock(spec=Future)
         mock_future2 = Mock(spec=Future)
@@ -304,14 +318,11 @@ class TestTilerRunnerThreadSafety:
 
         results = []
         errors = []
-        
+
         def submit_tiling_job(index):
             try:
                 future = tilerrunner.submit_tiling(
-                    f"input_{index}.ppm", 
-                    media_id=f"media_{index}",
-                    filext='jpg',
-                    tilesize=256
+                    f"input_{index}.ppm", media_id=f"media_{index}", filext="jpg", tilesize=256
                 )
                 results.append((index, future))
             except Exception as e:
@@ -323,7 +334,7 @@ class TestTilerRunnerThreadSafety:
             thread = threading.Thread(target=submit_tiling_job, args=(i,))
             threads.append(thread)
             thread.start()
-        
+
         # Wait for all threads to complete
         for thread in threads:
             thread.join(timeout=5)
@@ -331,13 +342,13 @@ class TestTilerRunnerThreadSafety:
 
         # Verify no errors occurred
         assert len(errors) == 0, f"Errors occurred during concurrent submission: {errors}"
-        
+
         # Verify all submissions completed
         assert len(results) == 3
         assert mock_executor.submit.call_count == 3
 
-    @patch('pyzui.tilesystem.tiler.tilerrunner.ProcessPoolExecutor')
-    @patch('pyzui.tilesystem.tiler.tilerrunner._get_safe_context')
+    @patch("pyzui.tilesystem.tiler.tilerrunner.ProcessPoolExecutor")
+    @patch("pyzui.tilesystem.tiler.tilerrunner._get_safe_context")
     def test_init_shutdown_race_condition(self, mock_get_context, mock_executor_class):
         """
         Scenario: Concurrent init and shutdown operations are thread-safe
@@ -348,19 +359,19 @@ class TestTilerRunnerThreadSafety:
         And executor state should remain consistent
         """
         mock_context = Mock()
-        mock_context.get_start_method.return_value = 'fork'
+        mock_context.get_start_method.return_value = "spawn"
         mock_get_context.return_value = mock_context
         mock_executor = Mock()
         mock_executor_class.return_value = mock_executor
 
         init_called = 0
         shutdown_called = 0
-        
+
         def call_init():
             nonlocal init_called
             tilerrunner.init(max_workers=4)
             init_called += 1
-        
+
         def call_shutdown():
             nonlocal shutdown_called
             tilerrunner.shutdown()
@@ -375,7 +386,7 @@ class TestTilerRunnerThreadSafety:
                 thread = threading.Thread(target=call_shutdown)
             threads.append(thread)
             thread.start()
-        
+
         # Wait for all threads
         for thread in threads:
             thread.join(timeout=5)
@@ -384,8 +395,8 @@ class TestTilerRunnerThreadSafety:
         # Verify operations completed (exact counts may vary due to timing)
         assert init_called > 0 or shutdown_called > 0, "No operations completed"
 
-    @patch('pyzui.tilesystem.tiler.tilerrunner.ProcessPoolExecutor')
-    @patch('pyzui.tilesystem.tiler.tilerrunner._get_safe_context')
+    @patch("pyzui.tilesystem.tiler.tilerrunner.ProcessPoolExecutor")
+    @patch("pyzui.tilesystem.tiler.tilerrunner._get_safe_context")
     def test_multiple_threads_get_executor(self, mock_get_context, mock_executor_class):
         """
         Scenario: Multiple threads can safely get executor instance
@@ -396,7 +407,7 @@ class TestTilerRunnerThreadSafety:
         And all threads should receive same executor instance
         """
         mock_context = Mock()
-        mock_context.get_start_method.return_value = 'fork'
+        mock_context.get_start_method.return_value = "spawn"
         mock_get_context.return_value = mock_context
         mock_executor = Mock()
         mock_executor_class.return_value = mock_executor
@@ -406,7 +417,7 @@ class TestTilerRunnerThreadSafety:
 
         executors = []
         lock = threading.Lock()
-        
+
         def get_executor_and_store():
             executor = tilerrunner._get_executor()
             with lock:
@@ -414,11 +425,11 @@ class TestTilerRunnerThreadSafety:
 
         # Start multiple threads
         threads = []
-        for i in range(5):
+        for _i in range(5):
             thread = threading.Thread(target=get_executor_and_store)
             threads.append(thread)
             thread.start()
-        
+
         # Wait for all threads
         for thread in threads:
             thread.join(timeout=5)
@@ -429,7 +440,7 @@ class TestTilerRunnerThreadSafety:
         first_executor = executors[0]
         for executor in executors[1:]:
             assert executor is first_executor, "All threads should get same executor instance"
-        
+
         # Verify executor was created only once
         assert mock_executor_class.call_count == 1
 
@@ -454,16 +465,16 @@ class TestTilingHandle:
         """
         mock_future = Mock(spec=Future)
         mock_future.done.return_value = False
-        
+
         handle = tilerrunner.TilingHandle(mock_future, "input.ppm", "media_123")
-        
+
         # Not done -> progress 0.0
         assert handle.progress == 0.0
-        
+
         # Done -> progress 1.0
         mock_future.done.return_value = True
         mock_future.result.return_value = None  # No error
-        
+
         assert handle.progress == 1.0
 
     def test_error_property(self):
@@ -478,20 +489,20 @@ class TestTilingHandle:
         """
         mock_future = Mock(spec=Future)
         mock_future.done.return_value = True
-        
+
         # Test with error
         error_message = "Tiling failed: invalid PPM format"
         mock_future.result.return_value = error_message
-        
+
         handle = tilerrunner.TilingHandle(mock_future, "input.ppm", "media_123")
-        
+
         assert handle.error == error_message
-        
+
         # Test without error
         mock_future.result.return_value = None
-        
+
         handle2 = tilerrunner.TilingHandle(mock_future, "input2.ppm", "media_456")
-        
+
         assert handle2.error is None
 
     def test_error_property_future_exception(self):
@@ -505,9 +516,9 @@ class TestTilingHandle:
         mock_future = Mock(spec=Future)
         mock_future.done.return_value = True
         mock_future.result.side_effect = RuntimeError("Process crashed during tiling")
-        
+
         handle = tilerrunner.TilingHandle(mock_future, "input.ppm", "media_123")
-        
+
         assert "tiling process error" in handle.error
         assert "Process crashed" in handle.error
 
@@ -565,11 +576,11 @@ class TestTilingHandle:
         """
         mock_future = Mock(spec=Future)
         mock_future.done.return_value = False
-        
+
         handle = tilerrunner.TilingHandle(mock_future, "input.ppm", "media_123")
-        
+
         assert handle.is_alive() is True
-        
+
         mock_future.done.return_value = True
-        
+
         assert handle.is_alive() is False

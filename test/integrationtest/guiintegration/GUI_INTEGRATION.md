@@ -1,6 +1,6 @@
 # GUI Integration Test Documentation
 
-This document describes the GUI integration test suite for PyZUI, located at `test/integrationtest/gui_integration.py`.
+This document describes the GUI integration test suite for PyZUI, located at `test/integrationtest/guiintegration/`.
 
 ## Overview
 
@@ -8,8 +8,8 @@ The GUI integration test is a comprehensive end-to-end test that launches the fu
 
 ## Important Notes
 
-- **Not a pytest test**: The file is intentionally named `gui_integration.py` (not `test_*.py`) so pytest won't automatically discover and run it
-- **Run directly with Python**: Execute the script directly using the Python interpreter
+- **Not a pytest test**: The directory is structured so pytest won't automatically discover it
+- **Run directly with Python**: Execute the main script using the Python interpreter
 - **Visual verification**: The test includes deliberate delays for human observation
 - **Interruptible**: Press `Ctrl+C` at any time to stop the test
 
@@ -19,11 +19,11 @@ The GUI integration test is a comprehensive end-to-end test that launches the fu
 
 ```bash
 # From project root
-python test/integrationtest/gui_integration.py
+python test/integrationtest/guiintegration/main.py
 
-# Or from the test directory
-cd test/integrationtest
-python gui_integration.py
+# Or from the guiintegration directory
+cd test/integrationtest/guiintegration
+python main.py
 ```
 
 ### Starting from a Specific Step
@@ -32,17 +32,17 @@ Use the `--start-step` or `-s` argument to skip earlier steps:
 
 ```bash
 # Start from step 10 (View Menu tests)
-python test/integrationtest/gui_integration.py --start-step 10
+python test/integrationtest/guiintegration/main.py --start-step 10
 
 # Short form
-python test/integrationtest/gui_integration.py -s 30
+python test/integrationtest/guiintegration/main.py -s 30
 ```
 
 ### Listing Available Steps
 
 ```bash
-python test/integrationtest/gui_integration.py --list-steps
-python test/integrationtest/gui_integration.py -l
+python test/integrationtest/guiintegration/main.py --list-steps
+python test/integrationtest/guiintegration/main.py -l
 ```
 
 ## Test Steps
@@ -60,20 +60,43 @@ The test suite is organized into numbered steps grouped by functionality:
 | 5 | File Menu - Save Screenshot |
 | 6 | File Menu - Save Scene |
 | 7 | File Menu - Open Saved Scene |
+| 8 | File Menu - Open New String Dialog |
+| 9 | File Menu - Open Local Media |
+| 14 | File Menu - Open new SVG |
+| 15 | File Menu - Import Scene |
+| 16 | File Menu - New Tab |
+| 17 | File Menu - Close Tab |
 | **View Menu** | |
 | 10 | View Menu - Set Framerate |
 | 11 | View Menu - Adjust Sensitivity |
 | 12 | View Menu - Fullscreen Toggle |
+| 13 | View Menu - Adjust Sensitivity Dialog |
+| 18 | View Menu - Render Order Toggle |
+| **Settings Menu** | |
+| 19 | Settings Menu - Autosave Settings |
+| 22 | Settings Menu - Zoom Settings |
+| **Actions Menu** | |
+| 23 | Actions Menu - Copy SVG |
+| 24 | Actions Menu - Paste SVG |
 | **Help Menu** | |
 | 20 | Help Menu - About |
 | 21 | Help Menu - About Qt |
+| **SVG** | |
+| 25 | SVG - Full Elongation Test |
+| 26 | SVG - Reload Test Scene |
 | **Mouse Interactions** | |
 | 30 | Mouse - Left Click Select |
 | 31 | Mouse - Click and Drag |
 | 32 | Mouse - Scroll Wheel Zoom |
-| 35 | Mouse - Control+Click Rectangle Drawing Selection |
+| 33 | Mouse - Multi-Selection Persistence |
+| 35 | Mouse - Control+Click Rectangle Drawing and Move |
 | 36 | Mouse - Shift+Click No Selection Change |
+| 45 | Mouse Right-Click - String Modification Dialog |
+| 46 | Mouse Right-Click - Image Modification Dialog |
+| 47 | Mouse Right-Click - SVG Modification Dialog |
 | **Keyboard Interactions** | |
+| 34 | Keyboard - Alt Fine Zoom Control |
+| 37 | Keyboard - Ctrl+C/V Copy Paste |
 | 40 | Keyboard - Escape Deselect |
 | 41 | Keyboard - Page Up/Down Zoom |
 | 42 | Keyboard - Arrow Keys Move |
@@ -81,7 +104,7 @@ The test suite is organized into numbered steps grouped by functionality:
 | 44 | Keyboard - Delete Media |
 | **Workflow** | |
 | 90 | Complete Workflow |
-| 99 | File Menu - Quit (skipped) |
+| 99 | File Menu - Quit |
 
 ## Test Resources
 
@@ -130,13 +153,13 @@ The test includes configurable timing constants (in milliseconds) that control t
 | Constant | Default | Description |
 |----------|---------|-------------|
 | `SHORT_DELAY_MS` | 2000 | Short pauses (2 seconds) |
-| `DEFAULT_DELAY_MS` | 3500 | Standard delay between actions (3.5 seconds) |
-| `LONG_DELAY_MS` | 5000 | Long delay for loading/rendering (5 seconds) |
-| `IMAGE_LOAD_DELAY_MS` | 10000 | Extra time for images to fully load/tile (10 seconds) |
-| `ZOOM_STEP_DELAY_MS` | 800 | Delay between zoom steps (0.8 seconds) |
-| `MOVE_STEP_DELAY_MS` | 500 | Delay between movement steps (0.5 seconds) |
+| `DEFAULT_DELAY_MS` | 150 | Standard delay between actions (0.15 seconds) |
+| `LONG_DELAY_MS` | 200 | Long delay for loading/rendering (0.2 seconds) |
+| `IMAGE_LOAD_DELAY_MS` | 500 | Extra time for images to fully load/tile (0.5 seconds) |
+| `ZOOM_STEP_DELAY_MS` | 50 | Delay between zoom steps (0.05 seconds) |
+| `MOVE_STEP_DELAY_MS` | 30 | Delay between movement steps (0.03 seconds) |
 
-To adjust timing, edit these constants at the top of `gui_integration.py`.
+To adjust timing, edit these constants in `guiintegration/conf.py`.
 
 ## Logging
 
@@ -179,27 +202,50 @@ Log files are written to the `logs/` directory in the project root.
 - **Arrow keys**: Pan the view
 - **Space**: Center the view
 - **Delete**: Remove selected media object
+- **Ctrl+C/Ctrl+V**: Copy and paste SVG objects only (SVGMediaObject)
 
 ## Architecture
 
+### Directory Structure
+
+```
+test/integrationtest/guiintegration/
+├── __init__.py
+├── main.py                 # Entry point + orchestrator (GUITestContext, GUIIntegrationTest)
+├── conf.py                 # Timing constants
+├── logger.py               # GUITestLogger class
+├── utilities/
+│   ├── __init__.py
+│   ├── image_creation.py   # create_ppm_image, create_png_image
+│   ├── temp_dirs.py        # get_pytest_style_temp_dir
+│   ├── qt_simulation.py    # wait, simulate_key/mouse/wheel, trigger_action
+│   └── scene_helpers.py    # load_media_directory, add_test_string, add_svg, dialogs
+└── test/
+    ├── __init__.py
+    ├── load_test_scene.py
+    ├── new_scene.py
+    ├── ... (43 test modules, one per step)
+    └── quit.py
+```
+
 ### Main Classes
 
-- **`GUIIntegrationTest`**: Main test runner class that manages the application lifecycle and test execution
-- **`GUITestLogger`**: Custom logger with visual formatting for test output
+- **`GUIIntegrationTest`** (`main.py`): Main test runner class that manages the application lifecycle and test execution
+- **`GUITestContext`** (`main.py`): Dataclass holding shared state (app, window, log, resources, temp_dir, scene_loaded)
+- **`GUITestLogger`** (`logger.py`): Custom logger with visual formatting for test output
 
-### Key Methods
+### Key Modules
 
-| Method | Description |
+| Module | Description |
 |--------|-------------|
-| `setup()` | Initialize Qt app, create resources, show window |
-| `teardown()` | Clean up resources (preserves temp files) |
-| `run(start_step)` | Execute tests starting from specified step |
-| `trigger_action(key)` | Trigger a menu action by internal key |
-| `simulate_key(key, modifiers)` | Simulate keyboard input |
-| `simulate_mouse_click(pos, button)` | Simulate mouse click |
-| `simulate_mouse_drag(start, end)` | Simulate click-and-drag |
-| `simulate_wheel(pos, delta)` | Simulate scroll wheel |
-| `wait(ms, description)` | Wait with Qt event processing |
+| `main.py` | Orchestrator with `setup()`, `teardown()`, `run()`, `list_steps()`, `create_test_resources()` |
+| `conf.py` | Timing constants (SHORT_DELAY_MS, DEFAULT_DELAY_MS, etc.) |
+| `logger.py` | `GUITestLogger` with action/detail/wait/success/warning/section methods |
+| `utilities/qt_simulation.py` | `wait()`, `trigger_action()`, `simulate_key()`, `simulate_mouse_click()`, `simulate_mouse_drag()`, `simulate_wheel()` |
+| `utilities/scene_helpers.py` | `load_media_directory_with_action()`, `add_test_string()`, `add_svg_to_scene()`, `close_open_dialog()`, `ensure_test_scene_loaded()` |
+| `utilities/image_creation.py` | `create_ppm_image()`, `create_png_image()` |
+| `utilities/temp_dirs.py` | `get_pytest_style_temp_dir()` |
+| `test/*.py` | 43 individual test modules, each exporting `run(ctx)` for one test step |
 
 ### Qt Testing Utilities Used
 
@@ -214,7 +260,7 @@ Log files are written to the `logs/` directory in the project root.
 
 ### Test Runs Too Fast
 
-Increase the timing constants at the top of the file. The default values are designed for reasonable human observation.
+Increase the timing constants in `guiintegration/conf.py`. The default values are designed for reasonable human observation.
 
 ### Images Don't Load
 
@@ -272,3 +318,4 @@ STEP 1: Loading media directory: /tmp/pytest-of-user/pytest-5/pyzui_gui_test0/me
 - `pyzui/windows/mainwindow.py` - Main window implementation
 - `pyzui/objects/scene/scene.py` - Scene management
 - `pyzui/tilesystem/tilemanager.py` - Image tiling system
+- `test/integrationtest/guiintegration/` - This test suite directory

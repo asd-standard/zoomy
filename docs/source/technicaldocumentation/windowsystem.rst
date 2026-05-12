@@ -14,11 +14,12 @@ Overview
 The window system is responsible for:
 
 1. Creating the main application window with menus and toolbar
-2. Rendering the zooming user interface in real-time
-3. Handling user input (mouse, keyboard, touch)
-4. Managing dialogs for user interactions
-5. Coordinating between UI events and scene updates
-6. Providing visual feedback (selection borders, loading indicators)
+2. Managing multiple scene tabs via a ``QTabWidget``
+3. Rendering the zooming user interface in real-time
+4. Handling user input (mouse, keyboard, touch)
+5. Managing dialogs for user interactions (string, SVG, tiled media, zoom, autosave)
+6. Coordinating between UI events and scene updates
+7. Providing visual feedback (selection borders, loading indicators)
 
 The system uses **PySide6 (Qt6)** as the GUI framework, providing cross-platform window
 management, event handling, and rendering capabilities. The architecture follows the
@@ -41,18 +42,24 @@ The window system consists of the following components:
         │   • Media import dialogs
         │   • Settings and configuration
         │   • Error message display
+        │   • Tab management (add/close/switch)
         │
-        └── QZUI (QWidget + Thread)
-            │   • Central rendering widget
-            │   • Scene rendering coordination
-            │   • Mouse event handling
-            │   • Keyboard event handling
-            │   • Wheel event handling (zoom)
-            │   • Timer-based animation
-            │   • Draft/high-quality rendering
+        └── QTabWidget (central widget)
+            │   • Contains one or more QZUI tabs
+            │   • Tab bar for switching scenes
+            │   • Close button on each tab
             │
-            └── Scene
-                └── MediaObjects
+            └── QZUI (QWidget + Thread) × N
+                │   • Central rendering widget
+                │   • Scene rendering coordination
+                │   • Mouse event handling
+                │   • Keyboard event handling
+                │   • Wheel event handling (zoom)
+                │   • Timer-based animation
+                │   • Draft/high-quality rendering
+                │
+                └── Scene
+                    └── MediaObjects
 
 
     DialogWindows (Static Container)
@@ -72,9 +79,41 @@ The window system consists of the following components:
     │       • Change text color
     │       • Preserves original text
     │
-    └── ZoomSensitivityDialog
-            • Adjust zoom sensitivity (0-100)
-            • Real-time sensitivity update
+    ├── OpenSVGPickerInputDialog
+    │       • Browse SVG files from data/SVG/
+    │       • Scrollable SVG preview panels
+    │       • Color selection (24 recent colors)
+    │       • Thickness control
+    │
+    ├── ModifySVGInputDialog
+    │       • Modify stroke color of SVG shapes
+    │       • Change line thickness
+    │       • Integrates with SVGCache
+    │       • Triggered by right-click on SVG
+    │
+    ├── ModifyTiledMediaObjectDialog
+    │       • Rotate left / rotate right
+    │       • Invert colors toggle
+    │       • Black and white toggle
+    │       • Preview then apply pattern
+    │       • Triggered by right-click on tiled media
+    │
+    ├── ZoomSensitivityDialog
+    │       • Adjust zoom speed (0–100)
+    │       • Real-time sensitivity update
+    │
+    ├── ZoomSettingsDialog
+    │       • Configure min/max zoom levels
+    │       • Clamp zoom to limits toggle
+    │       • Default zoom for new scenes
+    │       • Accessed via Settings menu
+    │
+    └── AutosaveSettingsDialog
+            • Enable/disable autosave
+            • Set interval (1–1440 min)
+            • Set max backups (1–1000)
+            • Set expire days (1–365)
+            • Accessed via Settings menu
 
 **UI Event Flow:**
 
@@ -126,32 +165,46 @@ MainWindow
 ~~~~~~~~~~
 
 The :class:`MainWindow` class extends :class:`QMainWindow` and serves as the main
-application window, providing menus, actions, and file operations.
+application window, providing menus, actions, tab management, and file operations.
 
 **Class Definition:**
 
 .. code-block:: python
 
     class MainWindow(QtWidgets.QMainWindow):
-        def __init__(self, framerate: int = 10,
-                     zoom_sensitivity: int = 50) -> None:
+        def __init__(self, framerate: int = 20,
+                     zoom_sensitivity: int = 50,
+                     icon: QtGui.QIcon | None = None,
+                     config: dict[str, Any] | None = None,
+                     autosave_config: dict[str, Any] | None = None) -> None:
             QtWidgets.QMainWindow.__init__(self)
 
             self.setWindowTitle("PyZUI")
-            self.zui = QZUI(self, framerate, zoom_sensitivity)
-            self.zui.start()
-            self.setCentralWidget(self.zui)
+            self.__config = config or {}
+            self.__autosave_config = autosave_config or {}
+
+            # Tab widget is the central widget
+            self.__tab_widget = QTabWidget()
+            self.__tab_widget.setTabsClosable(True)
+            self.setCentralWidget(self.__tab_widget)
 
             self.__create_actions()
             self.__create_menus()
 
+            # Create initial tab
+            self._add_tab()
+
 **Key Attributes:**
 
-- ``zui``: Central QZUI widget for rendering
+- ``__tab_widget``: QTabWidget central widget containing all scene tabs
+- ``__zui_tabs``: List of ``(QZUI, Scene)`` tuples, one per tab
+- ``current_zui``: Property returning the active tab's QZUI
+- ``zui``: Backward-compatible property returning current tab's QZUI
 - ``__action``: Dictionary of QAction objects for menu items
 - ``__menu``: Dictionary of QMenu objects
 - ``__prev_dir``: Last used directory for file dialogs
-- ``__logger``: Logger instance for error reporting
+- ``__config``: Configuration dictionary loaded at startup
+- ``__autosave_config``: Autosave configuration subsection
 
 **Window Properties:**
 
@@ -159,18 +212,67 @@ application window, providing menus, actions, and file operations.
 - **Minimum Size**: 160x120 pixels (minimumSizeHint)
 - **Resizable**: Yes, viewport adapts to window size
 
+**Tab System:**
+
+MainWindow manages multiple scenes through a ``QTabWidget``:
+
+.. code-block:: python
+
+    @property
+    def current_zui(self) -> QZUI | None:
+        """Return the QZUI of the currently active tab."""
+        idx = self.__tab_widget.currentIndex()
+        if idx >= 0 and idx < len(self.__zui_tabs):
+            return self.__zui_tabs[idx][0]
+        return None
+
+    @property
+    def zui(self) -> QZUI | None:
+        """Backward-compatible accessor for current tab's QZUI."""
+        return self.current_zui
+
+    def _add_tab(self, scene: Scene | None = None) -> None:
+        """Create a new tab with a fresh QZUI and Scene."""
+        zui = QZUI(self, self.__config.get('framerate', self.framerate),
+                    self.__config.get('zoom_sensitivity', self.zoom_sensitivity))
+        if scene is not None:
+            zui.scene = scene
+        zui.start()
+        tab_idx = self.__tab_widget.addTab(zui, f"Scene {len(self.__zui_tabs) + 1}")
+        self.__zui_tabs.append((zui, zui.scene))
+        self.__tab_widget.setCurrentIndex(tab_idx)
+
+    def _close_tab(self, index: int) -> None:
+        """Close a tab, stop autosave, and purge tiles."""
+        zui, scene = self.__zui_tabs[index]
+        scene.shutdown_threads()
+        tilemanager.purge()  # Purge tiles from closed scene
+        self.__tab_widget.removeTab(index)
+        del self.__zui_tabs[index]
+
+    def _on_tab_changed(self, index: int) -> None:
+        """Sync render order checkbox and window title on tab switch."""
+        zui = self.current_zui
+        if zui:
+            self.setWindowTitle(f"PyZUI - {zui.scene.__last_save_path or 'Untitled'}")
+
 **Menu Structure:**
 
 .. code-block:: text
 
     File
+    ├── New Tab                     (Ctrl+T)
+    ├── Close Tab                   (Ctrl+W)
+    ├── ─────────────────────────
     ├── New Scene                   (Ctrl+N)
     ├── Open Scene                  (Ctrl+O)
+    ├── Import Scene                (Ctrl+I)
     ├── Open Home Scene             (Ctrl+Home)
     ├── Save Scene                  (Ctrl+S)
     ├── Save Screenshot             (Ctrl+H)
     ├── Open Local Media            (Ctrl+L)
     ├── Open new String             (Ctrl+U)
+    ├── Open new SVG                (Ctrl+G)
     ├── Open Media Directory        (Ctrl+D)
     └── Quit                        (Ctrl+Q)
 
@@ -181,11 +283,32 @@ application window, providing menus, actions, and file operations.
     │   ├── 30 FPS
     │   └── 40 FPS
     ├── Adjust Sensitivity
-    └── Fullscreen                  (Ctrl+F)
+    ├── Fullscreen                  (Ctrl+F)
+    └── Render Order: Smaller on Top (Ctrl+R)
+
+    Actions
+    ├── Copy SVG                    (Ctrl+C)
+    └── Paste SVG                   (Ctrl+V)
+
+    Settings
+    ├── Autosave Settings
+    └── Zoom Settings
 
     Help
     ├── About
     └── About Qt
+
+**Right-Click Context Menu:**
+
+The Scene handles right-click events and shows a context menu based on
+the selected object type:
+
+- **TiledMediaObject**: Opens :ref:`modify-tiled-media-dialog` for image
+  manipulation (rotate, invert, B&W)
+- **SVGMediaObject**: Opens :ref:`modify-svg-input-dialog` for changing
+  stroke color and line thickness
+- **StringMediaObject**: Opens :ref:`modify-string-input-dialog` for
+  editing text content and color
 
 **Key Methods:**
 
@@ -195,24 +318,32 @@ Scene Operations
 .. code-block:: python
 
     def __action_new_scene(self) -> None:
-        """Create a new empty scene."""
-        self.zui.scene = Scene.new()
+        """Create a new empty scene in current tab."""
+        self.current_zui.scene = Scene.new()
 
     def __action_open_scene(self) -> None:
-        """Open scene from .pzs file via file dialog."""
+        """Open scene from .pzs file via file dialog. Opens in new tab."""
         filename = QFileDialog.getOpenFileName(
             self, "Open scene", self.__prev_dir,
             "PyZUI Scenes (*.pzs)")
         if filename:
-            self.zui.scene = Scene.load_scene(filename)
+            scene = Scene.load_scene(filename)
+            self._add_tab(scene)
 
     def __action_save_scene(self) -> None:
-        """Save current scene to .pzs file."""
+        """Save current scene to .pzs file.
+        If objects are selected, saves only the selection."""
         filename = QFileDialog.getSaveFileName(
             self, "Save scene", "scene.pzs",
             "PyZUI Scenes (*.pzs)")
-        if filename:
-            self.zui.scene.save(filename)
+        if not filename:
+            return
+        scene = self.current_zui.scene
+        if scene.selection:
+            # Save only selected objects (header: "0 0 0")
+            scene.save_selection(filename, scene.selection)
+        else:
+            scene.save(filename)
 
     def __action_save_screenshot(self) -> None:
         """Save screenshot to image file."""
@@ -220,7 +351,7 @@ Scene Operations
             self, "Save screenshot", "screenshot.png",
             "Images (*.bmp *.jpg *.png ...)")
         if filename:
-            pixmap = self.zui.grab()
+            pixmap = self.current_zui.grab()
             pixmap.save(filename)
 
 Media Import
@@ -232,17 +363,18 @@ Media Import
         """Open media and optionally add to scene."""
         # Detect media type from file extension
         if media_id.startswith('string:'):
-            mediaobject = StringMediaObject(media_id, self.zui.scene)
+            mediaobject = StringMediaObject(media_id, self.current_zui.scene)
         elif media_id.lower().endswith('.svg'):
-            mediaobject = SVGMediaObject(media_id, self.zui.scene)
+            mediaobject = SVGMediaObject(media_id, self.current_zui.scene)
         else:
-            mediaobject = TiledMediaObject(media_id, self.zui.scene)
+            mediaobject = TiledMediaObject(media_id, self.current_zui.scene)
 
         if add:
             # Fit to center 50% of viewport
-            w, h = self.zui.width(), self.zui.height()
+            zui = self.current_zui
+            w, h = zui.width(), zui.height()
             mediaobject.fit((w/4, h/4, w*3/4, h*3/4))
-            self.zui.scene.add(mediaobject)
+            zui.scene.add(mediaobject)
 
     def __action_open_media_local(self) -> None:
         """Open single media file via file dialog."""
@@ -254,6 +386,13 @@ Media Import
     def __action_open_media_string(self) -> None:
         """Open string input dialog to create text object."""
         dialog = DialogWindows.open_new_string_input_dialog()
+        ok, uri = dialog._run_dialog()
+        if ok and uri:
+            self.__open_media(uri)
+
+    def __action_open_media_svg(self) -> None:
+        """Open SVG picker dialog to create SVG object."""
+        dialog = DialogWindows.open_svg_picker_input_dialog()
         ok, uri = dialog._run_dialog()
         if ok and uri:
             self.__open_media(uri)
@@ -317,7 +456,7 @@ Media Import
                     mediaobject.aim('x', (x - grid_centre) * cellsize)
                     mediaobject.aim('y', (y - grid_centre) * cellsize)
 
-                    self.zui.scene.add(mediaobject)
+                    self.current_zui.scene.add(mediaobject)
 
 View Settings
 ^^^^^^^^^^^^^
@@ -326,24 +465,73 @@ View Settings
 
     def __action_set_fps(self, act: QAction) -> None:
         """Set framerate from action group."""
-        self.zui.framerate = int(act.fps / 2)
+        self.current_zui.framerate = int(act.fps / 2)
 
     def __action_set_zoom_sensitivity(self) -> None:
         """Open dialog to adjust zoom sensitivity."""
         ok, text = DialogWindows._open_zoom_sensitivity_input_dialog(
-            self.zui.zoom_sensitivity)
+            self.current_zui.zoom_sensitivity)
 
         if ok and text:
             value = int(text)
             if 0 < value <= 100:
-                self.zui.zoom_sensitivity = int(1000 / value)
+                self.current_zui.zoom_sensitivity = int(1000 / value)
             elif value == 0:
-                self.zui.zoom_sensitivity = 1000
+                self.current_zui.zoom_sensitivity = 1000
 
     def __action_fullscreen(self) -> None:
         """Toggle fullscreen mode."""
         self.setWindowState(
             self.windowState() ^ Qt.WindowFullScreen)
+
+    def __action_toggle_render_order(self) -> None:
+        """Toggle render order between smaller_on_top and larger_on_top.
+        Persists setting to ~/.pyzui/config.json."""
+        action = self.__action["render_order_smaller_top"]
+        new_mode = "smaller_on_top" if action.isChecked() else "larger_on_top"
+        scene = self.current_zui.scene
+        scene.set_render_order(new_mode)
+
+        # Persist to config
+        config_manager = ConfigManager()
+        full_config = config_manager.load()
+        full_config["render"] = {"order": new_mode}
+        config_manager.save(full_config)
+
+    def __action_autosave_settings(self) -> None:
+        """Open autosave settings dialog."""
+        dialog = DialogWindows.autosave_settings_dialog(
+            self.__autosave_config)
+        ok, config = dialog._run_dialog()
+        if ok and config:
+            self.__autosave_config = config
+            # Apply to current scene
+            scene = self.current_zui.scene
+            if hasattr(scene, 'autosave_manager'):
+                scene.autosave_manager.set_autosave_config(config)
+
+    def __action_zoom_settings(self) -> None:
+        """Open zoom settings dialog for level limits."""
+        from pyzui.windows.dialogwindows.zoomsettingsdialog import ZoomSettingsDialog
+        dialog = ZoomSettingsDialog(self.__config.get('zoom', {}))
+        ok, zoom_config = dialog._run_dialog()
+        if ok and zoom_config:
+            self.__config['zoom'] = zoom_config
+
+Clipboard Actions
+^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+    def __action_copy_svg(self) -> None:
+        """Copy selected SVG objects to clipboard."""
+        scene = self.current_zui.scene
+        scene.copy_selected()
+
+    def __action_paste_svg(self) -> None:
+        """Paste SVG objects from clipboard."""
+        scene = self.current_zui.scene
+        scene.paste()
 
 Error Handling
 ^^^^^^^^^^^^^^
@@ -400,8 +588,8 @@ the central rendering widget that displays the scene and handles user input.
 
 - ``__scene``: The Scene object being rendered
 - ``__timer``: QBasicTimer for animation updates
-- ``framerate``: Target framerate (default: 10 FPS)
-- ``zoom_sensitivity``: Zoom speed (default: 20)
+- ``framerate``: Target framerate (default: 10 FPS, overridden to 20 by MainWindow)
+- ``zoom_sensitivity``: Zoom speed (default: 20, overridden to 50 by MainWindow)
 - ``reduced_framerate``: Framerate when idle (default: 3 FPS)
 - ``__draft``: Boolean flag for draft vs high-quality rendering
 - ``__mouse_left_down``: Left mouse button state
@@ -422,7 +610,7 @@ The active object determines what gets moved/zoomed:
     def __active_object(self):
         """Return the currently active object (selection or scene)."""
         if self.scene.selection:
-            return self.scene.selection  # Selected object
+            return self.scene.selection[0]  # First selected object
         else:
             return self.scene  # Whole scene
 
@@ -643,7 +831,9 @@ Keyboard Event Handling
 
     Selection:
         Left Click      - Select object
-        Right Click     - Right-select (for editing StringMediaObject)
+        Ctrl+Click      - Add to selection (bulk)
+        Left Drag       - Area selection (lasso)
+        Right Click     - Right-select (context menu for editing)
         Escape          - Clear selection
         Shift + Click   - Interact without changing selection
 
@@ -651,6 +841,8 @@ Keyboard Event Handling
         Left Drag       - Move object/scene
         Wheel           - Zoom object/scene
         Delete          - Remove selected object
+        Ctrl+C          - Copy SVG
+        Ctrl+V          - Paste SVG
 
 Dialog System
 -------------
@@ -668,9 +860,13 @@ The :class:`DialogWindows` class serves as a static container for all dialog com
         # Static methods
         _open_zoom_sensitivity_input_dialog = staticmethod(...)
 
-        # Nested classes
+        # Nested classes / class-level references
         open_new_string_input_dialog = OpenNewStringInputDialog
         modify_string_input_dialog = ModifyStringInputDialog
+        open_svg_picker_input_dialog = OpenSVGPickerInputDialog
+        modify_svg_input_dialog = ModifySVGInputDialog
+        modify_tiled_media_object_dialog = ModifyTiledMediaObjectDialog
+        autosave_settings_dialog = AutosaveSettingsDialog
 
 OpenNewStringInputDialog
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -729,6 +925,8 @@ Colors are stored in a deque (max 24 items) and persisted to disk:
 
 Format: One hex color per line (e.g., ``ff0000``)
 
+.. _modify-string-input-dialog:
+
 ModifyStringInputDialog
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -766,14 +964,204 @@ Dialog for editing existing text objects.
         color = media_id[7:13]   # Extract RRGGBB
         text = media_id[14:]     # Extract text content
 
-ZoomSensitivityDialog
-~~~~~~~~~~~~~~~~~~~~~
+.. _svg-picker-input-dialog:
 
-Simple input dialog for adjusting zoom sensitivity.
+OpenSVGPickerInputDialog
+
+Dialog for browsing and selecting SVG files from ``data/SVG/``, with color
+and thickness customization. Triggered by **File > Open new SVG** (Ctrl+G).
 
 **Features:**
 
-- **Range**: 0-100 (higher = more sensitive)
+- **SVG Browser**: Scrollable grid of SVG file previews loaded from ``data/SVG/``
+- **Preview Panels**: Each SVG is rendered at 64×64 for visual selection
+- **Color Selection**: Grid of 24 recently used colors (shared with string dialogs)
+- **Custom Colors**: Hex color input field
+- **Thickness Control**: Line thickness for the selected SVG shape
+- **Color Persistence**: Recent colors saved to ``~/.pyzui/colorstore/color_list.txt``
+
+**Dialog Layout:**
+
+.. code-block:: text
+
+    ┌───────────────────────────────────────────────────┐
+    │  SVG picker:                              [X]     │
+    ├───────────────────────────────────────────────────┤
+    │                                                   │
+    │  ┌──────┬──────┬──────┬──────┬──────┐             │
+    │  │ SVG  │ SVG  │ SVG  │ SVG  │ SVG  │             │
+    │  │ icon │ icon │ icon │ icon │ icon │   ┌──────┐  │
+    │  ├──────┼──────┼──────┼──────┼──────┤   │Color │  │
+    │  │ SVG  │ SVG  │ SVG  │ SVG  │ SVG  │   │Grid  │  │
+    │  │ icon │ icon │ icon │ icon │ icon │   │24 col│  │
+    │  ├──────┼──────┼──────┼──────┼──────┤   │      │  │
+    │  │ ...  │ ...  │ ...  │ ...  │ ...  │   │      │  │
+    │  └──────┴──────┴──────┴──────┴──────┘   └──────┘  │
+    │                                                   │
+    │  Thickness: [===slider===]                        │
+    │  Custom color: #_____                             │
+    │                                                   │
+    │              [Cancel]  [OK]                       │
+    └───────────────────────────────────────────────────┘
+
+**Usage:**
+
+.. code-block:: python
+
+    # Triggered by File > Open new SVG (Ctrl+G)
+    dialog = DialogWindows.open_svg_picker_input_dialog()
+    ok, uri = dialog._run_dialog()
+
+    if ok and uri:
+        # uri format: "svg:<hash>:<color>:<thickness>"
+        mediaobject = SVGMediaObject(uri, scene)
+        scene.add(mediaobject)
+
+**Output Format:**
+
+The dialog returns a ``uri`` string encoding the selected SVG, color, and thickness:
+
+.. code-block:: text
+
+    svg:<cache_hash>:<hex_color>:<thickness>
+
+    Example:
+        svg:a1b2c3d4:ff0000:3   → Red arrow, thickness 3
+
+The SVG file is stored in SVGCache with its content hash, and the created
+object references the cache entry.
+
+.. _modify-svg-input-dialog:
+
+ModifySVGInputDialog
+~~~~~~~~~~~~~~~~~~~~
+
+Dialog for modifying the stroke color and line thickness of existing SVG
+objects. Triggered by right-clicking an SVG shape in the scene.
+
+**Features:**
+
+- **Color Change**: Recolor the SVG stroke using the color picker grid
+- **Thickness Change**: Adjust line thickness with a slider
+- **SVG Cache Integration**: Modified SVG is stored in SVGCache via content hash
+- **Shape Detection**: Works with simple shapes (arrows, circles, squares,
+  triangles) added via the SVG picker
+- **Live Preview**: The dialog shows a preview of the current SVG
+
+**Usage:**
+
+.. code-block:: python
+
+    # Triggered by right-click on SVGMediaObject in the scene
+    dialog = DialogWindows.modify_svg_input_dialog(
+        media_id=obj.media_id, color=current_color, thickness=current_thickness)
+    ok, new_media_id = dialog._run_dialog()
+
+    if ok and new_media_id:
+        # Update the object's media reference
+        obj._media_id = new_media_id
+        obj._SVGMediaObject__is_modified = True
+        obj.mark_as_modified()
+
+**SVG Modification Process:**
+
+1. The dialog loads the SVG content from SVGCache or file
+2. User selects new color and/or thickness
+3. The SVG XML is parsed and modified (stroke color and stroke-width)
+4. Modified SVG is stored in SVGCache with a new content hash
+5. The object's ``media_id`` is updated to point to the new cache entry
+6. ``is_modified`` is set to True
+
+**See Also:**
+
+- :doc:`../pyzui/modifysvginputdialog` — API reference
+- :doc:`../pyzui/svgcache` — SVG cache storage
+
+.. _modify-tiled-media-dialog:
+
+ModifyTiledMediaObjectDialog
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Dialog for image manipulation of tiled media objects. Triggered by right-clicking
+a ``TiledMediaObject`` in the scene. Added in v0.1.5.
+
+**Features:**
+
+- **Rotate Left**: 90° counter-clockwise rotation
+- **Rotate Right**: 90° clockwise rotation
+- **Invert Colors**: Negative color effect (toggle)
+- **Black and White**: Convert to grayscale (toggle)
+- **Preview then Apply**: All operations are preview-only until OK is clicked
+
+**Dialog Layout:**
+
+.. code-block:: text
+
+    ┌────────────────────────────────────────┐
+    │  Modify Image                   [X]    │
+    ├────────────────────────────────────────┤
+    │                                        │
+    │  ┌──────────────────────────────────┐  │
+    │  │                                  │  │
+    │  │         Image Preview            │  │
+    │  │                                  │  │
+    │  └──────────────────────────────────┘  │
+    │                                        │
+    │  [Rotate Left]  [Rotate Right]         │
+    │  [✓] Invert Colors                     │
+    │  [✓] Black and White                   │
+    │                                        │
+    │              [Cancel]  [OK]            │
+    └────────────────────────────────────────┘
+
+**Usage:**
+
+.. code-block:: python
+
+    # Triggered by right-click on TiledMediaObject in the scene
+    dialog = DialogWindows.modify_tiled_media_object_dialog(
+        media_id=obj.media_id, ppmfile=tmpfile)
+    ok, rotation, invert, bw = dialog._run_dialog()
+
+    if ok:
+        # Submit to converterrunner with accumulated transformations
+        future = converterrunner.submit_vips_conversion(
+            ppmfile, new_tmpfile,
+            rotation=rotation,
+            invert_colors=invert,
+            black_and_white=bw,
+        )
+        handle = converterrunner.ConversionHandle(future, ppmfile, new_tmpfile)
+        handle.join()
+
+        # Replace object in scene preserving position/zoom
+        scene.remove(obj)
+        new_obj = TiledMediaObject(new_tmpfile, scene)
+        new_obj.pos = obj.pos
+        new_obj.zoomlevel = obj.zoomlevel
+        new_obj.centre = obj.centre
+        scene.add(new_obj)
+
+**Object Replacement:**
+
+When OK is clicked, all accumulated transformations are applied in a single
+``VipsConverter`` pass. The original ``TiledMediaObject`` is removed from the
+scene and replaced with a new one using the transformed PPM, preserving the
+original position, zoom level, and center point.
+
+**See Also:**
+
+- :doc:`../pyzui/modifytiledmediaobjectdialog` — API reference
+- :doc:`../pyzui/converterrunner` — Process-based parallel conversion
+
+ZoomSensitivityDialog
+~~~~~~~~~~~~~~~~~~~~~
+
+Simple input dialog for adjusting zoom sensitivity (zoom speed).
+
+**Features:**
+
+- **Range**: 0–100 (higher = more sensitive)
 - **Current Value**: Displays current setting
 - **Real-time Update**: Changes take effect immediately
 
@@ -822,6 +1210,130 @@ Simple input dialog for adjusting zoom sensitivity.
     1          → 1000             → Very slow
     0          → 1000             → Maximum
 
+ZoomSettingsDialog
+~~~~~~~~~~~~~~~~~~
+
+Dialog for configuring zoom level limits and clamping. Accessed via
+**Settings > Zoom Settings**. This is distinct from ``ZoomSensitivityDialog``
+(which controls zoom speed, not limits).
+
+**Features:**
+
+- **Min Zoom Level**: Minimum allowed zoom (range: -50 to 0, default: -10)
+- **Max Zoom Level**: Maximum allowed zoom (range: 0 to 50, default: 12)
+- **Clamp Toggle**: Enable or disable zoom clamping (checked by default)
+- **Default Zoom Level**: Zoom level for new scenes (range: -10 to 12, default: 0)
+- **Info Text**: Explanatory text about why limits exist (font visibility, float overflow, input precision)
+
+**Dialog Layout:**
+
+.. code-block:: text
+
+    ┌────────────────────────────────────────────┐
+    │  Zoom Settings                      [X]    │
+    ├────────────────────────────────────────────┤
+    │                                            │
+    │  Configuration for zoom level limits.      │
+    │  These settings prevent crashes at         │
+    │  extreme zoom values and improve           │
+    │  usability.                                │
+    │                                            │
+    │  Min Zoom Level: [-10]  (range: -50 to 0) │
+    │  Max Zoom Level: [12 ]  (range: 0 to 50)  │
+    │  [✓] Clamp zoom to limits                 │
+    │                                            │
+    │  Default Zoom Level: [0] (new scenes)      │
+    │                                            │
+    │  Performance note:                         │
+    │  Extreme zoom levels can cause font        │
+    │  rendering issues (too small) and          │
+    │  floating-point overflow (too large).      │
+    │                                            │
+    │              [Cancel]  [OK]                │
+    └────────────────────────────────────────────┘
+
+**Usage:**
+
+.. code-block:: python
+
+    from pyzui.windows.dialogwindows.zoomsettingsdialog import ZoomSettingsDialog
+
+    dialog = ZoomSettingsDialog({'min': -10, 'max': 12, 'default': 0})
+    ok, zoom_config = dialog._run_dialog()
+
+    if ok:
+        # zoom_config = {'min': -5, 'max': 10, 'clamp': True, 'default': 0}
+        zoom_manager.set_limits(zoom_config['min'], zoom_config['max'])
+        zoom_manager.clamp_enabled = zoom_config['clamp']
+
+**Integration with ZoomManager:**
+
+The configured limits are applied to :class:`ZoomManager` which enforces them
+during zoom operations. See :doc:`../pyzui/zoommanager` for details.
+
+.. note::
+
+   ``ZoomSettingsDialog`` (zoom level limits) and ``ZoomSensitivityDialog``
+   (zoom speed) are **different dialogs** accessed from different menus:
+   Settings > Zoom Settings vs. View > Adjust Sensitivity.
+
+AutosaveSettingsDialog
+~~~~~~~~~~~~~~~~~~~~~~
+
+Dialog for configuring the autosave backup system. Accessed via
+**Settings > Autosave Settings**.
+
+**Features:**
+
+- **Enable/Disable**: Checkbox to toggle autosave on/off
+- **Interval**: Spinbox for backup interval in minutes (1–1440, default: 5)
+- **Max Backups**: Spinbox for maximum backups per scene (1–1000, default: 20)
+- **Expire Days**: Spinbox for days before inactive directories expire (1–365, default: 7)
+- **Info Labels**: Explanatory text about backup directory structure and naming conventions
+
+**Dialog Layout:**
+
+.. code-block:: text
+
+    ┌────────────────────────────────────────────┐
+    │  Autosave Settings                  [X]    │
+    ├────────────────────────────────────────────┤
+    │                                            │
+    │  [✓] Enable Autosave                       │
+    │                                            │
+    │  Backup Interval (minutes): [5  ]          │
+    │  Max Backups to Keep:        [20 ]         │
+    │  Expire After (days):        [7  ]         │
+    │                                            │
+    │  Backups are stored in:                    │
+    │  ~/.pyzui/backups/                         │
+    │  Each scene has its own subdirectory.      │
+    │  Oldest backups are rotated automatically. │
+    │                                            │
+    │              [Cancel]  [OK]                │
+    └────────────────────────────────────────────┘
+
+**Usage:**
+
+.. code-block:: python
+
+    dialog = DialogWindows.autosave_settings_dialog({
+        'enabled': True,
+        'interval': 300,
+        'max_backups': 20,
+        'expire_days': 7,
+    })
+    ok, config = dialog._run_dialog()
+
+    if ok:
+        scene.autosave_manager.set_autosave_config(config)
+
+**See Also:**
+
+- :doc:`../pyzui/autosavesettingsdialog` — API reference
+- :doc:`../pyzui/autosave` — SceneAutosaveManager
+- :doc:`../pyzui/backupmanager` — BackupManager
+
 Integration Patterns
 --------------------
 
@@ -833,7 +1345,7 @@ The window system communicates with the scene through property access and method
 .. code-block:: python
 
     # MainWindow → QZUI → Scene
-    main_window.zui.scene = new_scene
+    main_window.current_zui.scene = new_scene
 
     # QZUI → Scene (rendering)
     self.scene.step(dt)
@@ -855,6 +1367,52 @@ The window system communicates with the scene through property access and method
 
     # When QZUI encounters an error
     self.error.emit("Error message", details)
+
+**Context Menu Flow:**
+
+.. code-block:: text
+
+    User Right-Clicks Object in Scene
+            │
+            ▼
+    Scene identifies object type
+            │
+    ┌───────┼───────────┬───────────┐
+    ▼                   ▼           ▼
+    StringMediaObject   SVGMedia    TiledMedia
+    │                   Object      Object
+    ▼                   ▼           ▼
+    ModifyStringInput   ModifySVG   ModifyTiled
+    Dialog              Dialog      MediaDialog
+    (edit text/color)   (stroke     (rotate/
+                         color/      invert/
+                         thickness)  B&W)
+
+Copy/Paste Flow:
+
+.. code-block:: text
+
+    User presses Ctrl+C
+            │
+            ▼
+    MainWindow.__action_copy_svg()
+            │
+            ▼
+    Scene.copy_selected() → SceneClipboardManager
+            │
+            ▼
+    Selected SVGMediaObjects serialized to clipboard list
+
+    User presses Ctrl+V
+            │
+            ▼
+    MainWindow.__action_paste_svg()
+            │
+            ▼
+    Scene.paste() → SceneClipboardManager
+            │
+            ▼
+    New SVGMediaObjects created with offset
 
 Viewport Resizing
 ~~~~~~~~~~~~~~~~~
@@ -885,11 +1443,12 @@ Selected objects are highlighted with colored borders:
 
     # In Scene.render()
     if self.selection:
-        x1, y1 = self.selection.topleft
-        x2, y2 = self.selection.bottomright
+        for obj in self.selection:
+            x1, y1 = obj.topleft
+            x2, y2 = obj.bottomright
 
-        painter.setPen(Qt.green)  # Green for left-click selection
-        painter.drawRect(x1, y1, x2-x1, y2-y1)
+            painter.setPen(Qt.green)  # Green for left-click selection
+            painter.drawRect(x1, y1, x2-x1, y2-y1)
 
     if self.right_selection:
         x1, y1 = self.right_selection.topleft
@@ -908,7 +1467,7 @@ The window system uses adaptive frame rates to balance responsiveness and qualit
 
 **Normal Operation:**
 
-- **Target Framerate**: 10 FPS (configurable: 10, 20, 30, 40)
+- **Target Framerate**: Configurable (10, 20, 30, 40 FPS — default 20)
 - **Rendering Mode**: Draft (fast)
 - **Triggered**: When scene.moving is True
 
@@ -923,10 +1482,10 @@ The window system uses adaptive frame rates to balance responsiveness and qualit
 .. code-block:: python
 
     frames_to_skip = framerate / reduced_framerate
-    # Example: 10 / 3 ≈ 3 frames
+    # Example: 20 / 3 ≈ 6 frames
 
-    # Drop 3 frames, then do HQ render on 4th frame
-    # Effective rate: 10 FPS → ~2.5 FPS for HQ rendering
+    # Drop 6 frames, then do HQ render on 7th frame
+    # Effective rate: 20 FPS → ~2.9 FPS for HQ rendering
 
 Draft vs High-Quality Rendering
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -956,7 +1515,7 @@ The window system triggers tile loading through the rendering pipeline:
 
     # TiledMediaObject.render() loads tiles on demand
     # TileManager caches tiles in memory (LRU)
-    # Old tiles automatically purged when scene objects removed
+    # Old tiles automatically purged when tabs are closed
 
 **Scene Object Limits:**
 
@@ -964,7 +1523,7 @@ No hard limit on objects, but performance degrades with:
 
 - More than ~100 visible objects
 - Very large viewport sizes
-- High frame rates (30-40 FPS)
+- High frame rates (30–40 FPS)
 
 Event Handling Details
 ----------------------
@@ -980,6 +1539,9 @@ Qt events propagate through the widget hierarchy:
         │
         ▼
     MainWindow
+        │
+        ▼
+    QTabWidget
         │
         ▼
     QZUI (central widget)
@@ -1109,7 +1671,7 @@ Programmatic Scene Manipulation
 .. code-block:: python
 
     # Access scene through window
-    scene = window.zui.scene
+    scene = window.current_zui.scene
 
     # Add media programmatically
     from pyzui.objects.mediaobjects import TiledMediaObject
@@ -1128,15 +1690,29 @@ Custom Dialogs
 
 .. code-block:: python
 
-    # Custom string input
+    # String input
     from pyzui.windows.dialogwindows import OpenNewStringInputDialog
 
     dialog = OpenNewStringInputDialog()
     ok, uri = dialog._run_dialog()
-
     if ok and uri:
         print(f"Created string: {uri}")
-        # uri format: "string:RRGGBB:text"
+
+    # SVG picker
+    from pyzui.windows.dialogwindows import OpenSVGPickerInputDialog
+
+    dialog = OpenSVGPickerInputDialog()
+    ok, uri = dialog._run_dialog()
+    if ok and uri:
+        print(f"Created SVG: {uri}")
+
+    # Autosave settings
+    from pyzui.windows.dialogwindows import AutosaveSettingsDialog
+
+    dialog = AutosaveSettingsDialog({'enabled': True, 'interval': 300})
+    ok, config = dialog._run_dialog()
+    if ok:
+        print(f"New autosave config: {config}")
 
 Event Filtering
 ~~~~~~~~~~~~~~~
@@ -1153,7 +1729,7 @@ Event Filtering
             return False  # Continue propagation
 
     event_filter = EventFilter()
-    window.zui.installEventFilter(event_filter)
+    window.current_zui.installEventFilter(event_filter)
 
 API Reference
 -------------
@@ -1168,14 +1744,23 @@ MainWindow
         SUPPORTED_EXTENSIONS: set[str]  # Supported file extensions
         MAX_PDF_SIZE_BYTES: int         # Maximum PDF file size (2 MB)
 
-        def __init__(self, framerate: int = 10,
-                     zoom_sensitivity: int = 50) -> None
+        def __init__(self, framerate: int = 20,
+                     zoom_sensitivity: int = 50,
+                     icon: QIcon | None = None,
+                     config: dict[str, Any] | None = None,
+                     autosave_config: dict[str, Any] | None = None) -> None
 
         def sizeHint(self) -> QSize
         def minimumSizeHint(self) -> QSize
 
-        # Public attributes
-        self.zui: QZUI
+        # Public attributes and properties
+        current_zui: QZUI  # Active tab's QZUI
+        zui: QZUI          # Backward-compatible alias for current_zui
+
+        # Tab management
+        def _add_tab(self, scene: Scene | None = None) -> None
+        def _close_tab(self, index: int) -> None
+        def _on_tab_changed(self, index: int) -> None
 
 **Class Constants:**
 
@@ -1233,15 +1818,37 @@ DialogWindows
             def __init__(self, media_id: Optional[str]) -> None
             def _run_dialog(self) -> Tuple[bool, str, str, str]
 
+        class open_svg_picker_input_dialog:
+            def __init__(self) -> None
+            def _run_dialog(self) -> Tuple[bool, str]
+
+        class modify_svg_input_dialog:
+            def __init__(self, media_id: str, color: str,
+                         thickness: int) -> None
+            def _run_dialog(self) -> Tuple[bool, str]
+
+        class modify_tiled_media_object_dialog:
+            def __init__(self, media_id: str, ppmfile: str) -> None
+            def _run_dialog(self) -> Tuple[bool, int, bool, bool]
+
+        class autosave_settings_dialog:
+            def __init__(self, config: dict) -> None
+            def _run_dialog(self) -> Tuple[bool, dict]
+
 Key Classes
 ~~~~~~~~~~~
 
-- :class:`pyzui.windows.mainwindow.MainWindow` - Main application window
-- :class:`pyzui.objects.scene.qzui.QZUI` - Central rendering widget
+- :class:`pyzui.windows.mainwindow.MainWindow` - Main application window with tab management
+- :class:`pyzui.objects.scene.qzui.QZUI` - Central rendering widget (per tab)
 - :class:`pyzui.windows.dialogwindows.dialogwindows.DialogWindows` - Dialog container
 - :class:`pyzui.windows.dialogwindows.stringinputdialog.OpenNewStringInputDialog` - New string dialog
 - :class:`pyzui.windows.dialogwindows.modifystringdialog.ModifyStringInputDialog` - Edit string dialog
-- :class:`pyzui.windows.dialogwindows.zoomsensitivitydialog.open_zoom_sensitivity_input_dialog` - Zoom settings
+- :class:`pyzui.windows.dialogwindows.svgpickerinputdialog.OpenSVGPickerInputDialog` - SVG file browser
+- :class:`pyzui.windows.dialogwindows.modifysvginputdialog.ModifySVGInputDialog` - SVG color/thickness editor
+- :class:`pyzui.windows.dialogwindows.modifytiledmediaobjectdialog.ModifyTiledMediaObjectDialog` - Image manipulation
+- :class:`pyzui.windows.dialogwindows.zoomsensitivitydialog.open_zoom_sensitivity_input_dialog` - Zoom speed settings
+- :class:`pyzui.windows.dialogwindows.zoomsettingsdialog.ZoomSettingsDialog` - Zoom level limits
+- :class:`pyzui.windows.dialogwindows.autosavesettingsdialog.AutosaveSettingsDialog` - Autosave configuration
 
 See Also
 --------
@@ -1250,3 +1857,10 @@ See Also
 - :doc:`tilingsystem` - Tile rendering system
 - :doc:`../usageinstructions/userinterface` - User interaction guide
 - :doc:`projectstructure` - Overall project organization
+- :doc:`../pyzui/svgpickerinputdialog` - SVG picker dialog API
+- :doc:`../pyzui/modifysvginputdialog` - SVG modifier dialog API
+- :doc:`../pyzui/modifytiledmediaobjectdialog` - Tiled media modifier dialog API
+- :doc:`../pyzui/autosavesettingsdialog` - Autosave settings dialog API
+- :doc:`../pyzui/zoommanager` - Zoom level clamping
+- :doc:`../pyzui/zoomsettingsdialog` - Zoom settings dialog API
+- :doc:`../pyzui/autosave` - SceneAutosaveManager

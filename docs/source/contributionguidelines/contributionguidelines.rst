@@ -47,8 +47,8 @@ Getting Started with Contributing
 
      .. code-block:: bash
 
-        conda create -n pyzui python=3.12.12
-        conda activate pyzui
+        conda create -n <env-name> python=3.12.12
+        conda activate <env-name>
 
    - Install core dependencies from the default Anaconda channel:
 
@@ -67,6 +67,18 @@ Getting Started with Contributing
      .. code-block:: bash
 
         conda install pytest
+
+    - Install linting and type-checking tools from conda-forge:
+
+      .. code-block:: bash
+
+         conda install -c conda-forge ruff mypy pre-commit
+
+    - Install the pre-commit hooks (one-time setup):
+
+      .. code-block:: bash
+
+         pre-commit install
 
 4. **Create a Feature Branch**
 
@@ -428,7 +440,7 @@ All source files in ``./pyzui`` should include the GPL license header:
 
 .. code-block:: python
 
-    ## PyZUI 0.1 - Python Zooming User Interface
+     ## PyZUI - Python Zooming User Interface
     ## Copyright (C) 2009  David Roberts <d@vidr.cc>
     ##
     ## This program is free software; you can redistribute it and/or
@@ -449,6 +461,95 @@ describing its purpose:
 - Use ``##`` for inline comments explaining formulas or complex logic
 - Use ``#`` for standard code comments
 - Write comments that explain *why*, not *what*
+
+Code Quality Checks
+-------------------
+
+All contributions must pass the project's automated code quality checks
+before submission. These tools catch bugs, enforce style, and verify type
+correctness.
+
+Ruff (Linter + Formatter)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Ruff enforces code style, import ordering, and catches common bugs. It
+replaces multiple tools (flake8, isort, pyupgrade, etc.) in a single
+fast pass.
+
+**Run the linter:**
+
+.. code-block:: bash
+
+   # Check for issues (source code only, test/ and scripts/ excluded)
+   conda run -n <env-name> ruff check
+
+   # Auto-fix safe issues
+   conda run -n <env-name> ruff check --fix
+
+   # Auto-fix all issues (including unsafe)
+   conda run -n <env-name> ruff check --fix --unsafe-fixes
+
+**Run the formatter:**
+
+.. code-block:: bash
+
+   # Format code
+   conda run -n <env-name> ruff format
+
+   # Check formatting without applying
+   conda run -n <env-name> ruff format --check
+
+**Configuration**: ``pyproject.toml`` under the ``[tool.ruff]`` section.
+Enabled rules include pycodestyle (E/W), Pyflakes (F), import sorting
+(I), pep8-naming (N), pyupgrade (UP), flake8-bugbear (B),
+comprehensions (C4), simplify (SIM), Ruff-specific (RUF), and
+performance (PERF). Line length is set to 120 characters. The
+``test/`` and ``scripts/`` directories are excluded.
+
+Mypy (Type Checker)
+^^^^^^^^^^^^^^^^^^^
+
+Mypy verifies that type annotations are correct and consistent. The
+codebase uses gradual typing (``disallow_untyped_defs = false``) with
+``check_untyped_defs = true`` to check function bodies even without
+complete signatures.
+
+**Run the type checker:**
+
+.. code-block:: bash
+
+   # Check all source files
+   conda run -n <env-name> mypy --explicit-package-bases --follow-imports=skip pyzui/
+
+   # Check a single file
+   conda run -n <env-name> mypy pyzui/path/to/file.py
+
+**Note**: Mypy is run manually, not in pre-commit. Per-file overrides in
+``pyproject.toml`` suppress known false positives from name-mangling,
+class aliases, and third-party stubs (PySide6, pyvips).
+
+**Configuration**: ``pyproject.toml`` under the ``[tool.mypy]`` section.
+
+Pre-Commit (Automated Hooks)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Pre-commit runs ruff and ruff-format automatically before every commit,
+preventing style issues from entering the repository.
+
+**Setup (one-time, after ``pre-commit install`` above):**
+
+   The ``pre-commit install`` command in step 3 registers the hooks with
+   your local ``.git`` directory. They will run automatically on every
+   ``git commit``.
+
+**Run manually on all files:**
+
+.. code-block:: bash
+
+   conda run -n <env-name> pre-commit run --all-files
+
+**Configuration**: ``.pre-commit-config.yaml``. Current hooks are ruff
+(checks + autofix) and ruff-format.
 
 Coding Conventions
 ------------------
@@ -723,6 +824,64 @@ constant with forward references:
 5. **Runtime code**: Use fully qualified names (e.g., ``QtGui.QImage``) not TYPE_CHECKING imports
 
 
+QPainter and Qt Paint Events
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When overriding ``paintEvent`` on any ``QWidget`` subclass (including
+dialog helpers that monkey-patch ``paintEvent`` on a bare ``QWidget``),
+the QPainter **must** be explicitly ended.
+
+.. code-block:: python
+
+    def paintEvent(self, event: QPaintEvent) -> None:
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), color)
+        painter.end()  # REQUIRED — see below
+
+**Why this matters:**
+
+An unended QPainter left active on its paint device keeps the underlying
+C++ paint engine resources alive.  After the application has run for
+hours or days, accumulated paint events with dangling C++ painter state
+corrupt Qt's internal paint engine.  The next paint event that
+constructs a new QPainter — including events triggered by simple user
+actions like opening a dialog via a keyboard shortcut — can then
+trigger a ``SIGSEGV`` (segmentation fault) crash with no Python
+traceback.
+
+**Rules:**
+
+1. Every ``paintEvent`` override must call ``painter.end()`` before
+   returning, including every ``return`` statement inside the function.
+
+2. For simple paint events, place ``painter.end()`` as the last
+   statement.
+
+3. For paint events with multiple exit points, either:
+
+   a. Call ``painter.end()`` before each ``return``, or
+   b. Wrap the body in ``try`` / ``finally``::
+
+          def paintEvent(self, event):
+              painter = QPainter(self)
+              try:
+                  ...
+              finally:
+                  painter.end()
+
+4. **Do not** rely on Python's reference counting or the QPainter
+   destructor — at process exit the destructor may run after Qt's C++
+   internals have already been partially torn down, which is the exact
+   scenario that triggers the segfault.
+
+**Affected code (fixed in 2026-05):**
+
+- ``stringinputdialog.py`` — color-square ``paintEvent``
+- ``modifystringdialog.py`` — color-square ``paintEvent``
+- ``modifysvginputdialog.py`` — color-square **and** SVG preview ``paintEvent``
+- ``svgpickerinputdialog.py`` — color-square **and** SVG button ``paintEvent``
+
+
 Testing Requirements
 --------------------
 
@@ -969,14 +1128,79 @@ When contributing tests, please follow these guidelines:
            the complete pipeline from image input to tile retrieval.
             """
 
+Versioning and Release Workflow
+--------------------------------
+
+PyZUI uses **Semantic Versioning** (SemVer) in ``MAJOR.MINOR.PATCH`` format.
+The single source of truth for the version is ``pyzui/__init__.py`` →
+``__version__``.
+
+**Version bump criteria:**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 50 50
+
+   * - **PATCH** (0.4.0 → 0.4.1)
+     - **MINOR** (0.4.0 → 0.5.0)
+   * - Bug fixes
+     - Major new features
+   * - Internal refactors
+     - New capabilities
+   * - Type annotations and code quality
+     - New architectures (e.g. process pools)
+   * - Documentation improvements
+     - New subsystems
+   * - Minor UI elements and enhancements
+     -
+
+**MAJOR** (0.x.y → 1.0.0): Breaking changes to config format, data file format,
+or public API.
+
+**Release workflow:**
+
+1. Update ``CHANGELOG.md``: move entries from ``[Unreleased]`` to a new version
+   heading with the release date
+
+2. Run the bump script. This updates **three** locations automatically:
+
+   - ``pyzui/__init__.py`` — the canonical ``__version__`` string
+   - ``data/home.pzs`` — the version text displayed in the default scene
+
+   .. code-block:: bash
+
+      python scripts/bump_version.py patch   # for fixes
+      python scripts/bump_version.py minor   # for features
+      python scripts/bump_version.py major   # for breaking changes
+
+3. Use ``--tag`` to also create an annotated git tag in one step:
+
+   .. code-block:: bash
+
+      python scripts/bump_version.py minor --tag
+
+4. Push the tag upstream:
+
+   .. code-block:: bash
+
+      git push origin vX.Y.Z
+
+**Keep ``CHANGELOG.md`` updated** as you work — add entries under
+``[Unreleased]`` at the top of the file following the
+`Keep a Changelog <https://keepachangelog.com/en/1.1.0/>`_ format. This
+ensures the changelog is ready when it is time to cut a release.
+
 Submitting Your Contribution
 ----------------------------
 
-1. Ensure all tests pass
-2. Ensure your code follows the coding conventions
-3. Ensure all new code has docstrings and type hints
-4. Create a pull request with a clear description of your changes
-5. Be responsive to feedback during the review process
+1. Ensure all tests pass (``pytest test/unittest/``)
+2. Ensure ruff reports no issues (``ruff check``)
+3. Ensure ruff-format reports no changes (``ruff format --check``)
+4. Ensure your code follows the coding conventions
+5. Ensure all new code has docstrings and type hints
+6. Update ``CHANGELOG.md`` under ``[Unreleased]`` with your changes
+7. Create a pull request with a clear description of your changes
+8. Be responsive to feedback during the review process
 
 Thank you for contributing to PyZUI!
 

@@ -16,17 +16,18 @@
 
 """Thread-safe Least Recently Used (LRU) cache for storing tiles."""
 
-from typing import Tuple, Any, TYPE_CHECKING
-from threading import RLock, Thread
-from collections import deque
 import time
+from collections import deque
+from threading import Event, RLock, Thread
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..tile import Tile
 
-TileID = Tuple[str, int, int, int]
+TileID = tuple[str, int, int, int]
 
-class TileCache(object):
+
+class TileCache:
     """
     Constructor:
         TileCache(maxsize, maxage)
@@ -41,6 +42,7 @@ class TileCache(object):
     Tiles can be accessed in much the same way as `dict` objects:
     `tilecache[tile_id]` holds the tile identified by the given `tile_id`.
     """
+
     def __init__(self, maxsize: int = 256, maxage: int = 60) -> None:
         """
         Constructor:
@@ -65,20 +67,25 @@ class TileCache(object):
         self.__maxsize = maxsize
         self.__maxage = maxage
 
-        self.__d = {}
-        self.__atime = {}
-        self.__anum = {}
-        self.__maxaccesses = {}
-        self.__discard_queue = deque()
+        self.__d: dict[TileID, Tile | None] = {}
+        self.__atime: dict[TileID, float] = {}
+        self.__anum: dict[TileID, int] = {}
+        self.__maxaccesses: dict[TileID, int] = {}
+        self.__discard_queue: deque[TileID] = deque()
         self.__num_tiles = 0
 
         self.__lock = RLock()
 
+        self.__shutdown_event = Event()
         self.__periodic_clean_thread = Thread(target=self.__periodic_clean)
         self.__periodic_clean_thread.daemon = True
         self.__periodic_clean_thread.start()
 
-    def insert(self, tile_id: TileID, tile: 'Tile', maxaccesses: int = 0) -> None:
+    def shutdown(self) -> None:
+        """Signal the periodic clean thread to stop."""
+        self.__shutdown_event.set()
+
+    def insert(self, tile_id: TileID, tile: "Tile", maxaccesses: int = 0) -> None:
         """
         Method :
             TileCache.insert(tile_id, tile, maxaccesses)
@@ -121,7 +128,7 @@ class TileCache(object):
     #     """
     #     return tile_id in self.__maxaccesses
 
-    def __mortal(self, tile_id: TileID, tile: 'Tile') -> bool:
+    def __mortal(self, tile_id: TileID, tile: "Tile") -> bool:
         """
         Method :
             __mortal(tile_id, tile)
@@ -139,7 +146,7 @@ class TileCache(object):
         """
         return tile is not None and tile_id[1] != 0
 
-    def __getitem__(self, tile_id: TileID) -> 'Tile':
+    def __getitem__(self, tile_id: TileID) -> "Tile":
         """
         Method :
             TileCache.__getitem__(tile_id)
@@ -163,8 +170,7 @@ class TileCache(object):
                     self.__atime[tile_id] = int(time.time())
 
                 self.__anum[tile_id] = self.__anum.get(tile_id, 0) + 1
-                if tile_id in self.__maxaccesses and \
-                   self.__anum[tile_id] >= self.__maxaccesses[tile_id]:
+                if tile_id in self.__maxaccesses and self.__anum[tile_id] >= self.__maxaccesses[tile_id]:
                     ## tile has expired
                     del self[tile_id]
 
@@ -183,14 +189,18 @@ class TileCache(object):
 
         Periodically remove old tiles based on maxage.
         """
-        while True:
+        while not self.__shutdown_event.is_set():
             ## make sure the age of tiles never exceeds 4/3 maxage
-            time.sleep(self.__maxage/3)
+            self.__shutdown_event.wait(self.__maxage / 3)
+            if self.__shutdown_event.is_set():
+                break
 
             with self.__lock:
-                while self.__maxage > 0 and self.__discard_queue and \
-                      time.time() - self.__atime[self.__discard_queue[0]] \
-                        > self.__maxage:
+                while (
+                    self.__maxage > 0
+                    and self.__discard_queue
+                    and time.time() - self.__atime[self.__discard_queue[0]] > self.__maxage
+                ):
                     tile_id = self.__discard_queue[0]
                     del self[tile_id]
 
@@ -210,7 +220,7 @@ class TileCache(object):
                 tile_id = self.__discard_queue[0]
                 del self[tile_id]
 
-    def __setitem__(self, tile_id: TileID, tile: 'Tile') -> None:
+    def __setitem__(self, tile_id: TileID, tile: "Tile") -> None:
         """
         Method :
             TileCache.__setitem__(tile_id, tile)

@@ -37,35 +37,32 @@ along with this program; if not, see <https://www.gnu.org/licenses/>.
 """
 __credits__ = ["David Roberts, Andrea Silvestri"]
 __license__ = "GPLv3"
-__version__ = "0.2"
+__version__ = "0.5.1"
 __maintainer__ = "Andrea Silvestri"
 __email__ = "asd.standard@gmail.com"
 
 __all__ = [
-    'physicalobject',
-        'mediaobject',
-            'tiledmediaobject',
-            'stringmediaobject',
-            'svgmediaobject',
-        'scene',
-            'qzui',
-            'mainwindow',
-
-    'converter',
-        'vipsconverter',
-        'pdfconverter',
-        'webkitconverter',
-    'ppm',
-    'tilestore',
-    'tilecache',
-    'tile',
-        'tilemanager',
-        'tiler',
-        'tileprovider',
-            'statictileprovider',
-            'dynamictileprovider',
-            'osmtileprovider',
-                'globalmosaictileprovider',
-                'mandeltileprovider',
-                'ferndynamictileprovider',
+    "backup",
+    "config",
+    "converter",
+    "dynamictileprovider",
+    "ferndynamictileprovider",
+    "mainwindow",
+    "mediaobject",
+    "pdfconverter",
+    "physicalobject",
+    "ppm",
+    "qzui",
+    "scene",
+    "statictileprovider",
+    "stringmediaobject",
+    "svgmediaobject",
+    "tile",
+    "tilecache",
+    "tiledmediaobject",
+    "tilemanager",
+    "tileprovider",
+    "tiler",
+    "tilestore",
+    "vipsconverter",
 ]

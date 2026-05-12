@@ -17,10 +17,14 @@
 """PyZui DialogWindows - Main dialog module that aggregates all dialog components."""
 
 # Import all dialog components from their respective modules
-from .zoomsensitivitydialog import OpenZoomSensitivityInputDialog
-from .stringinputdialog import OpenNewStringInputDialog
+from .autosavesettingsdialog import AutosaveSettingsDialog
 from .modifystringdialog import ModifyStringInputDialog
+from .modifysvginputdialog import ModifySVGInputDialog
 from .modifytiledmediaobjectdialog import ModifyTiledMediaObjectDialog
+from .stringinputdialog import OpenNewStringInputDialog
+from .svgpickerinputdialog import OpenSVGPickerInputDialog
+from .zoomsensitivitydialog import OpenZoomSensitivityInputDialog
+
 
 class DialogWindows:
     """
@@ -42,12 +46,19 @@ class DialogWindows:
     open_new_string_input_dialog = OpenNewStringInputDialog
     modify_string_input_dialog = ModifyStringInputDialog
     modify_tiled_media_object_dialog = ModifyTiledMediaObjectDialog
+    open_svg_picker_input_dialog = OpenSVGPickerInputDialog
+    modify_svg_input_dialog = ModifySVGInputDialog
+    autosave_settings_dialog = AutosaveSettingsDialog
+
 
 # Also expose at module level for direct imports
 __all__ = [
-    'DialogWindows',
-    'OpenZoomSensitivityInputDialog',
-    'OpenNewStringInputDialog',
-    'ModifyStringInputDialog',
-    'ModifyTiledMediaObjectDialog',
+    "AutosaveSettingsDialog",
+    "DialogWindows",
+    "ModifySVGInputDialog",
+    "ModifyStringInputDialog",
+    "ModifyTiledMediaObjectDialog",
+    "OpenNewStringInputDialog",
+    "OpenSVGPickerInputDialog",
+    "OpenZoomSensitivityInputDialog",
 ]

@@ -28,65 +28,44 @@ The multiprocessing context is chosen automatically:
 The context can be overridden via PYZUI_MP_CONTEXT environment variable.
 """
 
-from concurrent.futures import ProcessPoolExecutor, Future
-from typing import Optional, Literal, Dict, Any
-import multiprocessing
-import threading
-import warnings
 import atexit
+import contextlib
+import multiprocessing
 import os
+import threading
+from concurrent.futures import Future, ProcessPoolExecutor
 
 
 def _get_safe_context():
     """
-    Get a multiprocessing context that's safe for the current thread state.
+    Get a multiprocessing context safe for the current thread state.
 
-    Returns 'fork' if only the main thread is running (fast, clean shutdown).
-    Returns 'spawn' if other threads exist (avoids fork-after-threads issues).
+    Defaults to 'spawn' because 'fork' is unsafe in any process that has
+    or may later create threads (Qt, TileProviders, etc.). The parent's
+    C-level mutexes (fontconfig, malloc arenas, libvips thread pools) are
+    inherited in locked states by forked children, causing deadlocks.
 
-    Python 3.12+ DeprecationWarning about fork() in multi-threaded processes:
-    -------------------------------------------------------------------------
-    Python 3.12 emits a DeprecationWarning when os.fork() is called while
-    multiple threads are active, because forking duplicates the process but
-    only the calling thread — leaving any mutex locks held by other threads
-    in a permanently locked state, which can cause deadlocks in the child.
+    Python 3.12+ emits a DeprecationWarning when os.fork() is called with
+    multiple threads active. Using 'spawn' avoids this entirely — workers
+    start with clean Python interpreters.
 
-    This warning does NOT apply to our use case for the following reasons:
+    'spawn' workers are forcefully terminated in shutdown() via
+    child.terminate(), preventing the teardown hangs sometimes associated
+    with spawn-based pools.
 
-    1. We select 'fork' only when threading.active_count() == 1 (main thread
-       only). However, ProcessPoolExecutor spawns workers lazily on the first
-       submit() call, and by that time pytest or Qt may have started internal
-       threads (e.g., Qt event loop, pytest-xdist workers).
-
-    2. The forked worker processes are safe because they perform fresh imports
-       of VipsConverter/PDFConverter (see _run_vips_conversion and
-       _run_pdf_conversion) and do not inherit or interact with any shared
-       thread state, locks, or Qt objects from the parent process.
-
-    3. The alternative contexts ('spawn', 'forkserver') cause the process pool
-       to hang during interpreter shutdown / pytest teardown, making them
-       unsuitable. 'fork' provides clean and fast shutdown via the atexit
-       handler registered in init().
-
-    We therefore catch this specific DeprecationWarning and log it at debug
-    level rather than letting it propagate to the user.
+    The PYZUI_MP_CONTEXT environment variable can override this default
+    (e.g. PYZUI_MP_CONTEXT=fork to restore the old behavior).
     """
-    
-    env_context = os.environ.get('PYZUI_MP_CONTEXT')
+    env_context = os.environ.get("PYZUI_MP_CONTEXT")
     if env_context:
         return multiprocessing.get_context(env_context)
 
-    # Check if other threads are running (fork is unsafe with multiple threads)
-    if threading.active_count() > 1:
-        return multiprocessing.get_context('spawn')
-    else:
-        return multiprocessing.get_context('fork')
+    return multiprocessing.get_context("spawn")
 
 
-def _run_vips_conversion(infile: str, outfile: str,
-                         rotation: int = 0,
-                         invert_colors: bool = False,
-                         black_and_white: bool = False) -> Optional[str]:
+def _run_vips_conversion(
+    infile: str, outfile: str, rotation: int = 0, invert_colors: bool = False, black_and_white: bool = False
+) -> str | None:
     """
     Run VipsConverter in a separate process.
 
@@ -103,12 +82,12 @@ def _run_vips_conversion(infile: str, outfile: str,
     # Import here to avoid issues with multiprocessing
     from pyzui.converters.vipsconverter import VipsConverter
 
-    converter = VipsConverter(infile, outfile, rotation, invert_colors, black_and_white)
+    converter = VipsConverter(infile, outfile, rotation, invert_colors, black_and_white)  # type: ignore[arg-type]
     converter.run()
     return converter.error
 
 
-def _run_pdf_conversion(infile: str, outfile: str) -> Optional[str]:
+def _run_pdf_conversion(infile: str, outfile: str) -> str | None:
     """
     Run PDFConverter in a separate process.
 
@@ -128,8 +107,8 @@ def _run_pdf_conversion(infile: str, outfile: str) -> Optional[str]:
 
 
 # Global executor for process-based conversion
-_executor: Optional[ProcessPoolExecutor] = None
-_executor_context_name: Optional[str] = None
+_executor: ProcessPoolExecutor | None = None
+_executor_context_name: str | None = None
 _max_workers: int = 2
 _atexit_registered: bool = False
 
@@ -149,12 +128,12 @@ def init(max_workers: int = 2) -> None:
     init(max_workers) --> None
 
     Initialize the converter runner with a process pool.
-    
+
     Thread-safe: This function uses a reentrant lock to ensure safe concurrent
     initialization and shutdown operations.
     """
     global _executor, _executor_context_name, _max_workers, _atexit_registered
-    
+
     with _executor_lock:
         _max_workers = max_workers
 
@@ -186,12 +165,12 @@ def shutdown() -> None:
     shutdown() --> None
 
     Shutdown the process pool executor and terminate any lingering processes.
-    
+
     Thread-safe: This function uses a reentrant lock to ensure safe concurrent
     initialization and shutdown operations.
     """
     global _executor, _executor_context_name
-    
+
     with _executor_lock:
         if _executor is not None:
             # Shutdown the executor - don't wait to avoid blocking
@@ -216,16 +195,16 @@ def _get_executor() -> ProcessPoolExecutor:
     _get_executor() --> ProcessPoolExecutor
 
     Get or create the process pool executor.
-    
+
     Thread-safe: This function uses a reentrant lock to ensure safe concurrent
     access to the global executor. The lock allows reentrancy for the
     init() -> shutdown() -> init() chain that may occur during context changes.
-    
+
     Returns:
         ProcessPoolExecutor: The global process pool executor instance
     """
     global _executor, _executor_context_name
-    
+
     with _executor_lock:
         # Check if we need to recreate executor due to context change
         context = _get_safe_context()
@@ -246,10 +225,9 @@ def _get_executor() -> ProcessPoolExecutor:
         return _executor
 
 
-def submit_vips_conversion(infile: str, outfile: str,
-                           rotation: int = 0,
-                           invert_colors: bool = False,
-                           black_and_white: bool = False) -> Future:
+def submit_vips_conversion(
+    infile: str, outfile: str, rotation: int = 0, invert_colors: bool = False, black_and_white: bool = False
+) -> Future:
     """
     Submit a VipsConverter job to run in a separate process.
 
@@ -264,17 +242,7 @@ def submit_vips_conversion(infile: str, outfile: str,
         A Future object that will contain the conversion result
     """
     executor = _get_executor()
-    # Catch the Python 3.12+ DeprecationWarning about fork() in multi-threaded
-    # processes. The warning is emitted here because ProcessPoolExecutor spawns
-    # workers lazily on the first submit() call, which is when os.fork() runs.
-    # See _get_safe_context() docstring for why this is safe in our case.
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message=".*multi-threaded.*use of fork\\(\\).*",
-            category=DeprecationWarning)
-        return executor.submit(_run_vips_conversion, infile, outfile,
-                              rotation, invert_colors, black_and_white)
+    return executor.submit(_run_vips_conversion, infile, outfile, rotation, invert_colors, black_and_white)
 
 
 def submit_pdf_conversion(infile: str, outfile: str) -> Future:
@@ -289,14 +257,7 @@ def submit_pdf_conversion(infile: str, outfile: str) -> Future:
         A Future object that will contain the conversion result
     """
     executor = _get_executor()
-    # Catch the Python 3.12+ DeprecationWarning about fork() in multi-threaded
-    # processes. See _get_safe_context() docstring and submit_vips_conversion().
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message=".*multi-threaded.*use of fork\\(\\).*",
-            category=DeprecationWarning)
-        return executor.submit(_run_pdf_conversion, infile, outfile)
+    return executor.submit(_run_pdf_conversion, infile, outfile)
 
 
 class ConversionHandle:
@@ -319,7 +280,7 @@ class ConversionHandle:
         self._future = future
         self._infile = infile
         self._outfile = outfile
-        self._error: Optional[str] = None
+        self._error: str | None = None
         self._checked = False
 
     @property
@@ -336,7 +297,7 @@ class ConversionHandle:
         return 0.0
 
     @property
-    def error(self) -> Optional[str]:
+    def error(self) -> str | None:
         """Return the error message if conversion failed, None otherwise."""
         if self._future.done():
             self._check_result()
@@ -352,16 +313,14 @@ class ConversionHandle:
             if result is not None:
                 self._error = result
         except Exception as e:
-            self._error = f"conversion process error: {str(e)}"
+            self._error = f"conversion process error: {e!s}"
 
     def is_alive(self) -> bool:
         """Return True if the conversion is still running."""
         return not self._future.done()
 
-    def join(self, timeout: Optional[float] = None) -> None:
+    def join(self, timeout: float | None = None) -> None:
         """Wait for the conversion to complete."""
-        try:
+        with contextlib.suppress(Exception):
             self._future.result(timeout=timeout)
-        except Exception:
-            pass
         self._check_result()

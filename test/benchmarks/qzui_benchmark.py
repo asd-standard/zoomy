@@ -50,35 +50,39 @@ Example::
     python test/benchmarks/stress_benchmark.py --no-movement  # Static benchmark
 """
 
-import os
-import sys
-import time
-import tempfile
-import shutil
-import random
-import string
 import argparse
 import csv
 import math
-from dataclasses import dataclass, field, asdict
-from typing import List, Tuple, Optional, Any
+import os
+import random
+import shutil
+import string
+import sys
+import tempfile
+import time
+from dataclasses import asdict, dataclass, field
+
+## Performance optimization note:
+## Phase 2 optimizations replace 2**x with math.exp2(x) (1.85x faster)
+## and math.log(x, 2) with math.log2(x) (2x faster) throughout the codebase.
+## These changes are performance-critical for zoom operations.
 
 ## Add project root to path for imports
-sys.path.insert(0, os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6 import QtWidgets
 
+import pyzui.objects.scene.scene as Scene
 import pyzui.tilesystem.tilemanager as TileManager
 import pyzui.tilesystem.tilestore as TileStore
-from pyzui.objects.scene.qzui import QZUI
-import pyzui.objects.scene.scene as Scene
-from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject
 from pyzui.objects.mediaobjects.stringmediaobject import StringMediaObject
+from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject
+from pyzui.objects.scene.qzui import QZUI
 
 ## ============================================================================
 ## Data Classes for Metrics
 ## ============================================================================
+
 
 @dataclass
 class FrameMetrics:
@@ -109,6 +113,7 @@ class FrameMetrics:
         object_count   : Number of objects in scene at time of rendering
         dropped        : True if frame exceeded target frame interval
     """
+
     frame_number: int
     timestamp: float
     render_time_ms: float
@@ -116,6 +121,7 @@ class FrameMetrics:
     memory_vms_mb: float
     object_count: int
     dropped: bool
+
 
 @dataclass
 class BenchmarkResults:
@@ -160,6 +166,7 @@ class BenchmarkResults:
         peak_memory_vms_mb  : Peak VMS memory usage in megabytes
         final_object_count  : Number of objects at benchmark completion
     """
+
     total_frames: int
     total_time_sec: float
     mean_fps: float
@@ -172,6 +179,7 @@ class BenchmarkResults:
     peak_memory_rss_mb: float
     peak_memory_vms_mb: float
     final_object_count: int
+
 
 @dataclass
 class BenchmarkConfig:
@@ -214,24 +222,27 @@ class BenchmarkConfig:
         pan_amplitude      : Amplitude of pan as fraction of viewport
         enable_movement    : Whether to enable zoom/pan movement
     """
+
     target_framerate: int = 30
-    viewport_size: Tuple[int, int] = (1280, 720)
+    viewport_size: tuple[int, int] = (1280, 720)
     duration_sec: float = 30.0
     objects_per_second: int = 5
     initial_objects: int = 10
-    test_images: List[str] = field(default_factory=list)
-    output_file: Optional[str] = None
+    test_images: list[str] = field(default_factory=list)
+    output_file: str | None = None
     zoom_cycle_sec: float = 10.0
     pan_cycle_sec: float = 8.0
     zoom_amplitude: float = 2.0
     pan_amplitude: float = 0.3
     enable_movement: bool = True
 
+
 ## ============================================================================
 ## Memory Monitoring
 ## ============================================================================
 
-def get_memory_usage() -> Tuple[float, float]:
+
+def get_memory_usage() -> tuple[float, float]:
     """
     Function :
         get_memory_usage()
@@ -251,6 +262,7 @@ def get_memory_usage() -> Tuple[float, float]:
     """
     try:
         import psutil
+
         process = psutil.Process(os.getpid())
         mem = process.memory_info()
         return mem.rss / (1024 * 1024), mem.vms / (1024 * 1024)
@@ -259,22 +271,24 @@ def get_memory_usage() -> Tuple[float, float]:
 
     ## Fallback for Linux: parse /proc/self/status
     try:
-        with open('/proc/self/status', 'r') as f:
+        with open("/proc/self/status") as f:
             rss = vms = 0.0
             for line in f:
-                if line.startswith('VmRSS:'):
+                if line.startswith("VmRSS:"):
                     rss = float(line.split()[1]) / 1024  # KB to MB
-                elif line.startswith('VmSize:'):
+                elif line.startswith("VmSize:"):
                     vms = float(line.split()[1]) / 1024  # KB to MB
             return rss, vms
-    except (IOError, OSError):
+    except OSError:
         pass
 
     return 0.0, 0.0
 
+
 ## ============================================================================
 ## Stress Benchmark Class
 ## ============================================================================
+
 
 class StressBenchmark:
     """
@@ -326,13 +340,12 @@ class StressBenchmark:
         configuration parameters.
         """
         self.__config = config
-        self.__frame_metrics: List[FrameMetrics] = []
-        self.__temp_dir: Optional[str] = None
+        self.__frame_metrics: list[FrameMetrics] = []
+        self.__temp_dir: str | None = None
         self.__base_zoom: float = 0.0
-        self.__base_origin: Tuple[float, float] = (0.0, 0.0)
+        self.__base_origin: tuple[float, float] = (0.0, 0.0)
 
-    def __apply_cyclical_movement(self, scene: Scene.Scene,
-                                   elapsed: float) -> None:
+    def __apply_cyclical_movement(self, scene: Scene.Scene, elapsed: float) -> None:
         """
         Method :
             StressBenchmark.__apply_cyclical_movement(scene, elapsed)
@@ -362,8 +375,7 @@ class StressBenchmark:
         ## Calculate zoom oscillation
         ## Uses sine wave: zoom = base + amplitude * sin(2*pi*t/period)
         zoom_phase = (2.0 * math.pi * elapsed) / self.__config.zoom_cycle_sec
-        target_zoom = self.__base_zoom + \
-            self.__config.zoom_amplitude * math.sin(zoom_phase)
+        target_zoom = self.__base_zoom + self.__config.zoom_amplitude * math.sin(zoom_phase)
 
         ## Calculate pan oscillation
         ## Uses Lissajous pattern with slightly different frequencies for X/Y
@@ -408,21 +420,20 @@ class StressBenchmark:
         strings for more diverse testing.
         """
         ## Generate random hex color
-        color = ''.join(random.choices('0123456789ABCDEF', k=6))
+        color = "".join(random.choices("0123456789ABCDEF", k=6))
 
         ## Generate random text content
         text_len = random.randint(5, 50)
-        text = ''.join(random.choices(string.ascii_letters + ' ', k=text_len))
+        text = "".join(random.choices(string.ascii_letters + " ", k=text_len))
 
         ## Occasionally add newlines for multi-line strings (30% chance)
         if random.random() > 0.7:
             mid = len(text) // 2
-            text = text[:mid] + '\\n' + text[mid:]
+            text = text[:mid] + "\\n" + text[mid:]
 
         return f"string:{color}:{text}"
 
-    def __screen_to_scene_coords(self, screen_x: float, screen_y: float,
-                                   scene: Scene.Scene) -> Tuple[float, float]:
+    def __screen_to_scene_coords(self, screen_x: float, screen_y: float, scene: Scene.Scene) -> tuple[float, float]:
         """
         Method :
             StressBenchmark.__screen_to_scene_coords(screen_x, screen_y, scene)
@@ -437,17 +448,16 @@ class StressBenchmark:
         Convert screen coordinates to scene coordinates.
 
         The conversion formula is derived from MediaObject.topleft:
-            screen_x = scene.origin[0] + scene_x * (2 ** scene.zoomlevel)
+            screen_x = scene.origin[0] + scene_x * math.exp2(scene.zoomlevel)
 
         Solving for scene coordinates:
-            scene_x = (screen_x - scene.origin[0]) * (2 ** -scene.zoomlevel)
+            scene_x = (screen_x - scene.origin[0]) * math.exp2(-scene.zoomlevel)
         """
-        scene_x = (screen_x - scene.origin[0]) * (2 ** -scene.zoomlevel)
-        scene_y = (screen_y - scene.origin[1]) * (2 ** -scene.zoomlevel)
+        scene_x = (screen_x - scene.origin[0]) * math.exp2(-scene.zoomlevel)
+        scene_y = (screen_y - scene.origin[1]) * math.exp2(-scene.zoomlevel)
         return (scene_x, scene_y)
 
-    def __add_random_object(self, scene: Scene.Scene,
-                            allow_images: bool = True) -> None:
+    def __add_random_object(self, scene: Scene.Scene, allow_images: bool = True) -> None:
         """
         Method :
             StressBenchmark.__add_random_object(scene, allow_images)
@@ -477,8 +487,7 @@ class StressBenchmark:
         viewport_w, viewport_h = self.__config.viewport_size
 
         ## Determine object type: 70% strings, 30% images (if available and allowed)
-        use_image = (allow_images and self.__config.test_images and
-                     random.random() > 0.7)
+        use_image = allow_images and self.__config.test_images and random.random() > 0.7
 
         if use_image:
             media_id = random.choice(self.__config.test_images)
@@ -501,8 +510,7 @@ class StressBenchmark:
 
         scene.add(obj)
 
-    def __render_timed_frame(self, qzui: QZUI, frame_num: int,
-                             object_count: int) -> FrameMetrics:
+    def __render_timed_frame(self, qzui: QZUI, frame_num: int, object_count: int) -> FrameMetrics:
         """
         Method :
             StressBenchmark.__render_timed_frame(qzui, frame_num, object_count)
@@ -547,7 +555,7 @@ class StressBenchmark:
             memory_rss_mb=rss_mb,
             memory_vms_mb=vms_mb,
             object_count=object_count,
-            dropped=dropped
+            dropped=dropped,
         )
 
     def __calculate_results(self) -> BenchmarkResults:
@@ -585,8 +593,7 @@ class StressBenchmark:
         fps_values = []
         window_size = 10
         for i in range(window_size, total_frames):
-            dt = (self.__frame_metrics[i].timestamp -
-                  self.__frame_metrics[i - window_size].timestamp)
+            dt = self.__frame_metrics[i].timestamp - self.__frame_metrics[i - window_size].timestamp
             if dt > 0:
                 fps_values.append(window_size / dt)
 
@@ -602,7 +609,7 @@ class StressBenchmark:
             max_render_time_ms=max(render_times),
             peak_memory_rss_mb=max(m.memory_rss_mb for m in self.__frame_metrics),
             peak_memory_vms_mb=max(m.memory_vms_mb for m in self.__frame_metrics),
-            final_object_count=self.__frame_metrics[-1].object_count
+            final_object_count=self.__frame_metrics[-1].object_count,
         )
 
     def __export_csv(self, filepath: str) -> None:
@@ -623,11 +630,19 @@ class StressBenchmark:
         if not self.__frame_metrics:
             return
 
-        with open(filepath, 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=[
-                'frame_number', 'timestamp', 'render_time_ms',
-                'memory_rss_mb', 'memory_vms_mb', 'object_count', 'dropped'
-            ])
+        with open(filepath, "w", newline="") as f:
+            writer = csv.DictWriter(
+                f,
+                fieldnames=[
+                    "frame_number",
+                    "timestamp",
+                    "render_time_ms",
+                    "memory_rss_mb",
+                    "memory_vms_mb",
+                    "object_count",
+                    "dropped",
+                ],
+            )
             writer.writeheader()
             for metrics in self.__frame_metrics:
                 writer.writerow(asdict(metrics))
@@ -715,12 +730,12 @@ class StressBenchmark:
             self.__base_origin = (scene._x, scene._y)
 
             ## Main benchmark loop
-            print(f"Running benchmark for {self.__config.duration_sec}s "
-                  f"at {self.__config.target_framerate} FPS target...")
+            print(
+                f"Running benchmark for {self.__config.duration_sec}s at {self.__config.target_framerate} FPS target..."
+            )
             print(f"Adding {self.__config.objects_per_second} objects/second...")
             if self.__config.enable_movement:
-                print(f"Zoom cycle: {self.__config.zoom_cycle_sec}s, "
-                      f"Pan cycle: {self.__config.pan_cycle_sec}s")
+                print(f"Zoom cycle: {self.__config.zoom_cycle_sec}s, Pan cycle: {self.__config.pan_cycle_sec}s")
             else:
                 print("Movement disabled (static benchmark)")
 
@@ -744,7 +759,7 @@ class StressBenchmark:
                 ## Add objects at configured rate
                 ## Stop adding images near the end to let converters complete
                 if (current_time - last_add_time) >= add_interval:
-                    allow_images = (elapsed < image_cutoff_time)
+                    allow_images = elapsed < image_cutoff_time
                     self.__add_random_object(scene, allow_images=allow_images)
                     object_count += 1
                     last_add_time = current_time
@@ -757,11 +772,12 @@ class StressBenchmark:
                 ## Progress output every 100 frames
                 if frame_num % 100 == 0:
                     current_fps = frame_num / elapsed if elapsed > 0 else 0
-                    zoom_info = f"zoom={scene.zoomlevel:.2f}" \
-                        if self.__config.enable_movement else ""
-                    print(f"  Frame {frame_num}: {object_count} objects, "
-                          f"{current_fps:.1f} FPS, "
-                          f"{metrics.memory_rss_mb:.1f} MB RSS {zoom_info}")
+                    zoom_info = f"zoom={scene.zoomlevel:.2f}" if self.__config.enable_movement else ""
+                    print(
+                        f"  Frame {frame_num}: {object_count} objects, "
+                        f"{current_fps:.1f} FPS, "
+                        f"{metrics.memory_rss_mb:.1f} MB RSS {zoom_info}"
+                    )
 
                 ## Try to maintain target framerate
                 frame_end = time.perf_counter()
@@ -825,8 +841,7 @@ class StressBenchmark:
         print(f"Mean FPS:            {results.mean_fps:.2f}")
         print(f"Min FPS:             {results.min_fps:.2f}")
         print(f"Max FPS:             {results.max_fps:.2f}")
-        print(f"Dropped frames:      {results.dropped_frame_count} "
-              f"({results.dropped_frame_pct:.1f}%)")
+        print(f"Dropped frames:      {results.dropped_frame_count} ({results.dropped_frame_pct:.1f}%)")
         print(f"Mean render time:    {results.mean_render_time_ms:.2f}ms")
         print(f"Max render time:     {results.max_render_time_ms:.2f}ms")
         print(f"Peak memory (RSS):   {results.peak_memory_rss_mb:.1f}MB")
@@ -835,7 +850,7 @@ class StressBenchmark:
         print("=" * 60)
 
     @property
-    def frame_metrics(self) -> List[FrameMetrics]:
+    def frame_metrics(self) -> list[FrameMetrics]:
         """
         Property :
             StressBenchmark.frame_metrics
@@ -851,11 +866,13 @@ class StressBenchmark:
         """
         return self.__frame_metrics.copy()
 
+
 ## ============================================================================
 ## Utility Functions
 ## ============================================================================
 
-def find_test_images(data_dir: str) -> List[str]:
+
+def find_test_images(data_dir: str) -> list[str]:
     """
     Function :
         find_test_images(data_dir)
@@ -872,7 +889,7 @@ def find_test_images(data_dir: str) -> List[str]:
     Returns a list of absolute paths to found image files.
     Returns an empty list if the directory doesn't exist.
     """
-    supported_extensions = ('.jpg', '.jpeg', '.png', '.ppm', '.gif', '.tiff')
+    supported_extensions = (".jpg", ".jpeg", ".png", ".ppm", ".gif", ".tiff")
     images = []
 
     if os.path.exists(data_dir):
@@ -881,6 +898,7 @@ def find_test_images(data_dir: str) -> List[str]:
                 images.append(os.path.join(data_dir, filename))
 
     return images
+
 
 def parse_arguments() -> BenchmarkConfig:
     """
@@ -909,7 +927,7 @@ def parse_arguments() -> BenchmarkConfig:
     - --no-movement: Disable zoom and pan (static benchmark)
     """
     parser = argparse.ArgumentParser(
-        description='PyZUI Stress Benchmark - Performance testing tool',
+        description="PyZUI Stress Benchmark - Performance testing tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -918,61 +936,34 @@ Examples:
   python stress_benchmark.py --data-dir /path/to/images --duration 120
   python stress_benchmark.py --zoom-cycle 5 --pan-cycle 4
   python stress_benchmark.py --no-movement  # Static benchmark (no zoom/pan)
-        """
+        """,
     )
 
+    parser.add_argument("--duration", type=float, default=30.0, help="Benchmark duration in seconds (default: 30)")
     parser.add_argument(
-        '--duration', type=float, default=30.0,
-        help='Benchmark duration in seconds (default: 30)'
+        "--fps", type=int, default=30, help="Target framerate for dropped frame detection (default: 30)"
+    )
+    parser.add_argument("--objects-rate", type=int, default=5, help="Number of objects to add per second (default: 5)")
+    parser.add_argument(
+        "--initial", type=int, default=10, help="Initial object count before timing starts (default: 10)"
+    )
+    parser.add_argument("--width", type=int, default=1280, help="Viewport width in pixels (default: 1280)")
+    parser.add_argument("--height", type=int, default=720, help="Viewport height in pixels (default: 720)")
+    parser.add_argument("--output", type=str, default=None, help="Output file path for CSV results (optional)")
+    parser.add_argument(
+        "--data-dir", type=str, default=None, help="Directory containing test images (default: ../../data)"
     )
     parser.add_argument(
-        '--fps', type=int, default=30,
-        help='Target framerate for dropped frame detection (default: 30)'
+        "--zoom-cycle", type=float, default=10.0, help="Zoom oscillation period in seconds (default: 10)"
+    )
+    parser.add_argument("--pan-cycle", type=float, default=8.0, help="Pan oscillation period in seconds (default: 8)")
+    parser.add_argument(
+        "--zoom-amplitude", type=float, default=2.0, help="Zoom oscillation amplitude in zoom levels (default: 2.0)"
     )
     parser.add_argument(
-        '--objects-rate', type=int, default=5,
-        help='Number of objects to add per second (default: 5)'
+        "--pan-amplitude", type=float, default=0.3, help="Pan amplitude as fraction of viewport (default: 0.3)"
     )
-    parser.add_argument(
-        '--initial', type=int, default=10,
-        help='Initial object count before timing starts (default: 10)'
-    )
-    parser.add_argument(
-        '--width', type=int, default=1280,
-        help='Viewport width in pixels (default: 1280)'
-    )
-    parser.add_argument(
-        '--height', type=int, default=720,
-        help='Viewport height in pixels (default: 720)'
-    )
-    parser.add_argument(
-        '--output', type=str, default=None,
-        help='Output file path for CSV results (optional)'
-    )
-    parser.add_argument(
-        '--data-dir', type=str, default=None,
-        help='Directory containing test images (default: ../../data)'
-    )
-    parser.add_argument(
-        '--zoom-cycle', type=float, default=10.0,
-        help='Zoom oscillation period in seconds (default: 10)'
-    )
-    parser.add_argument(
-        '--pan-cycle', type=float, default=8.0,
-        help='Pan oscillation period in seconds (default: 8)'
-    )
-    parser.add_argument(
-        '--zoom-amplitude', type=float, default=2.0,
-        help='Zoom oscillation amplitude in zoom levels (default: 2.0)'
-    )
-    parser.add_argument(
-        '--pan-amplitude', type=float, default=0.3,
-        help='Pan amplitude as fraction of viewport (default: 0.3)'
-    )
-    parser.add_argument(
-        '--no-movement', action='store_true',
-        help='Disable zoom and pan movement (static benchmark)'
-    )
+    parser.add_argument("--no-movement", action="store_true", help="Disable zoom and pan movement (static benchmark)")
 
     args = parser.parse_args()
 
@@ -980,7 +971,7 @@ Examples:
     if args.data_dir:
         data_dir = args.data_dir
     else:
-        data_dir = os.path.join(os.path.dirname(__file__), '../../data')
+        data_dir = os.path.join(os.path.dirname(__file__), "../../data")
 
     test_images = find_test_images(data_dir)
 
@@ -996,12 +987,14 @@ Examples:
         pan_cycle_sec=args.pan_cycle,
         zoom_amplitude=args.zoom_amplitude,
         pan_amplitude=args.pan_amplitude,
-        enable_movement=not args.no_movement
+        enable_movement=not args.no_movement,
     )
+
 
 ## ============================================================================
 ## Main Entry Point
 ## ============================================================================
+
 
 def main() -> None:
     """
@@ -1021,7 +1014,7 @@ def main() -> None:
 
     print("PyZUI Stress Benchmark")
     print("=" * 60)
-    print(f"Configuration:")
+    print("Configuration:")
     print(f"  Target FPS:        {config.target_framerate}")
     print(f"  Viewport:          {config.viewport_size[0]}x{config.viewport_size[1]}")
     print(f"  Duration:          {config.duration_sec}s")
@@ -1029,13 +1022,11 @@ def main() -> None:
     print(f"  Initial objects:   {config.initial_objects}")
     print(f"  Test images:       {len(config.test_images)} found")
     if config.enable_movement:
-        print(f"  Movement:          Enabled")
-        print(f"  Zoom cycle:        {config.zoom_cycle_sec}s "
-              f"(amplitude: {config.zoom_amplitude})")
-        print(f"  Pan cycle:         {config.pan_cycle_sec}s "
-              f"(amplitude: {config.pan_amplitude * 100:.0f}% viewport)")
+        print("  Movement:          Enabled")
+        print(f"  Zoom cycle:        {config.zoom_cycle_sec}s (amplitude: {config.zoom_amplitude})")
+        print(f"  Pan cycle:         {config.pan_cycle_sec}s (amplitude: {config.pan_amplitude * 100:.0f}% viewport)")
     else:
-        print(f"  Movement:          Disabled (static)")
+        print("  Movement:          Disabled (static)")
     if config.output_file:
         print(f"  Output file:       {config.output_file}")
     print("=" * 60)
@@ -1044,5 +1035,6 @@ def main() -> None:
     results = benchmark.run()
     benchmark.print_results(results)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

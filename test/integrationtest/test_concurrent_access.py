@@ -31,32 +31,51 @@ The tests cover:
 - Thread-safe metadata access
 - Concurrent read/write operations on TileStore
 """
-import sys
-import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+
+import shutil
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pytest
-import time
-import threading
-import queue
-import tempfile
-import shutil
-from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from PIL import Image
 
+from pyzui.tilesystem import tilemanager, tilestore
 from pyzui.tilesystem.tile import Tile
-from pyzui.tilesystem.tilestore import TileCache
-from pyzui.tilesystem import tilestore
-from pyzui.tilesystem import tilemanager
-from pyzui.tilesystem.tilemanager import (
-    MediaNotTiled,
-    TileNotLoaded,
-    TileNotAvailable
-)
-from pyzui.tilesystem.tiler import Tiler
+from pyzui.tilesystem.tilemanager import TileNotAvailable, TileNotLoaded
 from pyzui.tilesystem.tileproviders.tileprovider import TileProvider
+from pyzui.tilesystem.tiler import Tiler
+from pyzui.tilesystem.tilestore import TileCache
+
+
+def wait_for_load_count(provider, expected, timeout=10.0):
+    """Poll until provider.load_call_count reaches expected, or timeout."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if provider.load_call_count >= expected:
+            return True
+        time.sleep(0.002)
+    return False
+
+
+def wait_for_tile(tile_id, timeout=10.0):
+    """Poll tilemanager until tile is available, or timeout."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            tile = tilemanager.get_tile(tile_id)
+            if tile is not None:
+                return tile
+        except (TileNotLoaded, TileNotAvailable):
+            pass
+        time.sleep(0.005)
+    raise TimeoutError(f"Tile {tile_id} not loaded after {timeout}s")
+
 
 class ConcreteTiler(Tiler):
     """
@@ -65,10 +84,10 @@ class ConcreteTiler(Tiler):
     Implements the _scanchunk method using PIL to read image data.
     """
 
-    def __init__(self, infile, media_id=None, filext='jpg', tilesize=256):
+    def __init__(self, infile, media_id=None, filext="jpg", tilesize=256):
         """Initialize the tiler and open the source image."""
         super().__init__(infile, media_id, filext, tilesize)
-        self._image = Image.open(infile).convert('RGB')
+        self._image = Image.open(infile).convert("RGB")
         self._width, self._height = self._image.size
         self._bytes_per_pixel = 3
         self._current_row = 0
@@ -83,13 +102,14 @@ class ConcreteTiler(Tiler):
         """
         with self._lock:
             if self._current_row >= self._height:
-                return b''
+                return b""
             row_data = []
             for x in range(self._width):
                 pixel = self._image.getpixel((x, self._current_row))
                 row_data.extend(pixel)
             self._current_row += 1
             return bytes(row_data)
+
 
 class MockTileProvider(TileProvider):
     """
@@ -103,6 +123,7 @@ class MockTileProvider(TileProvider):
         self.load_call_count = 0
         self.load_calls = []
         self._lock = threading.Lock()
+        self.load_completed = threading.Event()
 
     def _load(self, tile_id):
         """Load with artificial delay to expose race conditions."""
@@ -110,7 +131,9 @@ class MockTileProvider(TileProvider):
         with self._lock:
             self.load_call_count += 1
             self.load_calls.append(tile_id)
-        return Image.new('RGB', (256, 256), color='gray')
+        self.load_completed.set()
+        return Image.new("RGB", (256, 256), color="gray")
+
 
 @pytest.fixture
 def temp_tilestore(tmp_path):
@@ -138,6 +161,7 @@ def temp_tilestore(tmp_path):
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
 
+
 @pytest.fixture
 def initialized_tilemanager(temp_tilestore):
     """
@@ -149,6 +173,7 @@ def initialized_tilemanager(temp_tilestore):
     tilemanager.init(total_cache_size=200, auto_cleanup=False)
     yield
     tilemanager.purge()
+
 
 @pytest.fixture
 def sample_images(tmp_path):
@@ -162,12 +187,13 @@ def sample_images(tmp_path):
     """
     images = []
     for i in range(5):
-        img = Image.new('RGB', (512, 512), color=(i * 50, 100, 150))
+        img = Image.new("RGB", (512, 512), color=(i * 50, 100, 150))
         path = tmp_path / f"concurrent_test_{i}.png"
         img.save(path)
         images.append(str(path))
 
     yield images
+
 
 @pytest.fixture
 def cache():
@@ -178,6 +204,7 @@ def cache():
         TileCache: A fresh cache instance.
     """
     return TileCache(maxsize=100, maxage=3600)
+
 
 class TestConcurrentTileRequests:
     """
@@ -200,17 +227,13 @@ class TestConcurrentTileRequests:
         provider = MockTileProvider(cache, load_delay=0.1)
         provider.start()
 
-        tile_id = ('media', 1, 0, 0)
+        tile_id = ("media", 1, 0, 0)
         num_threads = 10
-        results = []
         errors = []
 
         def request_tile():
             try:
                 provider.request(tile_id)
-                time.sleep(0.2)  # Wait for load
-                if tile_id in cache:
-                    results.append(cache[tile_id])
             except Exception as e:
                 errors.append(e)
 
@@ -221,9 +244,18 @@ class TestConcurrentTileRequests:
             t.join()
 
         assert len(errors) == 0, f"Errors occurred: {errors}"
+
+        # Wait for provider to finish loading the tile
+        assert wait_for_load_count(provider, 1, timeout=5.0), "Tile was not loaded within timeout"
         # Tile should be loaded only once (or very few times due to race)
-        assert provider.load_call_count <= 2, \
-            f"Tile loaded {provider.load_call_count} times, expected 1-2"
+        assert provider.load_call_count <= 2, f"Tile loaded {provider.load_call_count} times, expected 1-2"
+
+        # Wait for Tile wrapper to be in cache after _load returns
+        deadline = time.monotonic() + 2.0
+        while time.monotonic() < deadline:
+            if tile_id in cache:
+                break
+            time.sleep(0.005)
         assert tile_id in cache
 
     def test_different_tiles_requested_concurrently(self, cache):
@@ -239,7 +271,7 @@ class TestConcurrentTileRequests:
         provider.start()
 
         num_tiles = 20
-        tile_ids = [('media', 1, 0, i) for i in range(num_tiles)]
+        tile_ids = [("media", 1, 0, i) for i in range(num_tiles)]
 
         def request_tile(tile_id):
             provider.request(tile_id)
@@ -249,10 +281,20 @@ class TestConcurrentTileRequests:
             for f in as_completed(futures):
                 f.result()  # Raise any exceptions
 
-        time.sleep(1.5)  # Allow processing (20 tiles * 0.02s delay + overhead)
+        assert wait_for_load_count(provider, num_tiles, timeout=5.0), (
+            f"Only {provider.load_call_count}/{num_tiles} tiles loaded"
+        )
 
         # All tiles should be loaded
         assert provider.load_call_count == num_tiles
+
+        # Wait for Tile wrappers in cache
+        missing = set(tile_ids)
+        deadline = time.monotonic() + 2.0
+        while missing and time.monotonic() < deadline:
+            missing -= {tid for tid in missing if tid in cache}
+            if missing:
+                time.sleep(0.005)
         for tile_id in tile_ids:
             assert tile_id in cache
 
@@ -269,12 +311,11 @@ class TestConcurrentTileRequests:
         provider.start()
 
         num_requests = 100
-        tile_ids = [('media', 1, i // 10, i % 10) for i in range(num_requests)]
+        tile_ids = [("media", 1, i // 10, i % 10) for i in range(num_requests)]
 
         def rapid_requests():
             for tile_id in tile_ids:
                 provider.request(tile_id)
-                time.sleep(0.001)  # Very rapid
 
         threads = [threading.Thread(target=rapid_requests) for _ in range(5)]
         for t in threads:
@@ -282,12 +323,22 @@ class TestConcurrentTileRequests:
         for t in threads:
             t.join()
 
-        time.sleep(2)  # Allow processing
+        # Wait until all unique tiles are in cache
+        unique_tiles = set(tile_ids)
+        deadline = time.monotonic() + 10.0
+        while time.monotonic() < deadline:
+            loaded_count = sum(1 for tid in unique_tiles if tid in cache)
+            if loaded_count == len(unique_tiles):
+                break
+            time.sleep(0.005)
+        else:
+            pass  # timeout — assertion below will fail with clear message
 
         # All unique tiles should be loaded
         unique_tiles = set(tile_ids)
         loaded_count = sum(1 for tid in unique_tiles if tid in cache)
         assert loaded_count == len(unique_tiles)
+
 
 class TestConcurrentTilingOperations:
     """
@@ -297,8 +348,7 @@ class TestConcurrentTilingOperations:
     must maintain its own state without interfering with others.
     """
 
-    def test_concurrent_tiling_different_images(
-            self, temp_tilestore, sample_images, initialized_tilemanager):
+    def test_concurrent_tiling_different_images(self, temp_tilestore, sample_images, initialized_tilemanager):
         """
         Scenario: Multiple images tiled concurrently
 
@@ -315,10 +365,7 @@ class TestConcurrentTilingOperations:
                 media_id = f"concurrent_media_{index}"
                 tiler = ConcreteTiler(image_path, media_id=media_id, tilesize=256)
                 tiler.run()
-                results[media_id] = {
-                    'error': tiler.error,
-                    'progress': tiler.progress
-                }
+                results[media_id] = {"error": tiler.error, "progress": tiler.progress}
             except Exception as e:
                 errors.append((index, e))
 
@@ -335,12 +382,13 @@ class TestConcurrentTilingOperations:
 
         # All should complete successfully
         for media_id, result in results.items():
-            assert result['error'] is None, f"{media_id} failed: {result['error']}"
-            assert result['progress'] == 1.0
+            assert result["error"] is None, f"{media_id} failed: {result['error']}"
+            assert result["progress"] == 1.0
             assert tilestore.tiled(media_id)
 
     def test_concurrent_tiling_creates_independent_pyramids(
-            self, temp_tilestore, sample_images, initialized_tilemanager):
+        self, temp_tilestore, sample_images, initialized_tilemanager
+    ):
         """
         Scenario: Concurrent tiling produces independent tile pyramids
 
@@ -359,10 +407,7 @@ class TestConcurrentTilingOperations:
             return tiler.error
 
         with ThreadPoolExecutor(max_workers=3) as executor:
-            futures = [
-                executor.submit(tile_image, path, i)
-                for i, path in enumerate(sample_images[:3])
-            ]
+            futures = [executor.submit(tile_image, path, i) for i, path in enumerate(sample_images[:3])]
             errors = [f.result() for f in as_completed(futures)]
 
         assert all(e is None for e in errors)
@@ -370,8 +415,9 @@ class TestConcurrentTilingOperations:
         # Verify each has independent metadata
         for media_id in media_ids:
             assert tilestore.tiled(media_id)
-            assert tilestore.get_metadata(media_id, 'width') == 512
-            assert tilestore.get_metadata(media_id, 'height') == 512
+            assert tilestore.get_metadata(media_id, "width") == 512
+            assert tilestore.get_metadata(media_id, "height") == 512
+
 
 class TestCacheThreadSafety:
     """
@@ -392,8 +438,8 @@ class TestCacheThreadSafety:
         """
         # Pre-populate cache
         for i in range(10):
-            tile_id = ('media', 1, 0, i)
-            cache[tile_id] = Tile(Image.new('RGB', (256, 256)))
+            tile_id = ("media", 1, 0, i)
+            cache[tile_id] = Tile(Image.new("RGB", (256, 256)))
 
         results = []
         errors = []
@@ -401,7 +447,7 @@ class TestCacheThreadSafety:
         def read_tiles():
             try:
                 for i in range(10):
-                    tile_id = ('media', 1, 0, i)
+                    tile_id = ("media", 1, 0, i)
                     if tile_id in cache:
                         tile = cache[tile_id]
                         results.append((tile_id, tile is not None))
@@ -431,11 +477,10 @@ class TestCacheThreadSafety:
 
         def write_tiles(thread_id):
             for i in range(tiles_per_thread):
-                tile_id = ('media', 1, thread_id, i)
-                cache[tile_id] = Tile(Image.new('RGB', (256, 256)))
+                tile_id = ("media", 1, thread_id, i)
+                cache[tile_id] = Tile(Image.new("RGB", (256, 256)))
 
-        threads = [threading.Thread(target=write_tiles, args=(i,))
-                   for i in range(num_threads)]
+        threads = [threading.Thread(target=write_tiles, args=(i,)) for i in range(num_threads)]
         for t in threads:
             t.start()
         for t in threads:
@@ -445,7 +490,7 @@ class TestCacheThreadSafety:
         stored_count = 0
         for thread_id in range(num_threads):
             for i in range(tiles_per_thread):
-                tile_id = ('media', 1, thread_id, i)
+                tile_id = ("media", 1, thread_id, i)
                 if tile_id in cache:
                     stored_count += 1
 
@@ -462,30 +507,35 @@ class TestCacheThreadSafety:
         """
         errors = []
         stop_flag = threading.Event()
+        write_count = [0]
+        write_lock = threading.Lock()
+        target_writes = 500
 
         def writer():
             i = 0
             while not stop_flag.is_set():
-                tile_id = ('media', 1, 0, i % 50)
+                tile_id = ("media", 1, 0, i % 50)
                 try:
-                    cache[tile_id] = Tile(Image.new('RGB', (256, 256)))
+                    cache[tile_id] = Tile(Image.new("RGB", (256, 256)))
                 except Exception as e:
-                    errors.append(('write', e))
+                    errors.append(("write", e))
                 i += 1
-                time.sleep(0.001)
+                with write_lock:
+                    write_count[0] += 1
+                    if write_count[0] >= target_writes:
+                        stop_flag.set()
 
         def reader():
             while not stop_flag.is_set():
                 for i in range(50):
-                    tile_id = ('media', 1, 0, i)
+                    tile_id = ("media", 1, 0, i)
                     try:
                         if tile_id in cache:
                             _ = cache[tile_id]
                     except KeyError:
                         pass  # Expected - tile may have been evicted
                     except Exception as e:
-                        errors.append(('read', e))
-                time.sleep(0.001)
+                        errors.append(("read", e))
 
         writers = [threading.Thread(target=writer) for _ in range(3)]
         readers = [threading.Thread(target=reader) for _ in range(5)]
@@ -493,11 +543,11 @@ class TestCacheThreadSafety:
         for t in writers + readers:
             t.start()
 
-        time.sleep(1)  # Run for 1 second
-        stop_flag.set()
+        # Wait until target writes are reached (or timeout)
+        assert stop_flag.wait(timeout=10), f"Only {write_count[0]}/{target_writes} writes completed before timeout"
 
         for t in writers + readers:
-            t.join()
+            t.join(timeout=2)
 
         assert len(errors) == 0, f"Errors: {errors}"
 
@@ -515,12 +565,12 @@ class TestCacheThreadSafety:
 
         def access_and_fill():
             for i in range(100):
-                tile_id = ('media', 1, 0, i)
+                tile_id = ("media", 1, 0, i)
                 try:
-                    small_cache[tile_id] = Tile(Image.new('RGB', (256, 256)))
+                    small_cache[tile_id] = Tile(Image.new("RGB", (256, 256)))
                     # Immediately access some tiles to affect LRU order
                     if i > 0 and i % 5 == 0:
-                        recent_id = ('media', 1, 0, i - 1)
+                        recent_id = ("media", 1, 0, i - 1)
                         if recent_id in small_cache:
                             _ = small_cache[recent_id]
                 except Exception as e:
@@ -533,6 +583,7 @@ class TestCacheThreadSafety:
             t.join()
 
         assert len(errors) == 0
+
 
 class TestProviderQueueConcurrency:
     """
@@ -559,20 +610,21 @@ class TestProviderQueueConcurrency:
 
         def submit_requests(thread_id):
             for i in range(requests_per_thread):
-                tile_id = ('media', 1, thread_id, i)
+                tile_id = ("media", 1, thread_id, i)
                 provider.request(tile_id)
 
-        threads = [threading.Thread(target=submit_requests, args=(i,))
-                   for i in range(num_threads)]
+        threads = [threading.Thread(target=submit_requests, args=(i,)) for i in range(num_threads)]
         for t in threads:
             t.start()
         for t in threads:
             t.join()
 
-        time.sleep(3)  # Allow all to process
-
         # All tiles should eventually be loaded
         total_expected = num_threads * requests_per_thread
+        assert wait_for_load_count(provider, total_expected, timeout=10.0), (
+            f"Only {provider.load_call_count}/{total_expected} tiles loaded"
+        )
+
         assert provider.load_call_count == total_expected
 
     def test_purge_during_concurrent_requests(self, cache):
@@ -589,20 +641,21 @@ class TestProviderQueueConcurrency:
 
         stop_flag = threading.Event()
         purge_count = [0]
+        target_purges = 20
 
         def submit_requests():
             i = 0
             while not stop_flag.is_set():
-                tile_id = ('media', 1, 0, i % 100)
+                tile_id = ("media", 1, 0, i % 100)
                 provider.request(tile_id)
                 i += 1
-                time.sleep(0.005)
 
         def periodic_purge():
             while not stop_flag.is_set():
-                time.sleep(0.1)
                 provider.purge()
                 purge_count[0] += 1
+                if purge_count[0] >= target_purges:
+                    stop_flag.set()
 
         submitter = threading.Thread(target=submit_requests)
         purger = threading.Thread(target=periodic_purge)
@@ -610,14 +663,14 @@ class TestProviderQueueConcurrency:
         submitter.start()
         purger.start()
 
-        time.sleep(1)  # Run for 1 second
-        stop_flag.set()
+        assert stop_flag.wait(timeout=10), f"Only {purge_count[0]}/{target_purges} purges completed before timeout"
 
-        submitter.join()
-        purger.join()
+        submitter.join(timeout=2)
+        purger.join(timeout=2)
 
         # Verify purge was called multiple times without deadlock
-        assert purge_count[0] > 5
+        assert purge_count[0] >= target_purges
+
 
 class TestMetadataConcurrency:
     """
@@ -627,8 +680,7 @@ class TestMetadataConcurrency:
     thread-safe, allowing concurrent reads without corruption.
     """
 
-    def test_concurrent_metadata_reads(
-            self, temp_tilestore, sample_images, initialized_tilemanager):
+    def test_concurrent_metadata_reads(self, temp_tilestore, sample_images, initialized_tilemanager):
         """
         Scenario: Concurrent metadata reads do not corrupt data
 
@@ -647,8 +699,8 @@ class TestMetadataConcurrency:
         def read_metadata():
             try:
                 for _ in range(50):
-                    width = tilemanager.get_metadata(media_id, 'width')
-                    height = tilemanager.get_metadata(media_id, 'height')
+                    width = tilemanager.get_metadata(media_id, "width")
+                    height = tilemanager.get_metadata(media_id, "height")
                     results.append((width, height))
             except Exception as e:
                 errors.append(e)
@@ -663,6 +715,7 @@ class TestMetadataConcurrency:
         # All results should be consistent
         assert all(r == (512, 512) for r in results)
 
+
 class TestTileManagerConcurrency:
     """
     Feature: TileManager Concurrent Operations
@@ -671,8 +724,7 @@ class TestTileManagerConcurrency:
     including tile loading, synthesis, and metadata access.
     """
 
-    def test_concurrent_load_tile_calls(
-            self, temp_tilestore, sample_images, initialized_tilemanager):
+    def test_concurrent_load_tile_calls(self, temp_tilestore, sample_images, initialized_tilemanager):
         """
         Scenario: Concurrent load_tile calls for same media
 
@@ -698,19 +750,12 @@ class TestTileManagerConcurrency:
         for t in threads:
             t.join()
 
-        time.sleep(0.5)
-
-        # Verify tiles are loadable (may need retry due to async loading)
+        # Verify tiles are loadable with deterministic timeout
         for tile_id in tile_ids:
-            for _ in range(10):
-                try:
-                    tile = tilemanager.get_tile(tile_id)
-                    break
-                except TileNotLoaded:
-                    time.sleep(0.1)
+            tile = wait_for_tile(tile_id, timeout=10.0)
+            assert tile is not None
 
-    def test_concurrent_get_tile_robust_calls(
-            self, temp_tilestore, sample_images, initialized_tilemanager):
+    def test_concurrent_get_tile_robust_calls(self, temp_tilestore, sample_images, initialized_tilemanager):
         """
         Scenario: Concurrent get_tile_robust calls with synthesis
 
@@ -726,7 +771,7 @@ class TestTileManagerConcurrency:
 
         # Ensure base tile is cached
         tilemanager.load_tile((media_id, 0, 0, 0))
-        time.sleep(0.3)
+        wait_for_tile((media_id, 0, 0, 0), timeout=10.0)
 
         results = []
         errors = []
@@ -751,6 +796,7 @@ class TestTileManagerConcurrency:
         assert len(errors) == 0, f"Errors: {errors}"
         assert all(results)
 
+
 class TestStressConditions:
     """
     Feature: System Behavior Under Stress
@@ -774,16 +820,17 @@ class TestStressConditions:
 
         def random_operations():
             import random
+
             for _ in range(100):
                 try:
-                    op = random.choice(['read', 'write', 'check'])
-                    tile_id = ('media', 1, random.randint(0, 10), random.randint(0, 10))
+                    op = random.choice(["read", "write", "check"])
+                    tile_id = ("media", 1, random.randint(0, 10), random.randint(0, 10))
 
-                    if op == 'write':
-                        cache[tile_id] = Tile(Image.new('RGB', (256, 256)))
-                    elif op == 'read' and tile_id in cache:
+                    if op == "write":
+                        cache[tile_id] = Tile(Image.new("RGB", (256, 256)))
+                    elif op == "read" and tile_id in cache:
                         _ = cache[tile_id]
-                    elif op == 'check':
+                    elif op == "check":
                         _ = tile_id in cache
 
                     with lock:
@@ -801,8 +848,7 @@ class TestStressConditions:
 
         assert len(errors) == 0, f"Errors: {errors}"
         # Allow small variance due to threading timing
-        assert operation_count[0] >= 1990, \
-            f"Expected ~2000 operations, got {operation_count[0]}"
+        assert operation_count[0] >= 1990, f"Expected ~2000 operations, got {operation_count[0]}"
 
     def test_memory_pressure_stability(self):
         """
@@ -818,9 +864,9 @@ class TestStressConditions:
 
         def fill_cache():
             for i in range(200):
-                tile_id = ('media', 1, i // 20, i % 20)
+                tile_id = ("media", 1, i // 20, i % 20)
                 try:
-                    small_cache[tile_id] = Tile(Image.new('RGB', (256, 256)))
+                    small_cache[tile_id] = Tile(Image.new("RGB", (256, 256)))
                 except Exception as e:
                     errors.append(e)
 

@@ -13,10 +13,12 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
 import math
-from unittest.mock import Mock
+
+import pytest
+
 from pyzui.objects.physicalobject import PhysicalObject
+
 
 class TestPhysicalObject:
     """
@@ -49,10 +51,10 @@ class TestPhysicalObject:
 
         Given a PhysicalObject
         When accessing the damping_factor attribute
-        Then it should be 512
+        Then it should be 1024
         """
         obj = PhysicalObject()
-        assert obj.damping_factor == 512
+        assert obj.damping_factor == 1024
 
     def test_move(self):
         """
@@ -172,7 +174,7 @@ class TestPhysicalObject:
         Then velocity should be calculated based on damping factor
         """
         obj = PhysicalObject()
-        obj.aim('x', 100.0)
+        obj.aim("x", 100.0)
         expected = 100.0 * math.log(obj.damping_factor)
         assert obj.vx == pytest.approx(expected)
 
@@ -185,7 +187,7 @@ class TestPhysicalObject:
         Then velocity should be calculated based on damping factor
         """
         obj = PhysicalObject()
-        obj.aim('y', 50.0)
+        obj.aim("y", 50.0)
         expected = 50.0 * math.log(obj.damping_factor)
         assert obj.vy == pytest.approx(expected)
 
@@ -198,7 +200,7 @@ class TestPhysicalObject:
         Then velocity should be calculated based on damping factor
         """
         obj = PhysicalObject()
-        obj.aim('z', 2.0)
+        obj.aim("z", 2.0)
         expected = 2.0 * math.log(obj.damping_factor)
         assert obj.vz == pytest.approx(expected)
 
@@ -211,7 +213,7 @@ class TestPhysicalObject:
         Then velocity should be adjusted to reach target in specified time
         """
         obj = PhysicalObject()
-        obj.aim('x', 100.0, t=1.0)
+        obj.aim("x", 100.0, t=1.0)
         expected = (100.0 * math.log(obj.damping_factor)) / (1 - obj.damping_factor**-1.0)
         assert obj.vx == pytest.approx(expected)
 
@@ -300,8 +302,8 @@ class TestPhysicalObject:
         Then the velocity changes should accumulate
         """
         obj = PhysicalObject()
-        obj.aim('x', 100.0)
+        obj.aim("x", 100.0)
         first_vx = obj.vx
-        obj.aim('x', 50.0)
+        obj.aim("x", 50.0)
         # Second aim should add to velocity
         assert obj.vx > first_vx

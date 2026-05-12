@@ -13,11 +13,14 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch, mock_open
 from io import BytesIO
+from unittest.mock import mock_open, patch
+
+import pytest
+
 from pyzui.tilesystem.tiler import ppm
 from pyzui.tilesystem.tiler.ppm import PPMTiler, read_ppm_header
+
 
 class TestReadPPMHeader:
     """
@@ -133,6 +136,7 @@ class TestReadPPMHeader:
         assert width == 100
         assert height == 200
 
+
 class TestEnlargePPMFile:
     """
     Feature: PPM File Enlargement
@@ -142,7 +146,7 @@ class TestEnlargePPMFile:
     """
 
     @pytest.mark.skip(reason="enlarge_ppm_file is currently commented out in ppm.py")
-    @patch('builtins.open', new_callable=mock_open, read_data="P6\n10 5\n255\ndata_here")
+    @patch("builtins.open", new_callable=mock_open, read_data="P6\n10 5\n255\ndata_here")
     def test_enlarge_ppm_file_basic(self, mock_file):
         """
         Scenario: Enlarge PPM file by factor
@@ -154,7 +158,7 @@ class TestEnlargePPMFile:
         ppm.enlarge_ppm_file("test.ppm", 10, 5, 3)
         # Function should have been called
 
-    @patch('builtins.open')
+    @patch("builtins.open")
     def test_enlarge_ppm_file_reads_and_writes(self, mock_file_open):
         """
         Scenario: Verify file operations during enlargement
@@ -167,6 +171,7 @@ class TestEnlargePPMFile:
         # Testing would require more sophisticated mocking
         pass
 
+
 class TestPPMTiler:
     """
     Feature: PPM Tiler
@@ -175,7 +180,7 @@ class TestPPMTiler:
     into pyramid structures for efficient zooming and panning.
     """
 
-    @patch('builtins.open', new_callable=mock_open, read_data=b"P6\n256 256\n255\n" + b"\x00" * (256 * 256 * 3))
+    @patch("builtins.open", new_callable=mock_open, read_data=b"P6\n256 256\n255\n" + b"\x00" * (256 * 256 * 3))
     def test_init(self, mock_file):
         """
         Scenario: Initialize PPM tiler
@@ -189,7 +194,7 @@ class TestPPMTiler:
         assert tiler._height == 256
         assert tiler._bytes_per_pixel == 3
 
-    @patch('builtins.open', new_callable=mock_open, read_data=b"P6\n100 200\n255\n" + b"\x00" * (100 * 200 * 3))
+    @patch("builtins.open", new_callable=mock_open, read_data=b"P6\n100 200\n255\n" + b"\x00" * (100 * 200 * 3))
     def test_init_custom_dimensions(self, mock_file):
         """
         Scenario: Initialize tiler with custom parameters
@@ -202,7 +207,7 @@ class TestPPMTiler:
         assert tiler._width == 100
         assert tiler._height == 200
 
-    @patch('builtins.open', side_effect=IOError("File not found"))
+    @patch("builtins.open", side_effect=OSError("File not found"))
     def test_init_file_not_found(self, mock_file):
         """
         Scenario: Handle missing PPM file
@@ -214,7 +219,7 @@ class TestPPMTiler:
         with pytest.raises(IOError):
             PPMTiler("nonexistent.ppm")
 
-    @patch('builtins.open', new_callable=mock_open, read_data=b"P6\n256 256\n255\n" + b"\xFF\x00\x00" * (256 * 256))
+    @patch("builtins.open", new_callable=mock_open, read_data=b"P6\n256 256\n255\n" + b"\xff\x00\x00" * (256 * 256))
     def test_scanchunk(self, mock_file):
         """
         Scenario: Read a chunk of scanline data
@@ -228,7 +233,7 @@ class TestPPMTiler:
         # Should read bytes_per_pixel * width bytes
         assert len(chunk) == 3 * 256
 
-    @patch('builtins.open', new_callable=mock_open, read_data=b"P6\n10 10\n255\n" + b"\x00" * (10 * 10 * 3))
+    @patch("builtins.open", new_callable=mock_open, read_data=b"P6\n10 10\n255\n" + b"\x00" * (10 * 10 * 3))
     def test_bytes_per_pixel(self, mock_file):
         """
         Scenario: Verify bytes per pixel setting
@@ -240,7 +245,7 @@ class TestPPMTiler:
         tiler = PPMTiler("test.ppm")
         assert tiler._bytes_per_pixel == 3
 
-    @patch('builtins.open', new_callable=mock_open, read_data=b"P6\n512 512\n255\n" + b"\x00" * (512 * 512 * 3))
+    @patch("builtins.open", new_callable=mock_open, read_data=b"P6\n512 512\n255\n" + b"\x00" * (512 * 512 * 3))
     def test_del_closes_file(self, mock_file):
         """
         Scenario: Clean up file handle on deletion
@@ -266,25 +271,26 @@ class TestPPMTiler:
         """
         import os
         import tempfile
+
         from pyzui.converters.vipsconverter import VipsConverter
         from pyzui.tilesystem import tilestore as TileStore
 
         for name in os.listdir("../../data"):
             fullpath = os.path.join("../../data", name)
-            
-            if os.path.isfile(fullpath) and name.lower().endswith(".jpg") \
-            or os.path.isfile(fullpath) and name.lower().endswith(".jpeg"):
-            
+
+            if (os.path.isfile(fullpath) and name.lower().endswith(".jpg")) or (
+                os.path.isfile(fullpath) and name.lower().endswith(".jpeg")
+            ):
                 tiff_file = fullpath
-            else :
+            else:
                 tiff_file = ""
 
         # Skip if TIFF file doesn't exist
         if not os.path.exists(tiff_file):
-            pytest.skip(f"Test file not found: place .tif/.tiff test file in ./data folder")
+            pytest.skip("Test file not found: place .tif/.tiff test file in ./data folder")
 
         # Convert TIFF to PPM first
-        with tempfile.NamedTemporaryFile(suffix='.ppm', delete=False) as tmp:
+        with tempfile.NamedTemporaryFile(suffix=".ppm", delete=False) as tmp:
             ppm_file = tmp.name
 
         try:
@@ -313,7 +319,7 @@ class TestPPMTiler:
             tiler.join()
 
             # Verify tiling completed
-            assert tiler.progress == 1.0, f"Tiling incomplete: {tiler.progress*100}%"
+            assert tiler.progress == 1.0, f"Tiling incomplete: {tiler.progress * 100}%"
 
             # Verify PNG tiles were created
             tile_path = TileStore.get_media_path(media_id)
@@ -321,8 +327,8 @@ class TestPPMTiler:
 
             # Count PNG tiles
             png_tiles = []
-            for root, dirs, files in os.walk(tile_path):
-                png_tiles.extend([f for f in files if f.endswith('.png')])
+            for _root, _dirs, files in os.walk(tile_path):
+                png_tiles.extend([f for f in files if f.endswith(".png")])
 
             assert len(png_tiles) > 0, "No PNG tiles were created"
 

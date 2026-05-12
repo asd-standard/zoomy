@@ -22,6 +22,7 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import cast
 
+
 class LoggerConfig:
     """
     Constructor :
@@ -46,21 +47,28 @@ class LoggerConfig:
     _log_file = None
     _console_level = logging.INFO
     _file_level = logging.DEBUG
-    _loggers = {}
+    _loggers: dict[str, logging.Logger] = {}
 
     # ANSI color codes for console output
     COLORS = {
-        'DEBUG': '\033[36m',      # Cyan
-        'INFO': '\033[32m',       # Green
-        'WARNING': '\033[33m',    # Yellow
-        'ERROR': '\033[31m',      # Red
-        'CRITICAL': '\033[35m',   # Magenta
-        'RESET': '\033[0m'        # Reset
+        "DEBUG": "\033[36m",  # Cyan
+        "INFO": "\033[32m",  # Green
+        "WARNING": "\033[33m",  # Yellow
+        "ERROR": "\033[31m",  # Red
+        "CRITICAL": "\033[35m",  # Magenta
+        "RESET": "\033[0m",  # Reset
     }
 
     @classmethod
-    def initialize(cls, debug: bool = False, log_to_file: bool = True, log_to_console: bool = True,
-                   log_dir: str | None = None, colored_output: bool = True, verbose: bool = False) -> None:
+    def initialize(
+        cls,
+        debug: bool = False,
+        log_to_file: bool = True,
+        log_to_console: bool = True,
+        log_dir: str | None = None,
+        colored_output: bool = True,
+        verbose: bool = False,
+    ) -> None:
         """
         Method :
             LoggerConfig.initialize(debug, log_to_file, log_to_console, log_dir, colored_output, verbose)
@@ -84,9 +92,6 @@ class LoggerConfig:
             colored_output (bool): Enable colored console output
             verbose (bool): Enable verbose mode (shows more detailed info)
         """
-        if cls._initialized:
-            return
-
         # Determine log levels
         if debug:
             cls._console_level = logging.DEBUG
@@ -98,15 +103,15 @@ class LoggerConfig:
             cls._console_level = logging.WARNING
             cls._file_level = logging.INFO
 
-        # Setup log directory
+        # Setup log directory with tilde expansion for command-line arguments
         if log_dir:
-            cls._log_dir = Path(log_dir)
+            cls._log_dir = Path(log_dir).expanduser()
         else:
-            cls._log_dir = Path.cwd() / 'logs'
+            cls._log_dir = Path.cwd() / "logs"
 
         if log_to_file:
             cls._log_dir.mkdir(parents=True, exist_ok=True)
-            cls._log_file = cls._log_dir / 'pyzui.log'
+            cls._log_file = cls._log_dir / "pyzui.log"
 
         # Configure root logger
         root_logger = logging.getLogger()
@@ -119,17 +124,12 @@ class LoggerConfig:
 
         # Create formatters
         if colored_output and log_to_console:
-            console_formatter = ColoredFormatter(
-                '%(color)s[%(levelname)-8s]%(reset)s %(name)-25s | %(message)s'
-            )
+            console_formatter = ColoredFormatter("%(color)s[%(levelname)-8s]%(reset)s %(name)-25s | %(message)s")
         else:
-            console_formatter = logging.Formatter(
-                '[%(levelname)-8s] %(name)-25s | %(message)s'
-            )
+            console_formatter = logging.Formatter("[%(levelname)-8s] %(name)-25s | %(message)s")  # type: ignore[assignment]
 
         file_formatter = logging.Formatter(
-            '%(asctime)s | [%(levelname)-8s] | %(name)-25s | %(funcName)-20s | %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
+            "%(asctime)s | [%(levelname)-8s] | %(name)-25s | %(funcName)-20s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
         )
 
         # Add console handler
@@ -145,7 +145,7 @@ class LoggerConfig:
             file_handler = RotatingFileHandler(
                 cast(Path, cls._log_file),
                 maxBytes=10 * 1024 * 1024,  # 10 MB
-                backupCount=5
+                backupCount=5,
             )
             file_handler.setLevel(cls._file_level)
             file_handler.setFormatter(file_formatter)
@@ -154,15 +154,15 @@ class LoggerConfig:
         cls._initialized = True
 
         # Log initialization
-        init_logger = cls.get_logger('LoggerConfig')
-        init_logger.info('='*60)
-        init_logger.info('PyZUI Logging System Initialized')
-        init_logger.info(f'Debug Mode: {debug}')
-        init_logger.info(f'Console Level: {logging.getLevelName(cls._console_level)}')
-        init_logger.info(f'File Level: {logging.getLevelName(cls._file_level)}')
+        init_logger = cls.get_logger("LoggerConfig")
+        init_logger.info("=" * 60)
+        init_logger.info("PyZUI Logging System Initialized")
+        init_logger.info(f"Debug Mode: {debug}")
+        init_logger.info(f"Console Level: {logging.getLevelName(cls._console_level)}")
+        init_logger.info(f"File Level: {logging.getLevelName(cls._file_level)}")
         if log_to_file:
-            init_logger.info(f'Log File: {cls._log_file}')
-        init_logger.info('='*60)
+            init_logger.info(f"Log File: {cls._log_file}")
+        init_logger.info("=" * 60)
 
     @classmethod
     def get_logger(cls, name: str) -> logging.Logger:
@@ -187,7 +187,7 @@ class LoggerConfig:
             cls.initialize()
 
         if name not in cls._loggers:
-            logger = logging.getLogger(f'pyzui.{name}')
+            logger = logging.getLogger(f"pyzui.{name}")
             cls._loggers[name] = logger
 
         return cls._loggers[name]
@@ -233,8 +233,8 @@ class LoggerConfig:
         Enable debug mode at runtime.
         """
         cls.set_level(logging.DEBUG)
-        logger = cls.get_logger('LoggerConfig')
-        logger.info('Debug mode enabled')
+        logger = cls.get_logger("LoggerConfig")
+        logger.info("Debug mode enabled")
 
     @classmethod
     def disable_debug(cls) -> None:
@@ -249,8 +249,8 @@ class LoggerConfig:
         Disable debug mode at runtime.
         """
         cls.set_level(logging.INFO)
-        logger = cls.get_logger('LoggerConfig')
-        logger.info('Debug mode disabled')
+        logger = cls.get_logger("LoggerConfig")
+        logger.info("Debug mode disabled")
 
     @classmethod
     def get_log_file_path(cls) -> Path | None:
@@ -268,6 +268,7 @@ class LoggerConfig:
             Path: Path to log file, or None if file logging is disabled
         """
         return cls._log_file
+
 
 class ColoredFormatter(logging.Formatter):
     """
@@ -298,12 +299,13 @@ class ColoredFormatter(logging.Formatter):
         levelname = record.levelname
         if levelname in LoggerConfig.COLORS:
             record.color = LoggerConfig.COLORS[levelname]
-            record.reset = LoggerConfig.COLORS['RESET']
+            record.reset = LoggerConfig.COLORS["RESET"]
         else:
-            record.color = ''
-            record.reset = ''
+            record.color = ""
+            record.reset = ""
 
         return super().format(record)
+
 
 def get_logger(name: str) -> logging.Logger:
     """

@@ -16,29 +16,34 @@
 
 """Tiled media object editing dialog with image manipulation options."""
 
-from typing import TYPE_CHECKING, Optional, Tuple, Literal
 import os
 import tempfile
+from typing import TYPE_CHECKING, Literal
 
-
-from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QPushButton, QDialogButtonBox,
-    QWidget, QLabel, QHBoxLayout, QSizePolicy
-)
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap, QTransform, QImage
+from PySide6.QtGui import QImage, QPixmap, QTransform
+from PySide6.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
+)
 
-from pyzui.tilesystem import tilemanager as TileManager
+from pyzui.converters.vipsconverter import VipsConverter
 from pyzui.logger import get_logger
 from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject
-from pyzui.converters.vipsconverter import VipsConverter
+from pyzui.tilesystem import tilemanager as TileManager
 
 if TYPE_CHECKING:
     from logging import Logger
-    from pyzui.objects.scene.scene import Scene as SceneType
+
 
 # Type aliases
-DialogResult = Tuple[bool, Optional[str]]
+DialogResult = tuple[bool, str | None]
 
 
 class ModifyTiledMediaObjectDialog:
@@ -54,6 +59,7 @@ class ModifyTiledMediaObjectDialog:
     Shows the top tile of the tiled media object and provides buttons
     for image manipulation (rotate, invert colors, black and white).
     """
+
     def __init__(self, mediaobject: TiledMediaObject) -> None:
         """
         Method :
@@ -67,24 +73,23 @@ class ModifyTiledMediaObjectDialog:
         Loads the top tile (0,0,0) of the tiled media object.
         """
         self.mediaobject: TiledMediaObject = mediaobject
-        self.media_id: Optional[str] = mediaobject._media_id if mediaobject else None
-        self.tile_image: Optional[QImage] = None
+        self.media_id: str | None = mediaobject._media_id if mediaobject else None
+        self.tile_image: QImage | None = None
         self.current_rotation: Literal[0, 90, 180, 270] = 0  # Track rotation angle in degrees
         self.invert_colors: bool = False  # Track invert colors state
         self.black_and_white: bool = False  # Track black and white state
         self.image_label: QLabel
 
         # Initialize logger
-        self.__logger: "Logger" = get_logger('ModifyTiledMediaObjectDialog')
+        self.__logger: Logger = get_logger("ModifyTiledMediaObjectDialog")
 
         # Try to load the top tile
         if self.media_id:
-            
             try:
                 tile = TileManager.get_tile((self.media_id, 0, 0, 0))
                 # Access the private __image attribute (Tile private attribute)
                 # This is a PIL.ImageQt.ImageQt object
-                if hasattr(tile, '_Tile__image'):
+                if hasattr(tile, "_Tile__image"):
                     self.tile_image = tile._Tile__image
                     self.__logger.debug(f"Successfully loaded tile for media_id: {self.media_id}")
             except Exception as e:
@@ -158,7 +163,9 @@ class ModifyTiledMediaObjectDialog:
             # Convert QImage to QPixmap and display
             pixmap = QPixmap.fromImage(self.tile_image)
             # Scale the image to fit nicely in the dialog
-            scaled_pixmap = pixmap.scaled(400, 400, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            scaled_pixmap = pixmap.scaled(
+                400, 400, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
+            )
             self.image_label.setPixmap(scaled_pixmap)
         else:
             self.image_label.setText("No image available")
@@ -203,7 +210,9 @@ class ModifyTiledMediaObjectDialog:
         button_layout = QVBoxLayout()
         button_layout.addStretch()
 
-        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Apply | QDialogButtonBox.StandardButton.Cancel, dialog)
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Apply | QDialogButtonBox.StandardButton.Cancel, dialog
+        )
         buttons.button(QDialogButtonBox.StandardButton.Apply).clicked.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)
 
@@ -226,7 +235,7 @@ class ModifyTiledMediaObjectDialog:
 
         return dialog
 
-    def _run_dialog(self) -> Tuple[bool, Optional[str]]:
+    def _run_dialog(self) -> tuple[bool, str | None]:
         """
         Method :
             ModifyTiledMediaObjectDialog._run_dialog()
@@ -244,35 +253,34 @@ class ModifyTiledMediaObjectDialog:
         # Run dialog and get result
         if dialog.exec() == QDialog.DialogCode.Accepted:
             # Check if any transformation was applied
-            has_transformations = (
-                self.current_rotation != 0 or
-                self.invert_colors or
-                self.black_and_white
-            )
+            has_transformations = self.current_rotation != 0 or self.invert_colors or self.black_and_white
 
             if has_transformations:
-                self.__logger.info(f"OK pressed - applying transformations: "
-                                   f"rotation={self.current_rotation}°, "
-                                   f"invert={self.invert_colors}, "
-                                   f"b&w={self.black_and_white}")
+                self.__logger.info(
+                    f"OK pressed - applying transformations: "
+                    f"rotation={self.current_rotation}°, "
+                    f"invert={self.invert_colors}, "
+                    f"b&w={self.black_and_white}"
+                )
 
                 # Get the original source file
-                infile = self.mediaobject._TiledMediaObject__tmpfile
+                infile = self.mediaobject._TiledMediaObject__tmpfile  # type: ignore[attr-defined]
                 if not infile or not os.path.exists(infile):
                     self.__logger.error(f"Source file not found: {infile}")
                     return False, None
 
                 # Create unique temp file for transformed output
-                fd, outfile = tempfile.mkstemp('.ppm')
+                fd, outfile = tempfile.mkstemp(".ppm")
                 os.close(fd)
 
                 # Use VipsConverter with all transformation parameters
                 self.__logger.info(f"Converting with VipsConverter: {infile} -> {outfile}")
                 converter = VipsConverter(
-                    infile, outfile,
+                    infile,
+                    outfile,
                     rotation=self.current_rotation,
                     invert_colors=self.invert_colors,
-                    black_and_white=self.black_and_white
+                    black_and_white=self.black_and_white,
                 )
                 converter.run()
 
@@ -323,9 +331,10 @@ class ModifyTiledMediaObjectDialog:
                 pixmap = pixmap.transformed(transform, Qt.TransformationMode.SmoothTransformation)
 
             # Scale the image to fit nicely in the dialog
-            scaled_pixmap = pixmap.scaled(400, 400, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            scaled_pixmap = pixmap.scaled(
+                400, 400, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
+            )
             self.image_label.setPixmap(scaled_pixmap)
-
 
     def _replace_mediaobject_with_rotated(self, rotated_ppm_path: str) -> bool:
         """
@@ -362,7 +371,7 @@ class ModifyTiledMediaObjectDialog:
             # Create a new TiledMediaObject with the rotated PPM
             self.__logger.info(f"Creating new TiledMediaObject with rotated PPM: {rotated_ppm_path}")
             new_mediaobject = TiledMediaObject(rotated_ppm_path, scene, autofit=False)
-            new_mediaobject._TiledMediaObject__tmpfile = rotated_ppm_path
+            new_mediaobject._TiledMediaObject__tmpfile = rotated_ppm_path  # type: ignore[attr-defined]
 
             # Set the new mediaobject to the same position and zoom as the old one
             new_mediaobject.fit((old_topleft[0], old_topleft[1], old_bottomright[0], old_bottomright[1]))
@@ -372,8 +381,6 @@ class ModifyTiledMediaObjectDialog:
             # Add the new mediaobject to the scene
             self.__logger.info("Adding new mediaobject to scene")
             scene.add(new_mediaobject)
-
-
 
             self.__logger.info("Successfully replaced mediaobject with rotated version")
             return True
@@ -395,7 +402,7 @@ class ModifyTiledMediaObjectDialog:
         Rotate the image 90 degrees counter-clockwise (left).
         Updates preview only; actual rotation applied on OK.
         """
-        self.current_rotation = (self.current_rotation - 90) % 360
+        self.current_rotation = (self.current_rotation - 90) % 360  # type: ignore[assignment]
         self._update_image_display()
         self.__logger.debug(f"Rotated left - current rotation: {self.current_rotation}°")
 
@@ -411,7 +418,7 @@ class ModifyTiledMediaObjectDialog:
         Rotate the image 90 degrees clockwise (right).
         Updates preview only; actual rotation applied on OK.
         """
-        self.current_rotation = (self.current_rotation + 90) % 360
+        self.current_rotation = (self.current_rotation + 90) % 360  # type: ignore[assignment]
         self._update_image_display()
         self.__logger.debug(f"Rotated right - current rotation: {self.current_rotation}°")
 

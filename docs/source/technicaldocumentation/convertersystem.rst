@@ -189,17 +189,28 @@ the threading mechanism and progress tracking.
 - ``run()``: Abstract method implemented by subclasses to perform conversion
 - ``progress``: Property returning current conversion progress (0.0 to 1.0)
 - ``start()``: Inherited from Thread - starts conversion in background
+- ``__str__()``: Returns ``f"Converter({infile}, {outfile})"`` (overridden by subclasses)
+- ``__repr__()``: Returns ``f"Converter({infile!r}, {outfile!r})"``
 
-**Threading Model:**
+**Threading Model (Legacy / Direct Use):**
 
-Converters inherit from :class:`threading.Thread`, which means:
+Converters inherit from :class:`threading.Thread`, which allows direct use:
 
 1. Conversion happens in a separate thread
 2. Main thread continues executing (non-blocking)
 3. Progress can be monitored via the ``progress`` property
 4. Errors are stored in the ``error`` attribute
 
-**Usage Pattern:**
+.. note::
+
+   For normal use via :class:`TiledMediaObject`, conversions are submitted
+   through :doc:`../pyzui/converterrunner` which runs converters in separate
+   **processes**. This avoids
+   threading conflicts between pyvips (which uses its own internal thread
+   pool) and TileManager's background threads. The thread-based approach
+   remains available for direct API usage.
+
+**Usage Pattern (Direct Thread-based):**
 
 .. code-block:: python
 
@@ -348,13 +359,22 @@ libvips, a fast image processing library.
 .. code-block:: python
 
     class VipsConverter(Converter):
-        def __init__(self, infile: str, outfile: str) -> None:
+        def __init__(self, infile: str, outfile: str,
+                     rotation: Literal[0, 90, 180, 270] = 0,
+                     invert_colors: bool = False,
+                     black_and_white: bool = False) -> None:
             Converter.__init__(self, infile, outfile)
             self.bitdepth = 8
+            self.rotation = rotation
+            self.invert_colors = invert_colors
+            self.black_and_white = black_and_white
 
 **Key Attributes:**
 
 - ``bitdepth``: Output bit depth (default: 8-bit, required for PPMTiler)
+- ``rotation``: Rotation angle in degrees (0, 90, 180, or 270)
+- ``invert_colors``: If True, invert all colors (negative effect)
+- ``black_and_white``: If True, convert to grayscale (luminance only)
 
 **Supported Formats:**
 
@@ -388,12 +408,21 @@ For a complete list, see: https://www.libvips.org/API/current/file-format.html
        │   └─ Extract first 3 bands
        └─ RGB and grayscale → pass through unchanged
 
-    4. Write to PPM
+    4. Image transformations (optional)
+       ├─ black_and_white: Convert to single-band luminance
+       │   └─ image.colourspace('b-w') then extract band 0
+       ├─ rotation: Rotate by 0, 90, 180, or 270 degrees
+       │   └─ image.rot(angle) for 90/180/270
+       ├─ invert_colors: Invert all pixel values
+       │   └─ image.invert()
+       └─ All transformations applied in order
+
+    5. Write to PPM
        ├─ Use image.write_to_file()
        ├─ Format automatically determined from extension
        └─ libvips handles PPM format generation
 
-    5. Error handling
+    6. Error handling
        ├─ Catch exceptions
        ├─ Store error message
        ├─ Clean up partial output
@@ -501,7 +530,7 @@ enabling parallel conversions without threading conflicts.
     from pyzui.converters import converterrunner
 
     # Initialize process pool (optional, auto-initialized on first use)
-    converterrunner.init(max_workers=4)
+    converterrunner.init(max_workers=2)
 
     # Submit image conversion
     future = converterrunner.submit_vips_conversion(
@@ -520,6 +549,73 @@ enabling parallel conversions without threading conflicts.
 
     # Shutdown pool when done
     converterrunner.shutdown()
+
+**Multiprocessing Context:**
+
+The module uses Python's ``'spawn'`` multiprocessing context by default.
+The ``'spawn'`` method creates a fresh Python interpreter for each subprocess,
+avoiding deadlocks from C-level mutexes (fontconfig, malloc arenas, libvips
+internal thread pools) that can occur when forking a process that has threading
+state. This is the safe default because PyZUI's main process always has threads
+running (Qt event loop, TileProvider threads, etc.).
+
+**PYZUI_MP_CONTEXT (Environment Variable):**
+
+Users can override the multiprocessing start method by setting the
+``PYZUI_MP_CONTEXT`` environment variable:
+
+.. code-block:: text
+
+    # Linux: override to 'fork' (faster startup, use only if threads are paused)
+    export PYZUI_MP_CONTEXT=fork
+
+    # Force 'spawn' (default behavior)
+    export PYZUI_MP_CONTEXT=spawn
+
+.. warning::
+
+   Using ``fork`` when other threads are active (the normal state in PyZUI)
+   is unsafe and may cause deadlocks. Only use ``fork`` if you have paused
+   all TileManager threads and understand the risks on your platform.
+
+**Executor Lifecycle:**
+
+The module manages a global ``ProcessPoolExecutor`` with these properties:
+
+- **Lazy initialization**: The pool is created on first call to ``submit_*``
+  if ``init()`` hasn't been called explicitly
+- **Default workers**: 2 (tunable via ``init(max_workers=N)``)
+- **Thread safety**: A ``threading.RLock`` protects the executor reference,
+  enabling safe concurrent calls to ``init()``, ``shutdown()``, and ``_get_executor()``
+- **Reentrancy**: ``init()`` can be called again after ``shutdown()`` —
+  a new pool is created and atexit is re-registered
+- **Context switching**: If ``init()`` is called with a different ``mp_context``
+  value while a pool is active, the old pool is shut down and a new one created
+- **Automatic cleanup**: ``init()`` registers ``atexit.register(shutdown)``
+  on first call, ensuring the pool is shut down during interpreter finalization
+
+**Shutdown Behavior:**
+
+``converterrunner.shutdown()`` performs aggressive cleanup to prevent zombie
+processes:
+
+1. Sets ``cancel_futures=True`` to cancel pending and running jobs
+2. Calls ``executor.shutdown(wait=False)`` for non-blocking teardown
+3. Iterates ``multiprocessing.active_children()`` and calls ``terminate()``
+   on any remaining child processes, with a 1-second join timeout
+4. Clears the ``atexit`` registration flag so it can be re-registered
+
+**Internal Worker Functions:**
+
+Two module-level functions are executed in subprocesses by the pool:
+
+- ``_run_vips_conversion(infile, outfile, rotation, invert_colors, black_and_white)``:
+  Instantiates ``VipsConverter`` and calls ``run()`` in the subprocess. Errors
+  are raised as exceptions so they propagate through the ``Future`` to the
+  ``ConversionHandle``.
+- ``_run_pdf_conversion(infile, outfile)``:
+  Instantiates ``PDFConverter`` and calls ``run()`` in the subprocess with
+  the same error propagation pattern.
 
 **ConversionHandle Class:**
 
@@ -546,6 +642,22 @@ with the thread-based ``Converter`` class:
     # Check for errors
     if handle.error:
         print(f"Failed: {handle.error}")
+
+**Lazy Error Resolution:**
+
+``ConversionHandle`` uses lazy evaluation for error checking via an internal
+``_check_result()`` method controlled by a ``_checked`` flag:
+
+1. On first access to ``error``, ``is_alive()``, or ``join()``: it calls
+   ``Future.result()`` (or ``exception()``) to retrieve completion status
+2. If the subprocess raised an exception, it is caught and wrapped as
+   ``f"conversion process error: {e!s}"``
+3. The ``_checked`` flag prevents double-fetching the Future result
+
+This lazy pattern avoids blocking on the ``Future`` until the caller actually
+needs the result, and ensures exceptions from subprocess errors are
+properly surfaced. After conversion, always check ``handle.error`` before
+proceeding to tiling.
 
 Integration with TiledMediaObject
 ----------------------------------
@@ -709,16 +821,36 @@ The process-based approach was adopted because:
 
 **Spawn Context:**
 
-The ``converterrunner`` uses Python's 'spawn' multiprocessing context:
+The ``converterrunner`` uses Python's ``'spawn'`` multiprocessing context as the
+safe default, with an intelligent context resolver via ``_get_safe_context()``:
 
 .. code-block:: python
 
-    import multiprocessing
-    _mp_context = multiprocessing.get_context('spawn')
-    _executor = ProcessPoolExecutor(max_workers=4, mp_context=_mp_context)
+    # Default: always 'spawn' for safety
+    # Override via environment variable: PYZUI_MP_CONTEXT=fork|spawn
+    _mp_context = multiprocessing.get_context(_get_safe_context())
+    _executor = ProcessPoolExecutor(max_workers=2, mp_context=_mp_context)
 
-The 'spawn' method creates a fresh Python interpreter for each subprocess,
-avoiding issues that occur when forking a process that already has pyvips initialized.
+The ``'spawn'`` method creates a fresh Python interpreter for each subprocess,
+avoiding issues that occur when forking a process that already has pyvips
+initialized or has active threads (Qt, TileProviders, etc.).
+
+**Why not ``'fork'``?**
+
+The ``'fork'`` start method is unsafe in any process that has or may later
+create threads — which describes the PyZUI main process at all times
+(Qt event loop, TileProvider threads, etc.). Forking after threads exist can
+cause deadlocks from:
+
+- **fontconfig mutexes**: QFont initialization acquires C-level locks
+- **malloc/free arena locks**: Memory allocator contention
+- **libvips internal thread pools**: pyvips manages its own worker threads
+- **Python 3.12+ DeprecationWarning**: CPython now warns about ``os.fork()``
+  with multiple threads
+
+If you need ``fork`` for faster startup (e.g., on Linux with paused threads),
+set ``PYZUI_MP_CONTEXT=fork`` and ensure all TileManager threads are paused
+before submitting conversions.
 
 TileManager Pause/Resume (Optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -905,29 +1037,76 @@ Optimization Strategies
 
 **Concurrent Conversions:**
 
-Since converters are threaded, multiple can run simultaneously:
+Since converters run in separate processes via ``converterrunner``, multiple
+conversions can execute truly in parallel:
 
 .. code-block:: python
 
-    # Start multiple conversions
-    conv1 = PDFConverter('doc1.pdf', 'out1.ppm')
-    conv2 = VipsConverter('img1.jpg', 'out2.ppm')
-    conv3 = VipsConverter('img2.png', 'out3.ppm')
+    from pyzui.converters import converterrunner
 
-    conv1.start()
-    conv2.start()
-    conv3.start()
+    # Submit multiple conversions to the process pool
+    f1 = converterrunner.submit_pdf_conversion('doc1.pdf', 'out1.ppm')
+    f2 = converterrunner.submit_vips_conversion('img1.jpg', 'out2.ppm')
+    f3 = converterrunner.submit_vips_conversion('img2.png', 'out3.ppm')
 
-    # All run concurrently
+    # Create handles and wait
+    h1 = converterrunner.ConversionHandle(f1, 'doc1.pdf', 'out1.ppm')
+    h2 = converterrunner.ConversionHandle(f2, 'img1.jpg', 'out2.ppm')
+    h3 = converterrunner.ConversionHandle(f3, 'img2.png', 'out3.ppm')
 
-However, disk lock serializes disk access, so actual speedup depends on
-CPU vs I/O balance.
+    h1.join(); h2.join(); h3.join()
+
+    # Check results
+    for h in (h1, h2, h3):
+        if h.error:
+            print(f"Failed: {h.error}")
+
+Actual parallelism depends on the number of worker processes in the pool
+(default: 2) and the CPU vs I/O balance of each conversion.
 
 Usage Examples
 --------------
 
-Basic Conversion
-~~~~~~~~~~~~~~~~
+Process-Based Conversion (Recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+    from pyzui.converters import converterrunner
+
+    # Initialize pool (auto-initialized on first submit, but explicit is fine)
+    converterrunner.init(max_workers=2)
+
+    # Submit PDF conversion
+    pdf_future = converterrunner.submit_pdf_conversion(
+        'document.pdf', 'output_pdf.ppm')
+    pdf_handle = converterrunner.ConversionHandle(
+        pdf_future, 'document.pdf', 'output_pdf.ppm')
+    pdf_handle.join()
+
+    if pdf_handle.error:
+        print(f"PDF conversion failed: {pdf_handle.error}")
+    else:
+        print("PDF converted successfully!")
+
+    # Submit image conversion with transformations
+    img_future = converterrunner.submit_vips_conversion(
+        'photo.jpg', 'output_img.ppm',
+        rotation=90, invert_colors=False, black_and_white=False)
+    img_handle = converterrunner.ConversionHandle(
+        img_future, 'photo.jpg', 'output_img.ppm')
+    img_handle.join()
+
+    if img_handle.error:
+        print(f"Image conversion failed: {img_handle.error}")
+    else:
+        print("Image converted successfully!")
+
+    # Clean up when done with all conversions
+    converterrunner.shutdown()
+
+Direct Conversion (Thread-based, Legacy)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -949,75 +1128,114 @@ Basic Conversion
     if not img_conv.error:
         print("Image converted successfully!")
 
-Progress Monitoring
-~~~~~~~~~~~~~~~~~~~
+Progress Monitoring (Process-Based)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
-    import time
+    from pyzui.converters import converterrunner
 
-    converter = PDFConverter('large_document.pdf', 'output.ppm')
-    converter.start()
+    future = converterrunner.submit_pdf_conversion(
+        'large_document.pdf', 'output.ppm')
+    handle = converterrunner.ConversionHandle(
+        future, 'large_document.pdf', 'output.ppm')
 
-    # Monitor progress
-    while converter.progress < 1.0:
-        print(f"\rProgress: {converter.progress * 100:.1f}%", end='')
-        time.sleep(0.1)
+    # Wait for completion with timeout
+    handle.join(timeout=60)
 
-    print()  # New line
-
-    if converter.error:
-        print(f"Error: {converter.error}")
+    if handle.error:
+        print(f"Error: {handle.error}")
     else:
         print("Conversion complete!")
+
+.. note::
+
+   Process-based converters report progress as 0.0 (running) or 1.0 (complete)
+   since subprocess progress cannot be monitored incrementally.
+   Thread-based converters (direct use) can report intermediate progress
+   (e.g., PDFConverter reports 0.5 at page merge stage).
 
 Custom Resolution PDF Conversion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
+    from pyzui.converters import converterrunner
+
     # High-resolution conversion for printing
-    converter = PDFConverter('document.pdf', 'high_res.ppm')
-    converter.resolution = 600  # 600 DPI
-    converter.start()
-    converter.join()
+    future = converterrunner.submit_pdf_conversion('document.pdf', 'high_res.ppm')
+    handle = converterrunner.ConversionHandle(future, 'document.pdf', 'high_res.ppm')
+    handle.join()
 
     # Low-resolution conversion for preview
-    converter = PDFConverter('document.pdf', 'low_res.ppm')
-    converter.resolution = 72  # 72 DPI (screen resolution)
-    converter.start()
-    converter.join()
+    future = converterrunner.submit_pdf_conversion('document.pdf', 'low_res.ppm')
+    handle = converterrunner.ConversionHandle(future, 'document.pdf', 'low_res.ppm')
+    handle.join()
+
+    if not handle.error:
+        print("PDF converted successfully!")
+
+.. note::
+
+   PDFConverter's ``resolution`` attribute (default: 300 DPI) is used by
+   the ``_run_pdf_conversion()`` worker in the subprocess. Resolution
+   cannot be changed through converterrunner directly; use the thread-based
+   ``PDFConverter`` directly if you need per-conversion resolution control.
+
+Image Conversion with Transformations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+    from pyzui.converters import converterrunner
+
+    # Convert with rotation
+    future = converterrunner.submit_vips_conversion(
+        'photo.jpg', 'rotated.ppm', rotation=90)
+    handle = converterrunner.ConversionHandle(future, 'photo.jpg', 'rotated.ppm')
+    handle.join()
+
+    # Convert to black and white
+    future = converterrunner.submit_vips_conversion(
+        'photo.jpg', 'bw.ppm', black_and_white=True)
+    handle = converterrunner.ConversionHandle(future, 'photo.jpg', 'bw.ppm')
+    handle.join()
+
+    # Invert colors (negative effect)
+    future = converterrunner.submit_vips_conversion(
+        'photo.jpg', 'inverted.ppm', invert_colors=True)
+    handle = converterrunner.ConversionHandle(future, 'photo.jpg', 'inverted.ppm')
+    handle.join()
+
+    if not handle.error:
+        print("Transformation applied successfully!")
 
 Handling Multiple Formats
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
-    import os
+    from pyzui.converters import converterrunner
 
     def convert_to_ppm(input_file, output_file):
-        """Convert any supported format to PPM."""
+        """Convert any supported format to PPM using process pool."""
+        ext = input_file.split('.')[-1].lower()
 
-        ext = os.path.splitext(input_file)[1].lower()
-
-        if ext == '.pdf':
-            converter = PDFConverter(input_file, output_file)
-        elif ext == '.ppm':
-            # Already PPM, just copy
+        if ext == 'pdf':
+            future = converterrunner.submit_pdf_conversion(input_file, output_file)
+        elif ext == 'ppm':
             import shutil
             shutil.copy(input_file, output_file)
             return True
         else:
-            # Try VipsConverter for everything else
-            converter = VipsConverter(input_file, output_file)
+            future = converterrunner.submit_vips_conversion(input_file, output_file)
 
-        converter.start()
-        converter.join()
+        handle = converterrunner.ConversionHandle(future, input_file, output_file)
+        handle.join()
 
-        if converter.error:
-            print(f"Conversion failed: {converter.error}")
+        if handle.error:
+            print(f"Conversion failed: {handle.error}")
             return False
-
         return True
 
     # Usage
@@ -1034,7 +1252,7 @@ converterrunner Module
 .. code-block:: python
 
     # Module functions
-    def init(max_workers: int = 4) -> None
+    def init(max_workers: int = 2) -> None
     def shutdown() -> None
     def submit_vips_conversion(infile, outfile, rotation=0,
                                invert_colors=False, black_and_white=False) -> Future
@@ -1111,6 +1329,6 @@ See Also
 --------
 
 - :doc:`tilingsystem` - Tile generation from PPM files
-- :doc:`tiledmediaobject` - Integration with TiledMediaObject
+- :doc:`pyzui/objects/mediaobjects/tiledmediaobject` - Integration with TiledMediaObject
 - :doc:`objectsystem` - Overall object system architecture
 - :doc:`projectstructure` - Project organization

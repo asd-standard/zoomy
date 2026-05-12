@@ -1,3 +1,5 @@
+:orphan:
+
 .. automodule:: main
    :members:
    :show-inheritance:

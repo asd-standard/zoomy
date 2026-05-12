@@ -17,19 +17,19 @@
 """Class for loading tiles into memory from somewhere other than the local
 filesystem (abstract base class)."""
 
-from typing import Optional, Tuple, Any, TYPE_CHECKING
 import os
+from typing import TYPE_CHECKING, Any, Optional
 
 from PySide6 import QtGui
 
-from .tileprovider import TileProvider
 from .. import tilestore as TileStore
+from .tileprovider import TileProvider
 
 if TYPE_CHECKING:
     from PySide6.QtGui import QImage
-    from .tileprovider import TileID
 
-TileID = Tuple[str, int, int, int]
+TileID = tuple[str, int, int, int]  # type: ignore[misc]
+
 
 class DynamicTileProvider(TileProvider):
     """
@@ -90,7 +90,8 @@ class DynamicTileProvider(TileProvider):
                                                   |    └─────────────────────────┘
 
     """
-    def __init__(self, tilecache: Any) -> None:  # type: ignore[no-untyped-def]
+
+    def __init__(self, tilecache: Any) -> None:
         """
         Constructor :
             DynamicTileProvider(tilecache)
@@ -107,9 +108,9 @@ class DynamicTileProvider(TileProvider):
         TileProvider.__init__(self, tilecache)
 
     ## set default values (derived classes may override these values)
-    filext = 'png'
+    filext = "png"
     tilesize = 256
-    aspect_ratio = 1.0 ## width / height
+    aspect_ratio = 1.0  ## width / height
 
     def _load_dynamic(self, tile_id: TileID, outfile: str) -> None:
         """
@@ -126,7 +127,7 @@ class DynamicTileProvider(TileProvider):
         """
         pass
 
-    def _load(self, tile_id: TileID) -> Optional['QImage']:
+    def _load(self, tile_id: TileID) -> Optional["QImage"]:
         """
         Method :
             DynamicTileProvider._load(tile_id)
@@ -149,8 +150,7 @@ class DynamicTileProvider(TileProvider):
             - Returns None if tile loading fails (logs exception)
             - Assumes tile is unavailable if any exception occurs
         """
-        filename = TileStore.get_tile_path(
-            tile_id, True, filext=self.filext)
+        filename = TileStore.get_tile_path(tile_id, True, filext=self.filext)
 
         if not os.path.exists(filename):
             ## tile has not been retrieved yet
@@ -159,6 +159,5 @@ class DynamicTileProvider(TileProvider):
         try:
             return QtGui.QImage(filename)
         except Exception:
-            self._logger.exception("error loading tile, "
-                "assuming it is unavailable")
+            self._logger.exception("error loading tile, assuming it is unavailable")
             return None

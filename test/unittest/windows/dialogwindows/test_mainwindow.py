@@ -13,8 +13,6 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
-from unittest.mock import Mock, patch
 
 from pyzui.windows.mainwindow import MainWindow
 
@@ -36,6 +34,7 @@ class TestMainWindow:
         Then the module should be successfully imported
         """
         import pyzui.windows.mainwindow
+
         assert pyzui.windows.mainwindow is not None
 
     def test_placeholder(self):
@@ -65,7 +64,7 @@ class TestSupportedExtensions:
         When accessing SUPPORTED_EXTENSIONS
         Then it should be a set containing file extensions
         """
-        assert hasattr(MainWindow, 'SUPPORTED_EXTENSIONS')
+        assert hasattr(MainWindow, "SUPPORTED_EXTENSIONS")
         assert isinstance(MainWindow.SUPPORTED_EXTENSIONS, set)
 
     def test_svg_extension_supported(self):
@@ -76,7 +75,7 @@ class TestSupportedExtensions:
         When checking for SVG extension
         Then .svg should be included
         """
-        assert '.svg' in MainWindow.SUPPORTED_EXTENSIONS
+        assert ".svg" in MainWindow.SUPPORTED_EXTENSIONS
 
     def test_pdf_extension_supported(self):
         """
@@ -86,7 +85,7 @@ class TestSupportedExtensions:
         When checking for PDF extension
         Then .pdf should be included
         """
-        assert '.pdf' in MainWindow.SUPPORTED_EXTENSIONS
+        assert ".pdf" in MainWindow.SUPPORTED_EXTENSIONS
 
     def test_ppm_extension_supported(self):
         """
@@ -96,7 +95,7 @@ class TestSupportedExtensions:
         When checking for PPM extension
         Then .ppm should be included
         """
-        assert '.ppm' in MainWindow.SUPPORTED_EXTENSIONS
+        assert ".ppm" in MainWindow.SUPPORTED_EXTENSIONS
 
     def test_common_image_extensions_supported(self):
         """
@@ -106,7 +105,7 @@ class TestSupportedExtensions:
         When checking for common image extensions
         Then jpg, jpeg, png, gif, tiff, bmp should be included
         """
-        common_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.tif', '.tiff', '.bmp'}
+        common_extensions = {".jpg", ".jpeg", ".png", ".gif", ".tif", ".tiff", ".bmp"}
         for ext in common_extensions:
             assert ext in MainWindow.SUPPORTED_EXTENSIONS, f"{ext} should be supported"
 
@@ -118,7 +117,7 @@ class TestSupportedExtensions:
         When checking for modern image extensions
         Then webp, heic, heif, avif, jxl should be included
         """
-        modern_extensions = {'.webp', '.heic', '.heif', '.avif', '.jxl'}
+        modern_extensions = {".webp", ".heic", ".heif", ".avif", ".jxl"}
         for ext in modern_extensions:
             assert ext in MainWindow.SUPPORTED_EXTENSIONS, f"{ext} should be supported"
 
@@ -130,7 +129,7 @@ class TestSupportedExtensions:
         When checking for non-media extensions
         Then txt, json, py, xml, html should not be included
         """
-        unsupported_extensions = {'.txt', '.json', '.py', '.xml', '.html', '.css', '.js'}
+        unsupported_extensions = {".txt", ".json", ".py", ".xml", ".html", ".css", ".js"}
         for ext in unsupported_extensions:
             assert ext not in MainWindow.SUPPORTED_EXTENSIONS, f"{ext} should not be supported"
 
@@ -154,7 +153,7 @@ class TestSupportedExtensions:
         Then all should start with '.'
         """
         for ext in MainWindow.SUPPORTED_EXTENSIONS:
-            assert ext.startswith('.'), f"{ext} should start with '.'"
+            assert ext.startswith("."), f"{ext} should start with '.'"
 
 
 class TestPdfSizeLimit:
@@ -173,7 +172,7 @@ class TestPdfSizeLimit:
         When accessing MAX_PDF_SIZE_BYTES
         Then it should be an integer representing bytes
         """
-        assert hasattr(MainWindow, 'MAX_PDF_SIZE_BYTES')
+        assert hasattr(MainWindow, "MAX_PDF_SIZE_BYTES")
         assert isinstance(MainWindow.MAX_PDF_SIZE_BYTES, int)
 
     def test_max_pdf_size_is_2_megabytes(self):
@@ -185,7 +184,7 @@ class TestPdfSizeLimit:
         Then it should equal 2 * 1024 * 1024 bytes (2 MB)
         """
         expected_size = 2 * 1024 * 1024  # 2 MB
-        assert MainWindow.MAX_PDF_SIZE_BYTES == expected_size
+        assert expected_size == MainWindow.MAX_PDF_SIZE_BYTES
 
     def test_max_pdf_size_is_positive(self):
         """

@@ -13,13 +13,29 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch
-from threading import Thread, Condition, Event
-from collections import deque
 import time
-from pyzui.tilesystem.tileproviders import TileProvider
+from threading import Event, Thread
+from unittest.mock import Mock, patch
+
 from pyzui.tilesystem.tile import Tile
+from pyzui.tilesystem.tileproviders import TileProvider
+
+
+def wait_for_cache(cache, tile_ids, timeout=5.0):
+    """Poll until all tile_ids appear in cache, or timeout.
+
+    Replaces blind time.sleep() with a deterministic condition wait.
+    Use after an Event confirms _load returned — the provider thread
+    may still be inserting the Tile wrapper into cache.
+    """
+    missing = set(tile_ids)
+    deadline = time.monotonic() + timeout
+    while missing and time.monotonic() < deadline:
+        missing -= {tid for tid in missing if tid in cache}
+        if missing:
+            time.sleep(0.002)
+    return not missing
+
 
 class TestTileProvider:
     """
@@ -64,7 +80,7 @@ class TestTileProvider:
         """
         tilecache = Mock()
         provider = TileProvider(tilecache)
-        tile_id = ('media_id', 0, 0, 0)
+        tile_id = ("media_id", 0, 0, 0)
         provider.request(tile_id)
         # Task should be added internally
 
@@ -78,8 +94,8 @@ class TestTileProvider:
         """
         tilecache = Mock()
         provider = TileProvider(tilecache)
-        tile_id1 = ('media_id1', 0, 0, 0)
-        tile_id2 = ('media_id2', 1, 1, 1)
+        tile_id1 = ("media_id1", 0, 0, 0)
+        tile_id2 = ("media_id2", 1, 1, 1)
         provider.request(tile_id1)
         provider.request(tile_id2)
         # Both tasks should be added internally
@@ -94,7 +110,7 @@ class TestTileProvider:
         """
         tilecache = Mock()
         provider = TileProvider(tilecache)
-        tile_id = ('media_id', 0, 0, 0)
+        tile_id = ("media_id", 0, 0, 0)
         result = provider._load(tile_id)
         assert result is None
 
@@ -108,8 +124,8 @@ class TestTileProvider:
         """
         tilecache = Mock()
         provider = TileProvider(tilecache)
-        provider.request(('media_id1', 0, 0, 0))
-        provider.request(('media_id2', 1, 1, 1))
+        provider.request(("media_id1", 0, 0, 0))
+        provider.request(("media_id2", 1, 1, 1))
         provider.purge()
         # All tasks should be purged
 
@@ -123,9 +139,9 @@ class TestTileProvider:
         """
         tilecache = Mock()
         provider = TileProvider(tilecache)
-        provider.request(('media_id1', 0, 0, 0))
-        provider.request(('media_id2', 1, 1, 1))
-        provider.purge('media_id1')
+        provider.request(("media_id1", 0, 0, 0))
+        provider.request(("media_id2", 1, 1, 1))
+        provider.purge("media_id1")
         # Only media_id1 tasks should be purged
 
     def test_str_representation(self):
@@ -138,7 +154,7 @@ class TestTileProvider:
         """
         tilecache = Mock()
         provider = TileProvider(tilecache)
-        assert str(provider) == 'TileProvider'
+        assert str(provider) == "TileProvider"
 
     def test_repr_representation(self):
         """
@@ -150,9 +166,9 @@ class TestTileProvider:
         """
         tilecache = Mock()
         provider = TileProvider(tilecache)
-        assert repr(provider) == 'TileProvider()'
+        assert repr(provider) == "TileProvider()"
 
-    @patch.object(TileProvider, '_load')
+    @patch.object(TileProvider, "_load")
     def test_run_loads_tile(self, mock_load):
         """
         Scenario: Run provider to load tiles
@@ -163,7 +179,7 @@ class TestTileProvider:
         """
         tilecache = {}
         provider = TileProvider(tilecache)
-        tile_id = ('media_id', 0, 0, 0)
+        tile_id = ("media_id", 0, 0, 0)
 
         # Mock _load to return a mock image
         mock_image = Mock()
@@ -173,7 +189,7 @@ class TestTileProvider:
         provider.request(tile_id)
         # We can't test run() fully as it loops forever
 
-    @patch.object(TileProvider, '_load')
+    @patch.object(TileProvider, "_load")
     def test_run_handles_unavailable_tile(self, mock_load):
         """
         Scenario: Handle unavailable tile
@@ -184,7 +200,7 @@ class TestTileProvider:
         """
         tilecache = {}
         provider = TileProvider(tilecache)
-        tile_id = ('media_id', 0, 0, 0)
+        tile_id = ("media_id", 0, 0, 0)
 
         # Mock _load to return None (unavailable)
         mock_load.return_value = None
@@ -225,18 +241,18 @@ class TestTileProvider:
             load_called.set()
             return mock_image
 
-        with patch.object(provider, '_load', side_effect=mock_load):
-            with patch('pyzui.tilesystem.tileproviders.tileprovider.Tile', return_value=mock_tile):
+        with patch.object(provider, "_load", side_effect=mock_load):
+            with patch("pyzui.tilesystem.tileproviders.tileprovider.Tile", return_value=mock_tile):
                 provider.start()
 
-                tile_id = ('test_media', 0, 0, 0)
+                tile_id = ("test_media", 0, 0, 0)
                 provider.request(tile_id)
 
                 # Wait for the tile to be processed
                 assert load_called.wait(timeout=2.0), "Tile was not loaded within timeout"
 
-                # Give thread time to update cache
-                time.sleep(0.1)
+                # Ensure Tile wrapper was inserted into cache
+                assert wait_for_cache(tilecache, [tile_id], timeout=2.0), "Tile not found in cache after load completed"
 
                 # Verify tile was added to cache
                 assert tile_id in tilecache
@@ -260,17 +276,16 @@ class TestTileProvider:
             processed_order.append(tile_id)
             if len(processed_order) == 3:
                 all_processed.set()
-            time.sleep(0.05)  # Small delay to ensure ordering
             return Mock()
 
-        with patch.object(provider, '_load', side_effect=mock_load):
-            with patch('pyzui.tilesystem.tileproviders.tileprovider.Tile', return_value=Mock(spec=Tile)):
+        with patch.object(provider, "_load", side_effect=mock_load):
+            with patch("pyzui.tilesystem.tileproviders.tileprovider.Tile", return_value=Mock(spec=Tile)):
                 provider.start()
 
                 # Request tiles in order: A, B, C
-                tile_a = ('media_a', 0, 0, 0)
-                tile_b = ('media_b', 1, 1, 1)
-                tile_c = ('media_c', 2, 2, 2)
+                tile_a = ("media_a", 0, 0, 0)
+                tile_b = ("media_b", 1, 1, 1)
+                tile_c = ("media_c", 2, 2, 2)
 
                 provider.request(tile_a)
                 provider.request(tile_b)
@@ -300,17 +315,17 @@ class TestTileProvider:
             exception_handled.set()
             raise ValueError("Simulated load error")
 
-        with patch.object(provider, '_load', side_effect=mock_load):
+        with patch.object(provider, "_load", side_effect=mock_load):
             provider.start()
 
-            tile_id = ('error_media', 0, 0, 0)
+            tile_id = ("error_media", 0, 0, 0)
             provider.request(tile_id)
 
             # Wait for exception to be handled
             assert exception_handled.wait(timeout=2.0), "Exception not handled"
 
-            # Give thread time to update cache
-            time.sleep(0.1)
+            # Ensure cache was updated with None
+            assert wait_for_cache(tilecache, [tile_id], timeout=2.0), "Tile not found in cache after error"
 
             # Verify None was stored in cache
             assert tile_id in tilecache
@@ -334,17 +349,17 @@ class TestTileProvider:
             load_called.set()
             return None
 
-        with patch.object(provider, '_load', side_effect=mock_load):
+        with patch.object(provider, "_load", side_effect=mock_load):
             provider.start()
 
-            tile_id = ('unavailable_media', 0, 0, 0)
+            tile_id = ("unavailable_media", 0, 0, 0)
             provider.request(tile_id)
 
             # Wait for load to be called
             assert load_called.wait(timeout=2.0), "Load not called"
 
-            # Give thread time to update cache
-            time.sleep(0.1)
+            # Ensure cache was updated with None
+            assert wait_for_cache(tilecache, [tile_id], timeout=2.0), "Unavailable tile marker not found in cache"
 
             # Verify None was stored in cache
             assert tile_id in tilecache
@@ -363,31 +378,28 @@ class TestTileProvider:
         tilecache = {}
         provider = TileProvider(tilecache)
 
-        tile_id = ('cached_media', 0, 0, 0)
+        tile_id = ("cached_media", 0, 0, 0)
         cached_tile = Mock(spec=Tile)
         tilecache[tile_id] = cached_tile
 
         load_called = Event()
-        request_processed = Event()
+        Event()
 
         def mock_load(tile_id_arg):
             load_called.set()
             return Mock()
 
-        with patch.object(provider, '_load', side_effect=mock_load):
-            with patch('pyzui.tilesystem.tileproviders.tileprovider.Tile', return_value=Mock(spec=Tile)):
+        with patch.object(provider, "_load", side_effect=mock_load):
+            with patch("pyzui.tilesystem.tileproviders.tileprovider.Tile", return_value=Mock(spec=Tile)):
                 provider.start()
 
                 # Request a different tile first to ensure thread is running
-                other_tile = ('other_media', 1, 1, 1)
+                other_tile = ("other_media", 1, 1, 1)
                 provider.request(other_tile)
+                assert load_called.wait(timeout=2.0), "Other tile was not processed"
 
-                # Wait a bit for other tile to be processed
-                time.sleep(0.2)
-
-                # Now request the cached tile
+                # Now request the cached tile — provider checks cache, skips _load
                 provider.request(tile_id)
-                time.sleep(0.2)
 
                 # Verify the cached tile is still the same object
                 assert tilecache[tile_id] is cached_tile
@@ -414,20 +426,22 @@ class TestTileProvider:
                 all_loaded.set()
             return Mock()
 
-        with patch.object(provider, '_load', side_effect=mock_load):
-            with patch('pyzui.tilesystem.tileproviders.tileprovider.Tile', return_value=Mock(spec=Tile)):
+        with patch.object(provider, "_load", side_effect=mock_load):
+            with patch("pyzui.tilesystem.tileproviders.tileprovider.Tile", return_value=Mock(spec=Tile)):
                 provider.start()
 
                 # Request multiple tiles
-                tile_ids = [('media_%d' % i, i, i, i) for i in range(num_tiles)]
+                tile_ids = [("media_%d" % i, i, i, i) for i in range(num_tiles)]
                 for tile_id in tile_ids:
                     provider.request(tile_id)
 
                 # Wait for all tiles to be processed
                 assert all_loaded.wait(timeout=3.0), "Not all tiles loaded"
 
-                # Give thread time to update cache
-                time.sleep(0.1)
+                # Ensure Tile wrappers were inserted into cache
+                assert wait_for_cache(tilecache, tile_ids, timeout=2.0), (
+                    f"Tiles missing from cache: {[tid for tid in tile_ids if tid not in tilecache]}"
+                )
 
                 # Verify all tiles are in cache
                 for tile_id in tile_ids:
@@ -449,25 +463,22 @@ class TestTileProvider:
         second_load = Event()
 
         def mock_load(tile_id):
-            if tile_id[0] == 'first':
+            if tile_id[0] == "first":
                 first_load.set()
             else:
                 second_load.set()
             return Mock()
 
-        with patch.object(provider, '_load', side_effect=mock_load):
-            with patch('pyzui.tilesystem.tileproviders.tileprovider.Tile', return_value=Mock(spec=Tile)):
+        with patch.object(provider, "_load", side_effect=mock_load):
+            with patch("pyzui.tilesystem.tileproviders.tileprovider.Tile", return_value=Mock(spec=Tile)):
                 provider.start()
 
                 # Request first tile
-                provider.request(('first', 0, 0, 0))
+                provider.request(("first", 0, 0, 0))
                 assert first_load.wait(timeout=2.0), "First tile not loaded"
 
-                # Thread should now be waiting for tasks
-                time.sleep(0.1)
-
-                # Request second tile
-                provider.request(('second', 1, 1, 1))
+                # Request second tile (wakes waiting thread via Condition.notify)
+                provider.request(("second", 1, 1, 1))
                 assert second_load.wait(timeout=2.0), "Second tile not loaded"
 
     def test_purge_during_thread_execution(self):
@@ -492,14 +503,14 @@ class TestTileProvider:
             time.sleep(0.1)  # Slow down processing
             return Mock()
 
-        with patch.object(provider, '_load', side_effect=mock_load):
-            with patch('pyzui.tilesystem.tileproviders.tileprovider.Tile', return_value=Mock(spec=Tile)):
+        with patch.object(provider, "_load", side_effect=mock_load):
+            with patch("pyzui.tilesystem.tileproviders.tileprovider.Tile", return_value=Mock(spec=Tile)):
                 provider.start()
 
                 # Queue several tasks
-                keep_tile = ('keep_media', 0, 0, 0)
-                purge_tile1 = ('purge_media', 1, 1, 1)
-                purge_tile2 = ('purge_media', 2, 2, 2)
+                keep_tile = ("keep_media", 0, 0, 0)
+                purge_tile1 = ("purge_media", 1, 1, 1)
+                purge_tile2 = ("purge_media", 2, 2, 2)
 
                 provider.request(keep_tile)
                 provider.request(purge_tile1)
@@ -509,10 +520,16 @@ class TestTileProvider:
                 assert first_processed.wait(timeout=2.0)
 
                 # Purge tasks for 'purge_media'
-                provider.purge('purge_media')
+                provider.purge("purge_media")
 
-                # Wait a bit for remaining tasks to process
-                time.sleep(0.5)
+                # Wait for remaining non-purged tasks to complete
+                deadline = time.monotonic() + 3.0
+                while time.monotonic() < deadline:
+                    if keep_tile in processed:
+                        break
+                    time.sleep(0.005)
+                else:
+                    pass  # timeout — assertions below will catch failures
 
                 # Verify purged tiles were not processed
                 assert keep_tile in processed

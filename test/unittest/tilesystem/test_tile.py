@@ -13,12 +13,14 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, patch
+
 from PIL import Image
 from PySide6 import QtGui
+
 from pyzui.tilesystem import tile
 from pyzui.tilesystem.tile import Tile
+
 
 class TestTile:
     """
@@ -36,7 +38,7 @@ class TestTile:
         When a Tile is created from the PIL Image
         Then the tile size should be (100, 100)
         """
-        pil_image = Image.new('RGB', (100, 100))
+        pil_image = Image.new("RGB", (100, 100))
         t = Tile(pil_image)
         assert t.size == (100, 100)
 
@@ -107,7 +109,7 @@ class TestTile:
         resized = t.resize(50, 50)
         assert resized.size == (50, 50)
 
-    @patch('pyzui.tilesystem.tile.QtGui.QImage.save')
+    @patch("pyzui.tilesystem.tile.QtGui.QImage.save")
     def test_save(self, mock_save):
         """
         Scenario: Save tile to disk
@@ -135,6 +137,7 @@ class TestTile:
         painter = Mock()
         t.draw(painter, 10, 20)
         painter.drawImage.assert_called_once()
+
 
 class TestTileFunctions:
     """
@@ -178,7 +181,7 @@ class TestTileFunctions:
         And the tile size should be (2, 2)
         """
         width, height = 2, 2
-        raw_pixels = '\xFF\x00\x00\xFF\x00\x00\x00\xFF\x00\x00\xFF\x00'
+        raw_pixels = "\xff\x00\x00\xff\x00\x00\x00\xff\x00\x00\xff\x00"
         t = tile.fromstring(raw_pixels, width, height)
         assert isinstance(t, Tile)
         assert t.size == (width, height)

@@ -16,11 +16,13 @@
 
 """Image converter based upon libvips (via pyvips)."""
 
-import pyvips
 import os
 from typing import Literal
 
+import pyvips
+
 from .converter import Converter
+
 
 class VipsConverter(Converter):
     """
@@ -40,10 +42,15 @@ class VipsConverter(Converter):
     with low memory usage. For a list of supported image formats see
     https://www.libvips.org/API/current/file-format.html
     """
-    def __init__(self, infile: str, outfile: str,
-                 rotation: Literal[0, 90, 180, 270] = 0,
-                 invert_colors: bool = False,
-                 black_and_white: bool = False) -> None:
+
+    def __init__(
+        self,
+        infile: str,
+        outfile: str,
+        rotation: Literal[0, 90, 180, 270] = 0,
+        invert_colors: bool = False,
+        black_and_white: bool = False,
+    ) -> None:
         """
         Constructor :
             VipsConverter(infile, outfile, rotation, invert_colors, black_and_white)
@@ -96,7 +103,7 @@ class VipsConverter(Converter):
             self._logger.debug("loading image with libvips")
 
             # Load the image using libvips
-            image = pyvips.Image.new_from_file(self._infile, access='sequential')
+            image = pyvips.Image.new_from_file(self._infile, access="sequential")
 
             self._logger.debug(f"loaded {image.width}x{image.height} image with {image.bands} bands")
 
@@ -114,7 +121,7 @@ class VipsConverter(Converter):
             if self.black_and_white:
                 self._logger.debug("converting to black and white (grayscale)")
                 # Convert to grayscale using colourspace, then back to sRGB for PPM
-                image = image.colourspace('b-w').colourspace('srgb')
+                image = image.colourspace("b-w").colourspace("srgb")
 
             # Apply color inversion if specified
             if self.invert_colors:
@@ -122,10 +129,10 @@ class VipsConverter(Converter):
                 image = image.invert()
 
             # Convert to the specified bit depth if needed
-            if self.bitdepth == 8 and image.format != 'uchar':
+            if self.bitdepth == 8 and image.format != "uchar":
                 self._logger.debug(f"converting from {image.format} to 8-bit")
                 # Scale to 8-bit range
-                image = image.cast('uchar')
+                image = image.cast("uchar")
 
             # Ensure we have RGB or grayscale format for PPM
             if image.bands == 4:  # RGBA
@@ -140,7 +147,7 @@ class VipsConverter(Converter):
             image.write_to_file(self._outfile)
 
         except Exception as e:
-            self.error = f"conversion failed: {str(e)}"
+            self.error = f"conversion failed: {e!s}"  # type: ignore[assignment]
             self._logger.error(self.error)
 
             try:
@@ -148,8 +155,7 @@ class VipsConverter(Converter):
                     os.unlink(self._outfile)
             except Exception:
                 try:
-                    self._logger.exception("unable to unlink temporary file "
-                        "'%s'" % self._outfile)
+                    self._logger.exception(f"unable to unlink temporary file '{self._outfile}'")
                 except AttributeError:
                     pass  # Logger not initialized
 
@@ -167,8 +173,12 @@ class VipsConverter(Converter):
         Return a human-readable string representation of the VipsConverter.
         """
         return "VipsConverter(%s, %s, rotation=%d, invert_colors=%s, black_and_white=%s)" % (
-            self._infile, self._outfile, self.rotation,
-            self.invert_colors, self.black_and_white)
+            self._infile,
+            self._outfile,
+            self.rotation,
+            self.invert_colors,
+            self.black_and_white,
+        )
 
     def __repr__(self) -> str:
         """
@@ -182,6 +192,9 @@ class VipsConverter(Converter):
         Return a formal string representation of the VipsConverter.
         """
         return "VipsConverter(%s, %s, rotation=%d, invert_colors=%s, black_and_white=%s)" % (
-            repr(self._infile), repr(self._outfile), self.rotation,
-            self.invert_colors, self.black_and_white)
-
+            repr(self._infile),
+            repr(self._outfile),
+            self.rotation,
+            self.invert_colors,
+            self.black_and_white,
+        )

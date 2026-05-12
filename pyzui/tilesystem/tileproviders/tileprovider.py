@@ -16,19 +16,18 @@
 
 """Threaded class for loading tiles into memory (abstract base class)."""
 
-from typing import Optional, Tuple, Any, TYPE_CHECKING
-
-from threading import Thread, Condition, Event
 from collections import deque
+from threading import Condition, Event, Thread
+from typing import TYPE_CHECKING, Any
 
-from pyzui.tilesystem.tile import Tile
 from pyzui.logger import get_logger
+from pyzui.tilesystem.tile import Tile
 
 if TYPE_CHECKING:
     from pyzui.tilesystem.tilestore.tilecache import TileCache
-    from pyzui.tilesystem.tile import Tile as TileType
 
-TileID = Tuple[str, int, int, int]
+TileID = tuple[str, int, int, int]
+
 
 class TileProvider(Thread):
     """
@@ -47,7 +46,8 @@ class TileProvider(Thread):
 
     Requests are processed in LIFO (Last In First Out) order.
     """
-    def __init__(self, tilecache: 'TileCache') -> None:
+
+    def __init__(self, tilecache: "TileCache") -> None:
         """
         Method :
             TileProvider.__init__(tilecache)
@@ -66,14 +66,27 @@ class TileProvider(Thread):
 
         self.__tilecache = tilecache
 
-        self.__tasks = deque()
+        self.__tasks: deque[TileID] = deque()
         self.__tasks_available = Condition()
 
         # Pause/resume mechanism
         self.__pause_event = Event()
         self.__pause_event.set()  # Start in running (not paused) state
 
+        # Shutdown event to signal the thread to stop
+        self.__shutdown_event = Event()
+
         self._logger = get_logger(str(self))
+
+    def stop(self) -> None:
+        """Signal the tile provider thread to stop and wake it if blocked."""
+        self.__shutdown_event.set()
+        self.__pause_event.set()
+        try:
+            self.__tasks_available.acquire()
+            self.__tasks_available.notify()
+        finally:
+            self.__tasks_available.release()
 
     def request(self, tile_id: TileID) -> None:
         """
@@ -97,7 +110,7 @@ class TileProvider(Thread):
         self.__tasks_available.notify()
         self.__tasks_available.release()
 
-    def _load(self, tile_id: TileID) -> Optional[Any]:
+    def _load(self, tile_id: TileID) -> Any | None:
         """
         Method :
             TileProvider._load(tile_id)
@@ -123,18 +136,23 @@ class TileProvider(Thread):
 
         Run a loop to load requested tiles.
         """
-        while True:
-            # Wait if paused
+        while not self.__shutdown_event.is_set():
             self.__pause_event.wait()
+            if self.__shutdown_event.is_set():
+                break
 
             self.__tasks_available.acquire()
-            while not self.__tasks:
+            while not self.__tasks and not self.__shutdown_event.is_set():
                 self.__tasks_available.wait()
+            if self.__shutdown_event.is_set():
+                self.__tasks_available.release()
+                break
             tile_id = self.__tasks.pop()
             self.__tasks_available.release()
 
-            # Check pause again after acquiring task
             self.__pause_event.wait()
+            if self.__shutdown_event.is_set():
+                break
 
             if tile_id not in self.__tilecache:
                 try:
@@ -152,7 +170,7 @@ class TileProvider(Thread):
                     self._logger.debug("unavailable %s", str(tile_id))
                     self.__tilecache[tile_id] = None
 
-    def purge(self, media_id: Optional[str] = None) -> None:
+    def purge(self, media_id: str | None = None) -> None:
         """
         Method :
             TileProvider.purge(media_id)
@@ -167,7 +185,7 @@ class TileProvider(Thread):
         self.__tasks_available.acquire()
         self._logger.debug("purging %s", media_id or "all")
         if media_id:
-            new_tasks = deque()
+            new_tasks: deque[TileID] = deque()
             for task in self.__tasks:
                 if task[0] != media_id:
                     new_tasks.append(task)
@@ -229,5 +247,4 @@ class TileProvider(Thread):
 
         Return a formal string representation of the TileProvider.
         """
-        return "%s()" % type(self).__name__
-
+        return f"{type(self).__name__}()"

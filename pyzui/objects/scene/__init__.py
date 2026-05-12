@@ -13,3 +13,13 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
+"""Scene module for PyZUI.
+
+This module contains the Scene class and related utilities for managing
+collections of media objects in a zooming user interface.
+"""
+
+from .scene import Scene, load_scene, new
+from .sceneutils import SceneAutosaveManager, SceneClipboardManager, SceneParallelRenderer
+
+__all__ = ["Scene", "SceneAutosaveManager", "SceneClipboardManager", "SceneParallelRenderer", "load_scene", "new"]

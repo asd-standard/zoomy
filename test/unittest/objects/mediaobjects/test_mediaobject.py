@@ -13,9 +13,10 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch
-from pyzui.objects.mediaobjects.mediaobject import MediaObject, LoadError, RenderMode
+from unittest.mock import Mock, patch
+
+from pyzui.objects.mediaobjects.mediaobject import LoadError, MediaObject, RenderMode
+
 
 class TestMediaObject:
     """
@@ -44,9 +45,9 @@ class TestMediaObject:
         When checking for RenderMode attributes
         Then Invisible, Draft, and HighQuality constants should exist
         """
-        assert hasattr(RenderMode, 'Invisible')
-        assert hasattr(RenderMode, 'Draft')
-        assert hasattr(RenderMode, 'HighQuality')
+        assert hasattr(RenderMode, "Invisible")
+        assert hasattr(RenderMode, "Draft")
+        assert hasattr(RenderMode, "HighQuality")
 
     def test_render_mode_values(self):
         """
@@ -152,14 +153,14 @@ class TestMediaObject:
         obj._centre = (100.0, 100.0)
 
         # Store initial center scene coordinates
-        initial_c_sx = obj._x + obj._centre[0] * (2 ** obj._z)
-        initial_c_sy = obj._y + obj._centre[1] * (2 ** obj._z)
+        initial_c_sx = obj._x + obj._centre[0] * (2**obj._z)
+        initial_c_sy = obj._y + obj._centre[1] * (2**obj._z)
 
         obj.zoom(1.0)
 
         # After zoom, center scene coordinates should be preserved
-        final_c_sx = obj._x + obj._centre[0] * (2 ** obj._z)
-        final_c_sy = obj._y + obj._centre[1] * (2 ** obj._z)
+        final_c_sx = obj._x + obj._centre[0] * (2**obj._z)
+        final_c_sy = obj._y + obj._centre[1] * (2**obj._z)
 
         assert abs(final_c_sx - initial_c_sx) < 0.01
         assert abs(final_c_sy - initial_c_sy) < 0.01
@@ -179,11 +180,13 @@ class TestMediaObject:
         obj1.transparent = True
 
         # Mock topleft and bottomright properties
-        with patch.object(type(obj1), 'topleft', new_callable=lambda: property(lambda self: (100, 100))):
-            with patch.object(type(obj1), 'bottomright', new_callable=lambda: property(lambda self: (500, 500))):
+        with patch.object(type(obj1), "topleft", new_callable=lambda: property(lambda self: (100, 100))):
+            with patch.object(type(obj1), "bottomright", new_callable=lambda: property(lambda self: (500, 500))):
                 obj2 = MediaObject("other.jpg", scene)
-                with patch.object(type(obj2), 'topleft', new_callable=lambda: property(lambda self: (200, 200))):
-                    with patch.object(type(obj2), 'bottomright', new_callable=lambda: property(lambda self: (400, 400))):
+                with patch.object(type(obj2), "topleft", new_callable=lambda: property(lambda self: (200, 200))):
+                    with patch.object(
+                        type(obj2), "bottomright", new_callable=lambda: property(lambda self: (400, 400))
+                    ):
                         assert obj1.hides(obj2) is False
 
     def test_hides_returns_true_when_completely_covering(self):
@@ -203,10 +206,12 @@ class TestMediaObject:
         obj2 = MediaObject("small.jpg", scene)
 
         # Mock the properties for both objects
-        with patch.object(type(obj1), 'topleft', new_callable=lambda: property(lambda self: (100, 100))):
-            with patch.object(type(obj1), 'bottomright', new_callable=lambda: property(lambda self: (500, 500))):
-                with patch.object(type(obj2), 'topleft', new_callable=lambda: property(lambda self: (200, 200))):
-                    with patch.object(type(obj2), 'bottomright', new_callable=lambda: property(lambda self: (400, 400))):
+        with patch.object(type(obj1), "topleft", new_callable=lambda: property(lambda self: (100, 100))):
+            with patch.object(type(obj1), "bottomright", new_callable=lambda: property(lambda self: (500, 500))):
+                with patch.object(type(obj2), "topleft", new_callable=lambda: property(lambda self: (200, 200))):
+                    with patch.object(
+                        type(obj2), "bottomright", new_callable=lambda: property(lambda self: (400, 400))
+                    ):
                         assert obj1.hides(obj2) is True
 
     def test_hides_method_exists(self):
@@ -219,7 +224,7 @@ class TestMediaObject:
         """
         scene = Mock()
         obj = MediaObject("test.jpg", scene)
-        assert hasattr(obj, 'hides')
+        assert hasattr(obj, "hides")
         assert callable(obj.hides)
 
     def test_hides_clamps_to_viewport(self):
@@ -239,9 +244,40 @@ class TestMediaObject:
         obj2 = MediaObject("small.jpg", scene)
 
         # Mock positions outside viewport
-        with patch.object(type(obj1), 'topleft', new_callable=lambda: property(lambda self: (-100, -100))):
-            with patch.object(type(obj1), 'bottomright', new_callable=lambda: property(lambda self: (1200, 1000))):
-                with patch.object(type(obj2), 'topleft', new_callable=lambda: property(lambda self: (200, 200))):
-                    with patch.object(type(obj2), 'bottomright', new_callable=lambda: property(lambda self: (400, 400))):
+        with patch.object(type(obj1), "topleft", new_callable=lambda: property(lambda self: (-100, -100))):
+            with patch.object(type(obj1), "bottomright", new_callable=lambda: property(lambda self: (1200, 1000))):
+                with patch.object(type(obj2), "topleft", new_callable=lambda: property(lambda self: (200, 200))):
+                    with patch.object(
+                        type(obj2), "bottomright", new_callable=lambda: property(lambda self: (400, 400))
+                    ):
                         # Should clamp and still detect hiding
                         assert obj1.hides(obj2) is True
+
+    def test_is_size_visible_base_implementation(self):
+        """
+        Scenario: Test base is_size_visible implementation
+
+        Given a MediaObject
+        When is_size_visible is called with different modes
+        Then it should return False for Invisible mode, True otherwise
+        """
+        scene = Mock()
+        obj = MediaObject("test.jpg", scene)
+
+        assert obj.is_size_visible(RenderMode.Invisible) is False
+        assert obj.is_size_visible(RenderMode.Draft) is True
+        assert obj.is_size_visible(RenderMode.HighQuality) is True
+
+    def test_is_size_visible_method_exists(self):
+        """
+        Scenario: Verify is_size_visible method exists
+
+        Given a MediaObject instance
+        When checking for the is_size_visible method
+        Then it should exist and be callable
+        """
+        scene = Mock()
+        obj = MediaObject("test.jpg", scene)
+
+        assert hasattr(obj, "is_size_visible")
+        assert callable(obj.is_size_visible)

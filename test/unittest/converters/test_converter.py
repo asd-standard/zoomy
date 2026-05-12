@@ -13,9 +13,10 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
 from threading import Thread
+
 from pyzui.converters.converter import Converter
+
 
 class TestConverter:
     """

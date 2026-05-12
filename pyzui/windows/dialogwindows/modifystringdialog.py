@@ -16,24 +16,35 @@
 
 """Modify string dialog with color selection."""
 
-from typing import TYPE_CHECKING, Optional, Tuple, Any, Deque
 import os
 from collections import deque
+from typing import TYPE_CHECKING
 
-from PySide6.QtWidgets import (
-    QDialog, QTextEdit, QVBoxLayout, QPushButton, QDialogButtonBox,
-    QLineEdit, QWidget, QLabel, QHBoxLayout, QSizePolicy
-)
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont, QColor, QPainter
+from PySide6.QtGui import QColor, QFont, QPainter
+from PySide6.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSizePolicy,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
+from pyzui.logger import get_logger
 
 if TYPE_CHECKING:
-    from PySide6.QtWidgets import QTextEdit, QLineEdit
     from PySide6.QtGui import QPaintEvent
+    from PySide6.QtWidgets import QLineEdit, QTextEdit
 
 # Type aliases
 ColorCode = str
-DialogResult = Tuple[bool, str, str, str]
+DialogResult = tuple[bool, str, str, str]
+
 
 class ModifyStringInputDialog:
     """
@@ -47,7 +58,8 @@ class ModifyStringInputDialog:
     Gather the string through a dialog and let select the color.
     Also gives a selection column of the last 20 used colors.
     """
-    def __init__(self, media_id: Optional[str]) -> None:
+
+    def __init__(self, media_id: str | None) -> None:
         """
         Constructor :
             ModifyStringInputDialog(media_id)
@@ -62,57 +74,57 @@ class ModifyStringInputDialog:
         If media_id is provided, the dialog is pre-populated with the existing color
         and text. Loads previously used colors from the color store file.
         """
-        self.start_string: str = ''
-        self.string_color: str = ''
-        self.passed_color: str = ''
-        self.color_codes: Deque[ColorCode] = deque(maxlen=24)
-        self.text_edit: "QTextEdit"
-        self.custom_color_input: "QLineEdit"
-        
-        if media_id == None:
+        self.start_string: str = ""
+        self.string_color: str = ""
+        self.passed_color: str = ""
+        self.color_codes: deque[ColorCode] = deque(maxlen=24)
+        self.text_edit: QTextEdit
+        self.custom_color_input: QLineEdit
+        self.__logger = get_logger("ModifyStringInputDialog")
+
+        if media_id is None:
             pass
-        elif media_id[:6] == 'string':
+        elif media_id[:6] == "string":
             self.string_color = media_id[7:13]
             self.start_string = media_id[14:]
         else:
             pass
-        
+
         ## set the default tilestore directory, this can be overridden if required
-        if 'APPDATA' in os.environ:
+        if "APPDATA" in os.environ:
             ## Windows
-            self.color_dir = os.path.join(os.environ['APPDATA'], "pyzui", "colorstore")
+            self.color_dir = os.path.join(os.environ["APPDATA"], "pyzui", "colorstore")
         else:
             ## Unix
-            self.color_dir = os.path.join(os.path.expanduser('~'), ".pyzui", "colorstore")
+            self.color_dir = os.path.join(os.path.expanduser("~"), ".pyzui", "colorstore")
 
-        if os.path.isfile(self.color_dir+'/color_list.txt'):
-            with open(self.color_dir+'/color_list.txt', 'r') as f:
+        if os.path.isfile(self.color_dir + "/color_list.txt"):
+            with open(self.color_dir + "/color_list.txt") as f:
                 for line in f:
                     stripline = line.strip()
-                    stripline = stripline.lower() 
-                    if len(stripline) == 6 :
-                        if stripline not in self.color_codes :
-                            self.color_codes.append(stripline)
+                    stripline = stripline.lower()
+                    if len(stripline) == 6 and stripline not in self.color_codes:
+                        self.color_codes.append(stripline)
 
         else:
             if os.path.isdir(self.color_dir):
-                f = open(self.color_dir+'/color_list.txt', 'w')
-                self.color_codes.append('ff0000')
-                f.write('ff0000\n')
-                self.color_codes.append('00ff00')
-                f.write('00ff00\n')
-                self.color_codes.append('0000ff')
-                f.write('0000ff\n')
+                f = open(self.color_dir + "/color_list.txt", "w")
+                self.color_codes.append("ff0000")
+                f.write("ff0000\n")
+                self.color_codes.append("00ff00")
+                f.write("00ff00\n")
+                self.color_codes.append("0000ff")
+                f.write("0000ff\n")
                 f.close()
             else:
                 os.mkdir(self.color_dir)
-                f = open(self.color_dir+'/color_list.txt', 'w')
-                self.color_codes.append('ff0000')
-                f.write('ff0000\n')
-                self.color_codes.append('00ff00')
-                f.write('00ff00\n')
-                self.color_codes.append('0000ff')
-                f.write('0000ff\n')
+                f = open(self.color_dir + "/color_list.txt", "w")
+                self.color_codes.append("ff0000")
+                f.write("ff0000\n")
+                self.color_codes.append("00ff00")
+                f.write("00ff00\n")
+                self.color_codes.append("0000ff")
+                f.write("0000ff\n")
                 f.close()
 
     def _color_square(self, color_code: ColorCode) -> QWidget:
@@ -127,12 +139,16 @@ class ModifyStringInputDialog:
         Creates a colored square widget.
         """
         color_square = QWidget()
-        color = QColor('#' + str(color_code))
+        color = QColor("#" + str(color_code))
         color_square.setFixedSize(20, 20)
 
         def paintEvent(event: "QPaintEvent") -> None:
             painter = QPainter(color_square)
             painter.fillRect(color_square.rect(), color)
+            # Explicit .end() is required: a QPainter left active on its
+            # paint device can corrupt Qt's C++ paint engine state,
+            # eventually causing a SIGSEGV crash in long-running sessions.
+            painter.end()
 
         color_square.paintEvent = paintEvent
 
@@ -264,37 +280,35 @@ class ModifyStringInputDialog:
         # Run dialog and get result
         if dialog.exec() == QDialog.DialogCode.Accepted:
             media_id = ""
-            
-            if len(self.custom_color_input.text()) == 6 or \
-            len(self.custom_color_input.text()) == 7:
-            
+
+            if len(self.custom_color_input.text()) == 6 or len(self.custom_color_input.text()) == 7:
                 self.string_color = self.custom_color_input.text()
-                
+
                 if len(self.string_color) == 6:
                     self.color_codes.append(self.string_color)
-                    f = open(self.color_dir+'/color_list.txt', 'w')
+                    f = open(self.color_dir + "/color_list.txt", "w")
                     for i in self.color_codes:
-                        f.write(str(i)+'\n')
+                        f.write(str(i) + "\n")
                     f.close()
 
-                if self.string_color[0]=="#" :
+                if self.string_color[0] == "#":
                     self.string_color = self.string_color[1:]
                     self.color_codes.append(self.string_color)
-                    f = open(self.color_dir+'/color_list.txt', 'w')
+                    f = open(self.color_dir + "/color_list.txt", "w")
                     for i in self.color_codes:
-                        f.write(str(i)+'\n')
+                        f.write(str(i) + "\n")
                     f.close()
 
-                if len(self.string_color) == 7 and self.string_color[0] != "#" :
+                if len(self.string_color) == 7 and self.string_color[0] != "#":
                     pass
 
             elif len(self.string_color) != 6:
-                print('Error')
+                self.__logger.warning("Invalid string color length")
             try:
-                media_id = 'string:'+str(self.string_color)+str(':') + str(self.text_edit.toPlainText())
+                media_id = "string:" + str(self.string_color) + ":" + str(self.text_edit.toPlainText())
 
             except Exception as e:
-                print('Error', e)
+                self.__logger.error("Error creating media_id: %s", e)
             ok = True
             return ok, media_id, self.string_color, self.text_edit.toPlainText()
         else:

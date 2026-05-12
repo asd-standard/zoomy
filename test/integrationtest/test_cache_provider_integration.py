@@ -31,27 +31,58 @@ The tests cover:
 - Multi-provider scenarios with shared cache
 - Provider purge operations and cache consistency
 """
-import sys
-import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+
+import shutil
+import threading
+import time
 
 import pytest
-import time
-import tempfile
-import shutil
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-from threading import Event
 from PIL import Image
 
-from pyzui.tilesystem.tile import Tile
-from pyzui.tilesystem.tilestore import TileCache
-from pyzui.tilesystem.tileproviders.tileprovider import TileProvider
-from pyzui.tilesystem.tileproviders.statictileprovider import StaticTileProvider
-from pyzui.tilesystem.tileproviders.dynamictileprovider import DynamicTileProvider
 from pyzui.tilesystem import tilestore
-from pyzui.tilesystem import tilemanager
+from pyzui.tilesystem.tile import Tile
+from pyzui.tilesystem.tileproviders.dynamictileprovider import DynamicTileProvider
+from pyzui.tilesystem.tileproviders.tileprovider import TileProvider
+from pyzui.tilesystem.tilestore import TileCache
+
+
+def wait_for_load_count(provider, expected, timeout=10.0, count_attr="load_call_count"):
+    """Poll until provider's count attr reaches expected, or timeout.
+
+    Replaces blind time.sleep() with a deterministic condition wait.
+    Note: This waits for _load to be called, but the Tile wrapper
+    may not yet be in cache. Use cache_ready() after this.
+    """
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if getattr(provider, count_attr) >= expected:
+            return True
+        time.sleep(0.002)
+    return False
+
+
+def cache_ready(cache, tile_ids, timeout=2.0):
+    """Poll until all tile_ids are present in cache, or timeout.
+
+    After _load returns, the provider thread wraps the image in Tile
+    and inserts into cache. This helper bridges the race window.
+
+    Returns:
+        bool: True if all tile_ids are in cache, False if timeout.
+    """
+    missing = set(tile_ids)
+    deadline = time.monotonic() + timeout
+    while missing and time.monotonic() < deadline:
+        missing -= {tid for tid in missing if tid in cache}
+        if missing:
+            time.sleep(0.002)
+    return not missing
+
 
 class MockTileProvider(TileProvider):
     """
@@ -67,6 +98,7 @@ class MockTileProvider(TileProvider):
         self.load_call_count = 0
         self.load_calls = []
         self.images_to_return = {}
+        self.load_completed = threading.Event()
 
     def _load(self, tile_id):
         """
@@ -82,10 +114,12 @@ class MockTileProvider(TileProvider):
         self.load_calls.append(tile_id)
 
         if tile_id in self.images_to_return:
-            return self.images_to_return[tile_id]
+            result = self.images_to_return[tile_id]
+        else:
+            result = Image.new("RGB", (256, 256), color="gray")
 
-        # Return a default test image (PIL Image, will be wrapped in Tile)
-        return Image.new('RGB', (256, 256), color='gray')
+        self.load_completed.set()
+        return result
 
     def set_image(self, tile_id, image):
         """Configure a specific image to be returned for a tile_id."""
@@ -94,6 +128,7 @@ class MockTileProvider(TileProvider):
     def set_unavailable(self, tile_id):
         """Mark a tile as unavailable (will return None)."""
         self.images_to_return[tile_id] = None
+
 
 class MockDynamicProvider(DynamicTileProvider):
     """
@@ -109,6 +144,7 @@ class MockDynamicProvider(DynamicTileProvider):
         self._media_id = media_id
         self.generate_call_count = 0
         self.generate_calls = []
+        self.load_completed = threading.Event()
 
     def _load_dynamic(self, tile_id, outfile):
         """
@@ -128,8 +164,10 @@ class MockDynamicProvider(DynamicTileProvider):
         r = (level * 50) % 256
         g = (row * 30) % 256
         b = (col * 40) % 256
-        img = Image.new('RGB', (256, 256), color=(r, g, b))
+        img = Image.new("RGB", (256, 256), color=(r, g, b))
         img.save(outfile)
+        self.load_completed.set()
+
 
 @pytest.fixture
 def cache():
@@ -144,6 +182,7 @@ def cache():
     """
     return TileCache(maxsize=100, maxage=3600)
 
+
 @pytest.fixture
 def small_cache():
     """
@@ -155,6 +194,7 @@ def small_cache():
         TileCache: A cache limited to 5 tiles.
     """
     return TileCache(maxsize=5, maxage=3600)
+
 
 @pytest.fixture
 def temp_tilestore(tmp_path):
@@ -183,6 +223,7 @@ def temp_tilestore(tmp_path):
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
 
+
 class TestProviderCacheBasicInteraction:
     """
     Feature: Basic Provider-Cache Interaction
@@ -203,17 +244,18 @@ class TestProviderCacheBasicInteraction:
         """
         provider = MockTileProvider(cache)
         provider.start()  # Start the provider thread
-        tile_id = ('test_media', 1, 0, 0)
+        tile_id = ("test_media", 1, 0, 0)
 
         # Configure a specific image to return
-        expected_image = Image.new('RGB', (256, 256), color='red')
+        expected_image = Image.new("RGB", (256, 256), color="red")
         provider.set_image(tile_id, expected_image)
 
         # When: Provider processes the tile request
         provider.request(tile_id)
-        time.sleep(0.2)  # Allow provider thread to process
+        assert wait_for_load_count(provider, 1, timeout=5.0), "Tile was not loaded within timeout"
 
         # Then: Tile should be in cache
+        assert cache_ready(cache, [tile_id], timeout=2.0), "Tile not found in cache after load completed"
         assert tile_id in cache
         assert provider.load_call_count == 1
 
@@ -228,15 +270,15 @@ class TestProviderCacheBasicInteraction:
         """
         provider = MockTileProvider(cache)
         provider.start()
-        tile_id = ('test_media', 1, 0, 0)
+        tile_id = ("test_media", 1, 0, 0)
 
         # Pre-populate cache
-        pre_cached_tile = Tile(Image.new('RGB', (256, 256), color='blue'))
+        pre_cached_tile = Tile(Image.new("RGB", (256, 256), color="blue"))
         cache[tile_id] = pre_cached_tile
 
         # When: Request the tile (already in cache)
         provider.request(tile_id)
-        time.sleep(0.1)
+        provider.load_completed.wait(timeout=5.0)
 
         # Then: Provider should not have been called
         assert provider.load_call_count == 0
@@ -254,16 +296,17 @@ class TestProviderCacheBasicInteraction:
         provider = MockTileProvider(cache)
         provider.start()
         tile_ids = [
-            ('media', 1, 0, 0),
-            ('media', 1, 0, 1),
-            ('media', 1, 1, 0),
+            ("media", 1, 0, 0),
+            ("media", 1, 0, 1),
+            ("media", 1, 1, 0),
         ]
 
         # When: Request each tile
         for tile_id in tile_ids:
             provider.request(tile_id)
 
-        time.sleep(0.3)  # Allow processing
+        assert wait_for_load_count(provider, 3, timeout=5.0), "Not all tiles loaded within timeout"
+        assert cache_ready(cache, tile_ids, timeout=2.0), "Tiles not in cache after load completed"
 
         # Then: All tiles should be cached
         for tile_id in tile_ids:
@@ -271,6 +314,7 @@ class TestProviderCacheBasicInteraction:
 
         # And: Provider was called for each
         assert provider.load_call_count == len(tile_ids)
+
 
 class TestDynamicProviderCacheInteraction:
     """
@@ -292,14 +336,17 @@ class TestDynamicProviderCacheInteraction:
         """
         provider = MockDynamicProvider(cache)
         provider.start()
-        tile_id = ('mock:dynamic', 5, 10, 20)
+        tile_id = ("mock:dynamic", 5, 10, 20)
 
         # When: Request tile generation
         provider.request(tile_id)
-        time.sleep(0.2)
+        assert wait_for_load_count(provider, 1, timeout=5.0, count_attr="generate_call_count"), (
+            "Dynamic tile was not generated within timeout"
+        )
 
         # Then: Tile should be generated and cached
         assert provider.generate_call_count == 1
+        assert cache_ready(cache, [tile_id], timeout=2.0), "Dynamic tile not found in cache"
         assert tile_id in cache
 
     def test_dynamic_provider_skips_cached_tiles(self, cache, temp_tilestore):
@@ -313,15 +360,17 @@ class TestDynamicProviderCacheInteraction:
         """
         provider = MockDynamicProvider(cache)
         provider.start()
-        tile_id = ('mock:dynamic', 5, 10, 20)
+        tile_id = ("mock:dynamic", 5, 10, 20)
 
         # Pre-cache a tile
-        cached_tile = Tile(Image.new('RGB', (256, 256), color='white'))
+        cached_tile = Tile(Image.new("RGB", (256, 256), color="white"))
         cache[tile_id] = cached_tile
 
         # When: Request the same tile
         provider.request(tile_id)
-        time.sleep(0.1)
+        # Provider thread checks cache, finds hit, skips _load_dynamic
+        # — wait for the thread to process the request
+        provider.load_completed.wait(timeout=1.0)
 
         # Then: No generation should occur
         assert provider.generate_call_count == 0
@@ -339,23 +388,29 @@ class TestDynamicProviderCacheInteraction:
         provider = MockDynamicProvider(cache)
         provider.start()
         tile_ids = [
-            ('mock:dynamic', 1, 0, 0),
-            ('mock:dynamic', 1, 0, 1),
-            ('mock:dynamic', 2, 0, 0),
+            ("mock:dynamic", 1, 0, 0),
+            ("mock:dynamic", 1, 0, 1),
+            ("mock:dynamic", 2, 0, 0),
         ]
 
         # When: Generate multiple tiles
         for tile_id in tile_ids:
             provider.request(tile_id)
 
-        time.sleep(0.3)
+        assert wait_for_load_count(provider, len(tile_ids), timeout=5.0, count_attr="generate_call_count"), (
+            f"Only {provider.generate_call_count}/{len(tile_ids)} dynamic tiles generated"
+        )
 
         # Then: All were generated
         assert provider.generate_call_count == len(tile_ids)
 
         # And: Each is cached
+        assert cache_ready(cache, tile_ids, timeout=2.0), (
+            f"Tiles missing from cache: {[tid for tid in tile_ids if tid not in cache]}"
+        )
         for tile_id in tile_ids:
             assert tile_id in cache
+
 
 class TestCacheEvictionProviderBehavior:
     """
@@ -381,28 +436,30 @@ class TestCacheEvictionProviderBehavior:
 
         # Fill cache to capacity (using level > 0 for mortal tiles)
         for i in range(5):
-            tile_id = ('media', 1, 0, i)
+            tile_id = ("media", 1, 0, i)
             provider.request(tile_id)
 
-        time.sleep(0.3)
-        initial_load_count = provider.load_call_count
+        assert wait_for_load_count(provider, 5, timeout=5.0), "Not all fill tiles loaded"
 
         # Add more tiles to trigger eviction
         for i in range(5, 8):
-            tile_id = ('media', 1, 0, i)
+            tile_id = ("media", 1, 0, i)
             provider.request(tile_id)
 
-        time.sleep(0.3)
+        assert wait_for_load_count(provider, 8, timeout=5.0), "Not all overflow tiles loaded"
 
         # First tile should have been evicted
-        first_tile_id = ('media', 1, 0, 0)
+        first_tile_id = ("media", 1, 0, 0)
 
         # Clear the load tracking to check for reload
         provider.load_call_count = 0
 
         # Request the evicted tile
         provider.request(first_tile_id)
-        time.sleep(0.2)
+
+        # Wait for tile to appear in cache (may be reloaded, or may
+        # still be cached if eviction hasn't removed it yet)
+        assert cache_ready(small_cache, [first_tile_id], timeout=5.0), "Evicted tile reload not found in cache"
 
         # Then: Provider should reload (if tile was evicted)
         # If tile wasn't evicted (still in cache), load count stays 0
@@ -422,20 +479,21 @@ class TestCacheEvictionProviderBehavior:
         provider.start()
 
         # Add an immortal tile (level 0)
-        immortal_id = ('media', 0, 0, 0)
-        immortal_tile = Tile(Image.new('RGB', (256, 256), color='gold'))
+        immortal_id = ("media", 0, 0, 0)
+        immortal_tile = Tile(Image.new("RGB", (256, 256), color="gold"))
         small_cache[immortal_id] = immortal_tile
 
         # Fill cache with mortal tiles
         for i in range(10):
-            tile_id = ('media', 1, 0, i)
+            tile_id = ("media", 1, 0, i)
             provider.request(tile_id)
 
-        time.sleep(0.5)
+        assert wait_for_load_count(provider, 10, timeout=5.0), "Not all pressure tiles loaded"
 
         # Then: Immortal tile should still be in cache
         assert immortal_id in small_cache
         assert small_cache[immortal_id] is immortal_tile
+
 
 class TestMultiProviderCacheSharing:
     """
@@ -460,15 +518,19 @@ class TestMultiProviderCacheSharing:
         provider_a.start()
         provider_b.start()
 
-        tile_a = ('media_a', 1, 0, 0)
-        tile_b = ('media_b', 1, 0, 0)
+        tile_a = ("media_a", 1, 0, 0)
+        tile_b = ("media_b", 1, 0, 0)
 
         # When: Both providers load tiles
         provider_a.request(tile_a)
         provider_b.request(tile_b)
-        time.sleep(0.3)
+        assert wait_for_load_count(provider_a, 1, timeout=5.0), "Provider A did not load tile"
+        assert wait_for_load_count(provider_b, 1, timeout=5.0), "Provider B did not load tile"
 
         # Then: Both tiles are in cache
+        assert cache_ready(cache, [tile_a, tile_b], timeout=2.0), (
+            f"Tiles missing from shared cache: tile_a={tile_a in cache}, tile_b={tile_b in cache}"
+        )
         assert tile_a in cache
         assert tile_b in cache
 
@@ -486,17 +548,22 @@ class TestMultiProviderCacheSharing:
         static_provider.start()
         dynamic_provider.start()
 
-        static_tile_id = ('image.jpg', 1, 0, 0)
-        dynamic_tile_id = ('mock:dynamic', 1, 0, 0)
+        static_tile_id = ("image.jpg", 1, 0, 0)
+        dynamic_tile_id = ("mock:dynamic", 1, 0, 0)
 
         # When: Both providers process requests
         static_provider.request(static_tile_id)
         dynamic_provider.request(dynamic_tile_id)
-        time.sleep(0.3)
+        assert wait_for_load_count(static_provider, 1, timeout=5.0), "Static provider did not load tile"
+        assert wait_for_load_count(dynamic_provider, 1, timeout=5.0, count_attr="generate_call_count"), (
+            "Dynamic provider did not generate tile"
+        )
 
         # Then: Both tiles are cached
+        assert cache_ready(cache, [static_tile_id, dynamic_tile_id], timeout=2.0), "Tiles not found in shared cache"
         assert static_tile_id in cache
         assert dynamic_tile_id in cache
+
 
 class TestProviderRequestQueue:
     """
@@ -520,11 +587,11 @@ class TestProviderRequestQueue:
         provider.start()
 
         # Queue multiple requests rapidly
-        tile_ids = [('media', 1, 0, i) for i in range(5)]
+        tile_ids = [("media", 1, 0, i) for i in range(5)]
         for tile_id in tile_ids:
             provider.request(tile_id)
 
-        time.sleep(0.5)
+        assert wait_for_load_count(provider, 5, timeout=5.0), f"Only {provider.load_call_count}/5 queued tiles loaded"
 
         # All should eventually be processed
         assert provider.load_call_count == 5
@@ -544,19 +611,20 @@ class TestProviderRequestQueue:
         """
         provider = MockTileProvider(cache)
         provider.start()
-        tile_id = ('media', 1, 0, 0)
+        tile_id = ("media", 1, 0, 0)
 
         # Request same tile multiple times
         for _ in range(5):
             provider.request(tile_id)
 
-        time.sleep(0.3)
+        assert wait_for_load_count(provider, 1, timeout=5.0), "Tile was not loaded within timeout"
 
         # Then: Tile should be loaded only once
         # (First request loads, subsequent find it in cache)
         assert tile_id in cache
         # Load count should be 1 (subsequent requests find tile in cache)
         assert provider.load_call_count == 1
+
 
 class TestProviderPurgeOperation:
     """
@@ -590,12 +658,18 @@ class TestProviderPurgeOperation:
 
         # Queue many requests
         for i in range(50):
-            provider.request(('media', 1, 0, i))
+            provider.request(("media", 1, 0, i))
 
-        # Small delay then purge
-        time.sleep(0.05)
+        # Wait until at least one load started, then purge
+        provider.load_completed.clear()
+        provider.load_completed.wait(timeout=1.0)
         provider.purge()
-        time.sleep(0.2)
+
+        # Wait for remaining in-flight loads to complete
+        for _ in range(20):
+            provider.load_completed.clear()
+            if not provider.load_completed.wait(timeout=0.05):
+                break  # thread idle — no more completions
 
         # Some may have processed before purge, but not all
         assert provider.load_call_count < 50
@@ -614,17 +688,18 @@ class TestProviderPurgeOperation:
 
         # Queue requests for two different media
         for i in range(3):
-            provider.request(('media_a', 1, 0, i))
-            provider.request(('media_b', 1, 0, i))
+            provider.request(("media_a", 1, 0, i))
+            provider.request(("media_b", 1, 0, i))
 
-        time.sleep(0.5)
+        assert wait_for_load_count(provider, 6, timeout=5.0), f"Only {provider.load_call_count}/6 tiles loaded"
 
         # All requests should process (purge not called)
-        loaded_media_a = sum(1 for t in provider.load_calls if t[0] == 'media_a')
-        loaded_media_b = sum(1 for t in provider.load_calls if t[0] == 'media_b')
+        loaded_media_a = sum(1 for t in provider.load_calls if t[0] == "media_a")
+        loaded_media_b = sum(1 for t in provider.load_calls if t[0] == "media_b")
 
         assert loaded_media_a == 3
         assert loaded_media_b == 3
+
 
 class TestCacheTemporaryTileHandling:
     """
@@ -644,8 +719,8 @@ class TestCacheTemporaryTileHandling:
         Then the tile is retrievable from cache
         And the tile can be checked for existence
         """
-        tile_id = ('media', 2, 5, 5)
-        tile = Tile(Image.new('RGB', (256, 256), color='cyan'))
+        tile_id = ("media", 2, 5, 5)
+        tile = Tile(Image.new("RGB", (256, 256), color="cyan"))
 
         # When: Store directly
         cache[tile_id] = tile
@@ -663,8 +738,8 @@ class TestCacheTemporaryTileHandling:
         Then the original tile is preserved
         And None is not stored
         """
-        tile_id = ('media', 1, 0, 0)
-        original_tile = Tile(Image.new('RGB', (256, 256), color='red'))
+        tile_id = ("media", 1, 0, 0)
+        original_tile = Tile(Image.new("RGB", (256, 256), color="red"))
 
         cache[tile_id] = original_tile
         cache[tile_id] = None  # Should not replace
@@ -672,6 +747,7 @@ class TestCacheTemporaryTileHandling:
         # Original tile should be preserved
         assert tile_id in cache
         assert cache[tile_id] is original_tile
+
 
 class TestProviderErrorHandling:
     """
@@ -693,14 +769,14 @@ class TestProviderErrorHandling:
         """
         provider = MockTileProvider(cache)
         provider.start()
-        tile_id = ('missing_media', 1, 0, 0)
+        tile_id = ("missing_media", 1, 0, 0)
 
         # Configure to return None
         provider.set_unavailable(tile_id)
 
         # When: Request the unavailable tile
         provider.request(tile_id)
-        time.sleep(0.2)
+        assert wait_for_load_count(provider, 1, timeout=5.0), "Unavailable tile request was not processed"
 
         # Then: None should be cached
         assert tile_id in cache
@@ -708,7 +784,7 @@ class TestProviderErrorHandling:
 
         # Request again - should not reload
         provider.request(tile_id)
-        time.sleep(0.1)
+        provider.load_completed.wait(timeout=5.0)
         assert provider.load_call_count == 1  # No additional load
 
     def test_provider_continues_after_load_error(self, cache):
@@ -724,23 +800,24 @@ class TestProviderErrorHandling:
         provider.start()
 
         # First tile will fail (returns None)
-        failing_id = ('bad_media', 1, 0, 0)
+        failing_id = ("bad_media", 1, 0, 0)
         provider.set_unavailable(failing_id)
 
         # Second tile will succeed
-        good_id = ('good_media', 1, 0, 0)
-        good_image = Image.new('RGB', (256, 256), color='green')
+        good_id = ("good_media", 1, 0, 0)
+        good_image = Image.new("RGB", (256, 256), color="green")
         provider.set_image(good_id, good_image)
 
         # When: Request both
         provider.request(failing_id)
         provider.request(good_id)
-        time.sleep(0.3)
+        assert wait_for_load_count(provider, 2, timeout=5.0), f"Only {provider.load_call_count}/2 tiles loaded"
 
         # Then: Both processed, good tile cached as Tile object
         assert provider.load_call_count == 2
         assert good_id in cache
         assert isinstance(cache[good_id], Tile)
+
 
 class TestCacheAccessPatterns:
     """
@@ -762,21 +839,21 @@ class TestCacheAccessPatterns:
         """
         # Fill cache with mortal tiles (level > 0)
         for i in range(5):
-            tile_id = ('media', 1, 0, i)
-            small_cache[tile_id] = Tile(Image.new('RGB', (256, 256)))
+            tile_id = ("media", 1, 0, i)
+            small_cache[tile_id] = Tile(Image.new("RGB", (256, 256)))
 
         # Access first tile to make it recently used
-        _ = small_cache[('media', 1, 0, 0)]
+        _ = small_cache[("media", 1, 0, 0)]
 
         # Add new tile to trigger eviction
-        small_cache[('media', 1, 0, 5)] = Tile(Image.new('RGB', (256, 256)))
+        small_cache[("media", 1, 0, 5)] = Tile(Image.new("RGB", (256, 256)))
 
         # Then: Recently accessed tile should survive
-        assert ('media', 1, 0, 0) in small_cache
+        assert ("media", 1, 0, 0) in small_cache
 
         # And: Oldest non-accessed tile should be evicted
         # (tile 1 was LRU before our access to tile 0)
-        assert ('media', 1, 0, 1) not in small_cache
+        assert ("media", 1, 0, 1) not in small_cache
 
     def test_access_count_tracking_with_maxaccesses(self, cache):
         """
@@ -787,8 +864,8 @@ class TestCacheAccessPatterns:
         Then the tile is removed from cache
         And further access raises KeyError
         """
-        tile_id = ('media', 1, 0, 0)
-        tile = Tile(Image.new('RGB', (256, 256)))
+        tile_id = ("media", 1, 0, 0)
+        tile = Tile(Image.new("RGB", (256, 256)))
 
         # Insert with maxaccesses limit
         cache.insert(tile_id, tile, maxaccesses=3)
@@ -805,6 +882,7 @@ class TestCacheAccessPatterns:
 
         # Tile should be expired (removed) after max accesses
         assert tile_id not in cache
+
 
 class TestProviderLifecycle:
     """
@@ -844,18 +922,18 @@ class TestProviderLifecycle:
         And tiles become available in cache
         """
         provider = MockTileProvider(cache)
-        tile_id = ('media', 1, 0, 0)
+        tile_id = ("media", 1, 0, 0)
 
         # Queue request before start
         provider.request(tile_id)
 
         # Tile not in cache yet (provider not running)
-        time.sleep(0.1)
         assert tile_id not in cache
 
         # Start provider
         provider.start()
-        time.sleep(0.2)
+        assert wait_for_load_count(provider, 1, timeout=5.0), "Queued request was not processed after start"
 
         # Now tile should be cached
+        assert cache_ready(cache, [tile_id], timeout=2.0), "Tile not found in cache after provider started"
         assert tile_id in cache

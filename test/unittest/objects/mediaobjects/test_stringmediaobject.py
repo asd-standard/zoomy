@@ -13,11 +13,13 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
+from unittest.mock import Mock
+
 import pytest
-from unittest.mock import Mock, patch, PropertyMock
-from PySide6 import QtGui
-from pyzui.objects.mediaobjects.stringmediaobject import StringMediaObject
+
 from pyzui.objects.mediaobjects.mediaobject import LoadError
+from pyzui.objects.mediaobjects.stringmediaobject import StringMediaObject
+
 
 class TestStringMediaObject:
     """
@@ -83,6 +85,7 @@ class TestStringMediaObject:
         Then it should be an instance of MediaObject
         """
         from pyzui.objects.mediaobjects.mediaobject import MediaObject
+
         scene = Mock()
         obj = StringMediaObject("string:000000:Test", scene)
         assert isinstance(obj, MediaObject)
@@ -100,7 +103,7 @@ class TestStringMediaObject:
         obj = StringMediaObject("string:000000:HelloWorld", scene)
 
         # Text should be parsed into lines (optimized: stored as strings, not character lists)
-        assert obj.lines == ['HelloWorld']
+        assert obj.lines == ["HelloWorld"]
 
     def test_multiline_text_parses_into_separate_lines(self):
         """
@@ -115,8 +118,8 @@ class TestStringMediaObject:
 
         # Should have 2 lines (optimized: stored as strings, not character lists)
         assert len(obj.lines) == 2
-        assert obj.lines[0] == 'Hello'
-        assert obj.lines[1] == 'World'
+        assert obj.lines[0] == "Hello"
+        assert obj.lines[1] == "World"
 
     def test_multiline_text_with_multiple_newlines(self):
         """
@@ -130,9 +133,9 @@ class TestStringMediaObject:
         obj = StringMediaObject("string:000000:Line1\nLine2\nLine3", scene)
 
         assert len(obj.lines) == 3
-        assert obj.lines[0] == 'Line1'
-        assert obj.lines[1] == 'Line2'
-        assert obj.lines[2] == 'Line3'
+        assert obj.lines[0] == "Line1"
+        assert obj.lines[1] == "Line2"
+        assert obj.lines[2] == "Line3"
 
     def test_parses_various_colors(self):
         """
@@ -162,7 +165,7 @@ class TestStringMediaObject:
         obj = StringMediaObject("string:000000:", scene)
 
         assert len(obj.lines) == 1
-        assert obj.lines[0] == ''
+        assert obj.lines[0] == ""
 
     def test_text_with_special_characters(self):
         """
@@ -176,7 +179,7 @@ class TestStringMediaObject:
         obj = StringMediaObject("string:000000:Hello @#$%!", scene)
 
         # Optimized: stored as string, not character list
-        assert obj.lines[0] == 'Hello @#$%!'
+        assert obj.lines[0] == "Hello @#$%!"
 
     def test_zoomlevel_attribute(self):
         """
@@ -214,7 +217,7 @@ class TestStringMediaObject:
         """
         scene = Mock()
         obj = StringMediaObject("string:000000:Test", scene)
-        assert hasattr(obj, 'render')
+        assert hasattr(obj, "render")
         assert callable(obj.render)
 
     def test_onscreen_size_property_exists(self):
@@ -226,8 +229,8 @@ class TestStringMediaObject:
         Then the property should exist
         """
         scene = Mock()
-        obj = StringMediaObject("string:000000:Test", scene)
-        assert hasattr(StringMediaObject, 'onscreen_size')
+        StringMediaObject("string:000000:Test", scene)
+        assert hasattr(StringMediaObject, "onscreen_size")
 
     def test_invalidate_cache_method_exists(self):
         """
@@ -240,7 +243,7 @@ class TestStringMediaObject:
         """
         scene = Mock()
         obj = StringMediaObject("string:000000:Test", scene)
-        assert hasattr(obj, 'invalidate_cache')
+        assert hasattr(obj, "invalidate_cache")
         assert callable(obj.invalidate_cache)
 
     def test_cache_functionality_through_public_interface(self):
@@ -254,17 +257,17 @@ class TestStringMediaObject:
         scene = Mock()
         scene.viewport_size = (800, 600)
         scene.zoomlevel = 0.0
-        
+
         obj = StringMediaObject("string:FF0000:Hello", scene)
         obj.zoomlevel = 0.0
-        
+
         # Test that invalidate_cache exists and is callable
-        assert hasattr(obj, 'invalidate_cache')
+        assert hasattr(obj, "invalidate_cache")
         assert callable(obj.invalidate_cache)
-        
+
         # Call invalidate_cache (should not raise exceptions)
         obj.invalidate_cache()
-        
+
         # The actual caching behavior is tested through render method
         # which is already covered in existing tests
 
@@ -279,13 +282,13 @@ class TestStringMediaObject:
         scene = Mock()
         scene.viewport_size = (800, 600)
         scene.zoomlevel = 0.0
-        
+
         obj = StringMediaObject("string:FF0000:Test", scene)
-        
+
         # Basic test: render method exists and is callable
-        assert hasattr(obj, 'render')
+        assert hasattr(obj, "render")
         assert callable(obj.render)
-        
+
         # Test that invalidate_cache exists
-        assert hasattr(obj, 'invalidate_cache')
+        assert hasattr(obj, "invalidate_cache")
         assert callable(obj.invalidate_cache)

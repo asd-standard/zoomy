@@ -30,13 +30,12 @@ To add a new provider, simply create a file matching *dynamictileprovider.py
 in the tileproviders directory - it will be automatically discovered and tested.
 """
 
-import pytest
 import importlib
 import inspect
-import os
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-from typing import List, Tuple, Type
+from unittest.mock import Mock, patch
+
+import pytest
 
 # Import base classes
 from pyzui.tilesystem.tileproviders import DynamicTileProvider
@@ -45,7 +44,8 @@ from pyzui.tilesystem.tileproviders import DynamicTileProvider
 # PROVIDER DISCOVERY
 # =============================================================================
 
-def discover_dynamic_providers() -> List[Tuple[str, Type]]:
+
+def discover_dynamic_providers() -> list[tuple[str, type]]:
     """
     Discover all DynamicTileProvider implementations automatically.
 
@@ -58,19 +58,19 @@ def discover_dynamic_providers() -> List[Tuple[str, Type]]:
     providers = []
 
     # Get the tileproviders directory path
-    tileproviders_dir = Path(__file__).parent.parent.parent / 'pyzui' / 'tilesystem' / 'tileproviders'
+    tileproviders_dir = Path(__file__).parent.parent.parent / "pyzui" / "tilesystem" / "tileproviders"
 
     # Find all *dynamictileprovider.py files
-    for filepath in tileproviders_dir.glob('*dynamictileprovider.py'):
+    for filepath in tileproviders_dir.glob("*dynamictileprovider.py"):
         module_name = filepath.stem  # filename without .py
 
         # Skip the base DynamicTileProvider itself
-        if module_name == 'dynamictileprovider':
+        if module_name == "dynamictileprovider":
             continue
 
         try:
             # Import the module dynamically
-            module = importlib.import_module(f'pyzui.tilesystem.tileproviders.{module_name}')
+            module = importlib.import_module(f"pyzui.tilesystem.tileproviders.{module_name}")
 
             # Find all classes in the module that inherit from DynamicTileProvider
             for name, obj in inspect.getmembers(module, inspect.isclass):
@@ -87,6 +87,7 @@ def discover_dynamic_providers() -> List[Tuple[str, Type]]:
 
     return providers
 
+
 # Discover all providers at module load time
 DISCOVERED_PROVIDERS = discover_dynamic_providers()
 
@@ -96,6 +97,7 @@ PROVIDER_PARAMS = [(name, cls) for name, cls in DISCOVERED_PROVIDERS]
 # =============================================================================
 # PARAMETRIZED TESTS - RUN FOR ALL DISCOVERED PROVIDERS
 # =============================================================================
+
 
 class TestAllDynamicTileProviders:
     """
@@ -109,8 +111,7 @@ class TestAllDynamicTileProviders:
     # SECTION 1: BASIC INITIALIZATION & STRUCTURE
     # -------------------------------------------------------------------------
 
-    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS,
-                             ids=[name for name, _ in PROVIDER_PARAMS])
+    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS, ids=[name for name, _ in PROVIDER_PARAMS])
     def test_provider_initialization(self, provider_name, provider_class):
         """
         Scenario: Initialize provider with tilecache
@@ -123,8 +124,7 @@ class TestAllDynamicTileProviders:
         provider = provider_class(tilecache)
         assert provider is not None, f"{provider_name} failed to initialize"
 
-    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS,
-                             ids=[name for name, _ in PROVIDER_PARAMS])
+    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS, ids=[name for name, _ in PROVIDER_PARAMS])
     def test_provider_inherits_from_dynamictileprovider(self, provider_name, provider_class):
         """
         Scenario: Verify provider inheritance
@@ -135,15 +135,13 @@ class TestAllDynamicTileProviders:
         """
         tilecache = Mock()
         provider = provider_class(tilecache)
-        assert isinstance(provider, DynamicTileProvider), \
-            f"{provider_name} does not inherit from DynamicTileProvider"
+        assert isinstance(provider, DynamicTileProvider), f"{provider_name} does not inherit from DynamicTileProvider"
 
     # -------------------------------------------------------------------------
     # SECTION 2: REQUIRED CLASS ATTRIBUTES
     # -------------------------------------------------------------------------
 
-    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS,
-                             ids=[name for name, _ in PROVIDER_PARAMS])
+    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS, ids=[name for name, _ in PROVIDER_PARAMS])
     def test_provider_has_filext(self, provider_name, provider_class):
         """
         Scenario: Verify filext attribute exists and is valid
@@ -152,15 +150,11 @@ class TestAllDynamicTileProviders:
         When checking for the filext attribute
         Then it should exist as a non-empty string
         """
-        assert hasattr(provider_class, 'filext'), \
-            f"{provider_name} missing 'filext' attribute"
-        assert isinstance(provider_class.filext, str), \
-            f"{provider_name}.filext must be a string"
-        assert len(provider_class.filext) > 0, \
-            f"{provider_name}.filext cannot be empty"
+        assert hasattr(provider_class, "filext"), f"{provider_name} missing 'filext' attribute"
+        assert isinstance(provider_class.filext, str), f"{provider_name}.filext must be a string"
+        assert len(provider_class.filext) > 0, f"{provider_name}.filext cannot be empty"
 
-    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS,
-                             ids=[name for name, _ in PROVIDER_PARAMS])
+    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS, ids=[name for name, _ in PROVIDER_PARAMS])
     def test_provider_has_tilesize(self, provider_name, provider_class):
         """
         Scenario: Verify tilesize attribute exists and is valid
@@ -169,15 +163,11 @@ class TestAllDynamicTileProviders:
         When checking for the tilesize attribute
         Then it should exist as a positive integer
         """
-        assert hasattr(provider_class, 'tilesize'), \
-            f"{provider_name} missing 'tilesize' attribute"
-        assert isinstance(provider_class.tilesize, int), \
-            f"{provider_name}.tilesize must be an integer"
-        assert provider_class.tilesize > 0, \
-            f"{provider_name}.tilesize must be positive"
+        assert hasattr(provider_class, "tilesize"), f"{provider_name} missing 'tilesize' attribute"
+        assert isinstance(provider_class.tilesize, int), f"{provider_name}.tilesize must be an integer"
+        assert provider_class.tilesize > 0, f"{provider_name}.tilesize must be positive"
 
-    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS,
-                             ids=[name for name, _ in PROVIDER_PARAMS])
+    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS, ids=[name for name, _ in PROVIDER_PARAMS])
     def test_provider_has_aspect_ratio(self, provider_name, provider_class):
         """
         Scenario: Verify aspect_ratio attribute exists and is valid
@@ -186,19 +176,15 @@ class TestAllDynamicTileProviders:
         When checking for the aspect_ratio attribute
         Then it should exist as a positive number
         """
-        assert hasattr(provider_class, 'aspect_ratio'), \
-            f"{provider_name} missing 'aspect_ratio' attribute"
-        assert isinstance(provider_class.aspect_ratio, (int, float)), \
-            f"{provider_name}.aspect_ratio must be a number"
-        assert provider_class.aspect_ratio > 0, \
-            f"{provider_name}.aspect_ratio must be positive"
+        assert hasattr(provider_class, "aspect_ratio"), f"{provider_name} missing 'aspect_ratio' attribute"
+        assert isinstance(provider_class.aspect_ratio, (int, float)), f"{provider_name}.aspect_ratio must be a number"
+        assert provider_class.aspect_ratio > 0, f"{provider_name}.aspect_ratio must be positive"
 
     # -------------------------------------------------------------------------
     # SECTION 3: BOUNDARY CONDITION TESTS FOR _load_dynamic()
     # -------------------------------------------------------------------------
 
-    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS,
-                             ids=[name for name, _ in PROVIDER_PARAMS])
+    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS, ids=[name for name, _ in PROVIDER_PARAMS])
     def test_load_dynamic_handles_negative_row(self, provider_name, provider_class):
         """
         Scenario: Handle negative row coordinate
@@ -211,17 +197,15 @@ class TestAllDynamicTileProviders:
         provider = provider_class(tilecache)
 
         # Extract media_id from provider name (lowercase)
-        media_id = provider_name.lower().replace('tileprovider', '').replace('dynamic', '')
+        media_id = provider_name.lower().replace("tileprovider", "").replace("dynamic", "")
 
         tile_id = (media_id, 2, -1, 1)  # negative row
-        outfile = '/tmp/test_tile.png'
+        outfile = "/tmp/test_tile.png"
 
         result = provider._load_dynamic(tile_id, outfile)
-        assert result is None, \
-            f"{provider_name}._load_dynamic() should return None for negative row"
+        assert result is None, f"{provider_name}._load_dynamic() should return None for negative row"
 
-    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS,
-                             ids=[name for name, _ in PROVIDER_PARAMS])
+    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS, ids=[name for name, _ in PROVIDER_PARAMS])
     def test_load_dynamic_handles_negative_col(self, provider_name, provider_class):
         """
         Scenario: Handle negative column coordinate
@@ -233,17 +217,15 @@ class TestAllDynamicTileProviders:
         tilecache = Mock()
         provider = provider_class(tilecache)
 
-        media_id = provider_name.lower().replace('tileprovider', '').replace('dynamic', '')
+        media_id = provider_name.lower().replace("tileprovider", "").replace("dynamic", "")
 
         tile_id = (media_id, 2, 1, -1)  # negative col
-        outfile = '/tmp/test_tile.png'
+        outfile = "/tmp/test_tile.png"
 
         result = provider._load_dynamic(tile_id, outfile)
-        assert result is None, \
-            f"{provider_name}._load_dynamic() should return None for negative col"
+        assert result is None, f"{provider_name}._load_dynamic() should return None for negative col"
 
-    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS,
-                             ids=[name for name, _ in PROVIDER_PARAMS])
+    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS, ids=[name for name, _ in PROVIDER_PARAMS])
     def test_load_dynamic_handles_row_out_of_range(self, provider_name, provider_class):
         """
         Scenario: Handle row coordinate exceeding valid range
@@ -255,19 +237,17 @@ class TestAllDynamicTileProviders:
         tilecache = Mock()
         provider = provider_class(tilecache)
 
-        media_id = provider_name.lower().replace('tileprovider', '').replace('dynamic', '')
+        media_id = provider_name.lower().replace("tileprovider", "").replace("dynamic", "")
 
         tilelevel = 2
         max_valid_coord = 2**tilelevel - 1  # = 3
         tile_id = (media_id, tilelevel, max_valid_coord + 1, 1)
-        outfile = '/tmp/test_tile.png'
+        outfile = "/tmp/test_tile.png"
 
         result = provider._load_dynamic(tile_id, outfile)
-        assert result is None, \
-            f"{provider_name}._load_dynamic() should return None for row out of range"
+        assert result is None, f"{provider_name}._load_dynamic() should return None for row out of range"
 
-    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS,
-                             ids=[name for name, _ in PROVIDER_PARAMS])
+    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS, ids=[name for name, _ in PROVIDER_PARAMS])
     def test_load_dynamic_handles_col_out_of_range(self, provider_name, provider_class):
         """
         Scenario: Handle column coordinate exceeding valid range
@@ -279,19 +259,17 @@ class TestAllDynamicTileProviders:
         tilecache = Mock()
         provider = provider_class(tilecache)
 
-        media_id = provider_name.lower().replace('tileprovider', '').replace('dynamic', '')
+        media_id = provider_name.lower().replace("tileprovider", "").replace("dynamic", "")
 
         tilelevel = 2
         max_valid_coord = 2**tilelevel - 1  # = 3
         tile_id = (media_id, tilelevel, 1, max_valid_coord + 1)
-        outfile = '/tmp/test_tile.png'
+        outfile = "/tmp/test_tile.png"
 
         result = provider._load_dynamic(tile_id, outfile)
-        assert result is None, \
-            f"{provider_name}._load_dynamic() should return None for col out of range"
+        assert result is None, f"{provider_name}._load_dynamic() should return None for col out of range"
 
-    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS,
-                             ids=[name for name, _ in PROVIDER_PARAMS])
+    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS, ids=[name for name, _ in PROVIDER_PARAMS])
     def test_load_dynamic_handles_both_coords_out_of_range(self, provider_name, provider_class):
         """
         Scenario: Handle both coordinates out of range
@@ -303,21 +281,19 @@ class TestAllDynamicTileProviders:
         tilecache = Mock()
         provider = provider_class(tilecache)
 
-        media_id = provider_name.lower().replace('tileprovider', '').replace('dynamic', '')
+        media_id = provider_name.lower().replace("tileprovider", "").replace("dynamic", "")
 
         tile_id = (media_id, 2, 10, 10)  # both exceed max of 3
-        outfile = '/tmp/test_tile.png'
+        outfile = "/tmp/test_tile.png"
 
         result = provider._load_dynamic(tile_id, outfile)
-        assert result is None, \
-            f"{provider_name}._load_dynamic() should return None for both coords out of range"
+        assert result is None, f"{provider_name}._load_dynamic() should return None for both coords out of range"
 
     # -------------------------------------------------------------------------
     # SECTION 4: VALID TILE GENERATION TEST
     # -------------------------------------------------------------------------
 
-    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS,
-                             ids=[name for name, _ in PROVIDER_PARAMS])
+    @pytest.mark.parametrize("provider_name,provider_class", PROVIDER_PARAMS, ids=[name for name, _ in PROVIDER_PARAMS])
     def test_load_dynamic_generates_valid_tile(self, provider_name, provider_class):
         """
         Scenario: Generate a valid tile for valid coordinates
@@ -333,29 +309,32 @@ class TestAllDynamicTileProviders:
         # Determine the module path for patching
         module_path = provider_class.__module__
 
-        with patch(f'{module_path}.Image.new') as mock_image_new:
+        with patch(f"{module_path}.Image.new") as mock_image_new:
             mock_image = Mock()
             mock_image_new.return_value = mock_image
 
-            media_id = provider_name.lower().replace('tileprovider', '').replace('dynamic', '')
+            media_id = provider_name.lower().replace("tileprovider", "").replace("dynamic", "")
 
             tile_id = (media_id, 2, 1, 1)  # valid coordinates
-            outfile = '/tmp/test_tile.png'
+            outfile = "/tmp/test_tile.png"
 
             # Call the method
             provider._load_dynamic(tile_id, outfile)
 
             # Verify image was created with correct size
-            expected_size = (provider_class.tilesize, provider_class.tilesize)
             mock_image_new.assert_called_once()
 
             # Verify image was saved
-            mock_image.save.assert_called_once_with(outfile), \
-                f"{provider_name}._load_dynamic() should save tile to outfile"
+            (
+                mock_image.save.assert_called_once_with(outfile),
+                f"{provider_name}._load_dynamic() should save tile to outfile",
+            )
+
 
 # =============================================================================
 # DISCOVERY VERIFICATION TEST
 # =============================================================================
+
 
 class TestProviderDiscovery:
     """
@@ -373,9 +352,10 @@ class TestProviderDiscovery:
         When scanning the tileproviders directory
         Then at least one provider should be found
         """
-        assert len(DISCOVERED_PROVIDERS) > 0, \
-            "No dynamic tile providers were discovered. " \
+        assert len(DISCOVERED_PROVIDERS) > 0, (
+            "No dynamic tile providers were discovered. "
             "Ensure *dynamictileprovider.py files exist in pyzui/tilesystem/tileproviders/"
+        )
 
     def test_discovery_finds_known_providers(self):
         """
@@ -388,8 +368,7 @@ class TestProviderDiscovery:
         provider_names = [name for name, _ in DISCOVERED_PROVIDERS]
 
         # We should at least find FernTileProvider
-        assert any('Fern' in name for name in provider_names), \
-            "FernTileProvider should be discovered"
+        assert any("Fern" in name for name in provider_names), "FernTileProvider should be discovered"
 
     def test_discovered_providers_have_valid_names(self):
         """
@@ -399,10 +378,11 @@ class TestProviderDiscovery:
         When checking their class names
         Then each name should be non-empty, start with uppercase, and contain 'Provider'
         """
-        for name, cls in DISCOVERED_PROVIDERS:
+        for name, _cls in DISCOVERED_PROVIDERS:
             assert len(name) > 0, "Provider name cannot be empty"
             assert name[0].isupper(), f"Provider class name '{name}' should start with uppercase"
-            assert 'Provider' in name, f"Provider class '{name}' should contain 'Provider'"
+            assert "Provider" in name, f"Provider class '{name}' should contain 'Provider'"
+
 
 # =============================================================================
 # USAGE INFORMATION

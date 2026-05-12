@@ -46,8 +46,20 @@ Directory Organization
     ├── test_concurrent_access.py        # Thread safety tests
     ├── test_cache_provider_integration.py  # Cache-provider interaction
     ├── test_tilemanager_integration.py  # TileManager coordination
-    ├── gui_integration.py               # Visual GUI testing (manual)
-    ├── GUI_INTEGRATION.md               # GUI test documentation
+    ├── guiintegration/                  # Visual GUI testing (manual)
+    │   ├── main.py                      #   Test orchestrator + CLI
+    │   ├── conf.py                      #   Timing constants
+    │   ├── logger.py                    #   Test logger
+    │   ├── utilities/                   #   Shared utilities
+    │   │   ├── qt_simulation.py
+    │   │   ├── scene_helpers.py
+    │   │   ├── image_creation.py
+    │   │   └── temp_dirs.py
+    │   ├── test/                        #   43 test modules (1 per step)
+    │   │   ├── load_test_scene.py
+    │   │   ├── new_scene.py
+    │   │   └── ... (43 modules total)
+    │   └── GUI_INTEGRATION.md           #   GUI test documentation
     └── logs/                            # Test execution logs
         └── pyzui.log
 
@@ -96,13 +108,14 @@ Test Categories
 - Negative tile level handling
 - Dual-cache management
 
-**6. GUI Integration** (``gui_integration.py``)
+**6. GUI Integration** (``guiintegration/``)
 
 - Full application workflow
-- All user interactions
+- All user interactions (43 test steps)
 - Visual verification by human
-- Menu operations
-- Mouse and keyboard input
+- Individual step execution (``--only``, ``--only-step``)
+- Menu operations, dialogs, mouse and keyboard input
+- Verbose/debug logging control (``-v``, ``-d``)
 
 Running Integration Tests
 --------------------------
@@ -194,19 +207,51 @@ GUI tests run separately and require visual verification:
 
 .. code-block:: bash
 
-    python gui_integration.py
+    python test/integrationtest/guiintegration/main.py
+
+**Run with verbose logging (-v) or debug logging (-d):**
+
+.. code-block:: bash
+
+    python test/integrationtest/guiintegration/main.py -v
+    python test/integrationtest/guiintegration/main.py -d
+
+**Run a single test step:**
+
+.. code-block:: bash
+
+    python test/integrationtest/guiintegration/main.py --only new_tab
+    python test/integrationtest/guiintegration/main.py --only-step 16
 
 **Start from specific step:**
 
 .. code-block:: bash
 
-    python gui_integration.py --start-step 30
+    python test/integrationtest/guiintegration/main.py --start-step 30
 
 **List available test steps:**
 
 .. code-block:: bash
 
-    python gui_integration.py --list-steps
+    python test/integrationtest/guiintegration/main.py --list-steps
+
+**Logging flags:**
+
+.. list-table::
+   :header-rows: 1
+
+   * - Flag
+     - Console output
+     - File output
+   * - *(none)*
+     - WARNING+
+     - INFO+
+   * - ``-v``
+     - **INFO**\ +
+     - DEBUG+
+   * - ``-d``
+     - **DEBUG**\ +
+     - DEBUG+
 
 Common Fixtures
 ---------------
@@ -1193,20 +1238,31 @@ GUI Integration Testing
 Visual Verification Testing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-GUI tests validate the complete application through visual verification:
-
-**Running GUI Tests:**
+GUI tests validate the complete application through visual verification.
+Run from the project root directory:
 
 .. code-block:: bash
 
-    # Run all tests (with visual observation)
-    python test/integrationtest/gui_integration.py
+    # Run all 43 tests (quiet — WARNING+ on console)
+    python test/integrationtest/guiintegration/main.py
+
+    # Run with verbose logging (INFO+ on console)
+    python test/integrationtest/guiintegration/main.py -v
+
+    # Run with debug logging (DEBUG+ on console)
+    python test/integrationtest/guiintegration/main.py -d
+
+    # Run a single test by module name
+    python test/integrationtest/guiintegration/main.py --only new_tab
+
+    # Run a single test by step number
+    python test/integrationtest/guiintegration/main.py --only-step 16
 
     # Start from specific step
-    python gui_integration.py --start-step 30
+    python test/integrationtest/guiintegration/main.py --start-step 30
 
-    # List available steps
-    python gui_integration.py --list-steps
+    # List all available steps
+    python test/integrationtest/guiintegration/main.py --list-steps
 
 **Test Steps Covered:**
 
@@ -1222,25 +1278,51 @@ GUI tests validate the complete application through visual verification:
       5. Save Screenshot
       6. Save Scene
       7. Open Saved Scene
+      8. Open New String Dialog
+      9. Open Local Media
+      14. Open new SVG
+      15. Import Scene
+      16. New Tab
+      17. Close Tab
 
     View Menu:
       10. Set Framerate
       11. Adjust Sensitivity
       12. Fullscreen Toggle
+      13. Adjust Sensitivity Dialog
+      18. Render Order Toggle
+
+    Settings Menu:
+      19. Autosave Settings
+      22. Zoom Settings
+
+    Actions Menu:
+      23. Copy SVG
+      24. Paste SVG
 
     Help Menu:
       20. About Dialog
       21. About Qt Dialog
 
+    SVG:
+      25. Full Elongation Test
+      26. SVG - Reload Test Scene
+
     Mouse Interactions:
-       30. Left Click Select
-       31. Click and Drag
-       32. Scroll Wheel Zoom
-       35. Control+Click Rectangle Drawing Selection
-       36. Shift+Click No Selection Change
+      30. Left Click Select
+      31. Click and Drag
+      32. Scroll Wheel Zoom
+      33. Multi-Selection Persistence
+      35. Control+Click Rectangle Drawing and Move
+      36. Shift+Click No Selection Change
+      45. Right-Click String Modification Dialog
+      46. Right-Click Image Modification Dialog
+      47. Right-Click SVG Modification Dialog
 
     Keyboard Interactions:
-       40. Escape Deselect
+      34. Alt Fine Zoom Control
+      37. Ctrl+C/V Copy Paste
+      40. Escape Deselect
       41. Page Up/Down Zoom
       42. Arrow Keys Move
       43. Space Center
@@ -1248,6 +1330,7 @@ GUI tests validate the complete application through visual verification:
 
     Complete Workflow:
       90. Full Application Workflow
+      99. File Menu - Quit
 
 **Test Resources:**
 
@@ -1270,13 +1353,35 @@ The GUI test creates temporary resources:
 
 **Timing Configuration:**
 
+Timing constants are in ``guiintegration/conf.py``:
+
 .. code-block:: python
 
-    # Configurable timing constants (milliseconds)
-    SHORT_DELAY_MS = 2000      # 2 seconds
-    DEFAULT_DELAY_MS = 3500    # 3.5 seconds
-    LONG_DELAY_MS = 5000       # 5 seconds
-    IMAGE_LOAD_DELAY_MS = 10000  # 10 seconds
+    SHORT_DELAY_MS = 2000       # Short pauses (2 seconds)
+    DEFAULT_DELAY_MS = 150      # Standard delay between actions (0.15s)
+    LONG_DELAY_MS = 200         # Long delay for loading/rendering (0.2s)
+    IMAGE_LOAD_DELAY_MS = 500   # Extra time for images to fully load (0.5s)
+    ZOOM_STEP_DELAY_MS = 50     # Delay between zoom steps (0.05s)
+    MOVE_STEP_DELAY_MS = 30     # Delay between movement steps (0.03s)
+
+**Package Structure:**
+
+.. code-block:: text
+
+    test/integrationtest/guiintegration/
+    ├── main.py                 # Orchestrator: GUITestContext, GUIIntegrationTest
+    ├── conf.py                 # Timing constants
+    ├── logger.py               # GUITestLogger
+    ├── utilities/
+    │   ├── qt_simulation.py    # wait, trigger_action, simulate_*
+    │   ├── scene_helpers.py    # load_media_dir, add_test_string, add_svg
+    │   ├── image_creation.py   # create_ppm_image, create_png_image
+    │   └── temp_dirs.py        # get_pytest_style_temp_dir
+    └── test/                   # 43 modules (one per test step)
+        ├── load_test_scene.py
+        ├── new_scene.py
+        ├── ... (43 modules total)
+        └── quit.py
 
 Writing New Integration Tests
 ------------------------------
@@ -1686,7 +1791,7 @@ Running Tests
     pytest --cov=pyzui
 
     # GUI tests (manual)
-    python gui_integration.py
+    python test/integrationtest/guiintegration/main.py
 
 Essential Patterns
 ~~~~~~~~~~~~~~~~~~
@@ -1737,7 +1842,7 @@ Reference these for patterns:
 - ``test/integrationtest/test_concurrent_access.py`` - Thread safety patterns
 - ``test/integrationtest/test_cache_provider_integration.py`` - Component interaction
 - ``test/integrationtest/test_tilemanager_integration.py`` - Coordination testing
-- ``test/integrationtest/gui_integration.py`` - Visual verification
+- ``test/integrationtest/guiintegration/`` - Visual verification
 
 Conclusion
 ----------

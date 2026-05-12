@@ -1,0 +1,109 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.pytest_cache/
+
+# Sphinx documentation
+docs/build/
+docs/_build/
+doc/build/
+doc/_build/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.spyproject/
+.spyderproject
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific
+logs/
+*.log
+*.log.*
+nohup.out
+
+# Benchmark logs (these are huge!)
+test/benchmarks/logs/
+
+# Temporary / work in progress
+WipDir/
+demo/
+__pycache__/
+
+# Coverage reports
+.coverage
+htmlcov/
+
+# Linting
+.ruff_cache/
+.mypy_cache/
+
+# AI assistant config (must not be committed)
+.claude/
+
+# Temporary / scratch / session files
+scene.pzs
+Gui-*
+test_tilde_fix.py
+session-*.md
+OrientarsiNeiConflitti.pzs
+PARALLEL_TEXT_RENDERING_PLAN.md
+PROGRAM_FLOW_FLOWCHART.md
+PROJECT_STRUCTURE_DIAGRAM.md

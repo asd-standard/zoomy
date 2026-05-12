@@ -13,9 +13,10 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
 from unittest.mock import Mock, patch
+
 from pyzui.tilesystem.tileproviders import FernTileProvider
+
 
 class TestFernTileProvider:
     """
@@ -46,6 +47,7 @@ class TestFernTileProvider:
         Then it should be an instance of DynamicTileProvider
         """
         from pyzui.tilesystem.tileproviders import DynamicTileProvider
+
         tilecache = Mock()
         provider = FernTileProvider(tilecache)
         assert isinstance(provider, DynamicTileProvider)
@@ -58,7 +60,7 @@ class TestFernTileProvider:
         When checking the filext attribute
         Then it should be 'png'
         """
-        assert FernTileProvider.filext == 'png'
+        assert FernTileProvider.filext == "png"
 
     def test_tilesize_attribute(self):
         """
@@ -138,8 +140,8 @@ class TestFernTileProvider:
         """
         tilecache = Mock()
         provider = FernTileProvider(tilecache)
-        tile_id = ('fern', 2, -1, 1)
-        outfile = '/path/to/tile.png'
+        tile_id = ("fern", 2, -1, 1)
+        outfile = "/path/to/tile.png"
         result = provider._load_dynamic(tile_id, outfile)
         assert result is None
 
@@ -153,8 +155,8 @@ class TestFernTileProvider:
         """
         tilecache = Mock()
         provider = FernTileProvider(tilecache)
-        tile_id = ('fern', 2, 1, -1)
-        outfile = '/path/to/tile.png'
+        tile_id = ("fern", 2, 1, -1)
+        outfile = "/path/to/tile.png"
         result = provider._load_dynamic(tile_id, outfile)
         assert result is None
 
@@ -168,12 +170,12 @@ class TestFernTileProvider:
         """
         tilecache = Mock()
         provider = FernTileProvider(tilecache)
-        tile_id = ('fern', 2, 10, 10)
-        outfile = '/path/to/tile.png'
+        tile_id = ("fern", 2, 10, 10)
+        outfile = "/path/to/tile.png"
         result = provider._load_dynamic(tile_id, outfile)
         assert result is None
 
-    @patch('pyzui.tilesystem.tileproviders.ferndynamictileprovider.Image.new')
+    @patch("pyzui.tilesystem.tileproviders.ferndynamictileprovider.Image.new")
     def test_load_dynamic_valid_tile(self, mock_image_new):
         """
         Scenario: Generate valid fern fractal tile
@@ -189,10 +191,10 @@ class TestFernTileProvider:
         mock_image = Mock()
         mock_image_new.return_value = mock_image
 
-        tile_id = ('fern', 2, 1, 1)
-        outfile = '/path/to/tile.png'
+        tile_id = ("fern", 2, 1, 1)
+        outfile = "/path/to/tile.png"
 
         provider._load_dynamic(tile_id, outfile)
 
         mock_image.save.assert_called_once_with(outfile)
-        mock_image_new.assert_called_once_with('RGB', (256, 256))
+        mock_image_new.assert_called_once_with("RGB", (256, 256))

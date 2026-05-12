@@ -1,0 +1,138 @@
+[project]
+name = "pyzui"
+version = "0.4.0"
+requires-python = ">=3.12"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+exclude = ["test/", "scripts/"]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes (unused imports, undefined names)
+    "I",      # isort (import ordering)
+    "N",      # pep8-naming (CamelCase classes, snake_case functions)
+    "UP",     # pyupgrade (modern Python syntax)
+    "B",      # flake8-bugbear (common gotchas)
+    "C4",     # flake8-comprehensions
+    "SIM",    # flake8-simplify
+    "RUF",    # Ruff-specific rules
+    "PERF",   # Performance
+]
+
+ignore = [
+    "E501",    # line-too-long (handled by formatter + line-length=120)
+    "B008",    # function call in defaults (too aggressive)
+    "N818",    # exception naming
+    "SIM108",  # ternary preference
+    "N802",    # Qt overrides must be CamelCase (paintEvent, wheelEvent, etc.)
+    "N806",    # Px/Py notation is intentional math convention
+    "N811",    # QZUI as QZUIType import alias pattern
+    "N812",    # module-as-CamelCase is standard Python pattern
+    "RUF002",  # ASCII art in docstrings is intentional
+    "RUF001",  # ambiguous unicode chars in ASCII art is intentional
+    "E701",    # one-line if/elif statements are intentional style (e.g. tile grid layout)
+    "RUF012",  # mutable class-level defaults are intentional (config, fern transforms)
+    "SIM102",  # nested-if style is more readable in some contexts
+    "SIM105",  # explicit try/except:pass is clearer than suppress()
+    "SIM115",  # non-context-manager open() for short-lived file handles
+    "UP031",   # %-formatting in performance-critical code is intentional
+    "PERF401", # loop-and-append pattern is intentional for readability
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pyzui"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.mypy]
+python_version = "3.12"
+explicit_package_bases = true
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+no_implicit_optional = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = "test.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "PySide6.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pyvips"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pyzui.objects.mediaobjects.mediaobjectsutils.svg.*"
+disable_error_code = ["union-attr", "return-value", "arg-type"]
+
+[[tool.mypy.overrides]]
+module = "pyzui.objects.mediaobjects.tiledmediaobject"
+disable_error_code = ["no-redef", "has-type", "union-attr", "no-any-return", "operator", "assignment", "arg-type"]
+
+[[tool.mypy.overrides]]
+module = "pyzui.config"
+disable_error_code = ["assignment", "attr-defined", "index", "operator"]
+
+[[tool.mypy.overrides]]
+module = "pyzui.backup.backupmanager"
+disable_error_code = ["arg-type", "operator", "call-overload"]
+
+[[tool.mypy.overrides]]
+module = "pyzui.tilesystem.tiler.tiler"
+disable_error_code = ["call-overload", "return-value", "list-item", "arg-type"]
+
+[[tool.mypy.overrides]]
+module = "pyzui.tilesystem.tilestore.tilecache"
+disable_error_code = ["arg-type", "return-value", "assignment"]
+
+[[tool.mypy.overrides]]
+module = "pyzui.objects.mediaobjects.mediaobject"
+disable_error_code = ["empty-body", "unused-ignore"]
+
+[[tool.mypy.overrides]]
+module = "pyzui.converters"
+disable_error_code = ["misc", "assignment"]
+
+[[tool.mypy.overrides]]
+module = "pyzui.tilesystem.tileproviders.tileprovider"
+disable_error_code = ["assignment", "unused-ignore"]
+
+[[tool.mypy.overrides]]
+module = "pyzui.tilesystem.tileproviders.statictileprovider"
+disable_error_code = ["unused-ignore"]
+
+[[tool.mypy.overrides]]
+module = "pyzui.tilesystem.tileproviders.dynamictileprovider"
+disable_error_code = ["unused-ignore"]
+
+[[tool.mypy.overrides]]
+module = "pyzui.tilesystem.tileproviders.ferndynamictileprovider"
+disable_error_code = ["unused-ignore"]
+
+[[tool.mypy.overrides]]
+module = "pyzui.objects.mediaobjects.mediaobjectsutils.string.parallellayout"
+disable_error_code = ["arg-type"]
+
+[[tool.mypy.overrides]]
+module = "pyzui.tilesystem.tilestore.cleanuptilestore"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "pyzui.tilesystem.tilestore.tilestore"
+ignore_errors = true

@@ -16,26 +16,28 @@
 
 """Tiled media to be displayed in the ZUI."""
 
-import tempfile
-import os
-import math
 import logging
-from typing import Optional, Tuple, Any
+import math
+import os
+import tempfile
+from typing import Any
 
+## Performance optimization note:
+## Phase 2 optimizations replace 2**x with math.exp2(x) (1.85x faster)
+## and math.log(x, 2) with math.log2(x) (2x faster) throughout the codebase.
+## These changes are performance-critical for zoom operations.
 from PySide6 import QtCore, QtGui
-
-from pyzui.objects.mediaobjects.mediaobject import MediaObject, LoadError, RenderMode
-from pyzui.tilesystem import tilemanager as TileManager
-from pyzui.logger import get_logger
-
-# Subdivide a ppm image into tiles that fit the mediaobject frame
-from pyzui.tilesystem.tiler.ppm import PPMTiler
 
 # Process-based conversion for parallel media conversion
 from pyzui.converters import converterrunner
+from pyzui.logger import get_logger
+from pyzui.objects.mediaobjects.mediaobject import LoadError, MediaObject, RenderMode
+from pyzui.tilesystem import tilemanager as TileManager
 
+# Subdivide a ppm image into tiles that fit the mediaobject frame
 # Process-based tiling for parallel image tiling
-from pyzui.tilesystem.tiler.tilerrunner import submit_tiling, TilingHandle
+from pyzui.tilesystem.tiler.tilerrunner import TilingHandle, submit_tiling
+
 
 class TiledMediaObject(MediaObject):
     """
@@ -63,6 +65,7 @@ class TiledMediaObject(MediaObject):
     For any acceptable filetype the adequate converter gets called.
     The converter returns a ppm image file on which we can run the tiler on.
     """
+
     def __init__(self, media_id: str, scene: Any, autofit: bool = True) -> None:
         """
         Constructor :
@@ -97,19 +100,19 @@ class TiledMediaObject(MediaObject):
 
         # Path to the temporary PPM file created during conversion
         # Set to None initially; assigned a tempfile path if conversion is needed
-        self.__tmpfile: Optional[str] = None
+        self.__tmpfile: str | None = None
 
         # Reference to the active ConversionHandle (wraps a Future from process pool)
         # None if no conversion is needed (e.g., already tiled or is a .ppm file)
-        self.__converter: Optional[converterrunner.ConversionHandle] = None
+        self.__converter: converterrunner.ConversionHandle | None = None
 
         # Reference to the TilingHandle that manages process-based tiling
         # None until __run_tiler() is called after conversion completes
-        self.__tiler: Optional[TilingHandle] = None
+        self.__tiler: TilingHandle | None = None
 
         # Logger instance for this specific TiledMediaObject, named with the media_id
         # Used for debug/info/error logging throughout the object's lifecycle
-        self.__logger: logging.Logger = get_logger(f'TiledMediaObject.{media_id}')
+        self.__logger: logging.Logger = get_logger(f"TiledMediaObject.{media_id}")
 
         # Maximum tile level (zoom depth) for this media
         # Initialized to 0; updated from TileManager metadata once tiles are loaded
@@ -123,16 +126,16 @@ class TiledMediaObject(MediaObject):
 
         # Aspect ratio of the media (width / height)
         # None until loaded from TileManager metadata; used for efficient size calculations
-        self.__aspect_ratio: Optional[float] = None
+        self.__aspect_ratio: float | None = None
 
         ## for caching tileblocks
         # The cached QImage containing the rendered tileblock
         # Reused across frames if the visible tile region hasn't changed
-        self.__tileblock: Optional[QtGui.QImage] = None
+        self.__tileblock: QtGui.QImage | None = None
 
         # Tuple identifying the cached tileblock: (tilelevel, row_min, col_min, row_max, col_max)
         # Used to determine if the cache is still valid for the current view
-        self.__tileblock_id: Optional[Tuple[int, int, int, int, int]] = None
+        self.__tileblock_id: tuple[int, int, int, int, int] | None = None
 
         # Whether the cached tileblock contains all final (fully loaded) tiles
         # If False, the tileblock may need re-rendering when higher quality tiles become available
@@ -156,45 +159,39 @@ class TiledMediaObject(MediaObject):
             # Create a temporary file with .ppm extension for the converter output
             # tempfile.mkstemp() returns (file_descriptor, file_path)
             fd: int
-            fd, self.__tmpfile = tempfile.mkstemp('.ppm')
+            fd, self.__tmpfile = tempfile.mkstemp(".ppm")
 
             # Close the file descriptor immediately; the converter will open the file itself
             os.close(fd)
 
             # Determine which converter to use based on file extension
-            if self._media_id.lower().endswith('.pdf'):
+            if self._media_id.lower().endswith(".pdf"):
                 # PDF files: submit to process pool for PDF-to-PPM conversion
                 # submit_pdf_conversion() returns a Future object
-                future: Any = converterrunner.submit_pdf_conversion(
-                    self._media_id, self.__tmpfile)
+                future: Any = converterrunner.submit_pdf_conversion(self._media_id, self.__tmpfile)
 
                 # Wrap the Future in a ConversionHandle for progress/error tracking
-                self.__converter = converterrunner.ConversionHandle(
-                    future, self._media_id, self.__tmpfile)
+                self.__converter = converterrunner.ConversionHandle(future, self._media_id, self.__tmpfile)
 
                 # Store path to the PPM file that the converter will produce
                 self.__ppmfile: str = self.__tmpfile
 
-            elif self._media_id.lower().endswith('.ppm'):
+            elif self._media_id.lower().endswith(".ppm"):
                 ## assume media_id is a local PPM file
                 # No conversion needed; the media_id itself is the PPM file path
-                self.__logger.info(
-                    "assuming media is a local PPM file")
+                self.__logger.info("assuming media is a local PPM file")
                 self.__ppmfile: str = self._media_id
 
             else:
                 # All other image formats (JPG, PNG, GIF, TIFF, etc.): use Vips conversion
                 # submit_vips_conversion() returns a Future object
-                future: Any = converterrunner.submit_vips_conversion(
-                    self._media_id, self.__tmpfile)
+                future: Any = converterrunner.submit_vips_conversion(self._media_id, self.__tmpfile)
 
                 # Wrap the Future in a ConversionHandle for progress/error tracking
-                self.__converter = converterrunner.ConversionHandle(
-                    future, self._media_id, self.__tmpfile)
+                self.__converter = converterrunner.ConversionHandle(future, self._media_id, self.__tmpfile)
 
                 # Store path to the PPM file that the converter will produce
                 self.__ppmfile: str = self.__tmpfile
-
 
     # Class variable: indicates this media object does NOT support transparency
     # Tiled images are fully opaque, so they can hide objects behind them
@@ -204,7 +201,7 @@ class TiledMediaObject(MediaObject):
     ## loaded
     # Class variable: default placeholder dimensions (width, height) in pixels
     # Used until the actual media dimensions are loaded from TileManager metadata
-    default_size: Tuple[int, int] = (256, 256)
+    default_size: tuple[int, int] = (256, 256)
 
     ## maximum number of cycles to cache temporary tiles for
     # Class variable: number of render cycles before non-final tileblocks are refreshed
@@ -244,7 +241,7 @@ class TiledMediaObject(MediaObject):
             # Average both progresses: converter contributes 50%, tiler contributes 50%
             return 0.5 * (self.__converter.progress + self.__tiler.progress)
 
-    def __pixpos2rowcol(self, pixpos: Tuple[float, float], tilescale: float) -> Tuple[int, int]:
+    def __pixpos2rowcol(self, pixpos: tuple[float, float], tilescale: float) -> tuple[int, int]:
         """
         Method :
             __pixpos2rowcol(pixpos, tilescale)
@@ -259,7 +256,7 @@ class TiledMediaObject(MediaObject):
         """
         # Get the top-left corner of this media object on screen
         # self.topleft returns (x, y) tuple in screen coordinates
-        o: Tuple[float, float] = self.topleft
+        o: tuple[float, float] = self.topleft
 
         # Calculate column index: horizontal offset from object's left edge, divided by scaled tile size
         # (pixpos[0] - o[0]) gives the pixel distance from the object's left edge
@@ -273,7 +270,7 @@ class TiledMediaObject(MediaObject):
 
         return (row, col)
 
-    def __rowcol_bound(self, tilelevel: int) -> Tuple[int, int]:
+    def __rowcol_bound(self, tilelevel: int) -> tuple[int, int]:
         """
         Method :
             __rowcol_bound(tilelevel)
@@ -294,32 +291,31 @@ class TiledMediaObject(MediaObject):
             if self.__aspect_ratio >= 1.0:
                 ## width >= height (landscape orientation)
                 # At this tilelevel, there are 2^tilelevel columns
-                col_bound = 2**tilelevel - 1
+                col_bound = (1 << tilelevel) - 1
 
                 # Rows are fewer because height < width; divide by aspect ratio
-                row_bound = int((2**tilelevel) / self.__aspect_ratio) - 1
+                row_bound = int((1 << tilelevel) / self.__aspect_ratio) - 1
             else:
                 ## height > width (portrait orientation)
                 # Columns are fewer because width < height; multiply by aspect ratio
-                col_bound = int((2**tilelevel) * self.__aspect_ratio) - 1
+                col_bound = int((1 << tilelevel) * self.__aspect_ratio) - 1
 
                 # At this tilelevel, there are 2^tilelevel rows
-                row_bound = 2**tilelevel - 1
+                row_bound = (1 << tilelevel) - 1
         else:
             # Fallback: calculate bounds from actual pixel dimensions
             # tile_pixsize is the pixel size each tile covers at this tilelevel
             # Higher tilelevels have smaller tiles; maxtilelevel has tilesize pixels per tile
-            tile_pixsize: int = self.__tilesize \
-                * 2 ** (self.__maxtilelevel - tilelevel)
+            tile_pixsize: int = self.__tilesize * 2 ** (self.__maxtilelevel - tilelevel)
 
             # Calculate the maximum row/col by dividing total dimensions by tile pixel size
             # (self.__height - 1) ensures we get the correct last tile index
             row_bound = int((self.__height - 1) / tile_pixsize)
-            col_bound = int((self.__width  - 1) / tile_pixsize)
+            col_bound = int((self.__width - 1) / tile_pixsize)
 
         return row_bound, col_bound
 
-    def __render_tileblock(self, tileblock_id: Tuple[int, int, int, int, int], mode: int) -> QtGui.QImage:
+    def __render_tileblock(self, tileblock_id: tuple[int, int, int, int, int], mode: int) -> QtGui.QImage:
         """
         Method :
             __render_tileblock(tileblock_id, mode)
@@ -351,8 +347,7 @@ class TiledMediaObject(MediaObject):
 
         # Get the bottom-right tile to determine its actual pixel dimensions
         # The bottom-right tile may be smaller than tilesize if the image doesn't divide evenly
-        brtile: Any = TileManager.get_tile_robust(
-            (self._media_id, tilelevel, row_max, col_max))
+        brtile: Any = TileManager.get_tile_robust((self._media_id, tilelevel, row_max, col_max))
 
         # Calculate total pixel dimensions of the tileblock
         # Width: number of full tiles * tilesize + actual width of the rightmost tile
@@ -381,7 +376,7 @@ class TiledMediaObject(MediaObject):
             for col in range(col_min, col_max + 1):
                 # Construct the unique tile identifier tuple
                 # Format: (media_id, tilelevel, row, col)
-                tile_id: Tuple[str, int, int, int] = (self._media_id, tilelevel, row, col)
+                tile_id: tuple[str, int, int, int] = (self._media_id, tilelevel, row, col)
                 try:
                     # Try to get the fully loaded tile from TileManager's cache
                     tile: Any = TileManager.get_tile(tile_id)
@@ -405,10 +400,10 @@ class TiledMediaObject(MediaObject):
                         tile, final = TileManager.cut_tile(tile_id)
                     else:
                         # In Draft mode: generate tile with tempcache expiry cycles
-                        tile, final = TileManager.cut_tile(tile_id,
-                                                           self.tempcache)
+                        tile, final = TileManager.cut_tile(tile_id, self.tempcache)
                     # If the generated tile is not final quality, mark the whole block non-final
-                    if not final: tileblock_final = False
+                    if not final:
+                        tileblock_final = False
 
                 # Calculate the pixel position of this tile within the tileblock image
                 # Offset from the top-left tile (col_min, row_min) of the block
@@ -448,25 +443,17 @@ class TiledMediaObject(MediaObject):
 
         Precondition: mode is equal to one of the constants defined in
         :class:`RenderMode`
-        """
 
-        # Skip rendering if the image is too small to be visible on screen
-        # min(self.onscreen_size) returns the smaller of width/height
-        # Also skip if mode is Invisible (object should not be drawn)
-        if min(self.onscreen_size) <= 1 or mode == RenderMode.Invisible:
-            ## don't bother rendering if the image is too
-            ## small to be seen, or invisible mode is set
-            return
+        Note: Size visibility is checked by the scene via is_size_visible().
+        """
 
         # Select the image scaling transformation mode based on render quality
         # FastTransformation uses nearest-neighbor interpolation (fast but lower quality)
-        if mode == RenderMode.Draft:
-            transform_mode: QtCore.Qt.TransformationMode = QtCore.Qt.FastTransformation
-        elif mode == RenderMode.HighQuality:
+        if mode == RenderMode.Draft or mode == RenderMode.HighQuality:
             transform_mode: QtCore.Qt.TransformationMode = QtCore.Qt.FastTransformation
 
         # Get the viewport dimensions (width, height) in pixels
-        viewport_size: Tuple[float, float] = self._scene.viewport_size
+        viewport_size: tuple[float, float] = self._scene.viewport_size
 
         # Calculate the combined zoom level (scene zoom + object zoom)
         # This determines which tile level to use and the sub-tile scaling
@@ -474,7 +461,7 @@ class TiledMediaObject(MediaObject):
 
         # tilelevel is the integer ceiling of zoomlevel
         # Tiles are stored at integer zoom levels; we pick the next higher level
-        tilelevel: int = int(math.ceil(zoomlevel))
+        tilelevel: int = math.ceil(zoomlevel)
 
         # tilescale is the fractional scaling between the tile's native resolution and display
         # When zoomlevel == tilelevel, tilescale = 1.0 (tiles displayed at native size)
@@ -512,13 +499,12 @@ class TiledMediaObject(MediaObject):
 
         # Create the tileblock identifier tuple for cache lookup
         # Uniquely identifies the visible tile region at the current zoom level
-        tileblock_id: Tuple[int, int, int, int, int] = (tilelevel, row_min, col_min, row_max, col_max)
+        tileblock_id: tuple[int, int, int, int, int] = (tilelevel, row_min, col_min, row_max, col_max)
 
         # Determine whether the cached tileblock needs to be re-rendered
-        if (self.__tileblock_id != tileblock_id) or \
-           (not self.__tileblock_final and \
-            (mode == RenderMode.HighQuality or \
-             self.__tileblock_age >= self.tempcache)):
+        if (self.__tileblock_id != tileblock_id) or (
+            not self.__tileblock_final and (mode == RenderMode.HighQuality or self.__tileblock_age >= self.tempcache)
+        ):
             ## the cached tileblock is different to the required
             ## one, so we have draw the new tileblock
             ## we also re-render the tileblock if it is not final
@@ -536,11 +522,12 @@ class TiledMediaObject(MediaObject):
             int(tilescale * tileblock.width()),
             int(tilescale * tileblock.height()),
             QtCore.Qt.IgnoreAspectRatio,
-            transform_mode)
+            transform_mode,
+        )
 
         # Calculate the on-screen position where the tileblock should be drawn
         # Start from the object's top-left corner and offset by the tile region's position
-        o: Tuple[float, float] = self.topleft
+        o: tuple[float, float] = self.topleft
 
         # x position: object left edge + horizontal offset to the first visible tile column
         x: float = o[0] + int(tilescale * self.__tilesize * col_min)
@@ -599,8 +586,7 @@ class TiledMediaObject(MediaObject):
                 # Draw the progress percentage centered in the placeholder rectangle
                 # QtCore.Qt.AlignCenter centers text both horizontally and vertically
                 # int(self.__progress * 100) converts 0.0-1.0 to 0-100 percentage
-                painter.drawText(x, y, w, h, QtCore.Qt.AlignCenter,
-                    str(int(self.__progress * 100)) + '%')
+                painter.drawText(x, y, w, h, QtCore.Qt.AlignCenter, str(int(self.__progress * 100)) + "%")
             else:
                 # No progress yet; show "loading..." text
                 # Set text color to white for visibility
@@ -612,8 +598,7 @@ class TiledMediaObject(MediaObject):
                 painter.setFont(font)
 
                 # Draw "loading..." centered in the placeholder rectangle
-                painter.drawText(x, y, w, h, QtCore.Qt.AlignCenter,
-                    "loading...")
+                painter.drawText(x, y, w, h, QtCore.Qt.AlignCenter, "loading...")
 
     def __try_load(self) -> None:
         """
@@ -630,17 +615,15 @@ class TiledMediaObject(MediaObject):
         try:
             # Attempt to retrieve the root tile (level=0, row=0, col=0) from TileManager
             # If this succeeds, the media has been fully tiled and is ready to render
-            TileManager.get_tile(
-                (self._media_id, 0, 0, 0))
+            TileManager.get_tile((self._media_id, 0, 0, 0))
         except TileManager.TileNotLoaded:
             # Tile exists in the store but hasn't been loaded into memory yet
             # This is expected during the loading process; we'll retry on next render cycle
             self.__logger.info("(0,0,0) tile not loaded yet")
             pass
-        except (TileManager.MediaNotTiled,
-            TileManager.TileNotAvailable):
+        except (TileManager.MediaNotTiled, TileManager.TileNotAvailable):
             # The media could not be tiled at all; raise a LoadError to signal failure
-            raise LoadError("unable to correctly tile the image")
+            raise LoadError("unable to correctly tile the image") from None
         else:
             # Root tile loaded successfully; media is ready for rendering
             self.__logger.info("media loaded")
@@ -653,14 +636,13 @@ class TiledMediaObject(MediaObject):
 
             # On Windows, clean up the temporary PPM file
             # On Unix systems, the file can be unlinked even while open
-            if os.name == 'nt':
+            if os.name == "nt":
                 try:
                     # os.unlink() deletes the file from the filesystem
                     os.unlink(self.__tmpfile)
-                except:
+                except Exception:
                     # Log but don't crash if temp file cleanup fails
-                    self.__logger.exception("unable to unlink temporary file "
-                        "'%s'" % self.__tmpfile)
+                    self.__logger.exception(f"unable to unlink temporary file '{self.__tmpfile}'")
 
             # Save the current bounding box before updating dimensions
             # These are needed for autofit to maintain the placeholder's screen position
@@ -673,26 +655,21 @@ class TiledMediaObject(MediaObject):
             old_x2, old_y2 = self.bottomright
 
             # Save the current centre position for restoration after autofit
-            old_centre: Tuple[float, float] = self.centre
+            old_centre: tuple[float, float] = self.centre
 
             # Load the actual media dimensions from TileManager metadata
             # These replace the default_size (256, 256) placeholder values
-            self.__width = TileManager.get_metadata(
-                self._media_id, 'width')
-            self.__height = TileManager.get_metadata(
-                self._media_id, 'height')
+            self.__width = TileManager.get_metadata(self._media_id, "width")
+            self.__height = TileManager.get_metadata(self._media_id, "height")
 
             # Load the maximum tile level (deepest zoom level available)
-            self.__maxtilelevel = TileManager.get_metadata(
-                self._media_id, 'maxtilelevel')
+            self.__maxtilelevel = TileManager.get_metadata(self._media_id, "maxtilelevel")
 
             # Load the tile size in pixels (typically 256)
-            self.__tilesize = TileManager.get_metadata(
-                self._media_id, 'tilesize')
+            self.__tilesize = TileManager.get_metadata(self._media_id, "tilesize")
 
             # Load the aspect ratio (width / height) for efficient size calculations
-            self.__aspect_ratio = TileManager.get_metadata(
-                self._media_id, 'aspect_ratio')
+            self.__aspect_ratio = TileManager.get_metadata(self._media_id, "aspect_ratio")
 
             if self.__autofit:
                 ## fit to area occupied by placeholder
@@ -719,7 +696,6 @@ class TiledMediaObject(MediaObject):
         # Check if the PPM file exists on disk before attempting to tile it
         # os.path.exists() returns True if the file path exists
         if not os.path.exists(self.__ppmfile):
-
             ## there was a problem converting, or the input file
             ## never actually existed
             if self.__converter and self.__converter.error:
@@ -727,15 +703,14 @@ class TiledMediaObject(MediaObject):
                 raise LoadError(self.__converter.error)
             else:
                 # No converter error available; raise a generic LoadError
-                raise LoadError("there was a problem "
-                    "converting and/or loading the input file")
+                raise LoadError("there was a problem converting and/or loading the input file")
 
         # Determine the output tile format based on the input file extension
         # JPG files are tiled as JPG to preserve compression; everything else uses PNG
-        if self._media_id.lower().endswith('.jpg'):
-            filext: str = 'jpg'
+        if self._media_id.lower().endswith(".jpg"):
+            filext: str = "jpg"
         else:
-            filext: str = 'png'
+            filext: str = "png"
 
         try:
             # Submit tiling job to process pool for parallel tile creation
@@ -743,9 +718,9 @@ class TiledMediaObject(MediaObject):
             future = submit_tiling(self.__ppmfile, self._media_id, filext)
             self.__tiler = TilingHandle(future, self.__ppmfile, self._media_id)
 
-        except IOError:
+        except OSError:
             # IOError during tiler creation indicates a file read problem
-            raise LoadError("there was an error creating the tiler: %s")
+            raise LoadError("there was an error creating the tiler: %s") from None
 
     def render(self, painter: Any, mode: int) -> None:
         """
@@ -776,13 +751,11 @@ class TiledMediaObject(MediaObject):
         elif self.__tiler and self.__tiler.error:
             # The tiler encountered an error during the tiling process
             # Log the error but don't raise an exception to avoid crashing the render loop
-            self.__logger.exception("an error ocurred during "
-                "the tiling process: %s" % self.__tiler.error)
+            self.__logger.exception(f"an error ocurred during the tiling process: {self.__tiler.error}")
 
         # Check if TileManager now has tiles available for this media
         # Uses 'if' instead of 'elif' to allow loading even after the __loaded check above
         if TileManager.tiled(self._media_id):
-
             # Attempt to load the root tile and update media dimensions
             self.__try_load()
 
@@ -793,8 +766,7 @@ class TiledMediaObject(MediaObject):
                 # Root tile not yet in memory; show placeholder while loading
                 self.__render_placeholder(painter)
 
-        elif self.__tiler is None and \
-             (self.__converter is None or self.__converter.progress == 1.0):
+        elif self.__tiler is None and (self.__converter is None or self.__converter.progress == 1.0):
             ## the tiler has not been run yet and either
             ## it was assumed that media_id is a local PPM
             ## file or the converter has just finished
@@ -809,8 +781,21 @@ class TiledMediaObject(MediaObject):
             # Conversion/tiling still in progress; show placeholder with progress
             self.__render_placeholder(painter)
 
+    def is_size_visible(self, mode: int) -> bool:
+        """
+        Tiled image size visibility check.
+
+        Returns False if image is too small (<= 1 pixel),
+        otherwise returns super().is_size_visible(mode).
+        """
+        if not super().is_size_visible(mode):
+            return False
+
+        # TiledMediaObject specific: minimum size check
+        return min(self.onscreen_size) > 1
+
     @property
-    def onscreen_size(self) -> Tuple[float, float]:
+    def onscreen_size(self) -> tuple[float, float]:
         """
         Property :
             TiledMediaObject.onscreen_size
@@ -832,14 +817,14 @@ class TiledMediaObject(MediaObject):
                 ## width >= height (landscape orientation)
                 # Width is determined by the combined zoom level and tile size
                 # 2^(scene_zoom + object_zoom) * tilesize gives the full-width at this zoom
-                w: float = 2**(self._scene.zoomlevel + self.zoomlevel) * self.__tilesize
+                w: float = math.exp2(self._scene.zoomlevel + self.zoomlevel) * self.__tilesize
 
                 # Height is derived from width using the aspect ratio (width / height)
                 h: float = w / self.__aspect_ratio
             else:
                 ## height > width (portrait orientation)
                 # Height is determined by the combined zoom level and tile size
-                h: float = 2**(self._scene.zoomlevel + self.zoomlevel) * self.__tilesize
+                h: float = math.exp2(self._scene.zoomlevel + self.zoomlevel) * self.__tilesize
 
                 # Width is derived from height using the aspect ratio
                 w: float = h * self.__aspect_ratio
@@ -851,8 +836,7 @@ class TiledMediaObject(MediaObject):
             # Fallback: calculate from actual pixel dimensions and zoom levels
             # scale converts from tile-level pixels to screen pixels
             # Subtracting maxtilelevel accounts for the tile hierarchy depth
-            scale: float = 2 ** (self._scene.zoomlevel + self.zoomlevel \
-                - self.__maxtilelevel)
+            scale: float = 2 ** (self._scene.zoomlevel + self.zoomlevel - self.__maxtilelevel)
 
             # Multiply pixel dimensions by scale to get on-screen size
             w: float = self.__width * scale

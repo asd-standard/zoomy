@@ -18,36 +18,34 @@
 
 # Import all public functions from tilestore module
 
+from .tilecache import TileCache
 from .tilestore import (
-    tile_dir,
-    disk_lock,
-    get_media_path,
-    get_tile_path,
-    load_metadata,
-    get_metadata,
-    write_metadata,
-    tiled,
-    get_directory_size,
-    get_tilestore_stats,
+    auto_cleanup,
     cleanup_old_tiles,
-    auto_cleanup
+    disk_lock,
+    get_directory_size,
+    get_media_path,
+    get_metadata,
+    get_tile_path,
+    get_tilestore_stats,
+    load_metadata,
+    tile_dir,
+    tiled,
+    write_metadata,
 )
 
-from .tilecache import TileCache
-
 __all__ = [
-    'TileCache',
-    'tile_dir',
-    'disk_lock',
-    'get_media_path',
-    'get_tile_path',
-    'load_metadata',
-    'get_metadata',
-    'write_metadata',
-    'tiled',
-    'get_directory_size',
-    'get_tilestore_stats',
-    'cleanup_old_tiles',
-    'auto_cleanup',
+    "TileCache",
+    "auto_cleanup",
+    "cleanup_old_tiles",
+    "disk_lock",
+    "get_directory_size",
+    "get_media_path",
+    "get_metadata",
+    "get_tile_path",
+    "get_tilestore_stats",
+    "load_metadata",
+    "tile_dir",
+    "tiled",
+    "write_metadata",
 ]
-

@@ -135,22 +135,28 @@ To use logging in your code, import the ``get_logger`` function:
 
 .. code-block:: python
 
-   from pyzui.logger import get_logger
+    from pyzui.logger import get_logger
 
-   class MyClass:
-       def __init__(self):
-           self.logger = get_logger('MyClass')
-           self.logger.info('MyClass initialized')
+    class MyClass:
+        def __init__(self):
+            self.logger = get_logger('MyClass')
+            self.logger.info('MyClass initialized')
 
-       def process_data(self, data):
-           self.logger.debug(f'Processing data: {data}')
-           try:
-               result = self._compute(data)
-               self.logger.info(f'Processing successful: {result}')
-               return result
-           except Exception as e:
-               self.logger.error(f'Processing failed: {e}')
-               raise
+        def process_data(self, data):
+            self.logger.debug(f'Processing data: {data}')
+            try:
+                result = self._compute(data)
+                self.logger.info(f'Processing successful: {result}')
+                return result
+            except Exception as e:
+                self.logger.error(f'Processing failed: {e}')
+                raise
+
+Loggers are named with a ``pyzui.`` prefix internally (e.g., ``pyzui.MyClass``)
+and are cached — repeated calls to ``get_logger('MyClass')`` return the same
+instance. If logging hasn't been initialized yet, the first call to
+``get_logger()`` auto-initializes the system with default settings
+(console: WARNING, file: INFO).
 
 Logging Exceptions
 ------------------
@@ -502,7 +508,8 @@ Convenience Functions
 
 .. py:function:: get_logger(name)
 
-   Convenience function to get a logger instance.
+   Convenience function to get a logger instance. Calls ``LoggerConfig.get_logger(name)``,
+   auto-initializing logging with defaults if it hasn't been set up yet.
 
    :param str name: Name of the module/class requesting the logger
    :return: Configured logger instance
@@ -516,6 +523,31 @@ Convenience Functions
 
       logger = get_logger('MyModule')
       logger.info('Module initialized')
+
+ColoredFormatter
+----------------
+
+.. py:class:: ColoredFormatter
+
+   Custom formatter that adds ANSI color codes to console output based on
+   the log level. Used internally by ``LoggerConfig.initialize()`` when
+   ``colored_output=True``.
+
+   Color mapping:
+     * DEBUG: Cyan
+     * INFO: Green
+     * WARNING: Yellow
+     * ERROR: Red
+     * CRITICAL: Magenta
+
+   .. py:method:: format(record)
+
+      Format the log record with color codes added to the ``color`` and
+      ``reset`` attributes on the record.
+
+      :param logging.LogRecord record: The log record to format
+      :return: Formatted log string with ANSI color codes
+      :rtype: str
 
 Best Practices
 ==============

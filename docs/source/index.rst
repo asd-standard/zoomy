@@ -45,6 +45,7 @@ be under COPYING.txt on project root, otherwise visit `gnu.org <https://www.gnu.
    :maxdepth: 2
    :titlesonly:
    :caption: Getting Started
+   :hidden:
 
    gettingstarted/installation
 
@@ -52,28 +53,36 @@ be under COPYING.txt on project root, otherwise visit `gnu.org <https://www.gnu.
    :maxdepth: 2
    :titlesonly:
    :caption: Usage Instructions
+   :hidden:
 
    usageinstructions/userinterface
    usageinstructions/programconfiguration
+   usageinstructions/svgfeatures
 
 .. toctree::
    :maxdepth: 2
    :titlesonly:
    :caption: Technical Documentation
+   :hidden:
 
    technicaldocumentation/readingdocumentation
    technicaldocumentation/projectstructure
+   technicaldocumentation/configsystem
    technicaldocumentation/objectsystem
    technicaldocumentation/convertersystem
+   technicaldocumentation/stringecosystem
+   technicaldocumentation/svgecosystem
    technicaldocumentation/tiledmediaobject
    technicaldocumentation/tilingsystem
    technicaldocumentation/windowsystem
    technicaldocumentation/logging
+   technicaldocumentation/backup
 
 .. toctree::
    :maxdepth: 2
    :titlesonly:
    :caption: Testing Documentation
+   :hidden:
 
    testingdocumentation/unittest
    testingdocumentation/integrationtest
@@ -82,16 +91,27 @@ be under COPYING.txt on project root, otherwise visit `gnu.org <https://www.gnu.
    :maxdepth: 2
    :titlesonly:
    :caption: Benchmarks Documentation
+   :hidden:
 
    benchmarksdocumentation/qzuibenchmark
    benchmarksdocumentation/converterbenchmark
-   
+    
 .. toctree::
    :maxdepth: 2
    :titlesonly:
    :caption: Contribution Guidelines
+   :hidden:
 
    contributionguidelines/contributionguidelines
+
+.. toctree::
+   :maxdepth: 2
+   :titlesonly:
+   :caption: API Documentation
+
+   pyzui
+
+
 
 
 

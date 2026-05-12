@@ -4,7 +4,7 @@ Tiling System
 =============
 
 This document provides a comprehensive overview of the tiling system architecture,
-explaining how large images are converted into pyramidal tile structures and how 
+explaining how large images are converted into pyramidal tile structures and how
 such tiles are stored to be then retrieved and rendered on the interface.
 
 Overview
@@ -16,6 +16,8 @@ The tiling system is responsible for:
 2. Storing tiles on disk for persistence
 3. Caching tiles in memory for fast access
 4. Providing tiles on demand for display
+5. Pausing and resuming tile providers during process-based conversion
+6. Cleaning up stale tile data automatically
 
 The system uses a **tile pyramid** structure where each level represents the image
 at a different zoom level. Level 0 contains a single overview tile, and higher
@@ -31,73 +33,102 @@ The tiling system consists of the following components:
     ┌─────────────────────────────────────────────────────────────────┐        
     │                        TileManager                              │       
     │  (Coordinates tile requests, caching, and provider routing)     │       
+    │  • init() / shutdown() — lifecycle management                   │
+    │  • pause() / resume() — provider control                        │
     └─────────────────────────────────────────────────────────────────┘       
                 │                                    │                        
                 ▼                                    ▼                        
     ┌─────────────────────┐              ┌─────────────────────┐              
     │     TileCache       │              │    TileProviders    │              
     │  (Memory caching)   │              │ (Tile loading/gen)  │              
-    └─────────────────────┘              └─────────────────────┘              
-                                                    │                         
-                                          ┌─────────┼──────────────┐          
-                                          ▼                        ▼           
-                              ┌───────────────────┐    ┌───────────────────┐   
-                              │StaticTileProvider │    │DynamicTileProvider│   
-                              │ Providers         │    │                   │   
-                              │ (tiled images)    │    │ (Procedural gen)  │   
-                              └───────────────────┘    └───────────────────┘   
-                                      │                    │                   
-                                      │                    ▼                   
-                                      │            ┌─────────────────┐         
-                                       ────────── 🢒│   TileStore     │          
-                                                   │ (Disk storage)  │         
-                                                   └─────────────────┘  
+    │  2-tier: perm/temp  │              └─────────────────────┘              
+    └─────────────────────┘                         │                         
+                                           ┌─────────┼──────────────┐          
+                                           ▼                        ▼           
+                               ┌───────────────────┐    ┌───────────────────┐   
+                               │StaticTileProvider │    │DynamicTileProvider│   
+                               │ (tiled images)    │    │(Procedural gen)   │   
+                               │ • FernTileProvider│    │                   │   
+                               └───────────────────┘    └───────────────────┘   
+                                       │                    │                   
+                                       │                    ▼                   
+                                       │            ┌───────────────────┐         
+                                        ──────────🢒 │   TileStore       │          
+                                                    │  (Disk storage)   │         
+                                                    └───────────────────┘  
+                                                    │
+                                                    ▼
+                                            ┌───────────────────┐
+                                            │ cleanuptilestore  │
+                                            │  (CLI + auto)     │
+                                            └───────────────────┘
 
     **Tile request and loading flow**
 
-    ┌─────────────────────────┐             |     │        FOUND     NOT FOUND
-    │ MediaObject needs tile  │             |     │            │         │
-    │ at specific zoom level  │             |     │            ▼         ▼
-    └────────────┬────────────┘             |     │      ┌─────────┐ ┌──────────┐
-                 │                          |     │      │ Load    │ │ Generate │
-                 ▼                          |     │      │ from    │ │ or load  │
-    ┌─────────────────────────┐             |     │      │ disk    │ │ from     │
-    │ TileManager.load_tile() │             |     │      └────┬────┘ │ source   │
-    │ (tile_id, provider)     │             |     │           │      └─────┬────┘
-    └────────────┬────────────┘             |     │           └─────┬──────┘
-                 │                          |     │                 ▼
-                 ▼                          |     │       ┌────────────────────┐
-    ┌─────────────────────────┐             |     │       │ Store in TileCache │
-    │ Check TileCache         │             |     │       └─────────┬──────────┘
-    │ (in-memory LRU cache)   │             |     │                 ▼
-    └────────────┬────────────┘             |     │       ┌────────────────────┐
-                 │                          |     │       │ Save to TileStore  │
-            ┌────┴────┐                     |     │       │ (if needed)        │
-            │         │                     |     │       └─────────┬──────────┘
-        CACHE HIT   CACHE MISS              |     └─────────────────┘
-            │         │                     |                       ▼
-            ▼         ▼                     |             ┌────────────────────┐
-      ┌──────────┐ ┌────────────────────┐   |             │ Return tile to     │
-      │ Return   │ │ Add to provider    │   |             │ MediaObject        │
-      │ cached   │ │ task queue (LIFO)  │   |             └─────────┬──────────┘
-      │ tile     │ └─────────┬──────────┘   |                       ▼
-      └────┬─────┘           │              |             ┌────────────────────┐
-           │                 ▼              |             │ Render tile in     │
-           │       ┌────────────────────┐   |             │ QZUI widget        │
-           │       │ TileProvider Thread│   |             └────────────────────┘
-           │       │ processes request  │   |
-           │       └─────────┬──────────┘   |
-           │                 │              |
-           │                 ▼              |
-           │       ┌────────────────────┐   |
-           │       │ Check TileStore    │   |
-           │       │ (disk cache)       │   |
-           │       └─────────┬──────────┘   |
-           │                 │              |
-           │            ┌────┴────┐         |
-           │            │         │         |
-           │        FOUND     NOT FOUND     |
-                                                                              
+    ┌─────────────────────────┐
+    │ MediaObject needs tile  │
+    │ at specific zoom level  │
+    └────────────┬────────────┘
+                 │
+                 ▼
+    ┌─────────────────────────┐
+    │ TileManager.get_tile()  │
+    │ or get_tile_robust()    │
+    └────────────┬────────────┘
+                 │
+                 ▼
+    ┌─────────────────────────┐
+    │ Check TileCache         │
+    │ (in-memory LRU cache)   │
+    └────────────┬────────────┘
+                 │
+            ┌────┴────┐
+            │         │
+        CACHE HIT   CACHE MISS
+            │         │
+            ▼         ▼
+      ┌──────────┐ ┌────────────────────┐
+      │ Return   │ │ load_tile() —      │
+      │ cached   │ │ Queue tile request │
+      │ tile     │ │ to provider (LIFO) │
+      └──────────┘ └─────────┬──────────┘
+                             │
+                             ▼
+                   ┌─────────────────────┐
+                   │ TileProvider Thread │
+                   │ processes request   │
+                   └─────────┬───────────┘
+                             │
+                             ▼
+                   ┌────────────────────┐
+                   │ Check TileStore    │
+                   │ (disk cache)       │
+                   └─────────┬──────────┘
+                             │
+                        ┌────┴────┐
+                        │         │
+                    FOUND     NOT FOUND
+                        │         │
+                        ▼         ▼
+                  ┌─────────┐ ┌──────────┐
+                  │ Load    │ │ Generate │
+                  │ from    │ │ or load  │
+                  │ disk    │ │ from src │
+                  └────┬────┘ └─────┬────┘
+                       └─────┬──────┘
+                             ▼
+                   ┌─────────────────────┐
+                   │ Store in TileCache  │
+                   └─────────┬───────────┘
+                             ▼
+                   ┌─────────────────────┐
+                   │ Save to TileStore   │
+                   │ (if static provider)│
+                   └─────────┬───────────┘
+                             ▼
+                   ┌────────────────────┐
+                   │ Return tile        │
+                   └────────────────────┘
 
 Component Details
 -----------------
@@ -125,7 +156,8 @@ Tiler
 ~~~~~
 
 The ``Tiler`` class converts source images into pyramidal tile structures. It is an
-abstract base class that runs as a separate thread.
+abstract base class that runs as a separate thread and uses an internal
+``ThreadPoolExecutor`` for parallel tile creation within each row.
 
 **Tile Pyramid Structure:**
 
@@ -173,35 +205,68 @@ This formula calculates how many tiles exist at a specific pyramid level:
 **Tiling Process:**
 
 1. **Calculate Dimensions**: Determine the number of tiles and pyramid levels
-2. **Read Scanlines**: Read the source image row by row using ``_scanline()``
-3. **Create Base Tiles**: Divide rows into tiles at the maximum level
+2. **Read Scanlines**: Read the source image row by row using ``_scanchunk()``
+3. **Create Base Tiles**: Divide rows into tiles at the maximum level using a
+   ``ThreadPoolExecutor`` per row for parallel column processing
 4. **Merge Upward**: Combine 2×2 tile groups to create lower-level tiles
-5. **Save Tiles**: Write each tile to disk via TileStore
+5. **Save Tiles**: Write each tile to disk via TileStore. Each tile save
+   increments the progress counter: ``progress = saved_count / numtiles``
 6. **Write Metadata**: Store image dimensions, tile size, and format
 
-**Subclasses:**
+**Concrete Subclasses:**
 
-Concrete implementations must provide the ``_scanline(y)`` method to read image data:
+- ``PPMTiler``: Reads PPM/PGM format images. Provides ``_scanchunk()`` as a
+  callable attribute that reads ``bytes_per_pixel * width`` bytes at a time.
+  Includes ``read_ppm_header()`` (validates P6 format, maxval=255) and a
+  ``__del__`` for output file cleanup.
 
-- ``VIPSTiler``: Uses libvips for memory-efficient processing of large images
-- ``PPMTiler``: Reads PPM/PGM format images
+**Extension Points:**
+
+Subclasses must provide these instance attributes (declared but uninitialized
+in the base class):
+
+- ``_width``: Image width in pixels
+- ``_height``: Image height in pixels
+- ``_bytes_per_pixel``: Number of color channels (1 for grayscale, 3 for RGB)
+- ``_scanchunk``: Callable that returns raw pixel data for the next row
+
+**Parallel Tile Processing:**
+
+Within each row, tiles are created in parallel using a ``ThreadPoolExecutor``:
+
+.. code-block:: python
+
+    # In Tiler.__tiles(), for each row:
+    workers = min(numtiles_across, cpu_count())
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        args = [(self, row, col, tilelevel, ...) for col in range(numtiles_across)]
+        for tile_data in executor.map(_make_tile, args):
+            __savetile(tile_data, tilelevel, row, col)
+
+The ``_make_tile()`` module-level function creates a ``Tile`` from raw pixel data
+via ``Tile.fromstring()`` in a thread-safe manner (no Qt objects are constructed
+on worker threads). The executor is shut down in a ``finally`` block to ensure
+cleanup even on errors.
+
+**Progress Tracking:**
+
+The ``progress`` property returns a 0.0–1.0 float computed as
+``saved_tiles / total_tiles``. Each successful ``__savetile()`` call increments
+the counter, providing smooth progress indication during the tiling phase.
 
 Process-Based Tiling (tilerrunner)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``tilerrunner`` module provides process-based tiling execution for parallel
 image tiling, avoiding threading conflicts between pyvips, TileManager threads,
-and Qt.
+and Qt. This is the **recommended** approach for tiling — the thread-based
+``Tiler`` class is a legacy API for direct use only.
 
 **Architecture:**
 
-The ``tilerrunner`` module uses ``ProcessPoolExecutor`` with automatic context
-selection:
-
-- **'fork' context**: Used when no other threads are running (fast, clean shutdown)
-- **'spawn' context**: Used when other threads exist (avoids fork-after-threads issues)
-
-The context can be overridden via ``PYZUI_MP_CONTEXT`` environment variable.
+The ``tilerrunner`` module uses ``ProcessPoolExecutor`` with ``'spawn'`` context
+(default, for safety). The context can be overridden via the ``PYZUI_MP_CONTEXT``
+environment variable (see :doc:`../pyzui/tilerrunner` for details).
 
 **Key Functions:**
 
@@ -210,7 +275,7 @@ The context can be overridden via ``PYZUI_MP_CONTEXT`` environment variable.
     from pyzui.tilesystem.tiler import tilerrunner
 
     # Initialize process pool (optional, auto-initialized on first use)
-    tilerrunner.init(max_workers=4)
+    tilerrunner.init(max_workers=2)
 
     # Submit tiling job
     future = tilerrunner.submit_tiling(
@@ -243,26 +308,16 @@ with the thread-based ``Tiler`` class:
 - ``is_alive()``: Returns True if tiling is still running
 - ``join(timeout)``: Wait for tiling to complete
 
+.. note::
+
+   Process-based tilers report progress as 0.0 (running) or 1.0 (complete),
+   since subprocess progress cannot be monitored incrementally. The
+   ``TilingHandle`` wraps the ``Future`` and provides a compatible interface
+   for integration with ``TiledMediaObject``.
+
 **Process Isolation:**
 
 Tilers run in separate processes via ``ProcessPoolExecutor``, providing complete isolation:
-
-.. code-block:: python
-
-    from pyzui.tilesystem.tiler import tilerrunner
-
-    # Submit tiling to process pool
-    future = tilerrunner.submit_tiling(infile, media_id)
-
-    # Track via TilingHandle
-    handle = tilerrunner.TilingHandle(future, infile, media_id)
-
-    # Check progress/completion
-    if handle.progress == 1.0:
-        if handle.error:
-            print(f"Failed: {handle.error}")
-
-This ensures:
 
 1. No threading conflicts with TileManager threads
 2. Each pyvips instance runs in its own memory space
@@ -278,15 +333,6 @@ when converting and tiling media files. The conversion and tiling pipeline is:
 2. Output PPM file is passed to ``tilerrunner``
 3. Tiling runs in separate process
 4. Progress is tracked across both conversion and tiling phases
-
-**Python 3.12+ Compatibility:**
-
-Python 3.12 emits a DeprecationWarning about ``fork()`` in multi-threaded
-processes. ``tilerrunner`` handles this by:
-
-1. Selecting 'spawn' context when other threads are running
-2. Catching and ignoring the specific DeprecationWarning
-3. Ensuring worker processes are safe (fresh imports, no shared state)
 
 TileStore
 ~~~~~~~~~
@@ -329,13 +375,19 @@ Tab-separated values with type information::
 **Key Functions:**
 
 - ``get_media_path(media_id)``: Get the directory for a media's tiles
-- ``get_tile_path(tile_id, filext)``: Get the file path for a specific tile
-- ``load_metadata(media_id)``: Load metadata from disk into memory
+- ``get_tile_path(tile_id, filext, mkdirp, prefix)``: Get the file path for a specific tile.
+  ``mkdirp=True`` creates parent directories (used by Tiler for output).
+  ``prefix`` overrides the media directory root (for custom output paths).
+- ``load_metadata(media_id)``: Load metadata from disk into memory. Uses a
+  lock-free fast path with double-check locking inside ``disk_lock`` for
+  on-demand loading.
 - ``get_metadata(media_id, key)``: Retrieve a metadata value
 - ``write_metadata(media_id, **kwargs)``: Write metadata to disk
 - ``tiled(media_id)``: Check if a media has been fully tiled
 - ``get_tilestore_stats()``: Get statistics about the tilestore
-- ``cleanup_old_tiles(max_age_days)``: Remove old tile directories
+- ``get_directory_size(path)``: Calculate total disk usage for a directory
+- ``cleanup_old_tiles(max_age_days, dry_run)``: Remove old tile directories.
+  ``dry_run=True`` reports what would be deleted without actually removing files.
 - ``auto_cleanup(max_age_days, enable, collect_stats)``: Automatic cleanup with statistics
 
 **Automatic Cleanup System:**
@@ -347,35 +399,30 @@ default to improve startup performance.
 .. code-block:: python
 
     # Enable automatic cleanup (runs on shutdown by default)
-    tilemanager.init(auto_cleanup=True, cleanup_max_age_days=7)
+    tilemanager.init(auto_cleanup=True, cleanup_max_age_days=3)
 
     # Disable automatic cleanup
     tilemanager.init(auto_cleanup=False)
 
     # Run cleanup manually
     from pyzui.tilesystem.tilestore import auto_cleanup
-    stats = auto_cleanup(max_age_days=7, enable=True, collect_stats=False)
+    stats = auto_cleanup(max_age_days=3, enable=True, collect_stats=False)
 
 **Cleanup Behavior:**
 
 - **Shutdown Cleanup (default)**: Runs when application exits gracefully
-- **Manual Cleanup**: Can be triggered via command-line utility
+- **Manual Cleanup**: Can be triggered via command-line utility or ``auto_cleanup()``
 - **Statistics Collection**: Can be disabled for faster cleanup
 
 **Cleanup Statistics:**
 
-When ``collect_stats=True`` (default), the cleanup process logs:
+When ``collect_stats=True``, the cleanup process logs:
 1. Before cleanup: Media count, file count, total size
 2. Cleanup results: Deleted media, freed space, errors
 3. After cleanup: Media count, file count, total size
 
-When ``collect_stats=False`` (fast mode), only cleanup results are logged.
-
-**Performance Considerations:**
-
-- Full statistics collection walks the tilestore directory 3 times
-- Fast mode (``collect_stats=False``) walks directory only once
-- Recommended for large tilestores (>10,000 files)
+When ``collect_stats=False`` (fast mode, default for shutdown), only cleanup
+results are logged.
 
 **Command-line Options:**
 
@@ -385,24 +432,83 @@ When ``collect_stats=False`` (fast mode), only cleanup results are logged.
     ./main.py --cleanup-age 30      # Clean tiles older than 30 days
     ./main.py --fast-cleanup        # Skip detailed statistics
 
+Standalone Cleanup CLI (cleanuptilestore)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``cleanuptilestore.py`` module provides a standalone CLI utility for manual
+tilestore cleanup, runnable via:
+
+.. code-block:: bash
+
+    python -m pyzui.tilesystem.tilestore.cleanuptilestore --age 7 --stats --verbose
+
+**Command-line Options:**
+
+.. code-block:: text
+
+    --age N         Remove tiles older than N days (default: 3)
+    --dry-run       Show what would be deleted without actually removing
+    --stats         Collect and display before/after statistics
+    --verbose       Enable detailed logging output
+    --debug         Enable debug-level logging output
+
+The utility initializes its own logger, runs ``cleanup_old_tiles()`` with the
+specified options, and prints a formatted summary of the results.
+
 TileCache
 ~~~~~~~~~
 
-The ``TileCache`` class provides in-memory LRU (Least Recently Used) caching of tiles.
+The ``TileCache`` class (at ``pyzui/tilesystem/tilestore/tilecache.py``) provides
+in-memory LRU (Least Recently Used) caching of tiles.
 
 **Features:**
 
 - **Size-Based Eviction**: Automatically evicts tiles when ``maxsize`` is exceeded
 - **Age-Based Expiration**: Optional ``maxage`` parameter for time-based eviction
 - **Access-Based Expiration**: Tiles can expire after N accesses via ``maxaccesses``
-- **Immortal Tiles**: Level 0 tiles (overview) are never evicted
+  on ``insert()``
+- **Immortal Tiles**: Level 0 tiles (overview) and ``None`` values are never evicted.
+  The ``__mortal()`` method returns True only when both the tile is not None AND
+  ``tile_id[1] != 0``. This prevents both overview tiles and pending/loading slots
+  from being discarded.
 - **Thread Safety**: RLock protects concurrent access
+
+**Periodic Clean Daemon:**
+
+When ``maxage`` is set, ``TileCache`` spawns a daemon thread that wakes every
+``maxage / 3`` seconds and evicts age-expired tiles. The daemon is controlled
+via a ``threading.Event`` for clean shutdown:
+
+.. code-block:: python
+
+    # In TileCache.__init__():
+    self.__shutdown_event = threading.Event()
+
+    # Shutdown called by TileManager.shutdown():
+    def shutdown(self):
+        self.__shutdown_event.set()   # Signal daemon to exit
+
+The daemon thread checks the event each cycle and exits gracefully when signalled.
+
+**Insert Method:**
+
+The ``insert(tile_id, tile, maxaccesses=0)`` method adds a tile with optional
+access-based expiration. When ``maxaccesses > 0``, the tile is evicted after
+the specified number of accesses (reads) to the tile. This is used by
+``cut_tile()`` with ``tempcache`` for synthesized tiles that can be regenerated.
+
+**None Tile Protection:**
+
+When ``__setitem__`` attempts to set a tile_id that already holds a valid tile
+to ``None``, the operation is silently ignored. This prevents a failed tile
+load from overwriting a previously cached valid tile.
 
 **Dual-Tier Caching:**
 
 The TileManager uses two caches:
 
-1. **Permanent Cache (80%)**: Stores tiles loaded from disk
+1. **Permanent Cache (80%)**: Stores tiles loaded from disk and procedurally
+   generated tiles (e.g., FernTileProvider tiles go here)
 2. **Temporary Cache (20%)**: Stores synthesized/cut tiles that can be regenerated
 
 TileManager
@@ -415,9 +521,9 @@ The ``TileManager`` module coordinates tile requests between providers and cache
 .. code-block:: python
 
     tilemanager.init(
-        total_cache_size=500,     # Total cache size in MB
-        auto_cleanup=True,        # Enable automatic cleanup
-        cleanup_max_age_days=7,   # Remove tiles older than 7 days
+        total_cache_size=1024,       # Total cache size in number of tiles
+        auto_cleanup=True,           # Enable automatic cleanup
+        cleanup_max_age_days=3,      # Remove tiles older than 3 days
         collect_cleanup_stats=False  # Skip detailed stats for faster startup
     )
 
@@ -430,6 +536,33 @@ The ``TileManager`` module coordinates tile requests between providers and cache
 - ``tiled(media_id)``: Check if media is tiled
 - ``get_metadata(media_id, key)``: Get metadata for a media
 - ``purge(media_id=None)``: Remove tiles from providers and cache
+
+**Lifecycle Management:**
+
+- ``init()``: Initialize caches, start provider threads, register shutdown hook
+- ``shutdown()``: Stop all provider threads, stop cache clean daemon threads,
+  run tilestore cleanup. Connected to Qt's ``aboutToQuit`` signal.
+- ``pause()``: Pause all TileProvider threads. Used during process-based
+  conversion when ``PYZUI_MP_CONTEXT=fork`` is configured.
+- ``resume()``: Resume all paused TileProvider threads.
+
+**Pause/Resume Integration:**
+
+.. code-block:: python
+
+    from pyzui.tilesystem import tilemanager
+
+    # Before forking (if using PYZUI_MP_CONTEXT=fork)
+    tilemanager.pause()
+
+    # ... conversion in subprocess ...
+
+    # After forking completes
+    tilemanager.resume()
+
+With the default ``'spawn'`` process context, pause/resume is typically not
+needed since ``spawn`` creates a fresh interpreter state. It exists primarily
+for platforms or configurations where ``fork`` is required.
 
 **Tile Synthesis (cut_tile):**
 
@@ -449,6 +582,10 @@ When a tile is not available, it can be synthesized from parent tiles:
 
     Then resized to full tile dimensions.
 
+Synthesized tiles are inserted into the temporary cache via ``insert(tile_id,
+tile, maxaccesses=tempcache)``, limiting how many times they can be accessed
+before being regenerated.
+
 **Negative Tile Levels:**
 
 Negative tile levels represent zoomed-out views beyond level 0:
@@ -457,7 +594,9 @@ Negative tile levels represent zoomed-out views beyond level 0:
 - Level -2: 25% of level 0
 - etc.
 
-These are created by resizing the (0,0,0) tile.
+``get_tile()`` raises ``TileNotAvailable`` for negative tile levels. The
+``cut_tile()`` function handles them by resizing the (0,0,0) tile, so use
+``get_tile_robust()`` for transparent negative-level support.
 
 TileProviders
 ~~~~~~~~~~~~~
@@ -469,23 +608,42 @@ Tile providers are responsible for loading or generating tiles.
 Abstract base class running as a daemon thread. Provides:
 
 - ``request(tile_id)``: Queue a tile load request (LIFO order)
-- ``load(tile_id)``: Abstract method to load/generate a tile
+- ``_load(tile_id)``: Abstract method to load/generate a tile (note: underscore-prefixed)
 - ``purge(media_id=None)``: Cancel pending requests
+- ``stop()``: Signal the provider thread to exit
+- ``pause()``: Pause processing of the task queue (used during forked conversions)
+- ``resume()``: Resume processing after a pause
+
+**Synchronization:**
+
+The provider uses three threading primitives beyond RLock:
+
+- ``threading.Condition``: For the LIFO task queue — waiters are notified when
+  new tasks arrive
+- ``threading.Event`` (pause): Blocks the run loop during pause, signalled by
+  ``resume()``
+- ``threading.Event`` (shutdown): Signals the run loop to exit gracefully,
+  set by ``stop()``
 
 **StaticTileProvider**
 
-Loads pre-tiled images from the TileStore::
+Loads pre-tiled images from the TileStore. On a cache miss, the provider
+reads the tile from disk using ``PIL.Image.open()`` on the path returned by
+``TileStore.get_tile_path()``, then stores it in the permanent cache.
 
-    tile = tilestore.load_tile(tile_id)
-    cache[tile_id] = tile
+Loading from disk is the only operation — ``StaticTileProvider`` does not
+perform synthesis or re-save tiles. It returns ``None`` if the tile file
+does not exist on disk.
 
 **DynamicTileProvider**
 
-Generates tiles procedurally (e.g., fractals, maps). Subclasses:
+Generates tiles procedurally. The only concrete subclass in the codebase is:
 
-- ``FernTileProvider``: Barnsley fern fractal
-- ``MandelbrotTileProvider``: Mandelbrot set
-- ``OSMTileProvider``: OpenStreetMap tiles
+- ``FernTileProvider``: Barnsley fern fractal (at
+  ``pyzui/tilesystem/tileproviders/ferndynamictileprovider.py``)
+
+Dynamic provider tiles go to the permanent cache (like StaticProvider tiles),
+not the temporary cache.
 
 Tile ID Format
 --------------
@@ -546,8 +704,10 @@ Performance Considerations
 **Memory Management:**
 
 - The cache uses approximately 80/20 split between permanent and temporary tiles
+  (counted by number of tiles, default total: 1024)
 - LRU eviction prevents unbounded memory growth
-- Level 0 tiles are immortal (always kept) as they're frequently accessed
+- Level 0 tiles and None values are immortal (always kept) as they're
+  frequently accessed or represent pending load slots
 
 **Disk I/O:**
 
@@ -558,14 +718,16 @@ Performance Considerations
 **Threading:**
 
 - TileProviders run as daemon threads
-- RLocks protect shared state (caches, metadata)
-- Multiple providers can run concurrently
+- Condition variables and Events coordinate provider lifecycle
+- Tiler uses internal ``ThreadPoolExecutor`` for parallel row processing
+- Process-based tiling (tilerrunner) uses ``ProcessPoolExecutor`` for full isolation
 
 **Recommended Settings:**
 
-- **Cache Size**: 200-500 MB for typical usage
+- **Cache Size**: 1024 tiles (typical usage)
 - **Tile Size**: 256×256 for balance of overhead vs. granularity
-- **Auto-Cleanup**: Enable with 7-30 day retention for disk management
+- **Process Workers**: 2 (default for tilerrunner)
+- **Auto-Cleanup**: Enable with 3-30 day retention for disk management
   - Runs on shutdown by default for faster startup
   - Use ``--fast-cleanup`` to skip detailed statistics
   - Disable with ``--no-cleanup`` if not needed
@@ -612,28 +774,50 @@ Use ``get_tile_robust()`` for automatic fallback handling::
     tile = tilemanager.get_tile_robust(tile_id)
     # Never raises TileNotLoaded or TileNotAvailable
 
-Usage Example
--------------
+Usage Examples
+--------------
 
-**Tiling an Image:**
+**Tiling an Image (Process-Based, Recommended):**
 
 .. code-block:: python
 
-    from pyzui.tilesystem.converters.vipsconverter import VIPSTiler
+    from pyzui.tilesystem.tiler import tilerrunner
     from pyzui.tilesystem import tilestore, tilemanager
 
     # Initialize the tilemanager
-    tilemanager.init(total_cache_size=500, auto_cleanup=True)
+    tilemanager.init(total_cache_size=1024, auto_cleanup=True,
+                     cleanup_max_age_days=3)
 
-    # Tile an image
-    tiler = VIPSTiler("large_photo.tif", media_id="photo1", tilesize=256)
-    tiler.start()  # Run in background thread
-    tiler.join()   # Wait for completion
+    # Submit tiling to process pool
+    future = tilerrunner.submit_tiling(
+        infile='image.ppm',
+        media_id='photo1',
+        filext='jpg',
+        tilesize=256,
+    )
+    handle = tilerrunner.TilingHandle(future, 'image.ppm', 'photo1')
+    handle.join()
 
-    if tiler.error:
-        print(f"Tiling failed: {tiler.error}")
+    if handle.error:
+        print(f"Tiling failed: {handle.error}")
     else:
         print(f"Tiled successfully: {tilestore.get_metadata('photo1', 'maxtilelevel')} levels")
+
+    # Shutdown when done with all tiling
+    tilerrunner.shutdown()
+
+**Pausing Providers (for fork-based conversions):**
+
+.. code-block:: python
+
+    from pyzui.tilesystem import tilemanager
+
+    # Pause all providers before forking
+    tilemanager.pause()
+
+    # ... run conversion in a fork-based subprocess ...
+
+    tilemanager.resume()
 
 **Retrieving Tiles:**
 
@@ -667,6 +851,18 @@ Usage Example
     tilesize = tilemanager.get_metadata("dynamic:fern", "tilesize")  # 256
     maxlevel = tilemanager.get_metadata("dynamic:fern", "maxtilelevel")  # 18
 
+**Manual Tilestore Cleanup:**
+
+.. code-block:: bash
+
+    # CLI utility
+    python -m pyzui.tilesystem.tilestore.cleanuptilestore --age 30 --dry-run --stats
+
+    # Or programmatically
+    from pyzui.tilesystem.tilestore import cleanup_old_tiles
+
+    cleanup_old_tiles(max_age_days=30, dry_run=True)
+
 API Reference
 -------------
 
@@ -674,7 +870,15 @@ For detailed API documentation, see:
 
 - :doc:`../pyzui/tile`
 - :doc:`../pyzui/tiler`
+- :doc:`../pyzui/tilerrunner`
 - :doc:`../pyzui/tilestore`
 - :doc:`../pyzui/tilecache`
 - :doc:`../pyzui/tilemanager`
 - :doc:`../pyzui/tileprovider`
+
+See Also
+--------
+
+- :doc:`../technicaldocumentation/tiledmediaobject` — TiledMediaObject implementation
+- :doc:`../technicaldocumentation/convertersystem` — Media format conversion
+- :doc:`../technicaldocumentation/objectsystem` — Object system architecture

@@ -16,13 +16,15 @@
 
 """Module for reading PPM images."""
 
-from typing import Optional, Tuple, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
+
 from .tiler import Tiler
 
 if TYPE_CHECKING:
-    from .tiler import Tiler as TilerType
+    pass
 
-def read_ppm_header(f: Any) -> Tuple[int, int]:
+
+def read_ppm_header(f: Any) -> tuple[int, int]:
     """
     Function :
         read_ppm_header(f)
@@ -37,39 +39,40 @@ def read_ppm_header(f: Any) -> Tuple[int, int]:
     Raises IOError if the header is invalid and/or unsupported (must be 'P6'
     binary PPM format with maxval=255).
     """
-    header = []
+    header: list[str] = []
 
     while len(header) < 4:
         line = f.readline()
 
         if not line:
             ## we've hit EOF
-            raise IOError("not enough entries in PPM header")
+            raise OSError("not enough entries in PPM header")
 
         # Split line and filter out comments (# and everything after)
         tokens = line.split()
         for token in tokens:
             # Skip comments (lines starting with #)
-            if token.startswith(b'#'):
+            if token.startswith(b"#"):
                 break  # Skip rest of line after #
             header.append(token)
 
     magic = header[0]
-    
-    if str(magic) != str(b'P6'):
-        raise IOError("can only load binary PPM (P6 format)")
+
+    if str(magic) != str(b"P6"):
+        raise OSError("can only load binary PPM (P6 format)")
 
     try:
         width = int(header[1])
         height = int(header[2])
         maxval = int(header[3])
     except ValueError:
-        raise IOError("invalid PPM header")
+        raise OSError("invalid PPM header") from None
 
     if maxval != 255:
-        raise IOError("PPM maxval must equal 255")
+        raise OSError("PPM maxval must equal 255")
 
     return (width, height)
+
 
 class PPMTiler(Tiler):
     """
@@ -86,7 +89,8 @@ class PPMTiler(Tiler):
     PPMTiler objects are used for tiling PPM images.
     Inherits from Tiler class and provides PPM-specific image reading.
     """
-    def __init__(self, infile: str, media_id: Optional[str] = None, filext: str = 'jpg', tilesize: int = 256) -> None:
+
+    def __init__(self, infile: str, media_id: str | None = None, filext: str = "jpg", tilesize: int = 256) -> None:
         """
         Constructor:
             PPMTiler(infile, media_id, filext, tilesize)
@@ -106,21 +110,18 @@ class PPMTiler(Tiler):
         Tiles will be saved in the format indicated by filext and with the
         dimensions given by tilesize.
         """
-        
-        
+
         Tiler.__init__(self, infile, media_id, filext, tilesize)
-        
-        
+
         try:
-            self.__ppm_fileobj = open(self._infile, 'rb')
-            
-        except IOError:
+            self.__ppm_fileobj = open(self._infile, "rb")
+
+        except OSError:
             raise
 
         self._width, self._height = read_ppm_header(self.__ppm_fileobj)
 
         self._bytes_per_pixel = 3
-        
 
     def _scanchunk(self) -> bytes:
         """
@@ -134,8 +135,7 @@ class PPMTiler(Tiler):
         Scan a chunk of ppm image bytes correspondent of a tile row.
         The row length of the tile is given by self._bytes_per_pixel*self._width.
         """
-        return self.__ppm_fileobj.read(self._bytes_per_pixel*self._width) 
-         
+        return self.__ppm_fileobj.read(self._bytes_per_pixel * self._width)
 
     def __del__(self) -> None:
         """
@@ -153,4 +153,3 @@ class PPMTiler(Tiler):
             self.__ppm_fileobj.close()
         except AttributeError:
             pass  # Object was never fully initialized
-

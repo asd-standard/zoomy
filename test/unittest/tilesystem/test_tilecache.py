@@ -13,10 +13,13 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
 import time
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
+
+import pytest
+
 from pyzui.tilesystem.tilestore.tilecache import TileCache
+
 
 class TestTileCache:
     """
@@ -87,7 +90,7 @@ class TestTileCache:
         And the retrieved tile should be the same object
         """
         cache = TileCache()
-        tile_id = ('media1', 1, 0, 0)
+        tile_id = ("media1", 1, 0, 0)
         tile = Mock()
         cache[tile_id] = tile
         assert cache[tile_id] == tile
@@ -102,7 +105,7 @@ class TestTileCache:
         """
         cache = TileCache()
         with pytest.raises(KeyError):
-            _ = cache[('nonexistent', 1, 0, 0)]
+            _ = cache[("nonexistent", 1, 0, 0)]
 
     def test_contains(self):
         """
@@ -115,7 +118,7 @@ class TestTileCache:
         Then checking should return True
         """
         cache = TileCache()
-        tile_id = ('media1', 1, 0, 0)
+        tile_id = ("media1", 1, 0, 0)
         tile = Mock()
 
         assert tile_id not in cache
@@ -131,7 +134,7 @@ class TestTileCache:
         Then the tile should no longer be in the cache
         """
         cache = TileCache()
-        tile_id = ('media1', 1, 0, 0)
+        tile_id = ("media1", 1, 0, 0)
         tile = Mock()
 
         cache[tile_id] = tile
@@ -149,7 +152,7 @@ class TestTileCache:
         Then the tile should be stored and retrievable
         """
         cache = TileCache()
-        tile_id = ('media1', 1, 0, 0)
+        tile_id = ("media1", 1, 0, 0)
         tile = Mock()
         cache.insert(tile_id, tile)
         assert cache[tile_id] == tile
@@ -163,7 +166,7 @@ class TestTileCache:
         Then the tile should be stored with an access limit
         """
         cache = TileCache()
-        tile_id = ('media1', 1, 0, 0)
+        tile_id = ("media1", 1, 0, 0)
         tile = Mock()
         cache.insert(tile_id, tile, maxaccesses=3)
         assert cache[tile_id] == tile
@@ -179,7 +182,7 @@ class TestTileCache:
         Then the tile should be automatically removed
         """
         cache = TileCache()
-        tile_id = ('media1', 1, 0, 0)
+        tile_id = ("media1", 1, 0, 0)
         tile = Mock()
         cache.insert(tile_id, tile, maxaccesses=2)
 
@@ -201,12 +204,12 @@ class TestTileCache:
         Then the None tile should remain in cache
         """
         cache = TileCache(maxsize=1)
-        none_tile_id = ('media1', 1, 0, 0)
+        none_tile_id = ("media1", 1, 0, 0)
         cache[none_tile_id] = None
 
         # Add more tiles to exceed maxsize
-        cache[('media2', 1, 0, 0)] = Mock()
-        cache[('media3', 1, 0, 0)] = Mock()
+        cache[("media2", 1, 0, 0)] = Mock()
+        cache[("media3", 1, 0, 0)] = Mock()
 
         # None tile should still be there
         assert none_tile_id in cache
@@ -221,12 +224,12 @@ class TestTileCache:
         Then the level-0 tile should remain in cache
         """
         cache = TileCache(maxsize=1)
-        zero_tile_id = ('media1', 0, 0, 0)
+        zero_tile_id = ("media1", 0, 0, 0)
         cache[zero_tile_id] = Mock()
 
         # Add more tiles to exceed maxsize
-        cache[('media2', 1, 0, 0)] = Mock()
-        cache[('media3', 1, 0, 0)] = Mock()
+        cache[("media2", 1, 0, 0)] = Mock()
+        cache[("media3", 1, 0, 0)] = Mock()
 
         # Zero-level tile should still be there
         assert zero_tile_id in cache
@@ -242,9 +245,9 @@ class TestTileCache:
         And the two most recent tiles should remain
         """
         cache = TileCache(maxsize=2)
-        tile1_id = ('media1', 1, 0, 0)
-        tile2_id = ('media2', 1, 0, 0)
-        tile3_id = ('media3', 1, 0, 0)
+        tile1_id = ("media1", 1, 0, 0)
+        tile2_id = ("media2", 1, 0, 0)
+        tile3_id = ("media3", 1, 0, 0)
 
         cache[tile1_id] = Mock()
         cache[tile2_id] = Mock()
@@ -264,15 +267,15 @@ class TestTileCache:
         Then all tiles should be removed from cache
         """
         cache = TileCache()
-        cache[('media1', 1, 0, 0)] = Mock()
-        cache[('media2', 1, 0, 0)] = Mock()
-        cache[('media3', 1, 0, 0)] = Mock()
+        cache[("media1", 1, 0, 0)] = Mock()
+        cache[("media2", 1, 0, 0)] = Mock()
+        cache[("media3", 1, 0, 0)] = Mock()
 
         cache.purge()
 
-        assert ('media1', 1, 0, 0) not in cache
-        assert ('media2', 1, 0, 0) not in cache
-        assert ('media3', 1, 0, 0) not in cache
+        assert ("media1", 1, 0, 0) not in cache
+        assert ("media2", 1, 0, 0) not in cache
+        assert ("media3", 1, 0, 0) not in cache
 
     def test_dont_replace_existing_with_none(self):
         """
@@ -284,7 +287,7 @@ class TestTileCache:
         And not be replaced with None
         """
         cache = TileCache()
-        tile_id = ('media1', 1, 0, 0)
+        tile_id = ("media1", 1, 0, 0)
         tile = Mock()
 
         cache[tile_id] = tile
@@ -304,9 +307,9 @@ class TestTileCache:
         Then the second tile should be evicted (not the first)
         """
         cache = TileCache(maxsize=2)
-        tile1_id = ('media1', 1, 0, 0)
-        tile2_id = ('media2', 1, 0, 0)
-        tile3_id = ('media3', 1, 0, 0)
+        tile1_id = ("media1", 1, 0, 0)
+        tile2_id = ("media2", 1, 0, 0)
+        tile3_id = ("media3", 1, 0, 0)
 
         cache[tile1_id] = Mock()
         cache[tile2_id] = Mock()
@@ -321,6 +324,33 @@ class TestTileCache:
         assert tile2_id not in cache
         assert tile3_id in cache
 
+    def test_maxage_expiration(self):
+        """
+        Scenario: Tiles expire after exceeding maxage
+
+        Given a cache with maxage=3 and two tiles inserted
+        When one tile's access time is manipulated to be older than maxage
+        And the periodic clean thread runs
+        Then the expired tile should be removed
+        And the recent tile should remain
+        """
+        cache = TileCache(maxsize=100, maxage=3)
+        recent_id = ("media", 1, 0, 0)
+        stale_id = ("media", 1, 0, 1)
+
+        # Insert stale tile first so it sits at the front of discard queue
+        cache[stale_id] = Mock()
+        cache[recent_id] = Mock()
+
+        # Manipulate access time of stale tile to be older than maxage
+        cache._TileCache__atime[stale_id] = time.time() - 10
+
+        # Trigger a clean cycle — periodic thread runs every maxage/3 = 1s
+        time.sleep(1.5)
+
+        assert recent_id in cache
+        assert stale_id not in cache
+
     def test_thread_safety(self):
         """
         Scenario: Cache operations are thread-safe
@@ -333,7 +363,7 @@ class TestTileCache:
         would require concurrent access simulation.
         """
         cache = TileCache()
-        tile_id = ('media1', 1, 0, 0)
+        tile_id = ("media1", 1, 0, 0)
         tile = Mock()
 
         # Basic test - actual threading tests would be more complex

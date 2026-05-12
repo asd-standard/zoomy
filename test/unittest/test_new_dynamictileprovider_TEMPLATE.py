@@ -29,12 +29,11 @@ If you created MandelbrotTileProvider, rename to test_mandelbrottileprovider.py
 and replace all instances of YourProvider with MandelbrotTileProvider.
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-from PIL import Image
+from unittest.mock import Mock, patch
 
 # TODO: Update this import to match your provider
 # from pyzui.tilesystem.tileproviders import YourProvider
+
 
 class TestYourProviderName:
     """
@@ -58,7 +57,7 @@ class TestYourProviderName:
 
         REQUIRED: Every provider must initialize with a tilecache parameter.
         """
-        tilecache = Mock()
+        Mock()
         # TODO: Uncomment and update with your provider class
         # provider = YourProvider(tilecache)
         # assert provider is not None
@@ -73,8 +72,7 @@ class TestYourProviderName:
 
         REQUIRED: All dynamic providers must inherit from DynamicTileProvider.
         """
-        from pyzui.tilesystem.tileproviders import DynamicTileProvider
-        tilecache = Mock()
+        Mock()
         # TODO: Uncomment and update with your provider class
         # provider = YourProvider(tilecache)
         # assert isinstance(provider, DynamicTileProvider)
@@ -150,7 +148,7 @@ class TestYourProviderName:
 
         TODO: Add tests for your provider's specific attributes
         """
-        tilecache = Mock()
+        Mock()
         # provider = YourProvider(tilecache)
         # assert provider.your_custom_attribute == expected_value
         pass
@@ -170,7 +168,7 @@ class TestYourProviderName:
         REQUIRED: Provider must gracefully handle invalid negative row values.
         Tile coordinates use (media_id, tilelevel, row, col) format.
         """
-        tilecache = Mock()
+        Mock()
         # TODO: Uncomment and update
         # provider = YourProvider(tilecache)
         # tile_id = ('your_media_id', 2, -1, 1)  # negative row
@@ -189,7 +187,7 @@ class TestYourProviderName:
 
         REQUIRED: Provider must gracefully handle invalid negative col values.
         """
-        tilecache = Mock()
+        Mock()
         # TODO: Uncomment and update
         # provider = YourProvider(tilecache)
         # tile_id = ('your_media_id', 2, 1, -1)  # negative col
@@ -209,7 +207,7 @@ class TestYourProviderName:
         REQUIRED: For a given tilelevel, row must be in range [0, 2^tilelevel - 1].
         Example: tilelevel=2 allows rows 0-3 (2^2 - 1 = 3)
         """
-        tilecache = Mock()
+        Mock()
         # TODO: Uncomment and update
         # provider = YourProvider(tilecache)
         # tilelevel = 2
@@ -230,7 +228,7 @@ class TestYourProviderName:
 
         REQUIRED: For a given tilelevel, col must be in range [0, 2^tilelevel - 1].
         """
-        tilecache = Mock()
+        Mock()
         # TODO: Uncomment and update
         # provider = YourProvider(tilecache)
         # tilelevel = 2
@@ -251,7 +249,7 @@ class TestYourProviderName:
 
         RECOMMENDED: Test combined boundary violations.
         """
-        tilecache = Mock()
+        Mock()
         # TODO: Uncomment and update
         # provider = YourProvider(tilecache)
         # tile_id = ('your_media_id', 2, 10, 10)  # both exceed max of 3
@@ -264,7 +262,7 @@ class TestYourProviderName:
     # SECTION 5: VALID TILE GENERATION TEST
     # =========================================================================
 
-    @patch('PIL.Image.new')  # TODO: Update import path if needed
+    @patch("PIL.Image.new")  # TODO: Update import path if needed
     def test_load_dynamic_valid_tile(self, mock_image_new):
         """
         Scenario: Generate a valid tile for valid coordinates
@@ -281,7 +279,7 @@ class TestYourProviderName:
         2. The image is saved to the specified output file
         3. Image format matches tilesize attribute
         """
-        tilecache = Mock()
+        Mock()
         # TODO: Uncomment and update
         # provider = YourProvider(tilecache)
 
@@ -304,7 +302,7 @@ class TestYourProviderName:
         # mock_image.save.assert_called_once_with(outfile)
         pass
 
-    @patch('PIL.Image.new')
+    @patch("PIL.Image.new")
     def test_load_dynamic_different_tile_levels(self, mock_image_new):
         """
         Scenario: Generate tiles at multiple zoom levels
@@ -315,7 +313,7 @@ class TestYourProviderName:
 
         RECOMMENDED: Verify tile generation at multiple zoom levels.
         """
-        tilecache = Mock()
+        Mock()
         # TODO: Uncomment and update
         # provider = YourProvider(tilecache)
         # mock_image = Mock()
@@ -419,6 +417,7 @@ class TestYourProviderName:
         Note: Skip if randomness is intentional (like FernDynamicTileProvider).
         """
         pass
+
 
 # =============================================================================
 # ADDITIONAL NOTES FOR TEST IMPLEMENTATION

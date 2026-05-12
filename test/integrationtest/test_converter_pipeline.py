@@ -31,27 +31,24 @@ The tests cover:
 - Concurrent conversion operations
 - Output format validation
 """
-import sys
+
 import os
+import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
-import pytest
-import time
-import tempfile
 import shutil
 import subprocess
-from pathlib import Path
-from threading import Thread
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
+
+import pytest
 from PIL import Image
 
-from pyzui.converters.converter import Converter
-from pyzui.converters.vipsconverter import VipsConverter
 from pyzui.converters.pdfconverter import PDFConverter
+from pyzui.converters.vipsconverter import VipsConverter
+from pyzui.tilesystem import tilemanager, tilestore
 from pyzui.tilesystem.tiler import Tiler
-from pyzui.tilesystem import tilestore
-from pyzui.tilesystem import tilemanager
+
 
 class ConcreteTiler(Tiler):
     """
@@ -60,10 +57,10 @@ class ConcreteTiler(Tiler):
     Implements the _scanchunk method using PIL to read PPM image data.
     """
 
-    def __init__(self, infile, media_id=None, filext='jpg', tilesize=256):
+    def __init__(self, infile, media_id=None, filext="jpg", tilesize=256):
         """Initialize the tiler and open the source image."""
         super().__init__(infile, media_id, filext, tilesize)
-        self._image = Image.open(infile).convert('RGB')
+        self._image = Image.open(infile).convert("RGB")
         self._width, self._height = self._image.size
         self._bytes_per_pixel = 3
         self._current_row = 0
@@ -71,43 +68,45 @@ class ConcreteTiler(Tiler):
     def _scanchunk(self):
         """Read the next scanline from the image."""
         if self._current_row >= self._height:
-            return b''
+            return b""
         # Use crop to get entire row at once (much faster than getpixel)
         row_img = self._image.crop((0, self._current_row, self._width, self._current_row + 1))
         row_data = row_img.tobytes()
         self._current_row += 1
         return row_data
 
+
 def is_pdftoppm_available():
     """Check if pdftoppm is available on the system."""
     try:
-        result = subprocess.run(
-            ['pdftoppm', '-v'],
-            capture_output=True,
-            timeout=5
-        )
+        subprocess.run(["pdftoppm", "-v"], capture_output=True, timeout=5)
         return True
     except (subprocess.SubprocessError, FileNotFoundError):
         return False
+
 
 def is_pyvips_available():
     """Check if pyvips is available and functional."""
     try:
         import pyvips
+
         return True
     except ImportError:
         return False
+
 
 def is_qt_available():
     """Check if Qt is available and required enums are present."""
     try:
         from PySide6 import QtCore, QtGui
+
         # Check for enums used in tile.py
-        has_aspect = hasattr(QtCore.Qt, 'IgnoreAspectRatio') or hasattr(QtCore.Qt.AspectRatioMode, 'IgnoreAspectRatio')
-        has_format = hasattr(QtGui.QImage.Format, 'Format_RGB32')
+        has_aspect = hasattr(QtCore.Qt, "IgnoreAspectRatio") or hasattr(QtCore.Qt.AspectRatioMode, "IgnoreAspectRatio")
+        has_format = hasattr(QtGui.QImage.Format, "Format_RGB32")
         return has_aspect and has_format
     except ImportError:
         return False
+
 
 @pytest.fixture
 def temp_tilestore(tmp_path):
@@ -135,6 +134,7 @@ def temp_tilestore(tmp_path):
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
 
+
 @pytest.fixture
 def initialized_tilemanager(temp_tilestore):
     """
@@ -146,6 +146,7 @@ def initialized_tilemanager(temp_tilestore):
     tilemanager.init(total_cache_size=100, auto_cleanup=False)
     yield
     tilemanager.purge()
+
 
 @pytest.fixture
 def sample_images(tmp_path):
@@ -161,36 +162,37 @@ def sample_images(tmp_path):
 
     # PNG image
     png_path = tmp_path / "test_image.png"
-    img = Image.new('RGB', (800, 600), color='red')
+    img = Image.new("RGB", (800, 600), color="red")
     for y in range(600):
         for x in range(min(50, 800)):
             img.putpixel((x, y), (x * 5, y % 256, 128))
     img.save(png_path)
-    images['png'] = str(png_path)
+    images["png"] = str(png_path)
 
     # JPEG image
     jpg_path = tmp_path / "test_image.jpg"
     img.save(jpg_path, quality=95)
-    images['jpg'] = str(jpg_path)
+    images["jpg"] = str(jpg_path)
 
     # TIFF image
     tiff_path = tmp_path / "test_image.tiff"
     img.save(tiff_path)
-    images['tiff'] = str(tiff_path)
+    images["tiff"] = str(tiff_path)
 
     # Large image
     large_path = tmp_path / "large_image.png"
-    large_img = Image.new('RGB', (2048, 1536), color='blue')
+    large_img = Image.new("RGB", (2048, 1536), color="blue")
     large_img.save(large_path)
-    images['large'] = str(large_path)
+    images["large"] = str(large_path)
 
     # RGBA image (with alpha channel)
     rgba_path = tmp_path / "rgba_image.png"
-    rgba_img = Image.new('RGBA', (400, 300), color=(255, 0, 0, 128))
+    rgba_img = Image.new("RGBA", (400, 300), color=(255, 0, 0, 128))
     rgba_img.save(rgba_path)
-    images['rgba'] = str(rgba_path)
+    images["rgba"] = str(rgba_path)
 
     yield images
+
 
 @pytest.fixture
 def sample_pdf(tmp_path):
@@ -237,10 +239,11 @@ trailer << /Size 5 /Root 1 0 R >>
 startxref
 307
 %%EOF"""
-        with open(pdf_path, 'wb') as f:
+        with open(pdf_path, "wb") as f:
             f.write(minimal_pdf)
 
         yield str(pdf_path)
+
 
 class TestVipsConverterBasicOperations:
     """
@@ -261,7 +264,7 @@ class TestVipsConverterBasicOperations:
         Then a PPM file is created at the output path
         And the output is valid image data
         """
-        infile = sample_images['png']
+        infile = sample_images["png"]
         outfile = str(tmp_path / "output.ppm")
 
         converter = VipsConverter(infile, outfile)
@@ -284,7 +287,7 @@ class TestVipsConverterBasicOperations:
         When VipsConverter processes it
         Then a valid PPM file is created
         """
-        infile = sample_images['jpg']
+        infile = sample_images["jpg"]
         outfile = str(tmp_path / "output.ppm")
 
         converter = VipsConverter(infile, outfile)
@@ -294,7 +297,7 @@ class TestVipsConverterBasicOperations:
         assert os.path.exists(outfile)
 
         output_img = Image.open(outfile)
-        assert output_img.mode == 'RGB'
+        assert output_img.mode == "RGB"
 
     @pytest.mark.skipif(not is_pyvips_available(), reason="pyvips not available")
     def test_convert_tiff_to_ppm(self, sample_images, tmp_path):
@@ -305,7 +308,7 @@ class TestVipsConverterBasicOperations:
         When VipsConverter processes it
         Then a valid PPM file is created
         """
-        infile = sample_images['tiff']
+        infile = sample_images["tiff"]
         outfile = str(tmp_path / "output.ppm")
 
         converter = VipsConverter(infile, outfile)
@@ -324,7 +327,7 @@ class TestVipsConverterBasicOperations:
         Then the alpha channel is flattened
         And the output is RGB format
         """
-        infile = sample_images['rgba']
+        infile = sample_images["rgba"]
         outfile = str(tmp_path / "output.ppm")
 
         converter = VipsConverter(infile, outfile)
@@ -333,7 +336,7 @@ class TestVipsConverterBasicOperations:
         assert converter.error is None
 
         output_img = Image.open(outfile)
-        assert output_img.mode == 'RGB'
+        assert output_img.mode == "RGB"
 
     @pytest.mark.skipif(not is_pyvips_available(), reason="pyvips not available")
     def test_convert_large_image(self, sample_images, tmp_path):
@@ -345,7 +348,7 @@ class TestVipsConverterBasicOperations:
         Then conversion completes without memory issues
         And output dimensions match input
         """
-        infile = sample_images['large']
+        infile = sample_images["large"]
         outfile = str(tmp_path / "output.ppm")
 
         converter = VipsConverter(infile, outfile)
@@ -355,6 +358,7 @@ class TestVipsConverterBasicOperations:
 
         output_img = Image.open(outfile)
         assert output_img.size == (2048, 1536)
+
 
 class TestVipsConverterErrorHandling:
     """
@@ -395,7 +399,7 @@ class TestVipsConverterErrorHandling:
         """
         # Create corrupted file
         corrupted_path = tmp_path / "corrupted.png"
-        with open(corrupted_path, 'wb') as f:
+        with open(corrupted_path, "wb") as f:
             f.write(b"This is not a valid image file")
 
         outfile = str(tmp_path / "output.ppm")
@@ -415,13 +419,14 @@ class TestVipsConverterErrorHandling:
         When VipsConverter attempts to process
         Then an error is set on the converter
         """
-        infile = sample_images['png']
+        infile = sample_images["png"]
         outfile = str(tmp_path / "nonexistent_dir" / "output.ppm")
 
         converter = VipsConverter(infile, outfile)
         converter.run()
 
         assert converter.error is not None
+
 
 class TestPDFConverterBasicOperations:
     """
@@ -491,6 +496,7 @@ class TestPDFConverterBasicOperations:
             assert img_high.size[0] > img_low.size[0]
             assert img_high.size[1] > img_low.size[1]
 
+
 class TestPDFConverterErrorHandling:
     """
     Feature: PDFConverter Error Handling
@@ -526,7 +532,7 @@ class TestPDFConverterErrorHandling:
         Then an error is set on the converter
         """
         corrupted_path = tmp_path / "corrupted.pdf"
-        with open(corrupted_path, 'wb') as f:
+        with open(corrupted_path, "wb") as f:
             f.write(b"This is not a valid PDF file")
 
         outfile = str(tmp_path / "output.ppm")
@@ -535,6 +541,7 @@ class TestPDFConverterErrorHandling:
         converter.run()
 
         assert converter.error is not None
+
 
 class TestConverterToTilerPipeline:
     """
@@ -546,8 +553,7 @@ class TestConverterToTilerPipeline:
     """
 
     @pytest.mark.skipif(not is_pyvips_available(), reason="pyvips not available")
-    def test_convert_then_tile_png(
-            self, sample_images, tmp_path, temp_tilestore, initialized_tilemanager):
+    def test_convert_then_tile_png(self, sample_images, tmp_path, temp_tilestore, initialized_tilemanager):
         """
         Scenario: Convert PNG and create tile pyramid
 
@@ -556,7 +562,7 @@ class TestConverterToTilerPipeline:
         Then a complete tile pyramid is created
         And tiles are accessible via TileStore
         """
-        infile = sample_images['png']
+        infile = sample_images["png"]
         ppm_file = str(tmp_path / "converted.ppm")
         media_id = "pipeline_test_png"
 
@@ -572,12 +578,11 @@ class TestConverterToTilerPipeline:
 
         # Verify results
         assert tilestore.tiled(media_id)
-        assert tilestore.get_metadata(media_id, 'width') == 800
-        assert tilestore.get_metadata(media_id, 'height') == 600
+        assert tilestore.get_metadata(media_id, "width") == 800
+        assert tilestore.get_metadata(media_id, "height") == 600
 
     @pytest.mark.skipif(not is_pyvips_available(), reason="pyvips not available")
-    def test_convert_then_tile_large_image(
-            self, sample_images, tmp_path, temp_tilestore, initialized_tilemanager):
+    def test_convert_then_tile_large_image(self, sample_images, tmp_path, temp_tilestore, initialized_tilemanager):
         """
         Scenario: Convert and tile large image
 
@@ -586,7 +591,7 @@ class TestConverterToTilerPipeline:
         Then multiple tile levels are created
         And the full pyramid is accessible
         """
-        infile = sample_images['large']
+        infile = sample_images["large"]
         ppm_file = str(tmp_path / "large_converted.ppm")
         media_id = "pipeline_large"
 
@@ -601,15 +606,13 @@ class TestConverterToTilerPipeline:
         assert tiler.error is None
 
         # Verify multiple levels
-        maxlevel = tilestore.get_metadata(media_id, 'maxtilelevel')
+        maxlevel = tilestore.get_metadata(media_id, "maxtilelevel")
         assert maxlevel >= 2  # Large image should have multiple levels
 
     @pytest.mark.skipif(
-        not (is_pdftoppm_available() and is_pyvips_available()),
-        reason="pdftoppm or pyvips not available"
+        not (is_pdftoppm_available() and is_pyvips_available()), reason="pdftoppm or pyvips not available"
     )
-    def test_convert_pdf_then_tile(
-            self, sample_pdf, tmp_path, temp_tilestore, initialized_tilemanager):
+    def test_convert_pdf_then_tile(self, sample_pdf, tmp_path, temp_tilestore, initialized_tilemanager):
         """
         Scenario: Convert PDF and create tile pyramid
 
@@ -638,6 +641,7 @@ class TestConverterToTilerPipeline:
         # Verify
         assert tilestore.tiled(media_id)
 
+
 class TestConverterProgressTracking:
     """
     Feature: Converter Progress Tracking
@@ -654,7 +658,7 @@ class TestConverterProgressTracking:
         Given a new converter instance
         Then progress is initially 0.0
         """
-        infile = sample_images['png']
+        infile = sample_images["png"]
         outfile = str(tmp_path / "output.ppm")
 
         converter = VipsConverter(infile, outfile)
@@ -669,7 +673,7 @@ class TestConverterProgressTracking:
         When conversion completes (success or failure)
         Then progress is 1.0
         """
-        infile = sample_images['png']
+        infile = sample_images["png"]
         outfile = str(tmp_path / "output.ppm")
 
         converter = VipsConverter(infile, outfile)
@@ -695,6 +699,7 @@ class TestConverterProgressTracking:
         assert converter.progress == 1.0
         assert converter.error is not None
 
+
 class TestConverterThreading:
     """
     Feature: Converter Threading Support
@@ -717,21 +722,21 @@ class TestConverterThreading:
         """
         import threading
 
-        infile = sample_images['png']
+        infile = sample_images["png"]
         outfile = str(tmp_path / "output.ppm")
 
         converter = VipsConverter(infile, outfile)
-        result = {'done': False}
+        result = {"done": False}
 
         def run_conversion():
             converter.run()
-            result['done'] = True
+            result["done"] = True
 
         thread = threading.Thread(target=run_conversion)
         thread.start()
         thread.join(timeout=30)
 
-        assert result['done'], "Conversion thread timed out"
+        assert result["done"], "Conversion thread timed out"
         assert converter.progress == 1.0
         assert os.path.exists(outfile) or converter.error is not None
 
@@ -747,21 +752,22 @@ class TestConverterThreading:
 
         Note: This uses process-based parallelism to avoid pyvips threading conflicts.
         """
-        from pyzui.converters import converterrunner
         from concurrent.futures import wait
+
+        from pyzui.converters import converterrunner
 
         futures = []
         outfiles = []
 
         for i in range(3):
-            infile = sample_images['png']
+            infile = sample_images["png"]
             outfile = str(tmp_path / f"output_{i}.ppm")
             outfiles.append(outfile)
             future = converterrunner.submit_vips_conversion(infile, outfile)
             futures.append(future)
 
         # Wait for all to complete with timeout
-        done, not_done = wait(futures, timeout=60)
+        _done, not_done = wait(futures, timeout=60)
         assert len(not_done) == 0, f"{len(not_done)} conversions timed out"
 
         # Verify all completed successfully
@@ -769,6 +775,7 @@ class TestConverterThreading:
             error = future.result()
             assert error is None, f"Conversion {i} failed: {error}"
             assert os.path.exists(outfiles[i]), f"Output {i} not created"
+
 
 class TestConcurrentConversionOperations:
     """
@@ -783,8 +790,7 @@ class TestConcurrentConversionOperations:
     """
 
     @pytest.mark.skipif(not is_pyvips_available(), reason="pyvips not available")
-    def test_concurrent_conversions_complete_independently(
-            self, sample_images, tmp_path):
+    def test_concurrent_conversions_complete_independently(self, sample_images, tmp_path):
         """
         Scenario: Concurrent conversions complete independently
 
@@ -793,13 +799,14 @@ class TestConcurrentConversionOperations:
         Then each conversion completes independently
         And all outputs are valid
         """
-        from pyzui.converters import converterrunner
         from concurrent.futures import wait
 
+        from pyzui.converters import converterrunner
+
         files_to_convert = [
-            (sample_images['png'], str(tmp_path / "out1.ppm")),
-            (sample_images['jpg'], str(tmp_path / "out2.ppm")),
-            (sample_images['tiff'], str(tmp_path / "out3.ppm")),
+            (sample_images["png"], str(tmp_path / "out1.ppm")),
+            (sample_images["jpg"], str(tmp_path / "out2.ppm")),
+            (sample_images["tiff"], str(tmp_path / "out3.ppm")),
         ]
 
         # Submit all conversions to process pool
@@ -809,7 +816,7 @@ class TestConcurrentConversionOperations:
             futures.append((future, outfile))
 
         # Wait for all to complete
-        done, not_done = wait([f for f, _ in futures], timeout=60)
+        _done, not_done = wait([f for f, _ in futures], timeout=60)
         assert len(not_done) == 0, f"{len(not_done)} conversions timed out"
 
         # All should complete without error
@@ -819,8 +826,7 @@ class TestConcurrentConversionOperations:
             assert os.path.exists(outfile), f"Output not created: {outfile}"
 
     @pytest.mark.skipif(not is_pyvips_available(), reason="pyvips not available")
-    def test_concurrent_conversion_and_tiling(
-            self, sample_images, tmp_path, temp_tilestore):
+    def test_concurrent_conversion_and_tiling(self, sample_images, tmp_path, temp_tilestore):
         """
         Scenario: Concurrent conversion and tiling pipelines
 
@@ -832,8 +838,9 @@ class TestConcurrentConversionOperations:
         Note: Conversions run in separate processes for isolation. Tiling
         runs after conversion completes to avoid threading conflicts.
         """
-        from pyzui.converters import converterrunner
         from concurrent.futures import wait
+
+        from pyzui.converters import converterrunner
 
         # Initialize tilemanager locally
         tilemanager.init(total_cache_size=100, auto_cleanup=False)
@@ -842,12 +849,11 @@ class TestConcurrentConversionOperations:
         conversion_jobs = []
         for i in range(3):
             ppm_file = str(tmp_path / f"converted_{i}.ppm")
-            future = converterrunner.submit_vips_conversion(
-                sample_images['png'], ppm_file)
+            future = converterrunner.submit_vips_conversion(sample_images["png"], ppm_file)
             conversion_jobs.append((i, ppm_file, future))
 
         # Wait for all conversions to complete
-        done, not_done = wait([job[2] for job in conversion_jobs], timeout=60)
+        _done, not_done = wait([job[2] for job in conversion_jobs], timeout=60)
         assert len(not_done) == 0, "Some conversions timed out"
 
         # Check for conversion errors
@@ -863,18 +869,16 @@ class TestConcurrentConversionOperations:
             tiler.run()
 
             if tiler.error:
-                results[i] = {'error': tiler.error}
+                results[i] = {"error": tiler.error}
             else:
-                results[i] = {
-                    'media_id': media_id,
-                    'tiled': tilestore.tiled(media_id)
-                }
+                results[i] = {"media_id": media_id, "tiled": tilestore.tiled(media_id)}
 
         # All should succeed
         for idx, result in results.items():
-            assert 'error' not in result or result.get('error') is None, \
-                f"Pipeline {idx} failed: {result.get('error')}"
-            assert result.get('tiled', False), f"Pipeline {idx} not tiled"
+            assert "error" not in result or result.get("error") is None, f"Pipeline {idx} failed: {result.get('error')}"
+            assert result.get("tiled", False), f"Pipeline {idx} not tiled"
+
+
 class TestConcurrentTiling:
     """
     Feature: Concurrent Tiling Operations
@@ -884,7 +888,9 @@ class TestConcurrentTiling:
     """
 
     @pytest.mark.skipif(not is_pyvips_available(), reason="pyvips not available")
-    def test_concurrent_tiling_without_disk_lock(self, sample_images, tmp_path, temp_tilestore, initialized_tilemanager):
+    def test_concurrent_tiling_without_disk_lock(
+        self, sample_images, tmp_path, temp_tilestore, initialized_tilemanager
+    ):
         """
         Scenario: Multiple tilers run concurrently without disk lock
 
@@ -892,40 +898,40 @@ class TestConcurrentTiling:
         When tilers run in parallel threads
         Then all tilers complete successfully
         And all tile pyramids are created correctly
-        
+
         This test validates that the tiling system can handle concurrent disk
         access without the disk_lock that was previously used.
         """
-        from pyzui.converters import converterrunner
-        from concurrent.futures import wait, ThreadPoolExecutor
         import threading
-        
+        from concurrent.futures import wait
+
+        from pyzui.converters import converterrunner
+
         # Create multiple PPM files using converterrunner (process-based)
         ppm_files = []
         conversion_futures = []
-        
+
         for i in range(3):
             ppm_file = str(tmp_path / f"source_{i}.ppm")
             ppm_files.append(ppm_file)
             # Convert sample image to PPM using process pool
-            future = converterrunner.submit_vips_conversion(
-                sample_images['png'], ppm_file)
+            future = converterrunner.submit_vips_conversion(sample_images["png"], ppm_file)
             conversion_futures.append(future)
-        
+
         # Wait for all conversions to complete
         done, not_done = wait(conversion_futures, timeout=60)
         assert len(not_done) == 0, f"{len(not_done)} conversions timed out"
-        
+
         # Check for conversion errors
         for i, future in enumerate(conversion_futures):
             error = future.result()
             assert error is None, f"Conversion {i} failed: {error}"
             assert os.path.exists(ppm_files[i]), f"PPM file {i} not created"
-        
+
         # Now run tiling concurrently using threads
         results = {}
         results_lock = threading.Lock()
-        
+
         def run_tiler(media_id, ppm_file):
             """Run a tiler with given media_id and store result."""
             try:
@@ -933,16 +939,17 @@ class TestConcurrentTiling:
                 tiler.run()
                 with results_lock:
                     results[media_id] = {
-                        'error': tiler.error,
-                        'tiled': tilestore.tiled(media_id) if tiler.error is None else False,
-                        'progress': tiler.progress
+                        "error": tiler.error,
+                        "tiled": tilestore.tiled(media_id) if tiler.error is None else False,
+                        "progress": tiler.progress,
                     }
             except Exception as e:
                 import traceback
+
                 traceback.print_exc()
                 with results_lock:
-                    results[media_id] = {'error': str(e), 'tiled': False, 'progress': 0.0}
-        
+                    results[media_id] = {"error": str(e), "tiled": False, "progress": 0.0}
+
         # Start multiple tilers concurrently using ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=3) as executor:
             futures = []
@@ -950,32 +957,33 @@ class TestConcurrentTiling:
                 media_id = f"concurrent_tiling_{i}"
                 future = executor.submit(run_tiler, media_id, ppm_files[i])
                 futures.append(future)
-            
+
             # Wait for all tiling operations to complete
-            done, not_done = wait(futures, timeout=120)
+            _done, not_done = wait(futures, timeout=120)
             assert len(not_done) == 0, f"{len(not_done)} tiling operations timed out"
-            
+
             # Verify all succeeded
             for media_id, result in results.items():
-                error = result.get('error')
+                error = result.get("error")
                 if error is not None:
                     raise AssertionError(f"Tiler {media_id} failed: {error}")
-                assert result.get('tiled', False), f"Tiler {media_id} did not create tiles"
-                assert result.get('progress') == 1.0, f"Tiler {media_id} didn't reach 100% progress"
-                
+                assert result.get("tiled", False), f"Tiler {media_id} did not create tiles"
+                assert result.get("progress") == 1.0, f"Tiler {media_id} didn't reach 100% progress"
+
             # Additionally, verify each tile pyramid metadata
             for media_id, result in results.items():
-                if result.get('tiled', False):
+                if result.get("tiled", False):
                     # Check that metadata was written
-                    width = tilestore.get_metadata(media_id, 'width')
-                    height = tilestore.get_metadata(media_id, 'height')
-                    maxtilelevel = tilestore.get_metadata(media_id, 'maxtilelevel')
-                    
+                    width = tilestore.get_metadata(media_id, "width")
+                    height = tilestore.get_metadata(media_id, "height")
+                    maxtilelevel = tilestore.get_metadata(media_id, "maxtilelevel")
+
                     assert width is not None, f"No width metadata for {media_id}"
                     assert height is not None, f"No height metadata for {media_id}"
                     assert maxtilelevel is not None, f"No maxtilelevel metadata for {media_id}"
-                    
+
                     print(f"Tiling successful for {media_id}: {width}x{height}, levels: {maxtilelevel}")
+
 
 class TestConverterOutputValidation:
     """
@@ -994,7 +1002,7 @@ class TestConverterOutputValidation:
         When converted to PPM
         Then output dimensions match input
         """
-        infile = sample_images['png']
+        infile = sample_images["png"]
         outfile = str(tmp_path / "output.ppm")
 
         # Get input dimensions
@@ -1019,7 +1027,7 @@ class TestConverterOutputValidation:
         When converted to PPM
         Then output is 8-bit RGB
         """
-        infile = sample_images['png']
+        infile = sample_images["png"]
         outfile = str(tmp_path / "output.ppm")
 
         converter = VipsConverter(infile, outfile)
@@ -1027,7 +1035,7 @@ class TestConverterOutputValidation:
         assert converter.error is None
 
         output_img = Image.open(outfile)
-        assert output_img.mode == 'RGB'
+        assert output_img.mode == "RGB"
 
     @pytest.mark.skipif(not is_pyvips_available(), reason="pyvips not available")
     def test_output_readable_by_pil(self, sample_images, tmp_path):
@@ -1038,7 +1046,7 @@ class TestConverterOutputValidation:
         Then PIL can open and read the file
         And pixel data is accessible
         """
-        infile = sample_images['png']
+        infile = sample_images["png"]
         outfile = str(tmp_path / "output.ppm")
 
         converter = VipsConverter(infile, outfile)
@@ -1052,6 +1060,7 @@ class TestConverterOutputValidation:
         # Access pixel data
         pixel = output_img.getpixel((0, 0))
         assert len(pixel) == 3  # RGB
+
 
 class TestConverterStringRepresentation:
     """
@@ -1069,7 +1078,7 @@ class TestConverterStringRepresentation:
         Then __str__ returns a readable string
         And includes input and output file paths
         """
-        infile = sample_images['png']
+        infile = sample_images["png"]
         outfile = str(tmp_path / "output.ppm")
 
         converter = VipsConverter(infile, outfile)
@@ -1085,7 +1094,7 @@ class TestConverterStringRepresentation:
         Given a converter instance
         Then __repr__ returns a formal string representation
         """
-        infile = sample_images['png']
+        infile = sample_images["png"]
         outfile = str(tmp_path / "output.ppm")
 
         converter = VipsConverter(infile, outfile)

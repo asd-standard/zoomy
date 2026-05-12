@@ -13,8 +13,6 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
-from unittest.mock import Mock, patch
 
 class TestDialogWindows:
     """
@@ -33,6 +31,7 @@ class TestDialogWindows:
         Then the module should be successfully imported
         """
         import pyzui.windows.dialogwindows.dialogwindows
+
         assert pyzui.windows.dialogwindows.dialogwindows is not None
 
     def test_placeholder(self):

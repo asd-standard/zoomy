@@ -1260,6 +1260,80 @@ Debugging Tests
 
     pytest -l test_file.py
 
+Preventing Pytest Hangs on Exit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After all tests pass and pytest prints the summary line, the process may
+appear to hang — never returning control to the terminal.  This is
+caused by two independent interactions between mocked tests and
+real (unmockable) Python stdlib resources.
+
+**Cause 1 — TileStore atexit cleanup on a large tilestore**
+
+Tests that call ``tilemanager.init(auto_cleanup=True)`` register a real
+``atexit`` handler (``atexit.register`` is stdlib and cannot be mocked).
+After all ``@patch`` decorators are undone, that handler fires on the
+**real** ``~/.pyzui/tilestore/`` directory, which can contain tens of
+thousands of files (over 80,000 in a heavily-used installation).
+Walking and ``stat``-ing every file can take several minutes, which
+masquerades as a hang.
+
+**Cause 2 — Multiprocessing resource tracker thread**
+
+The ``converterrunner`` and ``tilerrunner`` modules use
+``multiprocessing.get_context('spawn')``, which creates a resource
+tracker daemon thread.  During Python interpreter shutdown, the
+tracker's ``__del__`` method calls ``_stop_locked()``, which tries to
+join the tracker thread.  In the ``'spawn'`` context this thread is
+frequently stuck, causing the process to hang indefinitely.  This is
+the same issue that the old codebase explicitly warned about (the
+commented-out ``'fork'`` preference note in the source).
+
+**Solution — conftest.py session hooks**
+
+Both causes are handled by hooks in ``test/unittest/conftest.py``:
+
+.. code-block:: python
+
+    def pytest_sessionstart(session):
+        """Disable tilemanager atexit so tests never register real handlers."""
+        from pyzui.tilesystem import tilemanager
+        tilemanager.__cleanup_enabled = False
+
+    def pytest_sessionfinish(session, exitstatus):
+        """Prevent expensive cleanup from blocking pytest exit."""
+        # TileManager: mark cleanup as already executed
+        from pyzui.tilesystem import tilemanager
+        tilemanager.__cleanup_executed = True
+        tilemanager.__cleanup_enabled = False
+
+        # ConverterRunner / TilerRunner: prevent atexit from firing
+        from pyzui.converters import converterrunner
+        converterrunner._atexit_registered = False
+        from pyzui.tilesystem.tiler import tilerrunner
+        tilerrunner._atexit_registered = False
+
+        # Force-clean the multiprocessing resource tracker
+        import multiprocessing.resource_tracker
+        tracker = multiprocessing.resource_tracker._resource_tracker
+        if tracker is not None:
+            tracker._stop = lambda: None  # no-op to prevent re-stop
+            if hasattr(tracker, '_thread') and tracker._thread is not None:
+                tracker._thread.join(timeout=0.5)
+
+**Verification:**
+
+To confirm the fix is working, run the full suite several times; every
+run should exit cleanly within a few seconds of the summary line:
+
+.. code-block:: bash
+
+    cd test/unittest
+    for i in $(seq 1 5); do
+        timeout 120 pytest -q --tb=no
+        echo "exit=$?"
+    done
+
 Quick Reference
 ---------------
 

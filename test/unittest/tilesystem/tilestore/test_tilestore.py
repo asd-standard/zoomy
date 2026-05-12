@@ -13,11 +13,11 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
-import os
 import hashlib
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import Mock, mock_open, patch
+
 from pyzui.tilesystem import tilestore
+
 
 class TestTilestoreModule:
     """
@@ -95,7 +95,7 @@ class TestTilestoreModule:
         Then the returned path should contain the SHA1 hash of the media_id
         """
         media_id = "test_media"
-        expected_hash = hashlib.sha1(media_id.encode('utf-8')).hexdigest()
+        expected_hash = hashlib.sha1(media_id.encode("utf-8")).hexdigest()
         path = tilestore.get_media_path(media_id)
         assert expected_hash in path
 
@@ -107,11 +107,11 @@ class TestTilestoreModule:
         When get_tile_path is called
         Then it should return a valid path with the correct file extension
         """
-        tile_id = ('media_id', 0, 0, 0)
-        with patch('pyzui.tilesystem.tilestore.tilestore.get_metadata', return_value='jpg'):
+        tile_id = ("media_id", 0, 0, 0)
+        with patch("pyzui.tilesystem.tilestore.tilestore.get_metadata", return_value="jpg"):
             path = tilestore.get_tile_path(tile_id)
             assert isinstance(path, str)
-            assert '.jpg' in path
+            assert ".jpg" in path
 
     def test_get_tile_path_with_filext(self):
         """
@@ -121,12 +121,12 @@ class TestTilestoreModule:
         When get_tile_path is called with a custom filext
         Then the path should include the extension and formatted coordinates
         """
-        tile_id = ('media_id', 1, 2, 3)
-        path = tilestore.get_tile_path(tile_id, filext='png')
-        assert '.png' in path
-        assert '01' in path  # tilelevel
-        assert '000002' in path  # row
-        assert '000003' in path  # col
+        tile_id = ("media_id", 1, 2, 3)
+        path = tilestore.get_tile_path(tile_id, filext="png")
+        assert ".png" in path
+        assert "01" in path  # tilelevel
+        assert "000002" in path  # row
+        assert "000003" in path  # col
 
     def test_get_tile_path_with_prefix(self):
         """
@@ -136,13 +136,13 @@ class TestTilestoreModule:
         When get_tile_path is called with the prefix
         Then the returned path should start with the custom prefix
         """
-        tile_id = ('media_id', 0, 0, 0)
-        prefix = '/custom/path'
-        path = tilestore.get_tile_path(tile_id, prefix=prefix, filext='jpg')
+        tile_id = ("media_id", 0, 0, 0)
+        prefix = "/custom/path"
+        path = tilestore.get_tile_path(tile_id, prefix=prefix, filext="jpg")
         assert path.startswith(prefix)
 
-    @patch('os.makedirs')
-    @patch('os.path.exists', return_value=False)
+    @patch("os.makedirs")
+    @patch("os.path.exists", return_value=False)
     def test_get_tile_path_mkdirp(self, mock_exists, mock_makedirs):
         """
         Scenario: Create directories automatically
@@ -151,12 +151,12 @@ class TestTilestoreModule:
         When get_tile_path is called with mkdirp=True
         Then the necessary directories should be created
         """
-        tile_id = ('media_id', 0, 0, 0)
-        tilestore.get_tile_path(tile_id, mkdirp=True, filext='jpg')
+        tile_id = ("media_id", 0, 0, 0)
+        tilestore.get_tile_path(tile_id, mkdirp=True, filext="jpg")
         mock_makedirs.assert_called_once()
 
-    @patch('builtins.open', new_callable=mock_open, read_data="width\t100\tint\nheight\t200\tint\n")
-    @patch('os.path.join')
+    @patch("builtins.open", new_callable=mock_open, read_data="width\t100\tint\nheight\t200\tint\n")
+    @patch("os.path.join")
     def test_load_metadata_success(self, mock_join, mock_file):
         """
         Scenario: Successfully load metadata from file
@@ -166,11 +166,11 @@ class TestTilestoreModule:
         Then it should read and parse the metadata
         And return True
         """
-        mock_join.return_value = '/path/to/metadata'
-        result = tilestore.load_metadata('media_id')
+        mock_join.return_value = "/path/to/metadata"
+        result = tilestore.load_metadata("media_id")
         assert result is True
 
-    @patch('builtins.open', side_effect=IOError)
+    @patch("builtins.open", side_effect=IOError)
     def test_load_metadata_failure(self, mock_file):
         """
         Scenario: Handle missing metadata file
@@ -179,11 +179,11 @@ class TestTilestoreModule:
         When load_metadata is called
         Then it should catch the IOError and return False
         """
-        result = tilestore.load_metadata('nonexistent_media')
+        result = tilestore.load_metadata("nonexistent_media")
         assert result is False
 
-    @patch('builtins.open', new_callable=mock_open, read_data="key1\tvalue1\tstr\nkey2\t42\tint\n")
-    @patch('os.path.join')
+    @patch("builtins.open", new_callable=mock_open, read_data="key1\tvalue1\tstr\nkey2\t42\tint\n")
+    @patch("os.path.join")
     def test_get_metadata(self, mock_join, mock_file):
         """
         Scenario: Retrieve metadata value by key
@@ -192,9 +192,9 @@ class TestTilestoreModule:
         When get_metadata is called with a specific key
         Then it should return the corresponding value
         """
-        mock_join.return_value = '/path/to/metadata'
+        mock_join.return_value = "/path/to/metadata"
         tilestore._TileStore__metadata = {}  # Reset metadata
-        value = tilestore.get_metadata('media_id', 'key2')
+        tilestore.get_metadata("media_id", "key2")
         # Metadata should be loaded and parsed
 
     def test_get_metadata_nonexistent_key(self):
@@ -206,13 +206,13 @@ class TestTilestoreModule:
         Then it should return None
         """
         tilestore._TileStore__metadata = {}
-        with patch.object(tilestore, 'load_metadata', return_value=True):
-            tilestore._TileStore__metadata = {'media_id': {}}
-            value = tilestore.get_metadata('media_id', 'nonexistent_key')
+        with patch.object(tilestore, "load_metadata", return_value=True):
+            tilestore._TileStore__metadata = {"media_id": {}}
+            value = tilestore.get_metadata("media_id", "nonexistent_key")
             assert value is None
 
-    @patch('builtins.open', new_callable=mock_open)
-    @patch('os.path.join')
+    @patch("builtins.open", new_callable=mock_open)
+    @patch("os.path.join")
     def test_write_metadata(self, mock_join, mock_file):
         """
         Scenario: Write metadata to file
@@ -221,13 +221,13 @@ class TestTilestoreModule:
         When write_metadata is called
         Then the metadata should be written to the file
         """
-        mock_join.return_value = '/path/to/metadata'
-        tilestore.write_metadata('media_id', width=100, height=200)
+        mock_join.return_value = "/path/to/metadata"
+        tilestore.write_metadata("media_id", width=100, height=200)
         mock_file.assert_called()
 
-    @patch('os.path.exists')
-    @patch.object(tilestore, 'get_tile_path')
-    @patch.object(tilestore, 'get_media_path')
+    @patch("os.path.exists")
+    @patch.object(tilestore, "get_tile_path")
+    @patch.object(tilestore, "get_media_path")
     def test_tiled_true(self, mock_media_path, mock_tile_path, mock_exists):
         """
         Scenario: Check if media is tiled with existing tiles
@@ -236,15 +236,15 @@ class TestTilestoreModule:
         When tiled is called
         Then it should return True
         """
-        mock_media_path.return_value = '/media/path'
-        mock_tile_path.return_value = '/tile/path'
+        mock_media_path.return_value = "/media/path"
+        mock_tile_path.return_value = "/tile/path"
         mock_exists.return_value = True
 
-        result = tilestore.tiled('media_id')
+        result = tilestore.tiled("media_id")
         assert result is True
 
-    @patch('os.path.exists')
-    @patch.object(tilestore, 'get_media_path')
+    @patch("os.path.exists")
+    @patch.object(tilestore, "get_media_path")
     def test_tiled_false(self, mock_media_path, mock_exists):
         """
         Scenario: Check if media is tiled without metadata
@@ -253,11 +253,12 @@ class TestTilestoreModule:
         When tiled is called
         Then it should return False
         """
-        mock_media_path.return_value = '/media/path'
+        mock_media_path.return_value = "/media/path"
         mock_exists.return_value = False
 
-        result = tilestore.tiled('media_id')
+        result = tilestore.tiled("media_id")
         assert result is False
+
 
 class TestTilestoreDirectorySize:
     """
@@ -267,9 +268,9 @@ class TestTilestoreDirectorySize:
     the total size of a directory in bytes.
     """
 
-    @patch('os.walk')
-    @patch('os.path.exists', return_value=True)
-    @patch('os.path.getsize')
+    @patch("os.walk")
+    @patch("os.path.exists", return_value=True)
+    @patch("os.path.getsize")
     def test_get_directory_size_empty_directory(self, mock_getsize, mock_exists, mock_walk):
         """
         Scenario: Calculate size of empty directory
@@ -278,14 +279,14 @@ class TestTilestoreDirectorySize:
         When get_directory_size is called
         Then it should return 0
         """
-        mock_walk.return_value = [('/test/path', [], [])]
+        mock_walk.return_value = [("/test/path", [], [])]
 
-        result = tilestore.get_directory_size('/test/path')
+        result = tilestore.get_directory_size("/test/path")
         assert result == 0
 
-    @patch('os.walk')
-    @patch('os.path.exists', return_value=True)
-    @patch('os.path.getsize')
+    @patch("os.walk")
+    @patch("os.path.exists", return_value=True)
+    @patch("os.path.getsize")
     def test_get_directory_size_with_files(self, mock_getsize, mock_exists, mock_walk):
         """
         Scenario: Calculate size of directory with files
@@ -295,15 +296,15 @@ class TestTilestoreDirectorySize:
         Then it should return the sum of all file sizes
         """
         mock_walk.return_value = [
-            ('/test/path', ['subdir'], ['file1.txt', 'file2.txt']),
-            ('/test/path/subdir', [], ['file3.txt'])
+            ("/test/path", ["subdir"], ["file1.txt", "file2.txt"]),
+            ("/test/path/subdir", [], ["file3.txt"]),
         ]
         mock_getsize.side_effect = [100, 200, 300]
 
-        result = tilestore.get_directory_size('/test/path')
+        result = tilestore.get_directory_size("/test/path")
         assert result == 600
 
-    @patch('os.walk')
+    @patch("os.walk")
     def test_get_directory_size_handles_exception(self, mock_walk):
         """
         Scenario: Handle exception during size calculation
@@ -314,8 +315,9 @@ class TestTilestoreDirectorySize:
         """
         mock_walk.side_effect = PermissionError("Access denied")
 
-        result = tilestore.get_directory_size('/test/path')
+        result = tilestore.get_directory_size("/test/path")
         assert result == 0
+
 
 class TestTilestoreStats:
     """
@@ -325,7 +327,7 @@ class TestTilestoreStats:
     statistics about the entire tilestore.
     """
 
-    @patch('os.path.exists', return_value=False)
+    @patch("os.path.exists", return_value=False)
     def test_get_tilestore_stats_nonexistent_directory(self, mock_exists):
         """
         Scenario: Get stats for non-existent tilestore
@@ -336,16 +338,16 @@ class TestTilestoreStats:
         """
         result = tilestore.get_tilestore_stats()
 
-        assert result['total_size'] == 0
-        assert result['file_count'] == 0
-        assert result['media_count'] == 0
-        assert result['total_size_mb'] == 0.0
+        assert result["total_size"] == 0
+        assert result["file_count"] == 0
+        assert result["media_count"] == 0
+        assert result["total_size_mb"] == 0.0
 
-    @patch('os.walk')
-    @patch('os.listdir')
-    @patch('os.path.isdir', return_value=True)
-    @patch('os.path.exists', return_value=True)
-    @patch('os.path.getsize')
+    @patch("os.walk")
+    @patch("os.listdir")
+    @patch("os.path.isdir", return_value=True)
+    @patch("os.path.exists", return_value=True)
+    @patch("os.path.getsize")
     def test_get_tilestore_stats_with_media(self, mock_getsize, mock_exists, mock_isdir, mock_listdir, mock_walk):
         """
         Scenario: Get stats for tilestore with media
@@ -354,25 +356,25 @@ class TestTilestoreStats:
         When get_tilestore_stats is called
         Then it should return correct statistics
         """
-        mock_listdir.return_value = ['media1_hash', 'media2_hash']
+        mock_listdir.return_value = ["media1_hash", "media2_hash"]
         mock_walk.return_value = [
-            (tilestore.tile_dir, ['media1_hash', 'media2_hash'], []),
-            (f'{tilestore.tile_dir}/media1_hash', ['00'], ['metadata']),
-            (f'{tilestore.tile_dir}/media1_hash/00', [], ['00_000000_000000.jpg']),
-            (f'{tilestore.tile_dir}/media2_hash', ['00'], ['metadata']),
-            (f'{tilestore.tile_dir}/media2_hash/00', [], ['00_000000_000000.jpg'])
+            (tilestore.tile_dir, ["media1_hash", "media2_hash"], []),
+            (f"{tilestore.tile_dir}/media1_hash", ["00"], ["metadata"]),
+            (f"{tilestore.tile_dir}/media1_hash/00", [], ["00_000000_000000.jpg"]),
+            (f"{tilestore.tile_dir}/media2_hash", ["00"], ["metadata"]),
+            (f"{tilestore.tile_dir}/media2_hash/00", [], ["00_000000_000000.jpg"]),
         ]
         mock_getsize.return_value = 1024
 
         result = tilestore.get_tilestore_stats()
 
-        assert result['media_count'] == 2
-        assert result['file_count'] == 4
-        assert result['total_size'] == 4096
-        assert result['total_size_mb'] == 4096 / (1024 * 1024)
+        assert result["media_count"] == 2
+        assert result["file_count"] == 4
+        assert result["total_size"] == 4096
+        assert result["total_size_mb"] == 4096 / (1024 * 1024)
 
-    @patch('os.path.exists', return_value=True)
-    @patch('os.listdir')
+    @patch("os.path.exists", return_value=True)
+    @patch("os.listdir")
     def test_get_tilestore_stats_handles_exception(self, mock_listdir, mock_exists):
         """
         Scenario: Handle exception during stats collection
@@ -386,8 +388,9 @@ class TestTilestoreStats:
         result = tilestore.get_tilestore_stats()
 
         # Should return partial stats without crashing
-        assert 'total_size' in result
-        assert 'media_count' in result
+        assert "total_size" in result
+        assert "media_count" in result
+
 
 class TestTilestoreCleanup:
     """
@@ -397,7 +400,7 @@ class TestTilestoreCleanup:
     which remove old tile directories based on access time.
     """
 
-    @patch('os.path.exists', return_value=False)
+    @patch("os.path.exists", return_value=False)
     def test_cleanup_old_tiles_nonexistent_directory(self, mock_exists):
         """
         Scenario: Cleanup with non-existent tilestore
@@ -408,20 +411,21 @@ class TestTilestoreCleanup:
         """
         result = tilestore.cleanup_old_tiles(max_age_days=3)
 
-        assert result['deleted_media_count'] == 0
-        assert result['deleted_size_mb'] == 0.0
-        assert result['kept_media_count'] == 0
-        assert result['errors'] == []
+        assert result["deleted_media_count"] == 0
+        assert result["deleted_size_mb"] == 0.0
+        assert result["kept_media_count"] == 0
+        assert result["errors"] == []
 
-    @patch('shutil.rmtree')
-    @patch('os.stat')
-    @patch('os.walk')
-    @patch('os.listdir')
-    @patch('os.path.isdir', return_value=True)
-    @patch('os.path.exists', return_value=True)
-    @patch('time.time')
-    def test_cleanup_old_tiles_deletes_old_media(self, mock_time, mock_exists, mock_isdir,
-                                                  mock_listdir, mock_walk, mock_stat, mock_rmtree):
+    @patch("shutil.rmtree")
+    @patch("os.stat")
+    @patch("os.walk")
+    @patch("os.listdir")
+    @patch("os.path.isdir", return_value=True)
+    @patch("os.path.exists", return_value=True)
+    @patch("time.time")
+    def test_cleanup_old_tiles_deletes_old_media(
+        self, mock_time, mock_exists, mock_isdir, mock_listdir, mock_walk, mock_stat, mock_rmtree
+    ):
         """
         Scenario: Cleanup deletes old media directories
 
@@ -431,7 +435,7 @@ class TestTilestoreCleanup:
         """
         # Current time is 10 days from epoch
         mock_time.return_value = 10 * 24 * 60 * 60
-        mock_listdir.return_value = ['old_media_hash']
+        mock_listdir.return_value = ["old_media_hash"]
 
         # Media was accessed 5 days ago (older than 3 day threshold)
         stat_result = Mock()
@@ -439,24 +443,23 @@ class TestTilestoreCleanup:
         stat_result.st_mtime = 5 * 24 * 60 * 60
         mock_stat.return_value = stat_result
 
-        mock_walk.return_value = [
-            (f'{tilestore.tile_dir}/old_media_hash', [], ['metadata', 'tile.jpg'])
-        ]
+        mock_walk.return_value = [(f"{tilestore.tile_dir}/old_media_hash", [], ["metadata", "tile.jpg"])]
 
-        with patch.object(tilestore, 'get_directory_size', return_value=1024 * 1024):
+        with patch.object(tilestore, "get_directory_size", return_value=1024 * 1024):
             result = tilestore.cleanup_old_tiles(max_age_days=3, dry_run=False)
 
-        assert result['deleted_media_count'] == 1
+        assert result["deleted_media_count"] == 1
         mock_rmtree.assert_called_once()
 
-    @patch('os.stat')
-    @patch('os.walk')
-    @patch('os.listdir')
-    @patch('os.path.isdir', return_value=True)
-    @patch('os.path.exists', return_value=True)
-    @patch('time.time')
-    def test_cleanup_old_tiles_keeps_recent_media(self, mock_time, mock_exists, mock_isdir,
-                                                   mock_listdir, mock_walk, mock_stat):
+    @patch("os.stat")
+    @patch("os.walk")
+    @patch("os.listdir")
+    @patch("os.path.isdir", return_value=True)
+    @patch("os.path.exists", return_value=True)
+    @patch("time.time")
+    def test_cleanup_old_tiles_keeps_recent_media(
+        self, mock_time, mock_exists, mock_isdir, mock_listdir, mock_walk, mock_stat
+    ):
         """
         Scenario: Cleanup keeps recent media directories
 
@@ -466,7 +469,7 @@ class TestTilestoreCleanup:
         """
         # Current time is 10 days from epoch
         mock_time.return_value = 10 * 24 * 60 * 60
-        mock_listdir.return_value = ['recent_media_hash']
+        mock_listdir.return_value = ["recent_media_hash"]
 
         # Media was accessed 1 day ago (newer than 3 day threshold)
         stat_result = Mock()
@@ -474,23 +477,20 @@ class TestTilestoreCleanup:
         stat_result.st_mtime = 9 * 24 * 60 * 60
         mock_stat.return_value = stat_result
 
-        mock_walk.return_value = [
-            (f'{tilestore.tile_dir}/recent_media_hash', [], ['metadata'])
-        ]
+        mock_walk.return_value = [(f"{tilestore.tile_dir}/recent_media_hash", [], ["metadata"])]
 
         result = tilestore.cleanup_old_tiles(max_age_days=3)
 
-        assert result['deleted_media_count'] == 0
-        assert result['kept_media_count'] == 1
+        assert result["deleted_media_count"] == 0
+        assert result["kept_media_count"] == 1
 
-    @patch('os.stat')
-    @patch('os.walk')
-    @patch('os.listdir')
-    @patch('os.path.isdir', return_value=True)
-    @patch('os.path.exists', return_value=True)
-    @patch('time.time')
-    def test_cleanup_old_tiles_dry_run(self, mock_time, mock_exists, mock_isdir,
-                                        mock_listdir, mock_walk, mock_stat):
+    @patch("os.stat")
+    @patch("os.walk")
+    @patch("os.listdir")
+    @patch("os.path.isdir", return_value=True)
+    @patch("os.path.exists", return_value=True)
+    @patch("time.time")
+    def test_cleanup_old_tiles_dry_run(self, mock_time, mock_exists, mock_isdir, mock_listdir, mock_walk, mock_stat):
         """
         Scenario: Cleanup in dry-run mode
 
@@ -500,27 +500,25 @@ class TestTilestoreCleanup:
         """
         # Current time is 10 days from epoch
         mock_time.return_value = 10 * 24 * 60 * 60
-        mock_listdir.return_value = ['old_media_hash']
+        mock_listdir.return_value = ["old_media_hash"]
 
         stat_result = Mock()
         stat_result.st_atime = 5 * 24 * 60 * 60
         stat_result.st_mtime = 5 * 24 * 60 * 60
         mock_stat.return_value = stat_result
 
-        mock_walk.return_value = [
-            (f'{tilestore.tile_dir}/old_media_hash', [], ['metadata'])
-        ]
+        mock_walk.return_value = [(f"{tilestore.tile_dir}/old_media_hash", [], ["metadata"])]
 
-        with patch.object(tilestore, 'get_directory_size', return_value=1024):
-            with patch('shutil.rmtree') as mock_rmtree:
+        with patch.object(tilestore, "get_directory_size", return_value=1024):
+            with patch("shutil.rmtree") as mock_rmtree:
                 result = tilestore.cleanup_old_tiles(max_age_days=3, dry_run=True)
 
-        assert result['deleted_media_count'] == 1
+        assert result["deleted_media_count"] == 1
         mock_rmtree.assert_not_called()
 
-    @patch('os.listdir')
-    @patch('os.path.isdir', return_value=True)
-    @patch('os.path.exists', return_value=True)
+    @patch("os.listdir")
+    @patch("os.path.isdir", return_value=True)
+    @patch("os.path.exists", return_value=True)
     def test_cleanup_old_tiles_handles_errors(self, mock_exists, mock_isdir, mock_listdir):
         """
         Scenario: Cleanup handles errors gracefully
@@ -529,16 +527,16 @@ class TestTilestoreCleanup:
         When cleanup_old_tiles is called
         Then errors should be collected and reported
         """
-        mock_listdir.return_value = ['media_hash']
+        mock_listdir.return_value = ["media_hash"]
 
-        with patch('os.walk', side_effect=PermissionError("Access denied")):
+        with patch("os.walk", side_effect=PermissionError("Access denied")):
             result = tilestore.cleanup_old_tiles(max_age_days=3)
 
         # Should not crash, errors should be collected
-        assert 'errors' in result
+        assert "errors" in result
 
-    @patch('pyzui.tilesystem.tilestore.tilestore.get_tilestore_stats')
-    @patch('pyzui.tilesystem.tilestore.tilestore.cleanup_old_tiles')
+    @patch("pyzui.tilesystem.tilestore.tilestore.get_tilestore_stats")
+    @patch("pyzui.tilesystem.tilestore.tilestore.cleanup_old_tiles")
     def test_auto_cleanup_disabled(self, mock_cleanup, mock_stats):
         """
         Scenario: Auto cleanup when disabled
@@ -552,8 +550,8 @@ class TestTilestoreCleanup:
         assert result is None
         mock_cleanup.assert_not_called()
 
-    @patch('pyzui.tilesystem.tilestore.tilestore.get_tilestore_stats')
-    @patch('pyzui.tilesystem.tilestore.tilestore.cleanup_old_tiles')
+    @patch("pyzui.tilesystem.tilestore.tilestore.get_tilestore_stats")
+    @patch("pyzui.tilesystem.tilestore.tilestore.cleanup_old_tiles")
     def test_auto_cleanup_enabled(self, mock_cleanup, mock_stats):
         """
         Scenario: Auto cleanup when enabled
@@ -563,16 +561,16 @@ class TestTilestoreCleanup:
         Then cleanup should be performed and stats logged
         """
         mock_stats.return_value = {
-            'media_count': 5,
-            'file_count': 100,
-            'total_size_mb': 50.0,
-            'total_size': 50 * 1024 * 1024
+            "media_count": 5,
+            "file_count": 100,
+            "total_size_mb": 50.0,
+            "total_size": 50 * 1024 * 1024,
         }
         mock_cleanup.return_value = {
-            'deleted_media_count': 2,
-            'deleted_size_mb': 20.0,
-            'kept_media_count': 3,
-            'errors': []
+            "deleted_media_count": 2,
+            "deleted_size_mb": 20.0,
+            "kept_media_count": 3,
+            "errors": [],
         }
 
         result = tilestore.auto_cleanup(max_age_days=5, enable=True)
@@ -582,8 +580,8 @@ class TestTilestoreCleanup:
         # get_tilestore_stats called twice (before and after cleanup)
         assert mock_stats.call_count == 2
 
-    @patch('pyzui.tilesystem.tilestore.tilestore.get_tilestore_stats')
-    @patch('pyzui.tilesystem.tilestore.tilestore.cleanup_old_tiles')
+    @patch("pyzui.tilesystem.tilestore.tilestore.get_tilestore_stats")
+    @patch("pyzui.tilesystem.tilestore.tilestore.cleanup_old_tiles")
     def test_auto_cleanup_custom_age(self, mock_cleanup, mock_stats):
         """
         Scenario: Auto cleanup with custom max age
@@ -592,12 +590,18 @@ class TestTilestoreCleanup:
         When auto_cleanup is called
         Then cleanup should use the specified age
         """
-        mock_stats.return_value = {'media_count': 0, 'file_count': 0, 'total_size_mb': 0, 'total_size': 0}
-        mock_cleanup.return_value = {'deleted_media_count': 0, 'deleted_size_mb': 0, 'kept_media_count': 0, 'errors': []}
+        mock_stats.return_value = {"media_count": 0, "file_count": 0, "total_size_mb": 0, "total_size": 0}
+        mock_cleanup.return_value = {
+            "deleted_media_count": 0,
+            "deleted_size_mb": 0,
+            "kept_media_count": 0,
+            "errors": [],
+        }
 
         tilestore.auto_cleanup(max_age_days=7, enable=True)
 
         mock_cleanup.assert_called_once_with(max_age_days=7, dry_run=False)
+
 
 class TestTilestoreMetadataTypes:
     """
@@ -606,8 +610,8 @@ class TestTilestoreMetadataTypes:
     This test suite validates the type conversion in load_metadata.
     """
 
-    @patch('builtins.open', new_callable=mock_open, read_data="count\t42\tint\n")
-    @patch('pyzui.tilesystem.tilestore.tilestore.get_media_path', return_value='/path/to/media')
+    @patch("builtins.open", new_callable=mock_open, read_data="count\t42\tint\n")
+    @patch("pyzui.tilesystem.tilestore.tilestore.get_media_path", return_value="/path/to/media")
     def test_load_metadata_parses_int(self, mock_media_path, mock_file):
         """
         Scenario: Parse integer metadata value
@@ -618,22 +622,23 @@ class TestTilestoreMetadataTypes:
         """
         # Import the actual tilestore module to reset its internal variable
         from pyzui.tilesystem.tilestore import tilestore as ts_module
+
         # Reset metadata cache
         ts_module._TestTilestoreMetadataTypes__metadata = {}
         # Access via _module__varname doesn't work for module-level - use direct attribute
-        if hasattr(ts_module, '_TestTilestoreMetadataTypes__metadata'):
-            delattr(ts_module, '_TestTilestoreMetadataTypes__metadata')
+        if hasattr(ts_module, "_TestTilestoreMetadataTypes__metadata"):
+            delattr(ts_module, "_TestTilestoreMetadataTypes__metadata")
 
-        result = tilestore.load_metadata('test_int_media')
+        result = tilestore.load_metadata("test_int_media")
         assert result is True
 
         # Verify parsed value via get_metadata
-        value = tilestore.get_metadata('test_int_media', 'count')
+        value = tilestore.get_metadata("test_int_media", "count")
         assert value == 42
         assert isinstance(value, int)
 
-    @patch('builtins.open', new_callable=mock_open, read_data="ratio\t3.14\tfloat\n")
-    @patch('pyzui.tilesystem.tilestore.tilestore.get_media_path', return_value='/path/to/media')
+    @patch("builtins.open", new_callable=mock_open, read_data="ratio\t3.14\tfloat\n")
+    @patch("pyzui.tilesystem.tilestore.tilestore.get_media_path", return_value="/path/to/media")
     def test_load_metadata_parses_float(self, mock_media_path, mock_file):
         """
         Scenario: Parse float metadata value
@@ -642,15 +647,15 @@ class TestTilestoreMetadataTypes:
         When load_metadata is called
         Then the value should be parsed as float
         """
-        result = tilestore.load_metadata('test_float_media')
+        result = tilestore.load_metadata("test_float_media")
         assert result is True
 
-        value = tilestore.get_metadata('test_float_media', 'ratio')
+        value = tilestore.get_metadata("test_float_media", "ratio")
         assert value == 3.14
         assert isinstance(value, float)
 
-    @patch('builtins.open', new_callable=mock_open, read_data="large\t9999999999\tlong\n")
-    @patch('pyzui.tilesystem.tilestore.tilestore.get_media_path', return_value='/path/to/media')
+    @patch("builtins.open", new_callable=mock_open, read_data="large\t9999999999\tlong\n")
+    @patch("pyzui.tilesystem.tilestore.tilestore.get_media_path", return_value="/path/to/media")
     def test_load_metadata_parses_long(self, mock_media_path, mock_file):
         """
         Scenario: Parse long metadata value
@@ -659,15 +664,15 @@ class TestTilestoreMetadataTypes:
         When load_metadata is called
         Then the value should be parsed as int (Python 3)
         """
-        result = tilestore.load_metadata('test_long_media')
+        result = tilestore.load_metadata("test_long_media")
         assert result is True
 
-        value = tilestore.get_metadata('test_long_media', 'large')
+        value = tilestore.get_metadata("test_long_media", "large")
         assert value == 9999999999
         assert isinstance(value, int)
 
-    @patch('builtins.open', new_callable=mock_open, read_data="name\ttest\tstr\n")
-    @patch('pyzui.tilesystem.tilestore.tilestore.get_media_path', return_value='/path/to/media')
+    @patch("builtins.open", new_callable=mock_open, read_data="name\ttest\tstr\n")
+    @patch("pyzui.tilesystem.tilestore.tilestore.get_media_path", return_value="/path/to/media")
     def test_load_metadata_keeps_string(self, mock_media_path, mock_file):
         """
         Scenario: Keep string metadata value
@@ -676,12 +681,13 @@ class TestTilestoreMetadataTypes:
         When load_metadata is called
         Then the value should remain as string
         """
-        result = tilestore.load_metadata('test_str_media')
+        result = tilestore.load_metadata("test_str_media")
         assert result is True
 
-        value = tilestore.get_metadata('test_str_media', 'name')
-        assert value == 'test'
+        value = tilestore.get_metadata("test_str_media", "name")
+        assert value == "test"
         assert isinstance(value, str)
+
 
 class TestTilestorePathFormatting:
     """
@@ -698,12 +704,12 @@ class TestTilestorePathFormatting:
         When get_tile_path is called
         Then coordinates should be properly zero-padded
         """
-        tile_id = ('media_id', 15, 999999, 123456)
-        path = tilestore.get_tile_path(tile_id, filext='jpg')
+        tile_id = ("media_id", 15, 999999, 123456)
+        path = tilestore.get_tile_path(tile_id, filext="jpg")
 
-        assert '15' in path  # tilelevel with 2 digits
-        assert '999999' in path  # row with 6 digits
-        assert '123456' in path  # col with 6 digits
+        assert "15" in path  # tilelevel with 2 digits
+        assert "999999" in path  # row with 6 digits
+        assert "123456" in path  # col with 6 digits
 
     def test_get_tile_path_zero_coordinates(self):
         """
@@ -713,8 +719,8 @@ class TestTilestorePathFormatting:
         When get_tile_path is called
         Then coordinates should be properly formatted
         """
-        tile_id = ('media_id', 0, 0, 0)
-        path = tilestore.get_tile_path(tile_id, filext='jpg')
+        tile_id = ("media_id", 0, 0, 0)
+        path = tilestore.get_tile_path(tile_id, filext="jpg")
 
-        assert '00' in path  # tilelevel
-        assert '000000' in path  # row and col
+        assert "00" in path  # tilelevel
+        assert "000000" in path  # row and col

@@ -14,13 +14,18 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-"""SVG objects to be displayed in the ZUI."""
+"""``SVG`` objects to be displayed in the ZUI."""
 
-from typing import Tuple, Any, Optional
+from pathlib import Path
+from typing import Any
 
 from PySide6 import QtCore, QtSvg
 
-from .mediaobject import MediaObject, LoadError, RenderMode
+from pyzui.logger import get_logger
+
+from .mediaobject import LoadError, MediaObject
+from .mediaobjectsutils.svg.svgcache.svgcache import get_svg_cache
+
 
 class SVGMediaObject(MediaObject):
     """
@@ -35,12 +40,40 @@ class SVGMediaObject(MediaObject):
     SVGMediaObject objects are used to represent SVG images that can be
     rendered in the ZUI.
     """
+
+    def __get_svg_load_path(self, media_id: str) -> str:
+        """
+        Get the file path to load SVG from, handling cache hashes.
+
+        Args:
+            media_id: Either a file path or cache hash (starting with ``'svg_'``)
+
+        Returns:
+            File path to load
+        """
+        # Check if media_id is a cache hash (starts with 'svg_')
+        if media_id.startswith("svg_"):
+            # It's a cache hash, get path from cache
+            svg_cache = get_svg_cache()
+            cache_path = svg_cache.get_cache_path(media_id)
+            if not cache_path.exists():
+                # Try to get content from cache (might have been stored elsewhere)
+                content = svg_cache.get_svg_content(media_id)
+                if content is None:
+                    raise LoadError(f"SVG cache hash not found: {media_id}")
+                # Re-store in cache (in case cache was cleaned up)
+                svg_cache.store_svg(content)
+            return str(cache_path)
+        else:
+            # It's a file path
+            return media_id
+
     def __init__(self, media_id: str, scene: Any) -> None:
         """
         Constructor :
             SVGMediaObject(media_id, scene)
         Parameters :
-            media_id : str
+            media_id : str (can be file path or cache hash starting with ``'svg_'``)
             scene : Scene
 
         SVGMediaObject(media_id, scene) --> None
@@ -62,10 +95,13 @@ class SVGMediaObject(MediaObject):
         # QSvgRenderer handles SVG parsing, animation, and rendering onto QPainter
         self.__renderer: QtSvg.QSvgRenderer = QtSvg.QSvgRenderer()
 
-        # Attempt to load the SVG file from the path stored in self._media_id
+        # Determine if media_id is a cache hash or file path
+        load_path = self.__get_svg_load_path(media_id)
+
+        # Attempt to load the SVG file
         # load() returns True on success, False if the file cannot be parsed
-        if not self.__renderer.load(self._media_id):
-            raise LoadError("unable to parse SVG file")
+        if not self.__renderer.load(load_path):
+            raise LoadError(f"unable to parse SVG file: {media_id}")
 
         # Get the default (intrinsic) size of the SVG image as a QSize object
         # defaultSize() returns the size specified in the SVG's width/height attributes
@@ -83,14 +119,35 @@ class SVGMediaObject(MediaObject):
         # These start as None and store computed values when first accessed
 
         # Stores the scale value (2^(scene.zoomlevel + object.zoomlevel))
-        self.__cached_scale: Optional[float] = None
+        self.__cached_scale: float | None = None
 
         # Stores the calculated (width, height) tuple for this SVG at current scale
-        self.__cached_onscreen_size: Optional[Tuple[float, float]] = None
+        self.__cached_onscreen_size: tuple[float, float] | None = None
+
+        # Track modification state and cache SVG content
+        self.__logger = get_logger("SVGMediaObject")
+
+        # Track if SVG has been modified (picker, clipboard, or svg_*_utils)
+        self.__is_modified: bool = False
+
+        # Cache SVG content in memory for performance
+        self.__cached_svg_content: str | None = None
+
+        # Store original file path for file-based SVGs
+        self.__original_file_path: str | None = None
+        if not media_id.startswith("svg_"):
+            # It's a file path, not cache hash
+            self.__original_file_path = media_id
+        else:
+            # Cache hash - mark as modified (from picker/clipboard)
+            self.__is_modified = True
 
     # Class variable: indicates this media object supports transparency
     # SVG images can have transparent backgrounds, so they cannot hide objects behind them
     transparent: bool = True
+
+    # Maximum SVG size for embedding warning (1MB)
+    MAX_EMBEDDED_SVG_SIZE_BYTES: int = 1 * 1024 * 1024
 
     def render(self, painter: Any, mode: int) -> None:
         """
@@ -103,35 +160,51 @@ class SVGMediaObject(MediaObject):
         SVGMediaObject.render(painter, mode) --> None
 
         Render the SVG image using the given painter and render mode.
+
+        Note: Size visibility is checked by the scene via is_size_visible().
         """
-        # Visibility check: only render if the SVG is appropriately sized for the viewport
-        # self._scene.viewport_size is a tuple (viewport_width, viewport_height)
-        # Checks: image not too small (>viewport_min/44) AND not too large (<viewport_max/1.3) AND not invisible
-        if min(self.onscreen_size) > int((min(self._scene.viewport_size))/44) and \
-        max(self.onscreen_size) < int((max(self._scene.viewport_size))/1.3) and mode \
-        != RenderMode.Invisible:
-            ## don't bother rendering if the string is too
-            ## small to be seen, or invisible mode is set
+        # Get top-left corner position of the SVG object on screen
+        # self.topleft is a property that returns tuple (x, y) in screen coordinates
+        x: float
+        y: float
+        x, y = self.topleft
 
-            # Get top-left corner position of the SVG object on screen
-            # self.topleft is a property that returns tuple (x, y) in screen coordinates
-            x: float
-            y: float
-            x, y = self.topleft
+        # Get the on-screen dimensions of the SVG at current scale
+        # onscreen_size returns (width, height) scaled by the current zoom level
+        w: float
+        h: float
+        w, h = self.onscreen_size
 
-            # Get the on-screen dimensions of the SVG at current scale
-            # onscreen_size returns (width, height) scaled by the current zoom level
-            w: float
-            h: float
-            w, h = self.onscreen_size
+        # Render the SVG into a floating-point rectangle on the painter
+        # QtCore.QRectF(x, y, width, height) defines the target rendering area
+        # QSvgRenderer.render() scales the SVG vector graphics to fit the rectangle
+        self.__renderer.render(painter, QtCore.QRectF(x, y, w, h))
 
-            # Render the SVG into a floating-point rectangle on the painter
-            # QtCore.QRectF(x, y, width, height) defines the target rendering area
-            # QSvgRenderer.render() scales the SVG vector graphics to fit the rectangle
-            self.__renderer.render(painter, QtCore.QRectF(x, y, w, h))
+    def is_size_visible(self, mode: int) -> bool:
+        """
+        SVG-specific size visibility check.
+
+        Returns False if SVG is too small or too large to be visible,
+        otherwise returns super().is_size_visible(mode).
+        """
+        # First check base class (handles Invisible mode)
+        if not super().is_size_visible(mode):
+            return False
+
+        # SVG-specific size checks (same thresholds as current render())
+        w, h = self.onscreen_size
+        viewport_w, viewport_h = self._scene.viewport_size
+
+        # Check if too small: min dimension > viewport_min / 55
+        not_too_small = min(w, h) > int((min(viewport_w, viewport_h)) / 55)
+
+        # Check if too large: max dimension < viewport_max / 0.5
+        not_too_large = max(w, h) < int((max(viewport_w, viewport_h)) / 0.5)
+
+        return not_too_small and not_too_large
 
     @property
-    def onscreen_size(self) -> Tuple[float, float]:
+    def onscreen_size(self) -> tuple[float, float]:
         """
         Property :
             SVGMediaObject.onscreen_size
@@ -163,3 +236,102 @@ class SVGMediaObject(MediaObject):
         self.__cached_scale = current_scale
         self.__cached_onscreen_size = (w, h)
         return (w, h)
+
+    @property
+    def is_modified(self) -> bool:
+        """Check if SVG has been modified."""
+        return self.__is_modified
+
+    def mark_as_modified(self) -> None:
+        """Mark SVG as modified (e.g., after svg_*_utils modification)."""
+        self.__is_modified = True
+        # Clear cached content since it will change
+        self.__cached_svg_content = None
+
+    @property
+    def original_file_path(self) -> str | None:
+        """Get original file path if SVG was loaded from file."""
+        return self.__original_file_path
+
+    def get_svg_content(self) -> str | None:
+        """
+        Get current SVG content with caching.
+        Returns None if content cannot be retrieved.
+        """
+        # Return cached content if available
+        if self.__cached_svg_content is not None:
+            return self.__cached_svg_content
+
+        # Get content from cache or file
+        if self._media_id.startswith("svg_"):
+            # Cache hash - get from SVG cache
+            svg_cache = get_svg_cache()
+            content = svg_cache.get_svg_content(self._media_id)
+        else:
+            # File path - read from file
+            try:
+                content = Path(self._media_id).read_text(encoding="utf-8")
+            except Exception as e:
+                self.__logger.error(f"Failed to read SVG file {self._media_id}: {e}")
+                content = None
+
+        # Cache the content
+        if content is not None:
+            self.__cached_svg_content = content
+
+        return content
+
+    def set_svg_content(self, content: str) -> None:
+        """Set SVG content (for embedded SVGs on load)."""
+        self.__cached_svg_content = content
+        self.__is_modified = True
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Method :
+            SVGMediaObject.to_dict()
+        Parameters :
+            None
+
+        SVGMediaObject.to_dict() --> Dict[str, Any]
+
+        Serialize SVGMediaObject with SVG-specific state.
+        """
+        data = super().to_dict()
+        data.update(
+            {
+                "width": self.__width,
+                "height": self.__height,
+                "transparent": self.transparent,
+                "is_modified": self.__is_modified,
+                "original_file_path": self.__original_file_path if self.__original_file_path else "",
+            }
+        )
+        return data
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any], scene: Any) -> "SVGMediaObject":
+        """
+        Method :
+            SVGMediaObject.from_dict(data, scene)
+        Parameters :
+            data : Dict[str, Any]
+            scene : Any
+
+        SVGMediaObject.from_dict(data, scene) --> SVGMediaObject
+
+        Create SVGMediaObject from serialized data.
+        """
+        obj = cls(data["media_id"], scene)
+        obj._x, obj._y, obj._z = data["position"]
+        obj.vx, obj.vy, obj.vz = data["velocity"]
+
+        # Restore modification state if present
+        if "is_modified" in data:
+            obj.__is_modified = data["is_modified"]
+
+        # Restore original file path if present
+        if data.get("original_file_path"):
+            obj.__original_file_path = data["original_file_path"]
+
+        return obj

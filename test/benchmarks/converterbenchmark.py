@@ -32,26 +32,25 @@ Example:
 """
 
 import os
+import shutil
 import sys
 import tempfile
 import time
-import shutil
-from typing import Tuple
 
-sys.path.append(os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtWidgets
 
+import pyzui.objects.scene.scene as Scene
 import pyzui.tilesystem.tilemanager as TileManager
 import pyzui.tilesystem.tilestore as TileStore
 from pyzui.converters.vipsconverter import VipsConverter
-from pyzui.tilesystem.tiler.ppm import PPMTiler, read_ppm_header
-from pyzui.objects.scene.qzui import QZUI
-import pyzui.objects.scene.scene as Scene
 from pyzui.objects.mediaobjects.tiledmediaobject import TiledMediaObject
+from pyzui.objects.scene.qzui import QZUI
+from pyzui.tilesystem.tiler.ppm import PPMTiler, read_ppm_header
 
-def mem(size: str = 'rss') -> int:
+
+def mem(size: str = "rss") -> int:
     """
     Function :
         mem(size)
@@ -71,8 +70,8 @@ def mem(size: str = 'rss') -> int:
 
     Adapted from <http://snipplr.com/view/6460/> by Florian Leitner.
     """
-    return int(os.popen("ps -p %d -o %s | tail -1" %
-        (os.getpid(), size)).read())
+    return int(os.popen("ps -p %d -o %s | tail -1" % (os.getpid(), size)).read())
+
 
 def benchmark(filename: str, ppmfile: str) -> None:
     """
@@ -113,11 +112,10 @@ def benchmark(filename: str, ppmfile: str) -> None:
     del converter
 
     ## Metadata extraction
-    f = open(ppmfile, 'rb')
+    f = open(ppmfile, "rb")
     width, height = read_ppm_header(f)
     f.close()
-    print("Dimensions: %dx%d, %.2f megapixels" %
-          (width, height, width * height * 1e-6))
+    print("Dimensions: %dx%d, %.2f megapixels" % (width, height, width * height * 1e-6))
     del f, width, height
 
     ## Tiling
@@ -137,8 +135,7 @@ def benchmark(filename: str, ppmfile: str) -> None:
     ## is running and maintain a max value
     end_mem = mem()
 
-    print("Done: took %.2fs consuming %.2fMB RAM" %
-          ((end_time - start_time), (end_mem - base_mem) * 1e-3))
+    print("Done: took %.2fs consuming %.2fMB RAM" % ((end_time - start_time), (end_mem - base_mem) * 1e-3))
     del tiler
 
     ## Zooming benchmark
@@ -166,16 +163,15 @@ def benchmark(filename: str, ppmfile: str) -> None:
     print("Zooming (cold)...")
     sys.stdout.flush()
 
-    for i in range(num_frames):
+    for _i in range(num_frames):
         qzui.repaint()
-        scene.centre = (viewport_w/2, viewport_h/2)
-        scene.zoom(zoom_amount/num_frames)
+        scene.centre = (viewport_w / 2, viewport_h / 2)
+        scene.zoom(zoom_amount / num_frames)
 
     end_time = time.time()
     elapsed = end_time - start_time
     fps = num_frames / elapsed
-    print("Done: %d frames took %.2fs, mean framerate %.2f FPS" %
-          (num_frames, elapsed, fps))
+    print("Done: %d frames took %.2fs, mean framerate %.2f FPS" % (num_frames, elapsed, fps))
 
     ## Warm cache zoom test
     scene.zoom(-zoom_amount)
@@ -184,16 +180,16 @@ def benchmark(filename: str, ppmfile: str) -> None:
     print("Zooming (warm)...")
     sys.stdout.flush()
 
-    for i in range(num_frames):
+    for _i in range(num_frames):
         qzui.repaint()
-        scene.centre = (viewport_w/2, viewport_h/2)
-        scene.zoom(zoom_amount/num_frames)
+        scene.centre = (viewport_w / 2, viewport_h / 2)
+        scene.zoom(zoom_amount / num_frames)
 
     end_time = time.time()
     elapsed = end_time - start_time
     fps = num_frames / elapsed
-    print("Done: %d frames took %.2fs, mean framerate %.2f FPS" %
-          (num_frames, elapsed, fps))
+    print("Done: %d frames took %.2fs, mean framerate %.2f FPS" % (num_frames, elapsed, fps))
+
 
 def main() -> None:
     """
@@ -218,7 +214,7 @@ def main() -> None:
     """
     TileManager.init()
     TileStore.tile_dir = tempfile.mkdtemp()
-    app = QtWidgets.QApplication(sys.argv)
+    QtWidgets.QApplication(sys.argv)
 
     if len(sys.argv) < 2:
         print("Error: No image file specified")
@@ -231,7 +227,7 @@ def main() -> None:
         print("Error: File not found: %s" % filename)
         sys.exit(1)
 
-    ppmfile = tempfile.mkstemp('.ppm')[1]
+    ppmfile = tempfile.mkstemp(".ppm")[1]
 
     try:
         benchmark(filename, ppmfile)
@@ -240,5 +236,6 @@ def main() -> None:
         shutil.rmtree(TileStore.tile_dir, ignore_errors=True)
         os.unlink(ppmfile)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

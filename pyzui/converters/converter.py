@@ -17,7 +17,9 @@
 """A threaded media converter (abstract base class)."""
 
 from threading import Thread
+
 from ..logger import get_logger
+
 
 class Converter(Thread):
     """
@@ -37,6 +39,7 @@ class Converter(Thread):
     Where appropriate, the output format will be determined from the file
     extension of `outfile`.
     """
+
     def __init__(self, infile: str, outfile: str) -> None:
         Thread.__init__(self)
 
@@ -45,7 +48,7 @@ class Converter(Thread):
 
         self._progress = 0.0
 
-        self._logger = get_logger(f'Converter.{infile}')
+        self._logger = get_logger(f"Converter.{infile}")
 
         self.error = None
 
@@ -89,7 +92,7 @@ class Converter(Thread):
 
         Return a human-readable string representation of the Converter.
         """
-        return "Converter(%s, %s)" % (self._infile, self._outfile)
+        return f"Converter({self._infile}, {self._outfile})"
 
     def __repr__(self) -> str:
         """
@@ -102,11 +105,4 @@ class Converter(Thread):
 
         Return a formal string representation of the Converter.
         """
-        return "Converter(%s, %s)" % (repr(self._infile), repr(self._outfile))
-    
-    
-    
-    
-    
-    
-    
+        return f"Converter({self._infile!r}, {self._outfile!r})"

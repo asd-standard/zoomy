@@ -13,10 +13,13 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
+from unittest.mock import MagicMock, Mock, call, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock, call
+
 from pyzui.tilesystem import tilemanager
 from pyzui.tilesystem.tile import Tile
+
 
 class TestTileManager:
     """
@@ -27,10 +30,10 @@ class TestTileManager:
     available. It provides robust tile retrieval with automatic fallback to tile synthesis.
     """
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_init_default_parameters(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Initialize tile manager with default parameters
@@ -60,10 +63,10 @@ class TestTileManager:
         # Verify auto cleanup was NOT called synchronously (registered for shutdown)
         mock_tilestore.auto_cleanup.assert_not_called()
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_init_auto_cleanup_disabled(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Initialize tile manager with auto cleanup disabled
@@ -81,7 +84,7 @@ class TestTileManager:
         assert mock_cache.call_count == 2
         assert mock_cache.call_args_list[0] == call(int(0.8 * 512))
         assert mock_cache.call_args_list[1] == call(int(0.2 * 512))
-        
+
         # Verify auto cleanup was NOT called
         mock_tilestore.auto_cleanup.assert_not_called()
 
@@ -94,7 +97,7 @@ class TestTileManager:
         Then it should exist in the module
         And it should inherit from Exception
         """
-        assert hasattr(tilemanager, 'MediaNotTiled')
+        assert hasattr(tilemanager, "MediaNotTiled")
         assert issubclass(tilemanager.MediaNotTiled, Exception)
 
     def test_tile_not_loaded_exception_exists(self):
@@ -106,7 +109,7 @@ class TestTileManager:
         Then it should exist in the module
         And it should inherit from Exception
         """
-        assert hasattr(tilemanager, 'TileNotLoaded')
+        assert hasattr(tilemanager, "TileNotLoaded")
         assert issubclass(tilemanager.TileNotLoaded, Exception)
 
     def test_tile_not_available_exception_exists(self):
@@ -118,13 +121,13 @@ class TestTileManager:
         Then it should exist in the module
         And it should inherit from Exception
         """
-        assert hasattr(tilemanager, 'TileNotAvailable')
+        assert hasattr(tilemanager, "TileNotAvailable")
         assert issubclass(tilemanager.TileNotAvailable, Exception)
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_load_tile_routes_to_static_provider(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Route tile request to static provider
@@ -139,15 +142,15 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        tile_id = ('static_media.jpg', 0, 0, 0)
+        tile_id = ("static_media.jpg", 0, 0, 0)
         tilemanager.load_tile(tile_id)
 
         mock_static_instance.request.assert_called_once_with(tile_id)
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_load_tile_routes_to_dynamic_provider(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Route tile request to dynamic provider
@@ -162,16 +165,18 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        tile_id = ('dynamic:fern', 2, 3, 4)
+        tile_id = ("dynamic:fern", 2, 3, 4)
         tilemanager.load_tile(tile_id)
 
         mock_fern_instance.request.assert_called_once_with(tile_id)
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
-    def test_get_tile_raises_tile_not_available_for_negative_tilelevel(self, mock_fern, mock_static, mock_cache, mock_tilestore):
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
+    def test_get_tile_raises_tile_not_available_for_negative_tilelevel(
+        self, mock_fern, mock_static, mock_cache, mock_tilestore
+    ):
         """
         Scenario: Handle request for negative tile level
 
@@ -184,14 +189,14 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        tile_id = ('media.jpg', -1, 0, 0)
+        tile_id = ("media.jpg", -1, 0, 0)
         with pytest.raises(tilemanager.TileNotAvailable):
             tilemanager.get_tile(tile_id)
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_get_tile_returns_tile_from_cache(self, mock_fern, mock_static, mock_cache_class, mock_tilestore):
         """
         Scenario: Retrieve tile from cache
@@ -205,7 +210,7 @@ class TestTileManager:
 
         # Create mock cache with a tile
         mock_cache = {}
-        tile_id = ('media.jpg', 0, 0, 0)
+        tile_id = ("media.jpg", 0, 0, 0)
         mock_tile = Mock(spec=Tile)
         mock_cache[tile_id] = mock_tile
         mock_cache_class.return_value = mock_cache
@@ -215,10 +220,10 @@ class TestTileManager:
         result = tilemanager.get_tile(tile_id)
         assert result == mock_tile
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_tiled_returns_true_for_dynamic_media(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Check if dynamic media is tiled
@@ -232,13 +237,13 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        result = tilemanager.tiled('dynamic:fern')
+        result = tilemanager.tiled("dynamic:fern")
         assert result is True
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_tiled_delegates_to_tilestore_for_static_media(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Check if static media is tiled
@@ -253,14 +258,14 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        result = tilemanager.tiled('static_media.jpg')
+        result = tilemanager.tiled("static_media.jpg")
         assert result is True
-        mock_tilestore.tiled.assert_called_once_with('static_media.jpg')
+        mock_tilestore.tiled.assert_called_once_with("static_media.jpg")
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_get_metadata_from_dynamic_provider(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Get metadata from dynamic tile provider
@@ -273,20 +278,20 @@ class TestTileManager:
         mock_fern_instance = Mock()
         mock_fern_instance.tilesize = 256
         mock_fern_instance.aspect_ratio = 1.0
-        mock_fern_instance.filext = 'png'
+        mock_fern_instance.filext = "png"
         mock_fern.return_value = mock_fern_instance
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        assert tilemanager.get_metadata('dynamic:fern', 'tilesize') == 256
-        assert tilemanager.get_metadata('dynamic:fern', 'aspect_ratio') == 1.0
-        assert tilemanager.get_metadata('dynamic:fern', 'filext') == 'png'
-        assert tilemanager.get_metadata('dynamic:fern', 'maxtilelevel') == 18
+        assert tilemanager.get_metadata("dynamic:fern", "tilesize") == 256
+        assert tilemanager.get_metadata("dynamic:fern", "aspect_ratio") == 1.0
+        assert tilemanager.get_metadata("dynamic:fern", "filext") == "png"
+        assert tilemanager.get_metadata("dynamic:fern", "maxtilelevel") == 18
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_get_metadata_from_tilestore_for_static_media(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Get metadata from tilestore for static media
@@ -301,14 +306,14 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        result = tilemanager.get_metadata('static_media.jpg', 'width')
+        result = tilemanager.get_metadata("static_media.jpg", "width")
         assert result == 512
-        mock_tilestore.get_metadata.assert_called_once_with('static_media.jpg', 'width')
+        mock_tilestore.get_metadata.assert_called_once_with("static_media.jpg", "width")
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_purge_calls_all_providers(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Purge tiles from all providers
@@ -324,15 +329,15 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        tilemanager.purge('media.jpg')
+        tilemanager.purge("media.jpg")
 
-        mock_static_instance.purge.assert_called_once_with('media.jpg')
-        mock_fern_instance.purge.assert_called_once_with('media.jpg')
+        mock_static_instance.purge.assert_called_once_with("media.jpg")
+        mock_fern_instance.purge.assert_called_once_with("media.jpg")
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_purge_without_media_id_purges_all(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Purge all tiles from providers
@@ -353,10 +358,10 @@ class TestTileManager:
         mock_static_instance.purge.assert_called_once_with(None)
         mock_fern_instance.purge.assert_called_once_with(None)
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_get_tile_raises_media_not_tiled(self, mock_fern, mock_static, mock_cache_class, mock_tilestore):
         """
         Scenario: Handle request for untiled media
@@ -377,14 +382,14 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        tile_id = ('untiled_media.jpg', 0, 0, 0)
+        tile_id = ("untiled_media.jpg", 0, 0, 0)
         with pytest.raises(tilemanager.MediaNotTiled):
             tilemanager.get_tile(tile_id)
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_get_tile_raises_tile_not_loaded(self, mock_fern, mock_static, mock_cache_class, mock_tilestore):
         """
         Scenario: Handle request for tile not yet loaded
@@ -407,18 +412,20 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        tile_id = ('tiled_media.jpg', 1, 2, 3)
+        tile_id = ("tiled_media.jpg", 1, 2, 3)
         with pytest.raises(tilemanager.TileNotLoaded):
             tilemanager.get_tile(tile_id)
 
         # Verify load_tile was called
         mock_static_instance.request.assert_called_once_with(tile_id)
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
-    def test_get_tile_raises_tile_not_available_when_none_in_cache(self, mock_fern, mock_static, mock_cache_class, mock_tilestore):
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
+    def test_get_tile_raises_tile_not_available_when_none_in_cache(
+        self, mock_fern, mock_static, mock_cache_class, mock_tilestore
+    ):
         """
         Scenario: Handle request for unavailable tile
 
@@ -431,7 +438,7 @@ class TestTileManager:
 
         # Create cache with None tile (unavailable)
         mock_cache = {}
-        tile_id = ('media.jpg', 0, 0, 0)
+        tile_id = ("media.jpg", 0, 0, 0)
         mock_cache[tile_id] = None
         mock_cache_class.return_value = mock_cache
 
@@ -440,13 +447,15 @@ class TestTileManager:
         with pytest.raises(tilemanager.TileNotAvailable):
             tilemanager.get_tile(tile_id)
 
-    @patch('pyzui.tilesystem.tilemanager.cut_tile')
-    @patch('pyzui.tilesystem.tilemanager.get_tile')
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
-    def test_get_tile_robust_returns_tile_from_get_tile(self, mock_fern, mock_static, mock_cache, mock_tilestore, mock_get_tile, mock_cut_tile):
+    @patch("pyzui.tilesystem.tilemanager.cut_tile")
+    @patch("pyzui.tilesystem.tilemanager.get_tile")
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
+    def test_get_tile_robust_returns_tile_from_get_tile(
+        self, mock_fern, mock_static, mock_cache, mock_tilestore, mock_get_tile, mock_cut_tile
+    ):
         """
         Scenario: Robust tile retrieval succeeds with get_tile
 
@@ -460,7 +469,7 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        tile_id = ('media.jpg', 0, 0, 0)
+        tile_id = ("media.jpg", 0, 0, 0)
         mock_tile = Mock(spec=Tile)
         mock_get_tile.return_value = mock_tile
 
@@ -470,13 +479,15 @@ class TestTileManager:
         mock_get_tile.assert_called_once_with(tile_id)
         mock_cut_tile.assert_not_called()
 
-    @patch('pyzui.tilesystem.tilemanager.cut_tile')
-    @patch('pyzui.tilesystem.tilemanager.get_tile')
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
-    def test_get_tile_robust_falls_back_to_cut_tile(self, mock_fern, mock_static, mock_cache, mock_tilestore, mock_get_tile, mock_cut_tile):
+    @patch("pyzui.tilesystem.tilemanager.cut_tile")
+    @patch("pyzui.tilesystem.tilemanager.get_tile")
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
+    def test_get_tile_robust_falls_back_to_cut_tile(
+        self, mock_fern, mock_static, mock_cache, mock_tilestore, mock_get_tile, mock_cut_tile
+    ):
         """
         Scenario: Robust tile retrieval falls back to cut_tile
 
@@ -490,7 +501,7 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        tile_id = ('media.jpg', 2, 1, 1)
+        tile_id = ("media.jpg", 2, 1, 1)
         mock_tile = Mock(spec=Tile)
         mock_get_tile.side_effect = tilemanager.TileNotLoaded
         mock_cut_tile.return_value = (mock_tile, True)
@@ -501,10 +512,10 @@ class TestTileManager:
         mock_get_tile.assert_called_once_with(tile_id)
         mock_cut_tile.assert_called_once_with(tile_id)
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_get_metadata_returns_none_for_unknown_key(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Get metadata with unknown key
@@ -519,14 +530,16 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        result = tilemanager.get_metadata('dynamic:fern', 'unknown_key')
+        result = tilemanager.get_metadata("dynamic:fern", "unknown_key")
         assert result is None
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
-    def test_get_metadata_calculates_width_and_height_for_dynamic_media(self, mock_fern, mock_static, mock_cache, mock_tilestore):
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
+    def test_get_metadata_calculates_width_and_height_for_dynamic_media(
+        self, mock_fern, mock_static, mock_cache, mock_tilestore
+    ):
         """
         Scenario: Calculate width and height for dynamic media
 
@@ -541,9 +554,10 @@ class TestTileManager:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        expected_dimension = 256 * (2 ** 18)
-        assert tilemanager.get_metadata('dynamic:fern', 'width') == expected_dimension
-        assert tilemanager.get_metadata('dynamic:fern', 'height') == expected_dimension
+        expected_dimension = 256 * (2**18)
+        assert tilemanager.get_metadata("dynamic:fern", "width") == expected_dimension
+        assert tilemanager.get_metadata("dynamic:fern", "height") == expected_dimension
+
 
 class TestTileManagerCutTile:
     """
@@ -553,12 +567,14 @@ class TestTileManagerCutTile:
     by cropping and resizing parent tiles when the requested tile is not available.
     """
 
-    @patch('pyzui.tilesystem.tilemanager.get_metadata')
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
-    def test_cut_tile_negative_tilelevel_scales_base_tile(self, mock_fern, mock_static, mock_cache_class, mock_tilestore, mock_get_metadata):
+    @patch("pyzui.tilesystem.tilemanager.get_metadata")
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
+    def test_cut_tile_negative_tilelevel_scales_base_tile(
+        self, mock_fern, mock_static, mock_cache_class, mock_tilestore, mock_get_metadata
+    ):
         """
         Scenario: Cut tile with negative tilelevel
 
@@ -583,19 +599,21 @@ class TestTileManagerCutTile:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        tile_id = ('media.jpg', -1, 0, 0)
-        result, final = tilemanager.cut_tile(tile_id)
+        tile_id = ("media.jpg", -1, 0, 0)
+        _result, final = tilemanager.cut_tile(tile_id)
 
         # Should resize to 50% (scale = 2^-1 = 0.5)
         mock_tile.resize.assert_called_once_with(128, 128)
         assert final is True
 
-    @patch('pyzui.tilesystem.tilemanager.get_metadata')
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
-    def test_cut_tile_negative_tilelevel_caches_result(self, mock_fern, mock_static, mock_cache_class, mock_tilestore, mock_get_metadata):
+    @patch("pyzui.tilesystem.tilemanager.get_metadata")
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
+    def test_cut_tile_negative_tilelevel_caches_result(
+        self, mock_fern, mock_static, mock_cache_class, mock_tilestore, mock_get_metadata
+    ):
         """
         Scenario: Cut tile with negative tilelevel caches the result
 
@@ -619,19 +637,21 @@ class TestTileManagerCutTile:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        tile_id = ('media.jpg', -2, 0, 0)
+        tile_id = ("media.jpg", -2, 0, 0)
         tilemanager.cut_tile(tile_id)
 
         # Should cache the result with __setitem__
         mock_tilecache.__setitem__.assert_called()
 
-    @patch('pyzui.tilesystem.tilemanager.get_tile')
-    @patch('pyzui.tilesystem.tilemanager.get_metadata')
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
-    def test_cut_tile_returns_cached_tile_if_available(self, mock_fern, mock_static, mock_cache_class, mock_tilestore, mock_get_metadata, mock_get_tile):
+    @patch("pyzui.tilesystem.tilemanager.get_tile")
+    @patch("pyzui.tilesystem.tilemanager.get_metadata")
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
+    def test_cut_tile_returns_cached_tile_if_available(
+        self, mock_fern, mock_static, mock_cache_class, mock_tilestore, mock_get_metadata, mock_get_tile
+    ):
         """
         Scenario: Cut tile returns tile from cache if available
 
@@ -652,19 +672,21 @@ class TestTileManagerCutTile:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        tile_id = ('media.jpg', 1, 0, 0)
+        tile_id = ("media.jpg", 1, 0, 0)
         result, final = tilemanager.cut_tile(tile_id)
 
         assert result == mock_tile
         assert final is True
         mock_get_tile.assert_called_with(tile_id)
 
-    @patch('pyzui.tilesystem.tilemanager.get_metadata')
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
-    def test_cut_tile_purges_temp_cache_when_tempcache_zero(self, mock_fern, mock_static, mock_cache_class, mock_tilestore, mock_get_metadata):
+    @patch("pyzui.tilesystem.tilemanager.get_metadata")
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
+    def test_cut_tile_purges_temp_cache_when_tempcache_zero(
+        self, mock_fern, mock_static, mock_cache_class, mock_tilestore, mock_get_metadata
+    ):
         """
         Scenario: Cut tile purges temporary cache when tempcache is 0
 
@@ -687,18 +709,20 @@ class TestTileManagerCutTile:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        tile_id = ('media.jpg', -1, 0, 0)
+        tile_id = ("media.jpg", -1, 0, 0)
         tilemanager.cut_tile(tile_id, tempcache=0)
 
         mock_tempcache.purge.assert_called_once()
 
-    @patch('pyzui.tilesystem.tilemanager.get_tile')
-    @patch('pyzui.tilesystem.tilemanager.get_metadata')
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
-    def test_cut_tile_handles_tile_not_loaded(self, mock_fern, mock_static, mock_cache_class, mock_tilestore, mock_get_metadata, mock_get_tile):
+    @patch("pyzui.tilesystem.tilemanager.get_tile")
+    @patch("pyzui.tilesystem.tilemanager.get_metadata")
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
+    def test_cut_tile_handles_tile_not_loaded(
+        self, mock_fern, mock_static, mock_cache_class, mock_tilestore, mock_get_metadata, mock_get_tile
+    ):
         """
         Scenario: Cut tile handles TileNotLoaded by checking temp cache
 
@@ -721,7 +745,7 @@ class TestTileManagerCutTile:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        tile_id = ('media.jpg', 2, 1, 1)
+        tile_id = ("media.jpg", 2, 1, 1)
         result, final = tilemanager.cut_tile(tile_id, tempcache=5)
 
         # Should check temp cache and return the tile from there
@@ -743,22 +767,22 @@ class TestTileManagerCutTile:
 
         # Test even column (col=0): x1 should be 0
         col = 0
-        x1 = 0 if col % 2 == 0 else tilesize/2
+        x1 = 0 if col % 2 == 0 else tilesize / 2
         assert x1 == 0
 
         # Test odd column (col=1): x1 should be 128
         col = 1
-        x1 = 0 if col % 2 == 0 else tilesize/2
+        x1 = 0 if col % 2 == 0 else tilesize / 2
         assert x1 == 128
 
         # Test even row (row=0): y1 should be 0
         row = 0
-        y1 = 0 if row % 2 == 0 else tilesize/2
+        y1 = 0 if row % 2 == 0 else tilesize / 2
         assert y1 == 0
 
         # Test odd row (row=1): y1 should be 128
         row = 1
-        y1 = 0 if row % 2 == 0 else tilesize/2
+        y1 = 0 if row % 2 == 0 else tilesize / 2
         assert y1 == 128
 
     def test_cut_tile_resize_factor(self):
@@ -808,6 +832,7 @@ class TestTileManagerCutTile:
             assert parent_row == expected_row
             assert parent_col == expected_col
 
+
 class TestTileManagerEdgeCases:
     """
     Feature: Tile Manager Edge Cases
@@ -815,10 +840,10 @@ class TestTileManagerEdgeCases:
     This test suite validates edge case handling in the tile manager.
     """
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_get_tile_rejects_negative_tilelevel(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Get tile rejects negative tilelevel
@@ -833,14 +858,14 @@ class TestTileManagerEdgeCases:
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
         for tilelevel in [-1, -2, -10]:
-            tile_id = ('media.jpg', tilelevel, 0, 0)
+            tile_id = ("media.jpg", tilelevel, 0, 0)
             with pytest.raises(tilemanager.TileNotAvailable):
                 tilemanager.get_tile(tile_id)
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_init_creates_cache_80_20_split(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Init creates caches with 80/20 split
@@ -859,10 +884,10 @@ class TestTileManagerEdgeCases:
         # Second call is temp cache (20%)
         assert mock_cache.call_args_list[1] == call(200.0)
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_tiled_always_true_for_dynamic_prefix(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Tiled returns True for any dynamic: prefix
@@ -876,17 +901,17 @@ class TestTileManagerEdgeCases:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        assert tilemanager.tiled('dynamic:fern') is True
-        assert tilemanager.tiled('dynamic:mandelbrot') is True
-        assert tilemanager.tiled('dynamic:anything') is True
+        assert tilemanager.tiled("dynamic:fern") is True
+        assert tilemanager.tiled("dynamic:mandelbrot") is True
+        assert tilemanager.tiled("dynamic:anything") is True
 
         # Should not call TileStore.tiled for dynamic media
         mock_tilestore.tiled.assert_not_called()
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_get_metadata_dynamic_maxtilelevel(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Get metadata for dynamic provider maxtilelevel
@@ -901,12 +926,12 @@ class TestTileManagerEdgeCases:
 
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
-        assert tilemanager.get_metadata('dynamic:fern', 'maxtilelevel') == 18
+        assert tilemanager.get_metadata("dynamic:fern", "maxtilelevel") == 18
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
     def test_load_tile_routes_by_media_id_prefix(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Load tile routes based on media_id
@@ -923,23 +948,21 @@ class TestTileManagerEdgeCases:
         tilemanager.init(total_cache_size=1024, auto_cleanup=False)
 
         # Static media goes to static provider
-        tilemanager.load_tile(('image.jpg', 0, 0, 0))
-        mock_static_instance.request.assert_called_with(('image.jpg', 0, 0, 0))
+        tilemanager.load_tile(("image.jpg", 0, 0, 0))
+        mock_static_instance.request.assert_called_with(("image.jpg", 0, 0, 0))
 
         # Dynamic media goes to dynamic provider
-        tilemanager.load_tile(('dynamic:fern', 5, 10, 20))
-        mock_fern_instance.request.assert_called_with(('dynamic:fern', 5, 10, 20))
+        tilemanager.load_tile(("dynamic:fern", 5, 10, 20))
+        mock_fern_instance.request.assert_called_with(("dynamic:fern", 5, 10, 20))
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
-    def test_init_registers_shutdown_cleanup(
-        self, mock_fern, mock_static, mock_cache, mock_tilestore
-    ):
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
+    def test_init_registers_shutdown_cleanup(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Initialize with auto cleanup enabled
-        
+
         Given auto_cleanup=True
         When init is called
         Then TileStore.auto_cleanup should NOT be called synchronously
@@ -949,23 +972,21 @@ class TestTileManagerEdgeCases:
         mock_fern.return_value = Mock()
 
         tilemanager.init(auto_cleanup=True, cleanup_max_age_days=7)
-        
+
         # Verify cleanup NOT called synchronously
         mock_tilestore.auto_cleanup.assert_not_called()
-        
+
         # Note: atexit registration is tested indirectly via _shutdown_cleanup tests
         # since atexit is imported inside the function and hard to mock
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
-    def test_shutdown_cleanup_execution(
-        self, mock_fern, mock_static, mock_cache, mock_tilestore
-    ):
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
+    def test_shutdown_cleanup_execution(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Execute shutdown cleanup
-        
+
         Given cleanup is enabled
         When _shutdown_cleanup is called
         Then TileStore.auto_cleanup should be called with correct parameters
@@ -973,30 +994,26 @@ class TestTileManagerEdgeCases:
         # Initialize with cleanup enabled
         mock_static.return_value = Mock()
         mock_fern.return_value = Mock()
-        
+
         tilemanager.init(auto_cleanup=True, cleanup_max_age_days=7)
-        
+
         # Reset mock to track only shutdown calls
         mock_tilestore.reset_mock()
-        
+
         # Call shutdown cleanup
         tilemanager._shutdown_cleanup()
-        
-        # Verify cleanup called with fast mode
-        mock_tilestore.auto_cleanup.assert_called_once_with(
-            max_age_days=7, enable=True, collect_stats=False
-        )
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
-    def test_shutdown_cleanup_skips_when_disabled(
-        self, mock_fern, mock_static, mock_cache, mock_tilestore
-    ):
+        # Verify cleanup called with fast mode
+        mock_tilestore.auto_cleanup.assert_called_once_with(max_age_days=7, enable=True, collect_stats=False)
+
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
+    def test_shutdown_cleanup_skips_when_disabled(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Skip shutdown cleanup when disabled
-        
+
         Given cleanup is disabled
         When _shutdown_cleanup is called
         Then TileStore.auto_cleanup should NOT be called
@@ -1004,28 +1021,26 @@ class TestTileManagerEdgeCases:
         # Initialize with cleanup disabled
         mock_static.return_value = Mock()
         mock_fern.return_value = Mock()
-        
+
         tilemanager.init(auto_cleanup=False)
-        
+
         # Reset mock
         mock_tilestore.reset_mock()
-        
+
         # Call shutdown cleanup
         tilemanager._shutdown_cleanup()
-        
+
         # Verify cleanup NOT called
         mock_tilestore.auto_cleanup.assert_not_called()
 
-    @patch('pyzui.tilesystem.tilemanager.TileStore')
-    @patch('pyzui.tilesystem.tilemanager.TileCache')
-    @patch('pyzui.tilesystem.tilemanager.StaticTileProvider')
-    @patch('pyzui.tilesystem.tilemanager.FernTileProvider')
-    def test_shutdown_cleanup_handles_exception(
-        self, mock_fern, mock_static, mock_cache, mock_tilestore
-    ):
+    @patch("pyzui.tilesystem.tilemanager.TileStore")
+    @patch("pyzui.tilesystem.tilemanager.TileCache")
+    @patch("pyzui.tilesystem.tilemanager.StaticTileProvider")
+    @patch("pyzui.tilesystem.tilemanager.FernTileProvider")
+    def test_shutdown_cleanup_handles_exception(self, mock_fern, mock_static, mock_cache, mock_tilestore):
         """
         Scenario: Handle exception during shutdown cleanup
-        
+
         Given cleanup is enabled
         When _shutdown_cleanup is called and TileStore.auto_cleanup raises exception
         Then exception should be caught and logged
@@ -1034,25 +1049,25 @@ class TestTileManagerEdgeCases:
         # Initialize with cleanup enabled
         mock_static.return_value = Mock()
         mock_fern.return_value = Mock()
-        
+
         tilemanager.init(auto_cleanup=True)
-        
+
         # Make auto_cleanup raise an exception
         mock_tilestore.auto_cleanup.side_effect = Exception("Test error")
-        
+
         # Call shutdown cleanup (should not raise)
         try:
             tilemanager._shutdown_cleanup()
         except Exception:
             pytest.fail("_shutdown_cleanup should not propagate exceptions")
-        
+
         # Verify cleanup was attempted
         mock_tilestore.auto_cleanup.assert_called_once()
 
     def test_collect_cleanup_stats_parameter_default(self):
         """
         Scenario: Test collect_cleanup_stats parameter default
-        
+
         When init is called without collect_cleanup_stats
         Then it should use default value (False)
         """

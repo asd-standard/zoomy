@@ -15,14 +15,14 @@
 
 """Tile provider classes for loading tiles into TileCache objects."""
 
-from .tileprovider import TileProvider
-from .statictileprovider import StaticTileProvider
 from .dynamictileprovider import DynamicTileProvider
 from .ferndynamictileprovider import FernTileProvider
+from .statictileprovider import StaticTileProvider
+from .tileprovider import TileProvider
 
 __all__ = [
-    'TileProvider',
-    'StaticTileProvider',
-    'DynamicTileProvider',
-    'FernTileProvider',
+    "DynamicTileProvider",
+    "FernTileProvider",
+    "StaticTileProvider",
+    "TileProvider",
 ]

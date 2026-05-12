@@ -13,9 +13,6 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import os
-import pytest
-from unittest.mock import Mock, patch
 
 class TestQZUI:
     """
@@ -34,6 +31,7 @@ class TestQZUI:
         Then the module should be successfully imported
         """
         import pyzui.objects.scene.qzui
+
         assert pyzui.objects.scene.qzui is not None
 
     def test_qzui_class_exists(self):
@@ -45,6 +43,7 @@ class TestQZUI:
         Then the class should be defined
         """
         from pyzui.objects.scene.qzui import QZUI
+
         assert QZUI is not None
 
     def test_placeholder(self):

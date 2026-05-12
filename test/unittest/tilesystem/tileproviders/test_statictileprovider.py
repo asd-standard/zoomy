@@ -13,10 +13,12 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
+
 from PIL import Image
+
 from pyzui.tilesystem.tileproviders import StaticTileProvider
+
 
 class TestStaticTileProvider:
     """
@@ -47,13 +49,14 @@ class TestStaticTileProvider:
         Then it should be an instance of TileProvider
         """
         from pyzui.tilesystem.tileproviders import TileProvider
+
         tilecache = Mock()
         provider = StaticTileProvider(tilecache)
         assert isinstance(provider, TileProvider)
 
-    @patch('pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_metadata')
-    @patch('pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_tile_path')
-    @patch('pyzui.tilesystem.tileproviders.statictileprovider.Image.open')
+    @patch("pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_metadata")
+    @patch("pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_tile_path")
+    @patch("pyzui.tilesystem.tileproviders.statictileprovider.Image.open")
     def test_load_success(self, mock_open, mock_path, mock_metadata):
         """
         Scenario: Successfully load a tile from disk
@@ -67,17 +70,17 @@ class TestStaticTileProvider:
         provider = StaticTileProvider(tilecache)
 
         mock_metadata.return_value = 5
-        mock_path.return_value = '/path/to/tile.jpg'
+        mock_path.return_value = "/path/to/tile.jpg"
         mock_image = Mock(spec=Image.Image)
         mock_open.return_value = mock_image
 
-        tile_id = ('media_id', 2, 0, 0)
+        tile_id = ("media_id", 2, 0, 0)
         result = provider._load(tile_id)
 
         assert result == mock_image
         mock_image.load.assert_called_once()
 
-    @patch('pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_metadata')
+    @patch("pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_metadata")
     def test_load_exceeds_maxtilelevel(self, mock_metadata):
         """
         Scenario: Request tile beyond maximum level
@@ -90,14 +93,14 @@ class TestStaticTileProvider:
         provider = StaticTileProvider(tilecache)
 
         mock_metadata.return_value = 3
-        tile_id = ('media_id', 5, 0, 0)
+        tile_id = ("media_id", 5, 0, 0)
         result = provider._load(tile_id)
 
         assert result is None
 
-    @patch('pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_metadata')
-    @patch('pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_tile_path')
-    @patch('pyzui.tilesystem.tileproviders.statictileprovider.Image.open')
+    @patch("pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_metadata")
+    @patch("pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_tile_path")
+    @patch("pyzui.tilesystem.tileproviders.statictileprovider.Image.open")
     def test_load_ioerror(self, mock_open, mock_path, mock_metadata):
         """
         Scenario: Handle missing tile file
@@ -110,17 +113,17 @@ class TestStaticTileProvider:
         provider = StaticTileProvider(tilecache)
 
         mock_metadata.return_value = 5
-        mock_path.return_value = '/path/to/tile.jpg'
-        mock_open.side_effect = IOError("File not found")
+        mock_path.return_value = "/path/to/tile.jpg"
+        mock_open.side_effect = OSError("File not found")
 
-        tile_id = ('media_id', 2, 0, 0)
+        tile_id = ("media_id", 2, 0, 0)
         result = provider._load(tile_id)
 
         assert result is None
 
-    @patch('pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_metadata')
-    @patch('pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_tile_path')
-    @patch('pyzui.tilesystem.tileproviders.statictileprovider.Image.open')
+    @patch("pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_metadata")
+    @patch("pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_tile_path")
+    @patch("pyzui.tilesystem.tileproviders.statictileprovider.Image.open")
     def test_load_valid_tilelevel(self, mock_open, mock_path, mock_metadata):
         """
         Scenario: Load tile at maximum level boundary
@@ -133,18 +136,18 @@ class TestStaticTileProvider:
         provider = StaticTileProvider(tilecache)
 
         mock_metadata.return_value = 5
-        mock_path.return_value = '/path/to/tile.jpg'
+        mock_path.return_value = "/path/to/tile.jpg"
         mock_image = Mock(spec=Image.Image)
         mock_open.return_value = mock_image
 
-        tile_id = ('media_id', 5, 0, 0)
+        tile_id = ("media_id", 5, 0, 0)
         result = provider._load(tile_id)
 
         assert result == mock_image
 
-    @patch('pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_metadata')
-    @patch('pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_tile_path')
-    @patch('pyzui.tilesystem.tileproviders.statictileprovider.Image.open')
+    @patch("pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_metadata")
+    @patch("pyzui.tilesystem.tileproviders.statictileprovider.TileStore.get_tile_path")
+    @patch("pyzui.tilesystem.tileproviders.statictileprovider.Image.open")
     def test_load_calls_correct_methods(self, mock_open, mock_path, mock_metadata):
         """
         Scenario: Verify tile store interaction
@@ -159,13 +162,13 @@ class TestStaticTileProvider:
         provider = StaticTileProvider(tilecache)
 
         mock_metadata.return_value = 5
-        mock_path.return_value = '/path/to/tile.jpg'
+        mock_path.return_value = "/path/to/tile.jpg"
         mock_image = Mock(spec=Image.Image)
         mock_open.return_value = mock_image
 
-        tile_id = ('media_id', 2, 3, 4)
+        tile_id = ("media_id", 2, 3, 4)
         provider._load(tile_id)
 
-        mock_metadata.assert_called_once_with('media_id', 'maxtilelevel')
+        mock_metadata.assert_called_once_with("media_id", "maxtilelevel")
         mock_path.assert_called_once_with(tile_id)
-        mock_open.assert_called_once_with('/path/to/tile.jpg')
+        mock_open.assert_called_once_with("/path/to/tile.jpg")

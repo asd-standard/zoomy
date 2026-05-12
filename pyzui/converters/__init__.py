@@ -25,6 +25,7 @@ from .pdfconverter import PDFConverter
 # VipsConverter may not be available (requires pyvips)
 try:
     from .vipsconverter import VipsConverter
+
     VIPS_AVAILABLE = True
 except ImportError:
     VipsConverter = None
@@ -33,10 +34,4 @@ except ImportError:
 # Process-based converter runner for parallel conversion
 from . import converterrunner
 
-__all__ = [
-    'Converter',
-    'PDFConverter',
-    'VipsConverter',
-    'VIPS_AVAILABLE',
-    'converterrunner'
-]
+__all__ = ["VIPS_AVAILABLE", "Converter", "PDFConverter", "VipsConverter", "converterrunner"]

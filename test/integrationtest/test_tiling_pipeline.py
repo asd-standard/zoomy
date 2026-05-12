@@ -24,25 +24,25 @@ TileManager, and TileProviders.
 The tests verify that images are correctly converted into pyramidal tile
 structures, stored on disk, cached in memory, and retrieved on demand.
 """
-import sys
-import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+
+import hashlib
+import shutil
 
 import pytest
-import shutil
-import tempfile
-import hashlib
-from pathlib import Path
 from PIL import Image
+
+from pyzui.tilesystem import tilestore
+from pyzui.tilesystem.tile import Tile
 
 # Import tiling system components
 from pyzui.tilesystem.tiler import Tiler
-from pyzui.tilesystem.tile import Tile
-from pyzui.tilesystem import tilestore
-from pyzui.tilesystem import tilemanager
 from pyzui.tilesystem.tilestore import TileCache
-from pyzui.tilesystem.tileproviders.statictileprovider import StaticTileProvider
+
 
 class ConcreteTiler(Tiler):
     """
@@ -52,10 +52,10 @@ class ConcreteTiler(Tiler):
     to read image data, enabling end-to-end testing of the tiling process.
     """
 
-    def __init__(self, infile, media_id=None, filext='jpg', tilesize=256):
+    def __init__(self, infile, media_id=None, filext="jpg", tilesize=256):
         """Initialize the tiler and open the source image."""
         super().__init__(infile, media_id, filext, tilesize)
-        self._image = Image.open(infile).convert('RGB')
+        self._image = Image.open(infile).convert("RGB")
         self._width, self._height = self._image.size
         self._bytes_per_pixel = 3
         self._current_row = 0
@@ -72,13 +72,14 @@ class ConcreteTiler(Tiler):
                    if past end of image.
         """
         if self._current_row >= self._height:
-            return b''
+            return b""
         row_data = []
         for x in range(self._width):
             pixel = self._image.getpixel((x, self._current_row))
             row_data.extend(pixel)
         self._current_row += 1
         return bytes(row_data)
+
 
 @pytest.fixture
 def temp_tilestore(tmp_path):
@@ -110,6 +111,7 @@ def temp_tilestore(tmp_path):
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
 
+
 @pytest.fixture
 def sample_images(tmp_path):
     """
@@ -127,15 +129,15 @@ def sample_images(tmp_path):
     """
     images = {}
     test_cases = [
-        (256, 256, 'red'),
-        (512, 512, 'green'),
-        (500, 300, 'blue'),
-        (100, 100, 'yellow'),
-        (1024, 1024, 'purple'),
+        (256, 256, "red"),
+        (512, 512, "green"),
+        (500, 300, "blue"),
+        (100, 100, "yellow"),
+        (1024, 1024, "purple"),
     ]
 
     for width, height, color in test_cases:
-        img = Image.new('RGB', (width, height), color=color)
+        img = Image.new("RGB", (width, height), color=color)
         # Add a gradient pattern for visual verification
         for y in range(height):
             for x in range(min(10, width)):
@@ -150,6 +152,7 @@ def sample_images(tmp_path):
     for path in images.values():
         if os.path.exists(path):
             os.remove(path)
+
 
 class TestTilingPipelineEndToEnd:
     """
@@ -188,21 +191,21 @@ class TestTilingPipelineEndToEnd:
         # Level 1: 2x2 = 4 tiles (full resolution)
 
         # Check level 0 tile exists
-        tile_path_0 = tilestore.get_tile_path((media_id, 0, 0, 0), filext='jpg')
+        tile_path_0 = tilestore.get_tile_path((media_id, 0, 0, 0), filext="jpg")
         assert os.path.exists(tile_path_0), "Level 0 tile not created"
 
         # Check level 1 tiles exist (2x2 grid)
         for row in range(2):
             for col in range(2):
-                tile_path = tilestore.get_tile_path((media_id, 1, row, col), filext='jpg')
+                tile_path = tilestore.get_tile_path((media_id, 1, row, col), filext="jpg")
                 assert os.path.exists(tile_path), f"Level 1 tile ({row},{col}) not created"
 
         # And: Verify metadata was written
         assert tilestore.tiled(media_id), "Media not marked as tiled"
-        assert tilestore.get_metadata(media_id, 'width') == 512
-        assert tilestore.get_metadata(media_id, 'height') == 512
-        assert tilestore.get_metadata(media_id, 'tilesize') == 256
-        assert tilestore.get_metadata(media_id, 'maxtilelevel') == 1
+        assert tilestore.get_metadata(media_id, "width") == 512
+        assert tilestore.get_metadata(media_id, "height") == 512
+        assert tilestore.get_metadata(media_id, "tilesize") == 256
+        assert tilestore.get_metadata(media_id, "maxtilelevel") == 1
 
     def test_tile_single_tile_image(self, temp_tilestore, sample_images):
         """
@@ -222,14 +225,14 @@ class TestTilingPipelineEndToEnd:
 
         # Then
         assert tiler.error is None
-        assert tilestore.get_metadata(media_id, 'maxtilelevel') == 0
+        assert tilestore.get_metadata(media_id, "maxtilelevel") == 0
 
         # Only level 0 tile should exist
-        tile_path = tilestore.get_tile_path((media_id, 0, 0, 0), filext='jpg')
+        tile_path = tilestore.get_tile_path((media_id, 0, 0, 0), filext="jpg")
         assert os.path.exists(tile_path)
 
         # Level 1 should not exist
-        tile_path_1 = tilestore.get_tile_path((media_id, 1, 0, 0), filext='jpg')
+        tile_path_1 = tilestore.get_tile_path((media_id, 1, 0, 0), filext="jpg")
         assert not os.path.exists(tile_path_1)
 
     def test_tile_image_smaller_than_tilesize(self, temp_tilestore, sample_images):
@@ -250,9 +253,9 @@ class TestTilingPipelineEndToEnd:
 
         # Then
         assert tiler.error is None
-        assert tilestore.get_metadata(media_id, 'maxtilelevel') == 0
-        assert tilestore.get_metadata(media_id, 'width') == 100
-        assert tilestore.get_metadata(media_id, 'height') == 100
+        assert tilestore.get_metadata(media_id, "maxtilelevel") == 0
+        assert tilestore.get_metadata(media_id, "width") == 100
+        assert tilestore.get_metadata(media_id, "height") == 100
 
     def test_tile_non_power_of_two_dimensions(self, temp_tilestore, sample_images):
         """
@@ -278,11 +281,11 @@ class TestTilingPipelineEndToEnd:
         # Height: ceil(300/256) = 2 tiles down
         # maxtilelevel = ceil(log2(max(500,300)/256)) = ceil(log2(1.95)) = 1
 
-        assert tilestore.get_metadata(media_id, 'width') == 500
-        assert tilestore.get_metadata(media_id, 'height') == 300
+        assert tilestore.get_metadata(media_id, "width") == 500
+        assert tilestore.get_metadata(media_id, "height") == 300
 
         # Verify tiles exist
-        tile_path = tilestore.get_tile_path((media_id, 0, 0, 0), filext='jpg')
+        tile_path = tilestore.get_tile_path((media_id, 0, 0, 0), filext="jpg")
         assert os.path.exists(tile_path)
 
     def test_tile_larger_pyramid(self, temp_tilestore, sample_images):
@@ -310,12 +313,12 @@ class TestTilingPipelineEndToEnd:
         # Level 2: 4x4 = 16 tiles
         # Total: 21 tiles
 
-        assert tilestore.get_metadata(media_id, 'maxtilelevel') == 2
+        assert tilestore.get_metadata(media_id, "maxtilelevel") == 2
 
         # Verify level 2 has 4x4 tiles
         for row in range(4):
             for col in range(4):
-                tile_path = tilestore.get_tile_path((media_id, 2, row, col), filext='jpg')
+                tile_path = tilestore.get_tile_path((media_id, 2, row, col), filext="jpg")
                 assert os.path.exists(tile_path), f"Level 2 tile ({row},{col}) missing"
 
     def test_progress_tracking_during_tiling(self, temp_tilestore, sample_images):
@@ -340,6 +343,7 @@ class TestTilingPipelineEndToEnd:
 
         # After completion
         assert tiler.progress == 1.0
+
 
 class TestTileRetrievalIntegration:
     """
@@ -366,7 +370,7 @@ class TestTileRetrievalIntegration:
         assert tiler.error is None
 
         # When: Retrieve tile paths
-        tile_path = tilestore.get_tile_path((media_id, 1, 0, 0), filext='jpg')
+        tile_path = tilestore.get_tile_path((media_id, 1, 0, 0), filext="jpg")
 
         # Then: Tile file exists and is readable as image
         assert os.path.exists(tile_path)
@@ -411,15 +415,16 @@ class TestTileRetrievalIntegration:
         media_id = "test_metadata"
 
         # Tile the image
-        tiler = ConcreteTiler(image_path, media_id=media_id, filext='png', tilesize=128)
+        tiler = ConcreteTiler(image_path, media_id=media_id, filext="png", tilesize=128)
         tiler.run()
 
         # Retrieve and verify metadata
-        assert tilestore.get_metadata(media_id, 'width') == 500
-        assert tilestore.get_metadata(media_id, 'height') == 300
-        assert tilestore.get_metadata(media_id, 'tilesize') == 128
-        assert tilestore.get_metadata(media_id, 'filext') == 'png'
-        assert tilestore.get_metadata(media_id, 'maxtilelevel') is not None
+        assert tilestore.get_metadata(media_id, "width") == 500
+        assert tilestore.get_metadata(media_id, "height") == 300
+        assert tilestore.get_metadata(media_id, "tilesize") == 128
+        assert tilestore.get_metadata(media_id, "filext") == "png"
+        assert tilestore.get_metadata(media_id, "maxtilelevel") is not None
+
 
 class TestTileCacheIntegration:
     """
@@ -440,10 +445,10 @@ class TestTileCacheIntegration:
         cache = TileCache(maxsize=100)
 
         # Create a test tile
-        test_image = Image.new('RGB', (256, 256), color='red')
+        test_image = Image.new("RGB", (256, 256), color="red")
         tile = Tile(test_image)
 
-        tile_id = ('test_media', 0, 0, 0)
+        tile_id = ("test_media", 0, 0, 0)
 
         # Store in cache
         cache[tile_id] = tile
@@ -463,14 +468,14 @@ class TestTileCacheIntegration:
         """
         cache = TileCache(maxsize=100)
 
-        tile_id = ('test_media', 1, 0, 0)  # Use tilelevel=1 for mortal tile
+        tile_id = ("test_media", 1, 0, 0)  # Use tilelevel=1 for mortal tile
 
         # Store first tile
-        tile1 = Tile(Image.new('RGB', (256, 256), color='red'))
+        tile1 = Tile(Image.new("RGB", (256, 256), color="red"))
         cache[tile_id] = tile1
 
         # Store second tile with same ID
-        tile2 = Tile(Image.new('RGB', (256, 256), color='blue'))
+        tile2 = Tile(Image.new("RGB", (256, 256), color="blue"))
         cache[tile_id] = tile2
 
         # New tile should replace the original
@@ -493,20 +498,20 @@ class TestTileCacheIntegration:
 
         # Add 3 tiles (using tilelevel=1 for mortal tiles)
         for i in range(3):
-            tile_id = ('media', 1, 0, i)  # tilelevel=1 makes them mortal
-            cache[tile_id] = Tile(Image.new('RGB', (256, 256)))
+            tile_id = ("media", 1, 0, i)  # tilelevel=1 makes them mortal
+            cache[tile_id] = Tile(Image.new("RGB", (256, 256)))
 
         # Access tile at col=0 to make it recently used
-        _ = cache[('media', 1, 0, 0)]
+        _ = cache[("media", 1, 0, 0)]
 
         # Add a 4th tile, should evict tile at col=1 (LRU)
-        cache[('media', 1, 0, 3)] = Tile(Image.new('RGB', (256, 256)))
+        cache[("media", 1, 0, 3)] = Tile(Image.new("RGB", (256, 256)))
 
         # Tile at col=0 should still be in cache (recently accessed)
-        assert ('media', 1, 0, 0) in cache
+        assert ("media", 1, 0, 0) in cache
 
         # Tile at col=1 should be evicted (LRU, oldest not accessed)
-        assert ('media', 1, 0, 1) not in cache
+        assert ("media", 1, 0, 1) not in cache
 
     def test_cache_contains_check(self, temp_tilestore, sample_images):
         """
@@ -519,11 +524,12 @@ class TestTileCacheIntegration:
         """
         cache = TileCache(maxsize=100)
 
-        tile_id = ('media', 1, 2, 3)
-        cache[tile_id] = Tile(Image.new('RGB', (256, 256)))
+        tile_id = ("media", 1, 2, 3)
+        cache[tile_id] = Tile(Image.new("RGB", (256, 256)))
 
         assert tile_id in cache
-        assert ('media', 9, 9, 9) not in cache
+        assert ("media", 9, 9, 9) not in cache
+
 
 class TestMultipleImageTiling:
     """
@@ -544,19 +550,11 @@ class TestMultipleImageTiling:
         And tiles do not interfere with each other
         """
         # Tile first image
-        tiler1 = ConcreteTiler(
-            sample_images[(256, 256)],
-            media_id="image_1",
-            tilesize=256
-        )
+        tiler1 = ConcreteTiler(sample_images[(256, 256)], media_id="image_1", tilesize=256)
         tiler1.run()
 
         # Tile second image
-        tiler2 = ConcreteTiler(
-            sample_images[(512, 512)],
-            media_id="image_2",
-            tilesize=256
-        )
+        tiler2 = ConcreteTiler(sample_images[(512, 512)], media_id="image_2", tilesize=256)
         tiler2.run()
 
         # Both should complete successfully
@@ -568,11 +566,12 @@ class TestMultipleImageTiling:
         assert tilestore.tiled("image_2")
 
         # Metadata should be independent
-        assert tilestore.get_metadata("image_1", 'width') == 256
-        assert tilestore.get_metadata("image_2", 'width') == 512
+        assert tilestore.get_metadata("image_1", "width") == 256
+        assert tilestore.get_metadata("image_2", "width") == 512
 
-        assert tilestore.get_metadata("image_1", 'maxtilelevel') == 0
-        assert tilestore.get_metadata("image_2", 'maxtilelevel') == 1
+        assert tilestore.get_metadata("image_1", "maxtilelevel") == 0
+        assert tilestore.get_metadata("image_2", "maxtilelevel") == 1
+
 
 class TestTilePathConsistency:
     """
@@ -590,10 +589,10 @@ class TestTilePathConsistency:
         When the path is requested multiple times
         Then the same path is returned each time
         """
-        tile_id = ('my_media.jpg', 5, 100, 200)
+        tile_id = ("my_media.jpg", 5, 100, 200)
 
-        path1 = tilestore.get_tile_path(tile_id, filext='jpg')
-        path2 = tilestore.get_tile_path(tile_id, filext='jpg')
+        path1 = tilestore.get_tile_path(tile_id, filext="jpg")
+        path2 = tilestore.get_tile_path(tile_id, filext="jpg")
 
         assert path1 == path2
 
@@ -605,11 +604,11 @@ class TestTilePathConsistency:
         When their paths are requested
         Then the paths are different
         """
-        tile_id_1 = ('media', 0, 0, 0)
-        tile_id_2 = ('media', 0, 0, 1)
+        tile_id_1 = ("media", 0, 0, 0)
+        tile_id_2 = ("media", 0, 0, 1)
 
-        path1 = tilestore.get_tile_path(tile_id_1, filext='jpg')
-        path2 = tilestore.get_tile_path(tile_id_2, filext='jpg')
+        path1 = tilestore.get_tile_path(tile_id_1, filext="jpg")
+        path2 = tilestore.get_tile_path(tile_id_2, filext="jpg")
 
         assert path1 != path2
 
@@ -622,11 +621,12 @@ class TestTilePathConsistency:
         Then the path contains a SHA1 hash of the media ID
         """
         media_id = "my_image.jpg"
-        expected_hash = hashlib.sha1(media_id.encode('utf-8')).hexdigest()
+        expected_hash = hashlib.sha1(media_id.encode("utf-8")).hexdigest()
 
         path = tilestore.get_media_path(media_id)
 
         assert expected_hash in path
+
 
 class TestTilingErrorHandling:
     """
@@ -666,7 +666,7 @@ class TestTilingErrorHandling:
         And the system does not crash
         """
         corrupted_path = tmp_path / "corrupted.jpg"
-        with open(corrupted_path, 'wb') as f:
+        with open(corrupted_path, "wb") as f:
             f.write(b"This is not a valid image file")
 
         try:
@@ -676,6 +676,7 @@ class TestTilingErrorHandling:
         except Exception:
             # Exception during init or run is acceptable
             pass
+
 
 class TestTileStorageStats:
     """
@@ -694,11 +695,7 @@ class TestTileStorageStats:
         Then the total size in bytes is returned
         """
         # Tile an image to create files
-        tiler = ConcreteTiler(
-            sample_images[(256, 256)],
-            media_id="size_test",
-            tilesize=256
-        )
+        tiler = ConcreteTiler(sample_images[(256, 256)], media_id="size_test", tilesize=256)
         tiler.run()
 
         media_path = tilestore.get_media_path("size_test")
@@ -717,18 +714,14 @@ class TestTileStorageStats:
         # Tile multiple images
         for i, size in enumerate([(256, 256), (512, 512)]):
             if size in sample_images:
-                tiler = ConcreteTiler(
-                    sample_images[size],
-                    media_id=f"stats_test_{i}",
-                    tilesize=256
-                )
+                tiler = ConcreteTiler(sample_images[size], media_id=f"stats_test_{i}", tilesize=256)
                 tiler.run()
 
         stats = tilestore.get_tilestore_stats()
 
-        assert 'media_count' in stats
-        assert 'file_count' in stats
-        assert 'total_size' in stats
-        assert stats['media_count'] >= 2
-        assert stats['file_count'] > 0
-        assert stats['total_size'] > 0
+        assert "media_count" in stats
+        assert "file_count" in stats
+        assert "total_size" in stats
+        assert stats["media_count"] >= 2
+        assert stats["file_count"] > 0
+        assert stats["total_size"] > 0

@@ -13,11 +13,14 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-import pytest
 import os
 import tempfile
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
+
+import pytest
+
 from pyzui.converters.vipsconverter import VipsConverter
+
 
 class TestVipsConverter:
     """
@@ -50,6 +53,7 @@ class TestVipsConverter:
         Then it should be an instance of Converter
         """
         from pyzui.converters.converter import Converter
+
         converter = VipsConverter("input.jpg", "output.ppm")
         assert isinstance(converter, Converter)
 
@@ -64,7 +68,7 @@ class TestVipsConverter:
         converter = VipsConverter("input.jpg", "output.ppm")
         assert converter.bitdepth == 8
 
-    @patch('pyvips.Image.new_from_file')
+    @patch("pyvips.Image.new_from_file")
     def test_run_success(self, mock_new_from_file):
         """
         Scenario: Successfully convert image to PPM
@@ -80,7 +84,7 @@ class TestVipsConverter:
         mock_image.width = 100
         mock_image.height = 100
         mock_image.bands = 3
-        mock_image.format = 'uchar'
+        mock_image.format = "uchar"
         mock_image.write_to_file = Mock()
         mock_new_from_file.return_value = mock_image
 
@@ -89,10 +93,10 @@ class TestVipsConverter:
 
         assert converter._progress == 1.0
         assert converter.error is None
-        mock_new_from_file.assert_called_once_with("input.jpg", access='sequential')
+        mock_new_from_file.assert_called_once_with("input.jpg", access="sequential")
         mock_image.write_to_file.assert_called_once_with("output.ppm")
 
-    @patch('pyvips.Image.new_from_file')
+    @patch("pyvips.Image.new_from_file")
     def test_run_converts_16bit_to_8bit(self, mock_new_from_file):
         """
         Scenario: Convert 16-bit image to 8-bit
@@ -108,7 +112,7 @@ class TestVipsConverter:
         mock_image.width = 100
         mock_image.height = 100
         mock_image.bands = 3
-        mock_image.format = 'ushort'  # 16-bit
+        mock_image.format = "ushort"  # 16-bit
         mock_image.cast = Mock(return_value=mock_image)
         mock_image.write_to_file = Mock()
         mock_new_from_file.return_value = mock_image
@@ -118,9 +122,9 @@ class TestVipsConverter:
 
         assert converter._progress == 1.0
         assert converter.error is None
-        mock_image.cast.assert_called_once_with('uchar')
+        mock_image.cast.assert_called_once_with("uchar")
 
-    @patch('pyvips.Image.new_from_file')
+    @patch("pyvips.Image.new_from_file")
     def test_run_handles_rgba_images(self, mock_new_from_file):
         """
         Scenario: Handle RGBA image by flattening
@@ -136,7 +140,7 @@ class TestVipsConverter:
         mock_image.width = 100
         mock_image.height = 100
         mock_image.bands = 4  # RGBA
-        mock_image.format = 'uchar'
+        mock_image.format = "uchar"
         mock_flattened = Mock()
         mock_flattened.write_to_file = Mock()
         mock_image.flatten = Mock(return_value=mock_flattened)
@@ -150,7 +154,7 @@ class TestVipsConverter:
         mock_image.flatten.assert_called_once()
         mock_flattened.write_to_file.assert_called_once_with("output.ppm")
 
-    @patch('pyvips.Image.new_from_file')
+    @patch("pyvips.Image.new_from_file")
     def test_run_handles_multiband_images(self, mock_new_from_file):
         """
         Scenario: Handle multiband image by extracting RGB bands
@@ -166,7 +170,7 @@ class TestVipsConverter:
         mock_image.width = 100
         mock_image.height = 100
         mock_image.bands = 5  # e.g., multispectral image
-        mock_image.format = 'uchar'
+        mock_image.format = "uchar"
         mock_extracted = Mock()
         mock_extracted.write_to_file = Mock()
         mock_image.extract_band = Mock(return_value=mock_extracted)
@@ -180,9 +184,9 @@ class TestVipsConverter:
         mock_image.extract_band.assert_called_once_with(0, n=3)
         mock_extracted.write_to_file.assert_called_once_with("output.ppm")
 
-    @patch('pyvips.Image.new_from_file')
-    @patch('os.path.exists')
-    @patch('os.unlink')
+    @patch("pyvips.Image.new_from_file")
+    @patch("os.path.exists")
+    @patch("os.unlink")
     def test_run_handles_errors(self, mock_unlink, mock_exists, mock_new_from_file):
         """
         Scenario: Handle conversion errors gracefully
@@ -214,7 +218,10 @@ class TestVipsConverter:
         Then it should return the expected format
         """
         converter = VipsConverter("input.jpg", "output.ppm")
-        assert str(converter) == "VipsConverter(input.jpg, output.ppm, rotation=0, invert_colors=False, black_and_white=False)"
+        assert (
+            str(converter)
+            == "VipsConverter(input.jpg, output.ppm, rotation=0, invert_colors=False, black_and_white=False)"
+        )
 
     def test_repr_representation(self):
         """
@@ -225,7 +232,10 @@ class TestVipsConverter:
         Then it should return the expected format
         """
         converter = VipsConverter("input.jpg", "output.ppm")
-        assert repr(converter) == "VipsConverter('input.jpg', 'output.ppm', rotation=0, invert_colors=False, black_and_white=False)"
+        assert (
+            repr(converter)
+            == "VipsConverter('input.jpg', 'output.ppm', rotation=0, invert_colors=False, black_and_white=False)"
+        )
 
     def test_small_image_conversion(self):
         """
@@ -244,7 +254,7 @@ class TestVipsConverter:
             pytest.skip(f"Test file not found: {infile}")
 
         # Create temporary output file
-        with tempfile.NamedTemporaryFile(suffix='.ppm', delete=False) as tmp:
+        with tempfile.NamedTemporaryFile(suffix=".ppm", delete=False) as tmp:
             outfile = tmp.name
 
         try:
@@ -260,9 +270,9 @@ class TestVipsConverter:
             assert os.path.getsize(outfile) > 0, "Output file is empty"
 
             # Verify it's a valid PPM file (P6 binary format)
-            with open(outfile, 'rb') as f:
+            with open(outfile, "rb") as f:
                 magic = f.read(2)
-                assert magic == b'P6', f"Invalid PPM format, magic number: {magic}"
+                assert magic == b"P6", f"Invalid PPM format, magic number: {magic}"
 
         finally:
             # Cleanup
@@ -282,20 +292,20 @@ class TestVipsConverter:
 
         for name in os.listdir("../../data"):
             fullpath = os.path.join("../../data", name)
-            
-            if os.path.isfile(fullpath) and name.lower().endswith(".tiff") \
-            or os.path.isfile(fullpath) and name.lower().endswith(".tif"):
-            
+
+            if (os.path.isfile(fullpath) and name.lower().endswith(".tiff")) or (
+                os.path.isfile(fullpath) and name.lower().endswith(".tif")
+            ):
                 infile = fullpath
-            else :
+            else:
                 infile = ""
 
         # Skip test if file doesn't exist
         if not os.path.exists(infile):
-            pytest.skip(f"Test file not found, place .tif/.tiff test file in ./data folder")
+            pytest.skip("Test file not found, place .tif/.tiff test file in ./data folder")
 
         # Create temporary output file
-        with tempfile.NamedTemporaryFile(suffix='.ppm', delete=False) as tmp:
+        with tempfile.NamedTemporaryFile(suffix=".ppm", delete=False) as tmp:
             outfile = tmp.name
 
         try:
@@ -311,9 +321,9 @@ class TestVipsConverter:
             assert os.path.getsize(outfile) > 0, "Output file is empty"
 
             # Verify it's a valid PPM file (P6 binary format)
-            with open(outfile, 'rb') as f:
+            with open(outfile, "rb") as f:
                 magic = f.read(2)
-                assert magic == b'P6', f"Invalid PPM format, magic number: {magic}"
+                assert magic == b"P6", f"Invalid PPM format, magic number: {magic}"
 
         finally:
             # Cleanup
@@ -332,20 +342,20 @@ class TestVipsConverter:
         """
         for name in os.listdir("../../data"):
             fullpath = os.path.join("../../data", name)
-            
-            if os.path.isfile(fullpath) and name.lower().endswith(".jpg") \
-            or os.path.isfile(fullpath) and name.lower().endswith(".jpeg"):
-            
+
+            if (os.path.isfile(fullpath) and name.lower().endswith(".jpg")) or (
+                os.path.isfile(fullpath) and name.lower().endswith(".jpeg")
+            ):
                 infile = fullpath
-            else :
+            else:
                 infile = ""
 
         # Skip test if file doesn't exist
         if not os.path.exists(infile):
-            pytest.skip(f"Test file not found, place .jpg/.jpeg test file in ./data folder")
+            pytest.skip("Test file not found, place .jpg/.jpeg test file in ./data folder")
 
         # Create temporary output file
-        with tempfile.NamedTemporaryFile(suffix='.ppm', delete=False) as tmp:
+        with tempfile.NamedTemporaryFile(suffix=".ppm", delete=False) as tmp:
             outfile = tmp.name
 
         try:
@@ -361,9 +371,9 @@ class TestVipsConverter:
             assert os.path.getsize(outfile) > 0, "Output file is empty"
 
             # Verify it's a valid PPM file (P6 binary format)
-            with open(outfile, 'rb') as f:
+            with open(outfile, "rb") as f:
                 magic = f.read(2)
-                assert magic == b'P6', f"Invalid PPM format, magic number: {magic}"
+                assert magic == b"P6", f"Invalid PPM format, magic number: {magic}"
 
         finally:
             # Cleanup
