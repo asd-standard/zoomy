@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# Launch PyZUI with native Wayland support using the PyZui-wayland conda environment
-# This environment has qt6-wayland installed for proper Wayland platform support
+# Launch PyZUI with the configured conda environment
+# Set CONDA_ENV to override the default environment name
 
-conda run -n PyZui-wayland python /home/asd/Projects/pyzui/main.py "$@"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONDA_ENV="${CONDA_ENV:-pyzui}"
+
+conda run -n "$CONDA_ENV" python "$SCRIPT_DIR/main.py" "$@"

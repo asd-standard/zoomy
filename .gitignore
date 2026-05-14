@@ -95,6 +95,10 @@ htmlcov/
 .ruff_cache/
 .mypy_cache/
 
+# Project configuration (local-only, not tracked)
+.gitignore
+.pre-commit-config.yaml
+
 # AI assistant config (must not be committed)
 .claude/
 

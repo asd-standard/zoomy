@@ -15,13 +15,10 @@ This document provides essential information for AI agents working on the PyZUI 
 
 ### Running the Application
 ```bash
-# With Wayland support (recommended - uses PyZui-wayland environment)
+# Using the launcher script (recommended)
 ./pyzui.sh
 
-# Or manually with conda run
-conda run -n PyZui-wayland python main.py
-
-# Basic execution (uses current active environment)
+# Or directly (with an active conda environment)
 python main.py
 
 # With configuration file
@@ -29,33 +26,30 @@ python main.py --config pyzui_config_example.json
 ```
 
 ### Environment Setup
-**Available Environments:**
-- `PyZui` - Base environment with core dependencies
-- `PyZui-wayland` - Active environment with Wayland support (`qt6-wayland` installed)
+The project uses conda for environment management. You need a conda environment
+with Python 3.12+, PySide6, and other dependencies (see `pyproject.toml`).
 
 **Setup Commands:**
 ```bash
-# List available environments
-conda info --envs
+# Create and activate an environment
+conda create -n pyzui python=3.12
+conda activate pyzui
 
-# Activate PyZui-wayland (recommended for Wayland display servers)
-conda activate PyZui-wayland
-
-# Or use conda run without activating
-conda run -n PyZui-wayland python main.py
-
-# Create base environment from YAML
-conda env create -f PyZui.yml
-conda activate PyZui
+# Install runtime dependencies
+pip install PySide6 Pillow pyvips
 
 # Install development dependencies
-pip install pytest pytest-cov pytest-xdist
+pip install pytest pytest-cov pytest-xdist ruff mypy pre-commit
+
+# Install pre-commit hooks (one-time setup)
+pre-commit install
 ```
 
-**Environment Notes:**
-- `PyZui-wayland` includes `qt6-wayland` for native Wayland support
-- Use `PyZui-wayland` for hardware acceleration on Wayland display servers
-- The `pyzui.sh` launcher script automatically uses `PyZui-wayland`
+**Note for Wayland users:** Install `qt6-wayland` (via conda or your system package
+manager) for native Wayland support and hardware acceleration.
+
+The `pyzui.sh` launcher uses `conda run -n pyzui` by default. Set the
+`CONDA_ENV` environment variable to override the environment name.
 
 ### Documentation Generation
 ```bash
@@ -158,28 +152,28 @@ pytest test/unittest/ test/integrationtest/
 ### Ruff (linter + formatter)
 ```bash
 # Run linter on source code only
-conda run -n PyZui-wayland ruff check
+conda run -n pyzui ruff check
 
 # Run linter + autofix (safe fixes)
-conda run -n PyZui-wayland ruff check --fix
+conda run -n pyzui ruff check --fix
 
 # Run linter + autofix (all fixes, including unsafe)
-conda run -n PyZui-wayland ruff check --fix --unsafe-fixes
+conda run -n pyzui ruff check --fix --unsafe-fixes
 
 # Format code (like Black)
-conda run -n PyZui-wayland ruff format
+conda run -n pyzui ruff format
 
 # Check formatting without applying
-conda run -n PyZui-wayland ruff format --check
+conda run -n pyzui ruff format --check
 ```
 
 ### mypy (type checker)
 ```bash
 # Run type checker on source code
-conda run -n PyZui-wayland mypy --explicit-package-bases --follow-imports=skip pyzui/
+conda run -n pyzui mypy --explicit-package-bases --follow-imports=skip pyzui/
 
 # Run on a single file
-conda run -n PyZui-wayland mypy pyzui/path/to/file.py
+conda run -n pyzui mypy pyzui/path/to/file.py
 ```
 
 **Note:** mypy is run manually, not in pre-commit. There are ~176 type issues to fix
@@ -188,10 +182,10 @@ incrementally before it can be added to CI.
 ### pre-commit (runs automatically before every commit)
 ```bash
 # Run all hooks manually on all files
-conda run -n PyZui-wayland pre-commit run --all-files
+conda run -n pyzui pre-commit run --all-files
 
 # Install hooks (one-time setup)
-conda run -n PyZui-wayland pre-commit install
+conda run -n pyzui pre-commit install
 ```
 
 **Current hooks:** ruff (checks + autofix imports/style) and ruff-format (code formatting).
@@ -344,17 +338,19 @@ logs/                     # Log files (gitignored)
 ```
 
 ### Key Configuration Files
-- `PyZui.yml` - Conda environment specification
+- `pyproject.toml` - Project metadata, ruff, and mypy configuration
 - `pyzui_config_example.json` - Example configuration
 - `.gitignore` - Git ignore patterns
-- `pyzui.sh` - Application launcher script (uses PyZui-wayland)
+- `pyzui.sh` - Application launcher script
 
 ## Development Workflow
 
 ### Setting Up Development Environment
-1. Create conda environment: `conda env create -f PyZui.yml`
-2. Activate environment: `conda activate PyZui-wayland`
-3. Install dev dependencies: `pip install pytest pytest-cov pytest-xdist`
+1. Create conda environment: `conda create -n pyzui python=3.12`
+2. Activate environment: `conda activate pyzui`
+3. Install runtime deps: `pip install PySide6 Pillow pyvips`
+4. Install dev dependencies: `pip install pytest pytest-cov pytest-xdist ruff mypy pre-commit`
+5. Install pre-commit hooks: `pre-commit install`
 
 ### Adding New Features
 1. **New DynamicTileProvider**: Use template `test/unittest/test_new_dynamictileprovider_TEMPLATE.py`
@@ -493,7 +489,7 @@ or public API.
 ### Release Workflow
 
 1. **Update CHANGELOG.md**: Move entries from `[Unreleased]` to a new version heading
-2. **Bump version** (updates `pyzui/__init__.py` and `data/home.pzs` automatically):
+2. **Bump version** (updates `pyzui/__init__.py`, `pyproject.toml`, and `data/home.pzs` automatically):
    ```bash
    python scripts/bump_version.py patch    # bug fixes, refactors, docs, minor UI
    python scripts/bump_version.py minor    # major features, new capabilities, new architectures
@@ -510,6 +506,7 @@ or public API.
 
 ### Key Files
 - `pyzui/__init__.py` — canonical version string (`__version__`)
+- `pyproject.toml` — project version metadata
 - `CHANGELOG.md` — per-version change log (Keep a Changelog format)
 - `data/home.pzs` — default scene file (version text updated automatically by bump script)
 - `scripts/bump_version.py` — version bump utility
@@ -563,10 +560,36 @@ The autosave feature provides automatic backup creation for scene files with per
 - **Integration tests**: `test/integrationtest/test_autosave_integration.py`
 
 ## Additional Resources
-- **Full documentation**: `docs/build/html/index.html`
-- **Testing guide**: `docs/build/html/_sources/testingdocumentation/unittest.rst.txt`
-- **Integration test docs**: `test/integrationtest/GUI_INTEGRATION.md`
-- **Claude configuration**: `.claude/claude.md`
+
+### Documentation Entry Points
+- **Full documentation index**: `docs/build/html/index.html`
+- **Reading Documentation guide**: `docs/build/html/technicaldocumentation/readingdocumentation.html`
+  (explains docstring conventions used throughout the codebase)
+
+### Technical Documentation
+- **Project Structure**: `docs/build/html/technicaldocumentation/projectstructure.html`
+- **Object System**: `docs/build/html/technicaldocumentation/objectsystem.html`
+- **Tiling System**: `docs/build/html/technicaldocumentation/tilingsystem.html`
+- **Tiled Media Object**: `docs/build/html/technicaldocumentation/tiledmediaobject.html`
+- **Converter System**: `docs/build/html/technicaldocumentation/convertersystem.html`
+- **Config System**: `docs/build/html/technicaldocumentation/configsystem.html`
+- **Window System**: `docs/build/html/technicaldocumentation/windowsystem.html`
+- **String Ecosystem**: `docs/build/html/technicaldocumentation/stringecosystem.html`
+- **SVG Ecosystem**: `docs/build/html/technicaldocumentation/svgecosystem.html`
+- **Logging**: `docs/build/html/technicaldocumentation/logging.html`
+- **Backup**: `docs/build/html/technicaldocumentation/backup.html`
+
+### Testing Documentation
+- **Unit Testing**: `docs/build/html/testingdocumentation/unittest.html`
+- **Integration Testing**: `docs/build/html/testingdocumentation/integrationtest.html`
+- **GUI Integration Test (human verification)**: `test/integrationtest/GUI_INTEGRATION.md`
+
+### Contribution Guidelines
+- `docs/build/html/contributionguidelines/contributionguidelines.html`
+
+### Source RST Files
+All documentation is maintained as `.rst` files under `docs/source/` and built to
+`docs/build/html/` via `cd docs && make html`.
 
 ---
 
